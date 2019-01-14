@@ -120,6 +120,7 @@ export const deleteList = id => (dispatch, getState) => {
 	return fetchAPI({
 		'url': `/api/v1/content/lists/${id}/`,
 		'method': 'DELETE',
+		'useAuth': true,
 	}).then(response => {
 		// deleted the selected list
 		if (id === getState().page.currentListId) {
