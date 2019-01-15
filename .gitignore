@@ -1,3 +1,2 @@
-/djangoproject/settings.py
+/.env
 /djangoproject/database.cnf
-/rundevserver.sh
