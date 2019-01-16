@@ -1,7 +1,7 @@
 // Page to display list of lists
 
 import React, { Component } from 'react';
-import { Container } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 import ListsList from '../components/ListsList';
 import './ListsPage.scss';
 
@@ -86,18 +86,21 @@ class ListsPage extends Component {
 		return (
 			<div className="lists-list">
 				<Container>
-					<div className="lists-list-header">
-						<input className="form-control"
-							onChange={this.onSearch}
-							type="text"
-							placeholder="Search..."
-						/>
-						<button
-							className="btn btn-primary"
-							onClick={this.toggleForm}
-						>
-					+ New list</button>
-					</div>
+					<Row>
+						<Col sm="6">
+							<div className="lists-list-header">
+								<input className="form-control"
+									onChange={this.onSearch}
+									type="text"
+									placeholder="Search..."
+								/>
+								<button
+									className="btn btn-primary"
+									onClick={this.toggleForm}
+								>+ New list</button>
+							</div>
+						</Col>
+					</Row>
 				</Container>
 				{this.state.showNewCardForm && (
 					<Container>
