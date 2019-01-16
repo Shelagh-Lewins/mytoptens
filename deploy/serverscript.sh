@@ -18,9 +18,12 @@ git reset --hard origin/master
 ### update Python requirements ###
 pip install -r requirements.txt
 
+### load secret environment variables required by manage.py
+. .env
+
 ### make and run migrations ###
-./manage.py makemigrations
-./manage.py migrate
+./manage.py makemigrations --settings=djangoproject.settings.development
+./manage.py migrate --settings=djangoproject.settings.development
 
 ### update node packages ###
 cd $FRONTEND_DIR
