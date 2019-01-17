@@ -100,7 +100,7 @@ class ForgotPassword extends Component {
 						</Col>
 					</Row>
 				</ValidatedForm>
-				{this.props.auth.forgotPasswordEmailSent && (<div className="valid-feedback">An email has been sent to {this.state.email}. If you don't see it within a few minutes, please check your junk mail folder.</div>)}
+				{this.props.auth.forgotPasswordEmailSent && (<div className="valid-feedback">If the address {this.state.email} is associated with an account, an email has been sent. If you don't see it within a few minutes, please check your junk mail folder.</div>)}
 			</Container>
 		);
 	}

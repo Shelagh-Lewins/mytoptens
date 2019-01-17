@@ -170,15 +170,14 @@ export const forgotPassword = (email) => dispatch => {
 	}
 
 	return fetchAPI({
+		//'url': '/api/v1/rest-auth/password/reset1/',
 		'url': '/api/v1/rest-auth/password/reset/',
 		'data': formData,
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
-		console.log('success');
 	   return dispatch(forgotPasswordEmailSent());
 	}).catch(error => {
-		console.log('pearshaped');
 		return dispatch(getErrors({ 'request password reset email': `Unable to send a password reset email. It is likely that the email address ${email} is not associated with a registered user` }));
 		// return dispatch(getErrors(error.response.data));
 	});

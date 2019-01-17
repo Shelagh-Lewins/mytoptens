@@ -7,8 +7,6 @@ from .forms import SetPasswordFormCustom
 from .forms import PasswordResetFormCustom
 
 urlpatterns = [
-    path('password/reset/', views.PasswordResetView.as_view(form_class=PasswordResetFormCustom),
-        name='rest_password_reset'),
     path('rest-auth/', include('rest_auth.urls')),
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('users/', include('users.urls')),
@@ -17,6 +15,9 @@ urlpatterns = [
     	name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(template_name='account/password_reset_complete.html'),
     	name='password_reset_complete'),
+    path('password/reset/', views.PasswordResetView.as_view()),
+    #path('password/reset/', views.PasswordResetView.as_view(form_class=PasswordResetFormCustom),
+        #name='rest_password_reset'),
     path('content/', include('lists.endpoints')),
     # content is a path for lists, items etc found in the lists app
 ]
