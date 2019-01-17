@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ### Configuration ###
-
 APP_DIR=/var/www/mytoptens/
 PROJECT_DIR=mytoptens
 FRONTEND_DIR=frontend
@@ -22,8 +21,8 @@ pip install -r requirements.txt
 . .env
 
 ### make and run migrations ###
-./manage.py makemigrations --settings=djangoproject.settings.development
-./manage.py migrate --settings=djangoproject.settings.development
+./manage.py makemigrations --settings=djangoproject.settings.production
+./manage.py migrate --settings=djangoproject.settings.production
 
 ### update node packages ###
 cd $FRONTEND_DIR

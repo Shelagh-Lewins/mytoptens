@@ -80,6 +80,7 @@ class Home extends Component {
 				<Container>
 					<Row>
 						<Col>
+						<h2>Lists</h2>
 							<SelectList
 								lists={this.props.lists}
 								onCurrentListChange={this.onCurrentListChange}

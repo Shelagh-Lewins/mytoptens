@@ -16,15 +16,11 @@ from os.path import join, dirname
 from dotenv import load_dotenv
  
 # Create .env file path.
-dotenv_path = join(dirname(__file__), '.env')
+# dotenv_path = join(dirname(__file__), '.env')
+dotenv_path = join(dirname(dirname(__file__)), '.env')
  
 # Load file from the path.
 load_dotenv(dotenv_path)
-print("*** wsgi.py ****")
-print("path")
-print("dotenv_path")
-print("EMAIL_HOST_PASSWORD")
-print(os.environ.get("EMAIL_HOST_PASSWORD", ''))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djangoproject.settings.production')
 
