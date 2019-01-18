@@ -42,7 +42,25 @@ class ListViewSet(viewsets.ModelViewSet):
         obj.created_by = self.request.user
 
 
+class ListBySlugViewSet(viewsets.ModelViewSet):
+    """
+    Find a list by slug. The list is only returned if the user is authorized to see it.
+
+    Only get, head are permitted.
+    """
+    permission_classes = [permissions.AllowAny, ]
+    model = List
+    serializer_class = ListSerializer
+    http_method_names = ['get', 'head']
+
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return List.objects.filter(slug__exact=self.request.query_params.get('slug', None)).filter(is_public__exact=True)
+
+        return List.objects.filter(slug__exact=self.request.query_params.get('slug', None)).filter(Q(created_by=self.request.user) | Q(is_public__exact=True))
+
 class ItemViewSet(viewsets.ModelViewSet):
+    # TODO filter and check permissions
     queryset = Item.objects.all()
     permission_classes = [permissions.AllowAny, ]
     serializer_class = ItemSerializer

@@ -18,6 +18,8 @@ import {
 export const RECEIVE_ENTITIES = 'RECEIVE_ENTITIES';
 export const FETCH_LISTS_STARTED = 'FETCH_LISTS_STARTED';
 export const FETCH_LISTS_FAILED = 'FETCH_LISTS_FAILED';
+export const FETCH_LIST_BY_SLUG_STARTED = 'FETCH_LISTS_STARTED';
+export const FETCH_LIST_BY_SLUG_FAILED = 'FETCH_LISTS_FAILED';
 export const FILTER_LISTS = 'FILTER_LISTS';
 export const CREATE_LIST_SUCCEEDED = 'CREATE_LIST_SUCCEEDED';
 export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
@@ -52,7 +54,7 @@ export function fetchLists() {
 	return (dispatch, getState) => {
 		dispatch(fetchListsStarted());
 
-		// if the user is not logged in, don't use auth. The server should return lists whatever lists a non-authenticated user should see.
+		// if the user is not logged in, don't use auth. The server should return whatever lists a non-authenticated user should see.
 		let useAuth = false;
 
 		if (getState().auth.user.token) {
@@ -79,6 +81,47 @@ export function fetchLists() {
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
 			dispatch(fetchListsFailed());
+
+			return dispatch(getErrors({ 'fetch lists': error.message }));
+		});
+	};
+}
+
+///////////////////////////////
+// fetch a single list by slug
+export function fetchListBySlugStarted(is_public) {
+	return {
+		'type': FETCH_LIST_BY_SLUG_STARTED,
+	};
+}
+
+function fetchListBySlugFailed() {
+	return {
+		'type': FETCH_LIST_BY_SLUG_FAILED
+	};
+}
+
+export function fetchListBySlug(slug) {
+	return (dispatch, getState) => {
+		dispatch(fetchListBySlugStarted());
+
+		// if the user is not logged in, don't use auth. The server should return the list if a non-authenticated user should see it.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
+
+		return fetchAPI({
+			'url': `/api/v1/content/list/?slug=${slug}`,
+			'method': 'GET',
+			'useAuth': useAuth,
+		}).then(response => {
+			const normalizedData = normalize(response, [listSchema]);
+			
+			return dispatch(receiveEntities(normalizedData));
+		}).catch(error => {
+			dispatch(fetchListBySlugFailed());
 
 			return dispatch(getErrors({ 'fetch lists': error.message }));
 		});
