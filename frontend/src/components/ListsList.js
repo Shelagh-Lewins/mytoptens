@@ -1,7 +1,7 @@
 // List of all lists
 
 import React from 'react';
-import List from './List';
+import ListSummary from './ListSummary';
 import { Container, Row } from 'reactstrap';
 
 import { LIST_IS_PUBLIC_VALUES } from '../constants';
@@ -20,7 +20,7 @@ const ListsList = props => {
 			</Row>
 			<Row>
 				{props.lists.map(list => (
-					<List
+					<ListSummary
 						key={list.id}
 						list={list}
 						onIsPublicChange={props.onIsPublicChange}

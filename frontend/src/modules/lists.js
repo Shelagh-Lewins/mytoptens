@@ -92,7 +92,7 @@ export function filterLists(searchTerm) {
 	};
 }
 
-export const createList = list => dispatch => {
+export const createList = (list, history) => dispatch => {
 	return fetchAPI({
 		'url': '/api/v1/content/lists/',
 		'data': JSON.stringify(list),
@@ -101,6 +101,8 @@ export const createList = list => dispatch => {
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
 		dispatch(setCurrentListId(response.id));
+		console.log('new list ', response);
+		history.push(`/list/${response.slug}`);
 		return dispatch(createListSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'create list': error.message }));

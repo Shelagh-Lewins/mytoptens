@@ -65,18 +65,17 @@ class Home extends Component {
 	render() {
 		return (
 			<div>
-				<Container>
+				{!isEmpty(this.props.errors) && (<Container>
 					<Row>
 						<Col>
-							{!isEmpty(this.props.errors) &&
-						<FlashMessage
-							message={formatErrorMessages(this.props.errors)}
-							type="error"
-							onClick={this.onCloseFlashMessage}
-						/>}
+							<FlashMessage
+								message={formatErrorMessages(this.props.errors)}
+								type="error"
+								onClick={this.onCloseFlashMessage}
+							/>
 						</Col>
 					</Row>
-				</Container>
+				</Container>)}
 				<Container>
 					<Row>
 						<Col>
@@ -90,6 +89,7 @@ class Home extends Component {
 				</Container>
 				<ListsPage
 					lists={this.props.lists}
+					canCreateList={this.props.auth.canCreateList}
 					onSearch={this.onSearch}
 					onCreateList={this.onCreateList}
 					onIsPublicChange={this.onIsPublicChange}

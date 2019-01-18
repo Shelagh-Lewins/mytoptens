@@ -7,7 +7,7 @@ import { Col } from 'reactstrap';
 
 import { LIST_IS_PUBLIC_TEXTS } from '../constants';
 
-const List = props => {
+const ListSummary = props => {
 	let id=`select-${props.list.id}`;
 	let value = props.list.is_public ? 'Public' : 'Private';
 
@@ -41,4 +41,4 @@ const List = props => {
 	}
 };
 
-export default List;
+export default ListSummary;

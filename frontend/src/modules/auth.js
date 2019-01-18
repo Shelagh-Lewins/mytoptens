@@ -234,17 +234,25 @@ var updeep = require('updeep');
 
 const initialState = {
 	'isAuthenticated': false,
+	'canCreateList': false,
 	'forgotPasswordEmailSent': false,
 	'resetPasswordComplete': false,
 	'changePasswordComplete': false,
 	'user': {}
 };
 
+function canCreateList(token) {
+	// for now, simply check whether the user is logged in
+	// in future, further checks will be added e.g. email validated, number of lists exceeded?
+	return !isEmpty(token);
+}
+
 export default function(state = initialState, action ) {
 	switch(action.type) {
 		case SET_CURRENT_USER:
 			return updeep({
 				'isAuthenticated': !isEmpty(action.payload.token),
+				'canCreateList': canCreateList(action.payload.token),
 				'user': updeep.constant({ 'token': action.payload.token }) // remove user info
 			}, state);
 
@@ -260,6 +268,7 @@ export default function(state = initialState, action ) {
 		case LOGOUT_USER_COMPLETE: {
 			return updeep({
 				'isAuthenticated': false,
+				'canCreateList': canCreateList(),
 				'user': updeep.constant({}) // remove user profile
 			}, state);
 		}

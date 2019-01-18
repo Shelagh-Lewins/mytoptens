@@ -11,6 +11,8 @@ import Register from '../components/Register';
 import Welcome from '../components/Welcome';
 import Login from '../components/Login';
 import Home from '../containers/Home';
+import CreateList from '../containers/CreateList';
+import ListDetails from '../containers/ListDetail';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';
@@ -36,9 +38,11 @@ class App extends Component {
 			<Provider store = { store }>
 				<Router>
 					<div>
-						<Navbar />
-						<Route exact path="/" component={ Home } />
+						<Navbar />	
 						<div className="container">
+							<Route exact path="/" component={ Home } />
+							<Route exact path="/createlist" component={ CreateList } />
+							<Route exact path="/list/:slug" component={ ListDetails } />
 							<Route exact path="/register" component={ Register } />
 							<Route exact path="/welcome" component={ Welcome } />
 							<Route exact path="/login" component={ Login } />
