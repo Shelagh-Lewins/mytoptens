@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Col } from 'reactstrap';
+import { Link } from 'react-router-dom';
 // Note how the is_public is updated without making this into a React Component with state.
 // By using props to populate the UI, we enable time travel and a direct connection with the store.
 
@@ -13,20 +14,22 @@ const ListSummary = props => {
 
 	return (
 		<Col sm="3" md="4" className="list-container">
-			<div className="list-header">
-				<div>{props.list.title}</div>
-			</div>
-			<div className="list-body">{props.list.description}</div>
-			<div className="list-status">
-				<label>Set list private/public status
-					<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
-						{LIST_IS_PUBLIC_TEXTS.map(is_public => (
-							<option key={is_public} value={is_public}>{is_public}</option>
-						))}
-					</select>
-				</label>
-			</div>
-			<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+			<Link to={`/list/${props.list.slug}`}>
+				<div className="list-header">
+					<div>{props.list.title}</div>
+				</div>
+				<div className="list-body">{props.list.description}</div>
+				<div className="list-status">
+					<label>Set list private/public status
+						<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
+							{LIST_IS_PUBLIC_TEXTS.map(is_public => (
+								<option key={is_public} value={is_public}>{is_public}</option>
+							))}
+						</select>
+					</label>
+				</div>
+				<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+			</Link>
 		</Col>
 	);
 

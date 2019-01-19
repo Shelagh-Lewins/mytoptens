@@ -3,6 +3,7 @@ import { Container, Row } from 'reactstrap';
 import ItemsList from '../components/ItemsList';
 import { MAX_ITEMS_IN_LIST } from '../constants';
 import './ItemsPage.scss';
+import ValidatedForm from '../components/ValidatedForm.js';
 
 class ItemsPage extends Component {
 	constructor(props) {
@@ -25,7 +26,7 @@ class ItemsPage extends Component {
 
 	resetForm() {
 		this.setState({
-			'showNewCardForm': false,
+			'showNewItemForm': false,
 			'title': '',
 			'description': ''
 		});
@@ -53,7 +54,7 @@ class ItemsPage extends Component {
 		this.props.onCreateItem({
 			'title': this.state.title,
 			'description': this.state.description,
-			'list': this.props.currentListId,
+			'list': this.props.list,
 			order, 
 		});
 		this.resetForm();
@@ -68,7 +69,6 @@ class ItemsPage extends Component {
 			<ItemsList
 				items={this.props.items}
 				onDeleteItem={this.props.onDeleteItem}
-				list={this.props.currentListId}
 			/>
 		);
 	}

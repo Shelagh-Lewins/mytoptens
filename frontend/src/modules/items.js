@@ -1,3 +1,4 @@
+import { createSelector } from 'reselect';
 import { RECEIVE_ENTITIES } from '../modules/lists';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
@@ -5,6 +6,10 @@ import { getErrors } from '../modules/errors';
 import {
 	LOGOUT_USER_COMPLETE
 } from './auth';
+
+import {
+	FETCH_LIST_BY_SLUG_STARTED
+} from './lists';
 
 //////////////////////////////////
 // Action creators
@@ -25,7 +30,7 @@ export const createItem = item => dispatch => {
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
-	    return dispatch(createItemSucceeded(response));
+		return dispatch(createItemSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'create item': error.message }));
 	});
@@ -51,7 +56,7 @@ export const deleteItem = ({ itemId, listId }) => dispatch => {
 		'url': `/api/v1/content/items/${itemId}/`,
 		'method': 'DELETE',
 	}).then(response => {
-	    return dispatch(deleteItemSucceeded({ itemId, listId }));
+		return dispatch(deleteItemSucceeded({ itemId, listId }));
 	}).catch(error => {
 		return dispatch(getErrors({ 'delete item': error.message }));
 	});
@@ -92,6 +97,12 @@ export default function items(state = initialItemsState, action) {
 			return state;
 		}
 
+		case FETCH_LIST_BY_SLUG_STARTED: {
+			return updeep({
+				'things': updeep.constant({}), // remove all existing items
+			}, state);
+		}
+
 		case CREATE_ITEM_SUCCEEDED: {
 			const item = action.payload.item;
 			return updeep({ 'things': { [item.id]: item } }, state);
@@ -106,18 +117,20 @@ export default function items(state = initialItemsState, action) {
 	}
 }
 
-export const getItemsByListId = state => {
-	const { currentListId } = state.page;
+// all items, for selector to use
+export const getItems = state => state.items.things;
 
-	if (!currentListId || !state.lists.things[currentListId]) {
-		return [];
+// items belonging to the current list
+export const sortedItems = createSelector(
+	[getItems],
+	(items) => {
+		let listItems = (Object.keys(items).map(id => {
+			return items[id];
+		})).sort(function(a, b){
+			return a.order - b.order; // sort to index order
+		});
+
+		return listItems;
 	}
+);
 
-	// get the array of item ids for this list
-	const itemIds = state.lists.things[currentListId].items;
-
-	// get the actual items and sort by order
-	let items = itemIds.map(id => state.items.things[id]).sort(function(a, b){return a.order - b.order;});
-
-	return items;
-};

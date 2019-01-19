@@ -5,13 +5,9 @@ import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import ListsPage from './ListsPage';
-import ItemsPage from './ItemsPage';
-import SelectList from '../components/SelectList';
 
 import * as lists from '../modules/lists';
-import * as items from '../modules/items';
 import { getGroupedAndFilteredLists } from '../modules/lists';
-import { getItemsByListId } from '../modules/items';
 
 import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -30,10 +26,6 @@ class Home extends Component {
 		}
 	}
 
-	onCurrentListChange = e => {
-		this.props.dispatch(lists.setCurrentListId(e.target.value));
-	}
-
 	onSearch = searchTerm => {
 		this.props.dispatch(lists.filterLists(searchTerm));
 	}
@@ -49,14 +41,14 @@ class Home extends Component {
 	onDeleteList = (id) => {
 		this.props.dispatch(lists.deleteList(id));
 	}
-
+	/*
 	onCreateItem = (item) => {
 		this.props.dispatch(items.createItem(item));
 	}
 
 	onDeleteItem = (item) => {
 		this.props.dispatch(items.deleteItem(item));
-	}
+	} */
 
 	onCloseFlashMessage = () => {
 		this.props.dispatch(clearErrors());
@@ -76,17 +68,6 @@ class Home extends Component {
 						</Col>
 					</Row>
 				</Container>)}
-				<Container>
-					<Row>
-						<Col>
-							<SelectList
-								lists={this.props.lists}
-								onCurrentListChange={this.onCurrentListChange}
-								currentListId={this.props.currentListId}
-							/>
-						</Col>
-					</Row>
-				</Container>
 				<ListsPage
 					lists={this.props.lists}
 					canCreateList={this.props.auth.canCreateList}
@@ -96,14 +77,6 @@ class Home extends Component {
 					onDeleteList={this.onDeleteList}
 					isLoading={this.props.isLoading}
 				/>
-				{this.props.currentListId && (
-					<ItemsPage
-						items={this.props.items}
-						onCreateItem={this.onCreateItem}
-						currentListId={this.props.currentListId}
-						onDeleteItem={this.onDeleteItem}
-					/>
-				)}
 			</div>
 		);
 	}
@@ -114,8 +87,6 @@ Home.propTypes = {
 	'errors': PropTypes.object.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
 	'lists': PropTypes.object.isRequired,
-	'items': PropTypes.array.isRequired,
-	'currentListId': PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({
@@ -123,8 +94,6 @@ const mapStateToProps = (state) => ({
 	'errors': state.errors,
 	'isLoading': state.lists.isLoading,
 	'lists': getGroupedAndFilteredLists(state),
-	'items': getItemsByListId(state),
-	'currentListId': state.page.currentListId,
 });
 
 export default connect(mapStateToProps)(Home);

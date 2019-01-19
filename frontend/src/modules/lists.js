@@ -4,6 +4,7 @@ import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import { normalize, schema } from 'normalizr';
 
+
 import {
 	LOGOUT_USER_COMPLETE
 } from './auth';
@@ -18,13 +19,12 @@ import {
 export const RECEIVE_ENTITIES = 'RECEIVE_ENTITIES';
 export const FETCH_LISTS_STARTED = 'FETCH_LISTS_STARTED';
 export const FETCH_LISTS_FAILED = 'FETCH_LISTS_FAILED';
-export const FETCH_LIST_BY_SLUG_STARTED = 'FETCH_LISTS_STARTED';
+export const FETCH_LIST_BY_SLUG_STARTED = 'FETCH_LIST_BY_SLUG_STARTED';
 export const FETCH_LIST_BY_SLUG_FAILED = 'FETCH_LISTS_FAILED';
 export const FILTER_LISTS = 'FILTER_LISTS';
 export const CREATE_LIST_SUCCEEDED = 'CREATE_LIST_SUCCEEDED';
 export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
 export const SET_LIST_IS_PUBLIC_SUCCEEDED = 'SET_LIST_IS_PUBLIC_SUCCEEDED';
-export const SET_CURRENT_LIST_ID = 'SET_CURRENT_LIST_ID';
 
 const itemSchema = new schema.Entity('items');
 const listSchema = new schema.Entity('lists', {
@@ -67,16 +67,6 @@ export function fetchLists() {
 			'useAuth': useAuth,
 		}).then(response => {
 			const normalizedData = normalize(response, [listSchema]);
-			let defaultListId = null;
-
-			if (normalizedData.result.length > 0) { // there is at least one list
-				defaultListId = response[0].id;
-			}
-
-			if (!getState().page.currentListId) { // preserve existing selection
-				// TODO check that this list still exists
-				dispatch(setCurrentListId(defaultListId));
-			}
 			
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
@@ -89,7 +79,7 @@ export function fetchLists() {
 
 ///////////////////////////////
 // fetch a single list by slug
-export function fetchListBySlugStarted(is_public) {
+export function fetchListBySlugStarted() {
 	return {
 		'type': FETCH_LIST_BY_SLUG_STARTED,
 	};
@@ -118,7 +108,7 @@ export function fetchListBySlug(slug) {
 			'useAuth': useAuth,
 		}).then(response => {
 			const normalizedData = normalize(response, [listSchema]);
-			
+
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
 			dispatch(fetchListBySlugFailed());
@@ -143,8 +133,7 @@ export const createList = (list, history) => dispatch => {
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
-		dispatch(setCurrentListId(response.id));
-		console.log('new list ', response);
+		//dispatch(setCurrentListId(response.id));
 		history.push(`/list/${response.slug}`);
 		return dispatch(createListSucceeded(response));
 	}).catch(error => {
@@ -168,9 +157,9 @@ export const deleteList = id => (dispatch, getState) => {
 		'useAuth': true,
 	}).then(response => {
 		// deleted the selected list
-		if (id === getState().page.currentListId) {
+		/*if (id === getState().page.currentListId) {
 			dispatch(setCurrentListId(null));
-		}
+		}  */
 
 		return dispatch(deleteListSucceeded(id));
 	}).catch(error => {
@@ -210,16 +199,6 @@ export function setListIsPublicSucceeded({ id, is_public }) {
 		}
 	};
 }
-
-export function setCurrentListId(id) {
-	return {
-		'type': SET_CURRENT_LIST_ID,
-		'payload': {
-			id,
-		}
-	};
-}
-
 
 //////////////////////////////////
 // Reducer
@@ -299,13 +278,23 @@ export default function lists(state = initialListsState, action) {
 			return updeep({ 'isLoading': false }, state);
 		}
 
+		case FETCH_LIST_BY_SLUG_STARTED: {
+			return updeep({
+				'isLoading': true,
+				'things': updeep.constant({}), // remove all existing lists
+			}, state);
+		}
+
+		case FETCH_LIST_BY_SLUG_FAILED: {
+			return updeep({ 'isLoading': false }, state);
+		}
+
 		case CREATE_LIST_SUCCEEDED: {
 			const list = action.payload.list;
 			return updeep({ 'things': { [list.id]: list } }, state);
 		}
 
 		case DELETE_LIST_SUCCEEDED: {
-			console.log('succeeded. id ', action.payload.id);
 			return updeep({ 'things': updeep.omit([action.payload.id]) }, state);
 		}
 
