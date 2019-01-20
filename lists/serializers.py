@@ -13,8 +13,15 @@ from dynamic_rest.fields import (
     DynamicRelationField
 )
 
-class ListSerializer(DynamicModelSerializer):
-    items = DynamicRelationField('ItemSerializer', embed=True, many=True)
+class ItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ('id', 'title', 'description', 'slug', 'modified_at', 'order')
+
+
+class ListSerializer(serializers.ModelSerializer):
+    #items = DynamicRelationField('ItemSerializer', embed=True, many=True)
+    items = ItemSerializer(many=True)
 
     # automatically set created_by as the current user
     created_by = serializers.PrimaryKeyRelatedField(
@@ -28,7 +35,11 @@ class ListSerializer(DynamicModelSerializer):
             'slug', 'created_by', 'created_at',
             'modified_by', 'modified_at', 'items')
 
-class ItemSerializer(DynamicModelSerializer):
-    class Meta:
-        model = Item
-        fields = ('id', 'title', 'description', 'slug', 'modified_at', 'list', 'order')
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', None)
+        newlist = List.objects.create(**validated_data)
+
+        for item_data in items_data:
+            Item.objects.create(list=newlist, **item_data)
+        return list
+

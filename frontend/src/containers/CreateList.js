@@ -38,10 +38,10 @@ class CreateList extends Component {
 		let newList = {
 			'title': this.state.title,
 			'description': this.state.description,
-			//'items': [],
+			'items': [],
 		};
 
-		/*
+		
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
 			if (this.state[`item${i}`] !== '') {
 				const newItem = {
@@ -50,7 +50,7 @@ class CreateList extends Component {
 				};
 				newList.items.push(newItem);
 			}
-		} */
+		}
 
 		this.props.createList(newList, this.props.history);
 	}
