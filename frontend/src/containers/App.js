@@ -41,7 +41,7 @@ class App extends Component {
 						<Navbar />	
 						<div className="container">
 							<Route exact path="/" component={ Home } />
-							<Route exact path="/createlist" component={ CreateList } />
+							<Route exact path="/newlist" component={ CreateList } />
 							<Route exact path="/list/:slug" component={ ListDetails } />
 							<Route exact path="/register" component={ Register } />
 							<Route exact path="/welcome" component={ Welcome } />

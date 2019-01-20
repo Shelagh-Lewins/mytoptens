@@ -126,6 +126,7 @@ export function filterLists(searchTerm) {
 }
 
 export const createList = (list, history) => dispatch => {
+	console.log('create list ', list);
 	return fetchAPI({
 		'url': '/api/v1/content/lists/',
 		'data': JSON.stringify(list),
@@ -133,7 +134,6 @@ export const createList = (list, history) => dispatch => {
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
-		//dispatch(setCurrentListId(response.id));
 		history.push(`/list/${response.slug}`);
 		return dispatch(createListSucceeded(response));
 	}).catch(error => {
@@ -156,11 +156,6 @@ export const deleteList = id => (dispatch, getState) => {
 		'method': 'DELETE',
 		'useAuth': true,
 	}).then(response => {
-		// deleted the selected list
-		/*if (id === getState().page.currentListId) {
-			dispatch(setCurrentListId(null));
-		}  */
-
 		return dispatch(deleteListSucceeded(id));
 	}).catch(error => {
 		return dispatch(getErrors({ 'delete list': error.message }));

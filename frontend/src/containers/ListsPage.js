@@ -14,46 +14,19 @@ class ListsPage extends Component {
 	}
 
 	componentDidUpdate(prevProps){
-		// Hide the New List form if the user cannot create a list
-		/*if(prevProps.canCreateList && !this.props.canCreateList){
-			this.resetForm();
-		} */
+
 	}
 
 	onSearch = e => {
 		this.props.onSearch(e.target.value);
 	}
-/*
-	onTitleChange = (e) => {
-		this.setState({ 'title': e.target.value });
-	}
-
-	onDescriptionChange = (e) => {
-		this.setState({ 'description': e.target.value });
-	} */
-
-	/*resetForm() {
-		this.setState({
-			'title': '',
-			'description': ''
-		});
-	} */
-
-	/* onCreateList = (e) => {
-		e.preventDefault();
-		this.props.onCreateList({
-			'title': this.state.title,
-			'description': this.state.description
-		});
-		this.resetForm();
-	} */
 
 	onDeleteList = (id) => {
 		this.props.onDeleteList(id);
 	}
 
 	onAddList = () => {
-		this.props.history.push('/createlist');
+		this.props.history.push('/newlist');
 	}
 
 	renderListsList() {

@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 import { createList } from '../modules/lists';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
 import ValidatedForm from '../components/ValidatedForm.js';
+import { MAX_ITEMS_IN_LIST } from '../constants';
 
 class CreateList extends Component {
 	constructor() {
@@ -13,6 +14,9 @@ class CreateList extends Component {
 			'title': '',
 			'description': '',
 		};
+		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
+			this.state[`item${i}`] = '';
+		}
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.cancel = this.cancel.bind(this);
@@ -30,10 +34,25 @@ class CreateList extends Component {
 
 	handleSubmit(e) {
 		e.preventDefault();
-		this.props.createList({
+
+		let newList = {
 			'title': this.state.title,
-			'description': this.state.description
-		}, this.props.history);
+			'description': this.state.description,
+			//'items': [],
+		};
+
+		/*
+		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
+			if (this.state[`item${i}`] !== '') {
+				const newItem = {
+					'title': this.state[`item${i}`],
+					'order': i,
+				};
+				newList.items.push(newItem);
+			}
+		} */
+
+		this.props.createList(newList, this.props.history);
 	}
 
 
@@ -46,6 +65,31 @@ class CreateList extends Component {
 		if(!this.props.auth.canCreateList){
 			this.props.history.push('/');
 		}
+	}
+
+	renderItemInputs() {
+		let elements = [];
+
+		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
+			elements.push(
+				<Row key={`item${i}`}>
+					<Col>
+						<div className="form-group">
+							<Label for={`item${i}`}>{`Item ${i}`}</Label>
+							<Input
+								type="text"
+								name={`item${i}`}
+								id={`item${i}`}
+								onChange={ this.handleInputChange }
+								value={ this.state[`item${i}`] }
+								placeholder="Enter a list item"
+							/>
+							<div className='invalid-feedback' />
+						</div>
+					</Col>
+				</Row>);
+		}
+		return elements;
 	}
 
 	///////////////
@@ -91,6 +135,7 @@ class CreateList extends Component {
 							</div>
 						</Col>
 					</Row>
+					{this.renderItemInputs()}
 					<Row>
 						<Col>
 							<button type="button" className="btn btn-secondary"onClick={this.cancel}>

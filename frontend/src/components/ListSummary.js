@@ -19,17 +19,18 @@ const ListSummary = props => {
 					<div>{props.list.title}</div>
 				</div>
 				<div className="list-body">{props.list.description}</div>
-				<div className="list-status">
-					<label>Set list private/public status
-						<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
-							{LIST_IS_PUBLIC_TEXTS.map(is_public => (
-								<option key={is_public} value={is_public}>{is_public}</option>
-							))}
-						</select>
-					</label>
-				</div>
-				<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
 			</Link>
+			<div className="list-status">
+				<label>Set list private/public status
+					<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
+						{LIST_IS_PUBLIC_TEXTS.map(is_public => (
+							<option key={is_public} value={is_public}>{is_public}</option>
+						))}
+					</select>
+				</label>
+			</div>
+			<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+			
 		</Col>
 	);
 
