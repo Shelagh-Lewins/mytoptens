@@ -14,13 +14,18 @@ from dynamic_rest.fields import (
 )
 
 class ItemSerializer(serializers.ModelSerializer):
+    """
+    An item must belong to a list
+    """
     class Meta:
         model = Item
         fields = ('id', 'title', 'description', 'slug', 'modified_at', 'order')
 
 
 class ListSerializer(serializers.ModelSerializer):
-    #items = DynamicRelationField('ItemSerializer', embed=True, many=True)
+    """
+    A list may be created with items
+    """
     items = ItemSerializer(many=True)
 
     # automatically set created_by as the current user
@@ -41,5 +46,5 @@ class ListSerializer(serializers.ModelSerializer):
 
         for item_data in items_data:
             Item.objects.create(list=newlist, **item_data)
-        return list
+        return newlist
 

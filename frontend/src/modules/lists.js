@@ -126,7 +126,6 @@ export function filterLists(searchTerm) {
 }
 
 export const createList = (list, history) => dispatch => {
-	console.log('create list ', list);
 	return fetchAPI({
 		'url': '/api/v1/content/lists/',
 		'data': JSON.stringify(list),
