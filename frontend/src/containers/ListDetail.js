@@ -11,7 +11,7 @@ import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
-import ItemsPage from './ItemsPage';
+import ItemsPage from '../components/ItemsPage';
 import { sortedItems } from '../modules/items';
 
 class ListDetails extends Component {

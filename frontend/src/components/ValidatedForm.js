@@ -161,11 +161,11 @@ export default class ValidatedForm extends Component {
 		}
 	};
 
-	submitHandler = event => {
-		event.preventDefault();
+	submitHandler = e => {
+		e.preventDefault();
 
 		if (this.validate()) {
-			this.props.onSubmit(event);
+			this.props.onSubmit(e);
 		}
 
 		this.setState({ 'isValidated': true });

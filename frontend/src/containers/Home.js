@@ -29,10 +29,10 @@ class Home extends Component {
 	onSearch = searchTerm => {
 		this.props.dispatch(lists.filterLists(searchTerm));
 	}
-
+	/*
 	onCreateList = ({ title, description }) => {
 		this.props.dispatch(lists.createList({ title, description }));
-	}
+	} */
 
 	onIsPublicChange = ({ id, is_public }) => {
 		this.props.dispatch(lists.setListIsPublic({ id, is_public }));

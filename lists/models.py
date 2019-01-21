@@ -47,7 +47,7 @@ class Item(models.Model):
     slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     modified_at = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, blank=True, default='')
     description = models.CharField(max_length=255, blank=True, default='')
     list = models.ForeignKey(List, on_delete=models.CASCADE, related_name='items')
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])

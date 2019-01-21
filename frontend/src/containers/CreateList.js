@@ -4,6 +4,12 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 import { createList } from '../modules/lists';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
+
+import FlashMessage from '../components/FlashMessage';
+import formatErrorMessages from '../modules/formatErrorMessages';
+import isEmpty from '../modules/isEmpty';
+import { clearErrors } from '../modules/errors';
+
 import ValidatedForm from '../components/ValidatedForm.js';
 import { MAX_ITEMS_IN_LIST } from '../constants';
 
@@ -15,7 +21,8 @@ class CreateList extends Component {
 			'description': '',
 		};
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
-			this.state[`item${i}`] = '';
+			this.state[`item${i}_title`] = '';
+			this.state[`item${i}_description`] = '';
 		}
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
@@ -45,14 +52,20 @@ class CreateList extends Component {
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
 			if (this.state[`item${i}`] !== '') {
 				const newItem = {
-					'title': this.state[`item${i}`],
+					'title': this.state[`item${i}_title`],
+					'description': this.state[`item${i}_description`],
 					'order': i,
 				};
 				newList.items.push(newItem);
 			}
 		}
 
-		this.props.createList(newList, this.props.history);
+		//this.props.onCreateList(newList, this.props.history);
+		this.onCreateList(newList);
+	}
+
+	onCreateList = (newList) => {
+		this.props.dispatch(createList(newList, this.props.history));
 	}
 
 
@@ -67,27 +80,46 @@ class CreateList extends Component {
 		}
 	}
 
+	onCloseFlashMessage = () => {
+		this.props.dispatch(clearErrors());
+	}
+
 	renderItemInputs() {
 		let elements = [];
 
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
 			elements.push(
-				<Row key={`item${i}`}>
-					<Col>
-						<div className="form-group">
-							<Label for={`item${i}`}>{`Item ${i}`}</Label>
+				<div className="form-group" key={`item${i}`}>
+					<Row>
+						<Col>
+							<h3>Item {i}</h3>
+							<Label for={`item${i}_title`}>Title</Label>
 							<Input
 								type="text"
-								name={`item${i}`}
-								id={`item${i}`}
+								name={`item${i}_title`}
+								id={`item${i}_title`}
 								onChange={ this.handleInputChange }
-								value={ this.state[`item${i}`] }
-								placeholder="Enter a list item"
+								value={ this.state[`item${i}_title`] }
+								placeholder="Title"
 							/>
 							<div className='invalid-feedback' />
-						</div>
-					</Col>
-				</Row>);
+						</Col>
+					</Row>
+					<Row>
+						<Col>
+							<Label for={`item${i}_description`}>Description</Label>
+							<Input
+								type="text"
+								name={`item${i}_description`}
+								id={`item${i}_description`}
+								onChange={ this.handleInputChange }
+								value={ this.state[`item${i}_description`] }
+								placeholder="Description"
+							/>
+							<div className='invalid-feedback' />
+						</Col>
+					</Row>
+				</div>);
 		}
 		return elements;
 	}
@@ -95,8 +127,19 @@ class CreateList extends Component {
 	///////////////
 
 	render() {
-		return(
+		return (
 			<Container>
+				{!isEmpty(this.props.errors) && (<Container>
+					<Row>
+						<Col>
+							<FlashMessage
+								message={formatErrorMessages(this.props.errors)}
+								type="error"
+								onClick={this.onCloseFlashMessage}
+							/>
+						</Col>
+					</Row>
+				</Container>)}
 				<h2>Create a new list</h2>
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<Row>
@@ -158,14 +201,14 @@ class CreateList extends Component {
 }
 
 CreateList.propTypes = {
-	'createList': PropTypes.func.isRequired,
+	//'createList': PropTypes.func.isRequired,
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
 	'auth': state.auth,
-	'errors': state.errors
+	'errors': state.errors,
 });
 
-export default connect(mapStateToProps,{ createList })(withRouter(CreateList));
+export default connect(mapStateToProps)(withRouter(CreateList));

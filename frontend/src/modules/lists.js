@@ -22,6 +22,7 @@ export const FETCH_LISTS_FAILED = 'FETCH_LISTS_FAILED';
 export const FETCH_LIST_BY_SLUG_STARTED = 'FETCH_LIST_BY_SLUG_STARTED';
 export const FETCH_LIST_BY_SLUG_FAILED = 'FETCH_LISTS_FAILED';
 export const FILTER_LISTS = 'FILTER_LISTS';
+export const CREATE_LIST_STARTED = 'CREATE_LIST_STARTED';
 export const CREATE_LIST_SUCCEEDED = 'CREATE_LIST_SUCCEEDED';
 export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
 export const SET_LIST_IS_PUBLIC_SUCCEEDED = 'SET_LIST_IS_PUBLIC_SUCCEEDED';
@@ -126,6 +127,8 @@ export function filterLists(searchTerm) {
 }
 
 export const createList = (list, history) => dispatch => {
+	dispatch(createListStarted());
+
 	return fetchAPI({
 		'url': '/api/v1/content/lists/',
 		'data': JSON.stringify(list),
@@ -133,12 +136,19 @@ export const createList = (list, history) => dispatch => {
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
+		dispatch(createListSucceeded(response));
 		history.push(`/list/${response.slug}`);
-		return dispatch(createListSucceeded(response));
+		return;
 	}).catch(error => {
 		return dispatch(getErrors({ 'create list': error.message }));
 	});
 };
+
+export function createListStarted() {
+	return {
+		'type': CREATE_LIST_STARTED,
+	};
+}
 
 export function createListSucceeded(list) {
 	return {
@@ -281,6 +291,11 @@ export default function lists(state = initialListsState, action) {
 
 		case FETCH_LIST_BY_SLUG_FAILED: {
 			return updeep({ 'isLoading': false }, state);
+		}
+
+		case CREATE_LIST_STARTED: {
+			// at present this does nothing, it's really just to track that the action happened
+			return updeep(state);
 		}
 
 		case CREATE_LIST_SUCCEEDED: {

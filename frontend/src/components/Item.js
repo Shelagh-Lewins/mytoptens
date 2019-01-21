@@ -2,17 +2,37 @@
 
 import React from 'react';
 import { Col } from 'reactstrap';
+import EditableTextField from './EditableTextField';
+import './Item.scss';
 
 const Item = props => {
 	return (
-		<Col sm="3" md="4" className="item-container">
+		<Col className="item-container">
 			<div className="item-header">
-				<div>{`${props.item.order}: ${props.item.title}`}</div>
+				<span className="order">{props.item.order}:</span><EditableTextField
+					name={`${props.item.order}_title`}
+					required={true}
+					labelText="Title"
+					data-state={`${props.item.order}_title`}
+					id={`${props.item.order}_title`}
+					handleInputChange={ props.handleInputChange }
+					value={ props.item.title }
+					placeholder="Enter the item title"
+				/>
 			</div>
 			<div className="item-body">
-				<div>{props.item.description}</div>
+				<span>Description:</span>
+				<EditableTextField
+					name={`${props.item.order}_description`}
+					required={true}
+					labelText="Title"
+					data-state={`${props.item.order}_description`}
+					id={`${props.item.order}_description`}
+					handleInputChange={ props.handleInputChange }
+					value={ props.item.description }
+					placeholder="Enter the item description"
+				/>
 			</div>
-			<button className="btn btn-danger" onClick={onDeleteItem}>Delete</button>
 		</Col>
 	);
 
