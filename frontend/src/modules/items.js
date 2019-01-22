@@ -18,6 +18,7 @@ import {
 // and export them so other reducers can use them
 export const CREATE_ITEM_REQUESTED = 'CREATE_ITEM_REQUESTED';
 export const CREATE_ITEM_SUCCEEDED = 'CREATE_ITEM_SUCCEEDED';
+export const UPDATE_ITEM_SUCCEEDED = 'UPDATE_ITEM_SUCCEEDED';
 export const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
 
 export const createItem = item => dispatch => {
@@ -47,6 +48,31 @@ export function createItemSucceeded(item) {
 		'type': 'CREATE_ITEM_SUCCEEDED',
 		'payload': {
 			item
+		}
+	};
+}
+
+export const updateItem = (itemId, propertyName, value) => dispatch => {
+	console.log('itemId ', itemId);
+	console.log('is public. data ', JSON.stringify({ [propertyName]: value }));
+	return fetchAPI({
+		'url': `/api/v1/content/items/${itemId}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify({ [propertyName]: value }),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then(response => {
+		return dispatch(updateItemSucceeded(response));
+	}).catch(error => {
+		return dispatch(getErrors({ 'update item': error.message }));
+	});
+};
+
+export function updateItemSucceeded({ id, is_public }) {
+	return {
+		'type': UPDATE_ITEM_SUCCEEDED,
+		'payload': {
+			'id': id,
 		}
 	};
 }

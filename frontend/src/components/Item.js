@@ -14,9 +14,11 @@ const Item = props => {
 					required={true}
 					labelText="Title"
 					data-state={`${props.item.order}_title`}
-					id={`${props.item.order}_title`}
-					handleInputChange={ props.handleInputChange }
-					value={ props.item.title }
+					data-entityid={props.item.id} // database id of the item
+					id={`${props.item.order}_title`} // id of the html element
+					handleInputChange={props.handleInputChange}
+					handleNewValue={props.handleNewValue}
+					value={props.item.title}
 					placeholder="Enter the item title"
 				/>
 			</div>
@@ -27,21 +29,23 @@ const Item = props => {
 					required={true}
 					labelText="Title"
 					data-state={`${props.item.order}_description`}
-					id={`${props.item.order}_description`}
-					handleInputChange={ props.handleInputChange }
-					value={ props.item.description }
+					data-entityid={props.item.id} // database id of the item
+					id={`${props.item.order}_description`} // id of the html element
+					handleInputChange={props.handleInputChange}
+					handleNewValue={props.handleNewValue}
+					value={props.item.description}
 					placeholder="Enter the item description"
 				/>
 			</div>
 		</Col>
 	);
-
+	/*
 	function onDeleteItem(e) {
 		props.onDeleteItem({
 			'itemId': props.item.id,
 			'listId': props.list,
 		});
-	}
+	} */
 };
 
 export default Item;

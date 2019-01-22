@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
-import ItemsList from '../components/ItemsList';
+
+import * as items from '../modules/items';
 
 import { MAX_ITEMS_IN_LIST } from '../constants';
 import './ItemsPage.scss';
@@ -14,7 +16,7 @@ class ItemsPage extends Component {
 
 		// set up the state to hold each item's title and description
 		// coded by order
-		// this is messy but keeps state flat
+		// this is not elegant but keeps state flat
 		for (let i=1; i<= MAX_ITEMS_IN_LIST; i++) {
 			this.state[`${i}_title`] = '';
 			this.state[`${i}_description`] = '';
@@ -26,28 +28,11 @@ class ItemsPage extends Component {
 		Object.keys(items).forEach((key) => {
 			if (items[key].order && items[key].order <= MAX_ITEMS_IN_LIST) {
 				const order = items[key].order;
-				const title = items[key].title;
-				const description = items[key].description;
 
-				this.state[`${order}_title`] = title;
-				this.state[`${order}_description`] = description;
+				this.state[`${order}_id`] = items[key].id;
+				this.state[`${order}_title`] = items[key].title;
+				this.state[`${order}_description`] = items[key].description;
 			}
-		});
-	}
-
-	onTitleChange = (e) => {
-		this.setState({ 'title': e.target.value });
-	}
-
-	onDescriptionChange = (e) => {
-		this.setState({ 'description': e.target.value });
-	}
-
-	resetForm() {
-		this.setState({
-			'showNewItemForm': false,
-			'title': '',
-			'description': ''
 		});
 	}
 
@@ -57,32 +42,15 @@ class ItemsPage extends Component {
 		});
 	}
 
-	onCreateItem = (e) => {
-		e.preventDefault();
+	handleNewValue = (e) => {
+		const itemId = e.target.dataset.entityid;
 
-		// find the next available position in the list
-		const orders = this.props.items.map((item) => parseInt(item.order));
-		orders.sort(function(a, b){return a - b;});
-		let order;
+		// the item's order and the field to update are coded in the 'state' data e.g. '1_title'
+		const identifiers = e.target.dataset.state.split('_');
+		const propertyName = identifiers[1];
+		const value = e.target.value;
 
-		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
-			if (orders.indexOf(i) === -1) {
-				order = i;
-				break;
-			}
-		}
-
-		if (!order) {
-			return; // the list is full
-		}
-
-		this.props.onCreateItem({
-			'title': this.state.title,
-			'description': this.state.description,
-			'list': this.props.list,
-			order, 
-		});
-		this.resetForm();
+		this.props.dispatch(items.updateItem(itemId, propertyName, value));
 	}
 
 	toggleForm = () => {
@@ -92,16 +60,19 @@ class ItemsPage extends Component {
 	renderItemsList() {
 		let elements = [];
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
-			const titleIdentifier = `${i}_title`;
-			const descriptionIdentifier = `${i}_description`;
 			elements.push(
 				<Row key={`item${i}`}>
 					<Col>
 						<Item
 							key={`item${i}`}
-							item={{ 'order': i, 'title': this.state[titleIdentifier], 'description': this.state[descriptionIdentifier] }}
-							onDeleteItem={this.props.onDeleteItem}
-							handleInputChange={ this.handleInputChange }
+							item={{
+								'id': this.state[`${i}_id`],
+								'order': i,
+								'title': this.state[`${i}_title`],
+								'description': this.state[`${i}_description`],
+								 }}
+							handleInputChange={this.handleInputChange}
+							handleNewValue={this.handleNewValue}
 							list={this.props.list}
 						/>
 					</Col>
@@ -120,4 +91,4 @@ class ItemsPage extends Component {
 	}
 }
 
-export default ItemsPage;
+export default connect()(ItemsPage);

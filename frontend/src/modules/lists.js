@@ -171,7 +171,17 @@ export const deleteList = id => (dispatch, getState) => {
 	});
 };
 
+export function deleteListSucceeded(id) {
+	return {
+		'type': DELETE_LIST_SUCCEEDED,
+		'payload': {
+			id
+		}
+	};
+}
+
 export const setListIsPublic = ({ id, is_public }) => dispatch => {
+	console.log('is public. data ', JSON.stringify({ is_public }));
 	return fetchAPI({
 		'url': `/api/v1/content/lists/${id}/`,
 		'headers': { 'Content-Type': 'application/json' },
@@ -184,15 +194,6 @@ export const setListIsPublic = ({ id, is_public }) => dispatch => {
 		return dispatch(getErrors({ 'set list is public': error.message }));
 	});
 };
-
-export function deleteListSucceeded(id) {
-	return {
-		'type': DELETE_LIST_SUCCEEDED,
-		'payload': {
-			id
-		}
-	};
-}
 
 export function setListIsPublicSucceeded({ id, is_public }) {
 	return {
