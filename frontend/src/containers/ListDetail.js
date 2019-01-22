@@ -6,6 +6,7 @@ import { Container, Row, Col, Label, Input } from 'reactstrap';
 
 import * as lists from '../modules/lists';
 import * as items from '../modules/items';
+import * as permissions from '../modules/permissions';
 
 import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -42,6 +43,13 @@ class ListDetails extends Component {
 	}
 
 	componentDidUpdate(prevProps){
+		if (prevProps.isLoading && !this.props.isLoading) {
+			// just finished loading, need to check if user should view this list
+			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
+			console.log('canViewList ', canViewList);
+			const canUpdateList = permissions.canUpdateList({ 'slug': this.state.slug });
+			console.log('canUpdateList ', canUpdateList);
+		}
 	}
 
 	///////////////
@@ -82,6 +90,7 @@ class ListDetails extends Component {
 ListDetails.propTypes = {
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired,
+	'isLoading': PropTypes.bool.isRequired,
 	'lists': PropTypes.object.isRequired,
 	'items': PropTypes.array.isRequired,
 };
@@ -93,6 +102,7 @@ const mapStateToProps = (state, ownProps) => {
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
+		'isLoading': state.lists.isLoading,
 		'lists': lists,
 		'list': list,
 		'items': sortedItems(state),

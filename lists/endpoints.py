@@ -8,7 +8,7 @@ from .api import ItemViewSet
 router = routers.DefaultRouter()
 router.register('lists', ListViewSet, base_name='Lists')
 router.register('list', ListBySlugViewSet, base_name='ListBySlug')
-router.register('items', ItemViewSet)
+router.register('items', ItemViewSet, base_name='Items')
 
 urlpatterns = [
     url("^", include(router.urls)),

@@ -53,8 +53,8 @@ export function createItemSucceeded(item) {
 }
 
 export const updateItem = (itemId, propertyName, value) => dispatch => {
-	console.log('itemId ', itemId);
-	console.log('is public. data ', JSON.stringify({ [propertyName]: value }));
+	// should be able to update any simple property e.g. title, description
+
 	return fetchAPI({
 		'url': `/api/v1/content/items/${itemId}/`,
 		'headers': { 'Content-Type': 'application/json' },

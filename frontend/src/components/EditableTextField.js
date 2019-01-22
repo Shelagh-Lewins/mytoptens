@@ -14,7 +14,6 @@ class EditableTextField extends Component {
 			'showInput': false,
 		};
 
-		//this.handleInputChange = this.handleInputChange.bind(this);
 		this.onBlur = this.onBlur.bind(this);
 		this.toggleInput = this.toggleInput.bind(this);
 	}
@@ -26,7 +25,7 @@ class EditableTextField extends Component {
 	}
 
 	onBlur(e) {
-		// the user has typed a new value and it should be saved
+		// the user has typed a new value and the parent component should be notified
 		this.props.handleNewValue(e);
 		this.toggleInput(e);
 	}

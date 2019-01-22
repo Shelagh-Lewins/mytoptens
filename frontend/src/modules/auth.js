@@ -139,6 +139,7 @@ export const getUserInfo = () => (dispatch) => {
 	  	return dispatch(setUserInfo({
 			'username': user.username,
 			'email': user.email,
+			'id': user.id,
 			'slug': user.slug,
 		}));
 	}).catch(error => {
@@ -262,6 +263,7 @@ export default function(state = initialState, action ) {
 					'username': action.payload.username,
 					'email': action.payload.email,
 					'slug': action.payload.slug,
+					'id': action.payload.id,
 				}
 			}, state);
 

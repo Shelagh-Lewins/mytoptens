@@ -60,7 +60,31 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
         return List.objects.filter(slug__exact=self.request.query_params.get('slug', None)).filter(Q(created_by=self.request.user) | Q(is_public__exact=True))
 
 class ItemViewSet(viewsets.ModelViewSet):
-    # TODO filter and check permissions
-    queryset = Item.objects.all()
     permission_classes = [permissions.AllowAny, ]
+    model = Item
     serializer_class = ItemSerializer
+
+    def get_queryset(self):
+        # restrict any method that can alter a record
+        restricted_methods = ['POST', 'PUT', 'PATCH', 'DELETE']
+        if self.request.method in restricted_methods:
+            # if you are not logged in you cannot modify any list
+            if not self.request.user.is_authenticated:
+              return Item.objects.none()
+
+            # you can only modify your own lists
+            # only a logged-in user can create a list and view the returned data
+            # return Item.objects.filter(created_by=self.request.user)
+            return Item.objects.all()
+
+        # GET method (view item) is available to owner and for items in public lists
+        if self.request.method == 'GET':
+          #if not self.request.user.is_authenticated:
+            #return Item.objects.filter(is_public__exact=True)
+            return Item.objects.all()
+
+          #return Item.objects.filter(Q(created_by=self.request.user) | Q(is_public__exact=True))
+
+        # explicitly refuse any non-handled methods
+        #return Item.objects.none()
+
