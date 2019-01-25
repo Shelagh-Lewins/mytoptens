@@ -70,7 +70,7 @@ class ListDetails extends Component {
 				</Container>)}
 				{this.props.list && (
 					<div>
-						<h2>{this.props.list.title}</h2>
+						<h2>{this.props.list.name}</h2>
 						<p>Description: {this.props.list.description}</p>
 						{this.props.items && (
 							<ItemsPage

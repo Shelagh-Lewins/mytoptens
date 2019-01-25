@@ -10,16 +10,16 @@ const Item = props => {
 		<Col className="item-container">
 			<div className="item-header">
 				<span className="order">{props.item.order}:</span><EditableTextField
-					name={`${props.item.order}_title`}
+					name={`${props.item.order}_name`}
 					required={true}
-					labelText="Title"
-					data-state={`${props.item.order}_title`}
+					labelText="Name"
+					data-state={`${props.item.order}_name`}
 					data-entityid={props.item.id} // database id of the item
-					id={`${props.item.order}_title`} // id of the html element
+					id={`${props.item.order}_name`} // id of the html element
 					handleInputChange={props.handleInputChange}
 					handleNewValue={props.handleNewValue}
-					value={props.item.title}
-					placeholder="Enter the item title"
+					value={props.item.name}
+					placeholder="Enter the item name"
 				/>
 			</div>
 			<div className="item-body">
@@ -27,7 +27,7 @@ const Item = props => {
 				<EditableTextField
 					name={`${props.item.order}_description`}
 					required={true}
-					labelText="Title"
+					labelText="Description"
 					data-state={`${props.item.order}_description`}
 					data-entityid={props.item.id} // database id of the item
 					id={`${props.item.order}_description`} // id of the html element

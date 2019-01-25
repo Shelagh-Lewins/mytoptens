@@ -14,11 +14,11 @@ class ItemsPage extends Component {
 
 		this.state = {};
 
-		// set up the state to hold each item's title and description
+		// set up the state to hold each item's name and description
 		// coded by order
 		// this is not elegant but keeps state flat
 		for (let i=1; i<= MAX_ITEMS_IN_LIST; i++) {
-			this.state[`${i}_title`] = '';
+			this.state[`${i}_name`] = '';
 			this.state[`${i}_description`] = '';
 		}
 
@@ -30,7 +30,7 @@ class ItemsPage extends Component {
 				const order = items[key].order;
 
 				this.state[`${order}_id`] = items[key].id;
-				this.state[`${order}_title`] = items[key].title;
+				this.state[`${order}_name`] = items[key].name;
 				this.state[`${order}_description`] = items[key].description;
 			}
 		});
@@ -45,7 +45,7 @@ class ItemsPage extends Component {
 	handleNewValue = (e) => {
 		const itemId = e.target.dataset.entityid;
 
-		// the item's order and the field to update are coded in the 'state' data e.g. '1_title'
+		// the item's order and the field to update are coded in the 'state' data e.g. '1_name'
 		const identifiers = e.target.dataset.state.split('_');
 		const propertyName = identifiers[1];
 		const value = e.target.value;
@@ -68,7 +68,7 @@ class ItemsPage extends Component {
 							item={{
 								'id': this.state[`${i}_id`],
 								'order': i,
-								'title': this.state[`${i}_title`],
+								'name': this.state[`${i}_name`],
 								'description': this.state[`${i}_description`],
 								 }}
 							handleInputChange={this.handleInputChange}

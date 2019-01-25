@@ -14,7 +14,7 @@ const ListsList = props => {
 	return (
 		<Container className="lists-list">
 			<Row>
-				<h3 className="lists-list-title">
+				<h3 className="lists-list-name">
 					<strong>{headerText}</strong>
 				</h3>
 			</Row>

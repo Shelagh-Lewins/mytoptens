@@ -16,7 +16,7 @@ const ListSummary = props => {
 		<Col sm="3" md="4" className="list-container">
 			<Link to={`/list/${props.list.slug}`}>
 				<div className="list-header">
-					<div>{props.list.title}</div>
+					<div>{props.list.name}</div>
 				</div>
 				<div className="list-body">{props.list.description}</div>
 			</Link>

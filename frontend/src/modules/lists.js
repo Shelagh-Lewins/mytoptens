@@ -234,7 +234,7 @@ export const getFilteredLists = createSelector(
 			if (searchTerm === '') {
 				return list;
 			}
-			return list.title.match(new RegExp(searchTerm, 'i'));
+			return list.name.match(new RegExp(searchTerm, 'i'));
 		});
 	}
 );

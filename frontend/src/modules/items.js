@@ -53,7 +53,7 @@ export function createItemSucceeded(item) {
 }
 
 export const updateItem = (itemId, propertyName, value) => dispatch => {
-	// should be able to update any simple property e.g. title, description
+	// should be able to update any simple property e.g. name, description
 
 	return fetchAPI({
 		'url': `/api/v1/content/items/${itemId}/`,

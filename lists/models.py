@@ -33,12 +33,12 @@ class List(models.Model):
     modified_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
         related_name='list_modified_by')
     modified_at = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, blank=True, default='')
     is_public = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Item(models.Model):
@@ -47,7 +47,7 @@ class Item(models.Model):
     slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     modified_at = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=255, blank=True, default='')
+    name = models.CharField(max_length=255, blank=True, default='')
     description = models.CharField(max_length=255, blank=True, default='')
     list = models.ForeignKey(List, on_delete=models.CASCADE, related_name='items')
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
@@ -57,4 +57,4 @@ class Item(models.Model):
         ordering = ['order']
 
     def __unicode__(self):
-        return '%d: %s' % (self.order, self.title)
+        return '%d: %s' % (self.order, self.name)

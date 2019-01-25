@@ -17,11 +17,11 @@ class CreateList extends Component {
 	constructor() {
 		super();
 		this.state = {
-			'title': '',
+			'name': '',
 			'description': '',
 		};
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
-			this.state[`item${i}_title`] = '';
+			this.state[`item${i}_name`] = '';
 			this.state[`item${i}_description`] = '';
 		}
 		this.handleInputChange = this.handleInputChange.bind(this);
@@ -43,7 +43,7 @@ class CreateList extends Component {
 		e.preventDefault();
 
 		let newList = {
-			'title': this.state.title,
+			'name': this.state.name,
 			'description': this.state.description,
 			'items': [],
 		};
@@ -52,7 +52,7 @@ class CreateList extends Component {
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
 			if (this.state[`item${i}`] !== '') {
 				const newItem = {
-					'title': this.state[`item${i}_title`],
+					'name': this.state[`item${i}_name`],
 					'description': this.state[`item${i}_description`],
 					'order': i,
 				};
@@ -93,14 +93,14 @@ class CreateList extends Component {
 					<Row>
 						<Col>
 							<h3>Item {i}</h3>
-							<Label for={`item${i}_title`}>Title</Label>
+							<Label for={`item${i}_name`}>Name</Label>
 							<Input
 								type="text"
-								name={`item${i}_title`}
-								id={`item${i}_title`}
+								name={`item${i}_name`}
+								id={`item${i}_name`}
 								onChange={ this.handleInputChange }
-								value={ this.state[`item${i}_title`] }
-								placeholder="Title"
+								value={ this.state[`item${i}_name`] }
+								placeholder="Name"
 							/>
 							<div className='invalid-feedback' />
 						</Col>
@@ -145,19 +145,19 @@ class CreateList extends Component {
 					<Row>
 						<Col>
 							<div className="form-group">
-								<Label for="email">Title</Label>
+								<Label for="name">Name</Label>
 								<Input
 									type="text"
-									name="title"
+									name="name"
 									required={true}
-									id="title"
+									id="name"
 									onChange={ this.handleInputChange }
-									value={ this.state.title }
-									placeholder="Enter the list title"
+									value={ this.state.name }
+									placeholder="Enter the list name"
 								/>
 								<div className='invalid-feedback' />
 								<small className='form-text text-muted'>
-									<p>Title is required</p>
+									<p>Name is required</p>
 								</small>
 							</div>
 						</Col>
