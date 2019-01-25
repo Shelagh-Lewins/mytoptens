@@ -5,7 +5,6 @@ import store from '../store';
 import formatErrorMessages from '../modules/formatErrorMessages';
 
 export default function fetchAPI({ url, data, method = 'GET', useAuth = false, headers = {} }) {
-
 	if (useAuth) {
 		headers.Authorization = `Token ${store.getState().auth.user.token}`;
 	}

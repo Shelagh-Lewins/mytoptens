@@ -29,10 +29,6 @@ class Home extends Component {
 	onSearch = searchTerm => {
 		this.props.dispatch(lists.filterLists(searchTerm));
 	}
-	/*
-	onCreateList = ({ title, description }) => {
-		this.props.dispatch(lists.createList({ title, description }));
-	} */
 
 	onIsPublicChange = ({ id, is_public }) => {
 		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
@@ -41,14 +37,6 @@ class Home extends Component {
 	onDeleteList = (id) => {
 		this.props.dispatch(lists.deleteList(id));
 	}
-	/*
-	onCreateItem = (item) => {
-		this.props.dispatch(items.createItem(item));
-	}
-
-	onDeleteItem = (item) => {
-		this.props.dispatch(items.deleteItem(item));
-	} */
 
 	onCloseFlashMessage = () => {
 		this.props.dispatch(clearErrors());

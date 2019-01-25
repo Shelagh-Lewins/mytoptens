@@ -26,10 +26,12 @@ export const getAuthToken = () => {
 
 function setAuthToken(token) {
 	localStorage.setItem('jwtToken', token);
+	return;
 }
 
 function removeAuthToken() {
 	localStorage.removeItem('jwtToken');
+	return;
 }
 
 export const registerUser = (user, history) => dispatch => {
@@ -104,15 +106,16 @@ export const logoutUserComplete = token => {
 
 export const logoutUser = (history) => dispatch => {
 	dispatch(clearErrors());
-
 	return fetchAPI({
 		'url': '/api/v1/rest-auth/logout/',
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
+		removeAuthToken();
+	  return dispatch(logoutUserComplete());
+	  }).then(() => {
+	  	// ensure token is removed from localStorage and store before redirecting
 	  	history.push('/');
-	  	removeAuthToken();
-	    return dispatch(logoutUserComplete());
 	}).catch(error => {
 		return dispatch(getErrors({ 'logout user': 'Unable to logout' }));
 	});
@@ -268,6 +271,7 @@ export default function(state = initialState, action ) {
 			}, state);
 
 		case LOGOUT_USER_COMPLETE: {
+			console.log('complete now');
 			return updeep({
 				'isAuthenticated': false,
 				'canCreateList': canCreateList(),

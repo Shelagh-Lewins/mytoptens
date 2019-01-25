@@ -55,7 +55,7 @@ export function fetchLists() {
 	return (dispatch, getState) => {
 		dispatch(fetchListsStarted());
 
-		// if the user is not logged in, don't use auth. The server should return whatever lists a non-authenticated user should see.
+		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
 
 		if (getState().auth.user.token) {
