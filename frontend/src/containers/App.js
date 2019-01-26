@@ -22,7 +22,6 @@ import './App.scss';
 // note that the Django template pages reset password loads the bootstrap css from static/bootstrap
 
 // check if user is already logged in
-console.log('App.js, auth ', getAuthToken());
 if(getAuthToken()) {
 	store.dispatch(setCurrentUser(localStorage.jwtToken));
 	store.dispatch(getUserInfo());

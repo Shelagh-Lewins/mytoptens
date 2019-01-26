@@ -271,7 +271,6 @@ export default function(state = initialState, action ) {
 			}, state);
 
 		case LOGOUT_USER_COMPLETE: {
-			console.log('complete now');
 			return updeep({
 				'isAuthenticated': false,
 				'canCreateList': canCreateList(),
