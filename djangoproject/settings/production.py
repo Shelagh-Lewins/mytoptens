@@ -9,3 +9,5 @@ REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
     'anon': '100/day',
     'user': '10/minute'
 }
+
+DEFAULT_FROM_EMAIL = 'My Top Tens <noreply@mytoptens.com>'
