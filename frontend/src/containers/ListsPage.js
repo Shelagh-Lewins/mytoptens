@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 import ListsList from '../components/ListsList';
+import ListSummary from '../components/ListSummary';
 import './ListsPage.scss';
 
 class ListsPage extends Component {
@@ -38,13 +39,16 @@ class ListsPage extends Component {
 			return (
 				<div key={index}>
 					{(listsByIsPublic.length > 0) && (
-						<ListsList
-							lists={listsByIsPublic}
-							onIsPublicChange={onIsPublicChange}
-							onDeleteList={onDeleteList}
-							is_public={is_public}
-							key={is_public}
-						/>
+						<ListsList is_public={is_public}>
+							{listsByIsPublic.map(list => 
+								<ListSummary
+									key={list.id}
+									list={list}
+									onIsPublicChange={onIsPublicChange}
+									onDeleteList={onDeleteList}
+								/>
+							)}
+						</ListsList>
 					)}
 				</div>
 			);

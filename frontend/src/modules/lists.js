@@ -295,7 +295,7 @@ export default function lists(state = initialListsState, action) {
 
 		case CREATE_LIST_STARTED: {
 			// at present this does nothing, it's really just to track that the action happened
-			return updeep(state);
+			return updeep(state, state);
 		}
 
 		case CREATE_LIST_SUCCEEDED: {

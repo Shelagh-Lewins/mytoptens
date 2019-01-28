@@ -60,7 +60,6 @@ class CreateList extends Component {
 			}
 		}
 
-		//this.props.onCreateList(newList, this.props.history);
 		this.onCreateList(newList);
 	}
 
