@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col, Label, Input } from 'reactstrap';
+import { Row, Col } from 'reactstrap';
 
-import * as items from '../modules/items';
+import * as itemsReducer from '../modules/items';
 
 import { MAX_ITEMS_IN_LIST } from '../constants';
 import './ItemsPage.scss';
@@ -50,7 +50,7 @@ class ItemsPage extends Component {
 		const propertyName = identifiers[1];
 		const value = e.target.value;
 
-		this.props.dispatch(items.updateItem(itemId, propertyName, value));
+		this.props.dispatch(itemsReducer.updateItem(itemId, propertyName, value));
 	}
 
 	toggleForm = () => {
@@ -60,24 +60,29 @@ class ItemsPage extends Component {
 	renderItemsList() {
 		let elements = [];
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
-			elements.push(
-				<Row key={`item${i}`}>
-					<Col>
-						<Item
-							key={`item${i}`}
-							item={{
-								'id': this.state[`${i}_id`],
-								'order': i,
-								'name': this.state[`${i}_name`],
-								'description': this.state[`${i}_description`],
-								 }}
-							handleInputChange={this.handleInputChange}
-							handleNewValue={this.handleNewValue}
-							list={this.props.list}
-						/>
-					</Col>
-				</Row>
-			);
+			const name = this.state[`${i}_name`];
+			const canEdit = this.props.canEdit;
+			if (name || canEdit) {
+				elements.push(
+					<Row key={`item${i}`}>
+						<Col>
+							<Item
+								key={`item${i}`}
+								item={{
+									'id': this.state[`${i}_id`],
+									'order': i,
+									'name': name,
+									'description': this.state[`${i}_description`],
+									 }}
+								handleInputChange={this.handleInputChange}
+								handleNewValue={this.handleNewValue}
+								list={this.props.list}
+								canEdit={canEdit}
+							/>
+						</Col>
+					</Row>
+				);
+			}
 		}
 		return elements;
 	}

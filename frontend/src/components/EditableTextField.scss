@@ -1,0 +1,16 @@
+@import "../variables";
+
+.editable-text-field {
+	input {
+		padding: 6px 12px;
+	}
+
+	span {
+		display: inline-block;
+		padding: 6px 0;
+	}
+
+	.placeholder {
+		color: $color-placeholder;
+	}
+}

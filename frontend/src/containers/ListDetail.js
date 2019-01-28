@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { Container, Row, Col, Label, Input } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 
 import * as lists from '../modules/lists';
-import * as items from '../modules/items';
+//import * as items from '../modules/items';
 import * as permissions from '../modules/permissions';
 
 import FlashMessage from '../components/FlashMessage';
@@ -30,14 +30,6 @@ class ListDetails extends Component {
 		props.dispatch(lists.fetchListBySlug(slug));
 	}
 
-	onCreateItem = (item) => {
-		this.props.dispatch(items.createItem(item));
-	}
-
-	onDeleteItem = (item) => {
-		this.props.dispatch(items.deleteItem(item));
-	}
-
 	onCloseFlashMessage = () => {
 		this.props.dispatch(clearErrors());
 	}
@@ -45,44 +37,54 @@ class ListDetails extends Component {
 	componentDidUpdate(prevProps){
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading, need to check if user should view this list
-			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
-			console.log('canViewList ', canViewList);
-			const canUpdateList = permissions.canUpdateList({ 'slug': this.state.slug });
-			console.log('canUpdateList ', canUpdateList);
+			this.setState({
+				'canView': permissions.canViewList({ 'slug': this.state.slug }),
+				'canEdit': permissions.canUpdateList({ 'slug': this.state.slug }),
+			});
 		}
+	}
+
+	renderItemsPage() {
+		return <div>
+			{!isEmpty(this.props.errors) && (<Container>
+				<Row>
+					<Col>
+						<FlashMessage
+							message={formatErrorMessages(this.props.errors)}
+							type="error"
+							onClick={this.onCloseFlashMessage}
+						/>
+					</Col>
+				</Row>
+			</Container>)}
+			{this.props.list && (
+				<Container>
+					{this.props.items && (
+						<ItemsPage
+							items={this.props.items}
+							list={this.props.list.id}
+							canEdit={this.state.canEdit}
+						/>
+					)}
+				</Container>
+			)}
+		</div>;
 	}
 
 	///////////////
 
 	render() {
+		let content;
+
+		if (this.state.canView) {
+			content = this.renderItemsPage();
+		} else {
+			content = <p>Either this list does not exist or you do not have permission to view it</p>;
+		}
 		return(
-			<Container>
-				{!isEmpty(this.props.errors) && (<Container>
-					<Row>
-						<Col>
-							<FlashMessage
-								message={formatErrorMessages(this.props.errors)}
-								type="error"
-								onClick={this.onCloseFlashMessage}
-							/>
-						</Col>
-					</Row>
-				</Container>)}
-				{this.props.list && (
-					<div>
-						<h2>{this.props.list.name}</h2>
-						<p>Description: {this.props.list.description}</p>
-						{this.props.items && (
-							<ItemsPage
-								items={this.props.items}
-								list={this.props.list.id}
-								onCreateItem={this.onCreateItem}
-								onDeleteItem={this.onDeleteItem}
-							/>
-						)}
-					</div>
-				)}
-			</Container>
+			<div>
+				{ content }
+			</div>
 		);
 	}
 }
