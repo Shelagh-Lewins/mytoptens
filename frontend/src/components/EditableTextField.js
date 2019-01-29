@@ -1,4 +1,4 @@
-// A text field that can be edited by clicking on it
+// An input or textarea that can be edited by clicking on it
 // It can be blank, or required
 // note custom property data-state which is the name of the property in this.state
 // Can be used with keyboard only
@@ -10,12 +10,13 @@ import { Row, Col, Label, Input } from 'reactstrap';
 import './EditableTextField.scss';
 
 class EditableTextField extends Component {
-	constructor() {
+	constructor(props) {
 		super();
 		this.state = {
 			'showInput': false,
 			'isValidated': false,
 			'initialValue': '',
+			'type': props.textarea ? 'textarea' : 'input',
 		};
 	}
 
@@ -59,7 +60,7 @@ class EditableTextField extends Component {
 	validate = () => {
 		// custom validation for consistency with other forms
 		const formEl = ReactDOM.findDOMNode(this); // component parent node
-		const elem = formEl.querySelector('input');
+		const elem = formEl.querySelector(this.state.type);
 		const errorLabel = elem.parentNode.querySelector('.invalid-feedback');
 
 		if (!elem.validity.valid) {
@@ -78,7 +79,7 @@ class EditableTextField extends Component {
 		e.preventDefault();
 		// the user has typed a new value and the parent component should be notified
 
-		const inputElement = e.target.querySelector('input');
+		const inputElement = e.target.querySelector(this.state.type);
 
 		if (this.validate()) {
 			this.props.handleNewValue(inputElement);
@@ -89,6 +90,10 @@ class EditableTextField extends Component {
 	}
 
 	render() {
+		let type = 'text';
+		if (this.props.textarea) {
+			type = 'textarea';
+		}
 		// Add bootstrap's 'was-validated' class to the forms classes to support its styling
 		let classNames = [];
 		if (this.props.className) {
@@ -116,7 +121,7 @@ class EditableTextField extends Component {
 								<div className="form-group">
 									<Label for={this.props.id}>{this.props.label}</Label>
 									<Input autoFocus
-										type="text"
+										type={type}
 										name={this.props.id}
 										className="form-control"
 										required={this.props.required}

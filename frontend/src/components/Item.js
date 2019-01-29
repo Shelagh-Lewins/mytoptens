@@ -26,6 +26,7 @@ const Item = props => {
 			{(props.item.name !== '') &&
 				<div className="item-body">
 					<EditableTextField
+						textarea={true}
 						canEdit={props.canEdit}
 						name={`${props.item.order}_description`}
 						placeholder="Click here to add a description"
