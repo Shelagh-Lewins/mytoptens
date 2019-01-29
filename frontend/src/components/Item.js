@@ -39,13 +39,6 @@ const Item = props => {
 			</div>
 		</Col>
 	);
-	/*
-	function onDeleteItem(e) {
-		props.onDeleteItem({
-			'itemId': props.item.id,
-			'listId': props.list,
-		});
-	} */
 };
 
 export default Item;

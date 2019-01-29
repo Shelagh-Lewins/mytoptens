@@ -26,6 +26,7 @@ export const CREATE_LIST_STARTED = 'CREATE_LIST_STARTED';
 export const CREATE_LIST_SUCCEEDED = 'CREATE_LIST_SUCCEEDED';
 export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
 export const SET_LIST_IS_PUBLIC_SUCCEEDED = 'SET_LIST_IS_PUBLIC_SUCCEEDED';
+export const UPDATE_LIST_SUCCEEDED = 'UPDATE_LIST_SUCCEEDED';
 
 const itemSchema = new schema.Entity('items');
 const listSchema = new schema.Entity('lists', {
@@ -126,6 +127,8 @@ export function filterLists(searchTerm) {
 	};
 }
 
+/////////////////////////////
+// create list
 export const createList = (list, history) => dispatch => {
 	dispatch(createListStarted());
 
@@ -159,6 +162,35 @@ export function createListSucceeded(list) {
 	};
 }
 
+///////////////////////////
+// update list
+export const updateList = (listId, propertyName, value) => dispatch => {
+	// should be able to update any simple property e.g. name, description
+
+	return fetchAPI({
+		'url': `/api/v1/content/lists/${listId}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify({ [propertyName]: value }),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then(response => {
+		return dispatch(updateListSucceeded(response));
+	}).catch(error => {
+		return dispatch(getErrors({ 'update item': error.message }));
+	});
+};
+
+export function updateListSucceeded({ id }) {
+	return {
+		'type': UPDATE_LIST_SUCCEEDED,
+		'payload': {
+			'id': id,
+		}
+	};
+}
+
+///////////////////////////
+// delete list
 export const deleteList = id => (dispatch, getState) => {
 	return fetchAPI({
 		'url': `/api/v1/content/lists/${id}/`,

@@ -1,0 +1,32 @@
+@import "../variables";
+
+.list-name {
+	// hide label but leave contents visible and entire label still readable
+	label {
+		border: 0;
+		clip: rect(0 0 0 0);
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		position: absolute;
+		width: 1px;
+	}
+
+	span {
+		font-size: 150%;
+		font-weight: bold;
+	}
+}
+
+.list-description {
+	// hide label but leave contents visible and entire label still readable
+	label {
+		border: 0;
+		clip: rect(0 0 0 0);
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		position: absolute;
+		width: 1px;
+	}
+}

@@ -5,7 +5,7 @@ import { Row, Col } from 'reactstrap';
 import * as itemsReducer from '../modules/items';
 
 import { MAX_ITEMS_IN_LIST } from '../constants';
-import './ItemsPage.scss';
+//import './ItemsPage.scss';
 import Item from './Item';
 
 class ItemsPage extends Component {
@@ -42,13 +42,13 @@ class ItemsPage extends Component {
 		});
 	}
 
-	handleNewValue = (e) => {
-		const itemId = e.target.dataset.entityid;
+	handleNewValue = (element) => {
+		const itemId = element.dataset.entityid;
 
 		// the item's order and the field to update are coded in the 'state' data e.g. '1_name'
-		const identifiers = e.target.dataset.state.split('_');
+		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
-		const value = e.target.value;
+		const value = element.value;
 
 		this.props.dispatch(itemsReducer.updateItem(itemId, propertyName, value));
 	}

@@ -68,7 +68,7 @@ export const updateItem = (itemId, propertyName, value) => dispatch => {
 	});
 };
 
-export function updateItemSucceeded({ id, is_public }) {
+export function updateItemSucceeded({ id }) {
 	return {
 		'type': UPDATE_ITEM_SUCCEEDED,
 		'payload': {

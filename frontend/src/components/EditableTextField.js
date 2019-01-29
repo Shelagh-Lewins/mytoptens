@@ -4,7 +4,8 @@
 // Can be used with keyboard only
 
 import React, { Component } from 'react';
-import { Label, Input } from 'reactstrap';
+import ReactDOM from 'react-dom';
+import { Row, Col, Label, Input } from 'reactstrap';
 import './EditableTextField.scss';
 
 class EditableTextField extends Component {
@@ -12,63 +13,137 @@ class EditableTextField extends Component {
 		super();
 		this.state = {
 			'showInput': false,
+			'isValidated': false,
+			'initialValue': '',
 		};
 
-		this.onBlur = this.onBlur.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+		this.showInput = this.showInput.bind(this);
 		this.toggleInput = this.toggleInput.bind(this);
+		this.cancel = this.cancel.bind(this);
+		this.validate = this.validate.bind(this);
 	}
 
-	toggleInput(e) {
+	showInput(e) {
+		this.setState({
+			'initialValue': e.target.textContent,
+		});
+		this.toggleInput();
+	}
+
+	toggleInput() {
 		this.setState({
 			'showInput': !this.state.showInput,
 		});
 	}
 
-	onBlur(e) {
-		// the user has typed a new value and the parent component should be notified
-		this.props.handleNewValue(e);
-		this.toggleInput(e);
+	cancel = () => {
+		// restore the initial value of the field as though the user had just entered it
+		const fakeEvent = {
+			'target': {
+				'dataset': { 'state': this.props['data-state'] },
+				'value': this.state.initialValue,
+			}
+		};
+		this.props.handleInputChange(fakeEvent);
+		this.toggleInput();
 	}
 
-	onKeyUp(e) {
-		var code = e.keyCode || e.which;
-		if(code === 13) { //13 is the enter keycode
-			//Do stuff in here
-			this.toggleInput(e);
+	validate = () => {
+		// custom validation for consistency with other forms
+		const formEl = ReactDOM.findDOMNode(this); // component parent node
+		const elem = formEl.querySelector('input');
+		const errorLabel = elem.parentNode.querySelector('.invalid-feedback');
+
+		if (!elem.validity.valid) {
+			let message = elem.validationMessage;
+			errorLabel.textContent = message;
+
+			return false;
+		} else {
+			errorLabel.textContent = '';
+
+			return true;
 		}
 	}
 
+	handleSubmit(e) {
+		e.preventDefault();
+		// the user has typed a new value and the parent component should be notified
+
+		if (this.validate()) {
+			this.props.handleNewValue(e.target[this.props.id]);
+			this.toggleInput();
+		}
+
+		this.setState({ 'isValidated': true });
+	}
+
 	render() {
+		// Add bootstrap's 'was-validated' class to the forms classes to support its styling
+		let classNames = [];
+		if (this.props.className) {
+			classNames = [...this.props.className];
+			delete this.props.className;
+		}
+
+		if (this.state.isValidated) {
+			classNames.push('was-validated');
+		}
+
 		const showInput = this.state.showInput;
 		let item;
 
 		if(this.props.canEdit) {
 			if (showInput) {			
 				item = (
-					<div><Label for={this.props.id}>{this.props.label}</Label>
-						<Input autoFocus
-							type="text"
-							name={this.props.id}
-							data-state={this.props['data-state']}
-							data-entityid={this.props['data-entityid']}
-							id={this.props.id}
-							onChange={this.props.handleInputChange}
-							onBlur={this.onBlur}
-							value={this.props.value}
-						/>
-					</div>);
+					<form
+						noValidate
+						onSubmit={ this.handleSubmit }
+						className={classNames}
+					>
+						<Row>
+							<Col>
+								<div className="form-group">
+									<Label for={this.props.id}>{this.props.label}</Label>
+									<Input autoFocus
+										type="text"
+										name={this.props.id}
+										className="form-control"
+										required={this.props.required}
+										data-state={this.props['data-state']}
+										data-entityid={this.props['data-entityid']}
+										id={this.props.id}
+										onChange={this.props.handleInputChange}
+										value={this.props.value}
+										placeholder={this.props.placeholder}
+									/>
+									<div className='invalid-feedback' />
+								</div>
+							</Col>
+						</Row>
+						<Row>
+							<Col>
+								<button type="button" className="btn btn-secondary"onClick={this.cancel}>
+								Cancel
+								</button>
+								<button type="submit" className="btn btn-primary">
+								Done
+								</button>
+							</Col>
+						</Row>
+					</form>);
 			} else {
 				if (this.props.value !== '') {
 					item = (
 						<span
-							onClick={this.toggleInput}
+							onClick={this.showInput}
 							tabIndex="0"
-							onKeyUp={this.onKeyUp.bind(this)}
 						>{this.props.value}</span>
 					);
 				} else {
 					item = (
-						<span className="placeholder" tabIndex="0" onClick={this.toggleInput} >{this.props.placeholder}</span>
+						<span className="placeholder" tabIndex="0" onClick={this.showInput} >{this.props.placeholder}</span>
 					);
 				}
 			}

@@ -161,7 +161,7 @@ export default class ValidatedForm extends Component {
 		}
 	};
 
-	submitHandler = e => {
+	handleSubmit = e => {
 		e.preventDefault();
 
 		if (this.validate()) {
@@ -188,13 +188,13 @@ export default class ValidatedForm extends Component {
 			classNames.push('was-validated');
 		}
 
-		//The form will have a reference in the component and a submit handler set to the component's submitHandler
+		//The form will have a reference in the component and a submit handler set to the component's handleSubmit
 		return (
 			<form
 				{...props}
 				className={classNames}
 				noValidate
-				onSubmit={this.submitHandler}
+				onSubmit={this.handleSubmit}
 			>
 				{this.props.children}
 			</form>
