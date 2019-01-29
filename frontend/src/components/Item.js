@@ -6,6 +6,9 @@ import EditableTextField from './EditableTextField.js';
 import './Item.scss';
 
 const Item = props => {
+	// TODO find a way to more elegantly hide the description if there is no item name.
+	// at present, description shows when you start typing name
+	// it's not obvious yet how to find whether the name field is being edited, when rendering the description field.
 	return (
 		<Col className="item-container">
 			<div className="item-header">
@@ -14,7 +17,6 @@ const Item = props => {
 					name={`${props.item.order}_name`}
 					label="Item name"
 					placeholder="Click here to add an item"
-					required={true}
 					data-state={`${props.item.order}_name`}
 					data-entityid={props.item.id} // database id of the item
 					id={`${props.item.order}_name`} // id of the html element

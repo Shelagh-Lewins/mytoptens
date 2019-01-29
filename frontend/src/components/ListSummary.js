@@ -8,9 +8,16 @@ import { Link } from 'react-router-dom';
 
 import { LIST_IS_PUBLIC_TEXTS } from '../constants';
 
+import * as permissions from '../modules/permissions';
+
 const ListSummary = props => {
 	let id=`select-${props.list.id}`;
 	let value = props.list.is_public ? 'Public' : 'Private';
+	let canEdit = permissions.canEditList({ 'id': props.list.id });
+
+	if (props.showOwner) {
+		console.log('show owner');
+	}
 
 	return (
 		<Col sm="3" md="4" className="list-container">
@@ -29,7 +36,9 @@ const ListSummary = props => {
 					</select>
 				</label>
 			</div>
-			<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+			{canEdit &&
+				<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+			}
 			
 		</Col>
 	);
@@ -41,7 +50,7 @@ const ListSummary = props => {
 	}
 
 	function onDeleteList(e) {
-		props.onDeleteList(props.list.id);
+		props.onDeleteList({ 'id': props.list.id, 'name': props.list.name });
 	}
 };
 

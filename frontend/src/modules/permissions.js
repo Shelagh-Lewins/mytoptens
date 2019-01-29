@@ -35,7 +35,7 @@ export function canViewList(identifier) {
 	return canViewList;
 }
 
-export function canUpdateList(identifier) {
+export function canEditList(identifier) {
 	// a list can be edited if created by user
 	const property = Object.keys(identifier)[0];
 	const value = identifier[property];
@@ -43,15 +43,15 @@ export function canUpdateList(identifier) {
 	const lists = state.lists.things;
 	const userId = state.auth.user.id;
 
-	let canUpdateList = false;
+	let canEditList = false;
 
 	if (Object.keys(lists).length > 0) {
 		let list = findObjectByProperty({ 'parentObject': lists, property, value });
 
 		if (list && (list.created_by === userId)) {
-			canUpdateList = true;
+			canEditList = true;
 		}
 	}
 
-	return canUpdateList;
+	return canEditList;
 }

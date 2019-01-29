@@ -3,6 +3,7 @@ import { LIST_IS_PUBLIC_VALUES } from '../constants';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import { normalize, schema } from 'normalizr';
+import store from '../store';
 
 
 import {
@@ -278,6 +279,28 @@ export const getGroupedAndFilteredLists = createSelector(
 
 		LIST_IS_PUBLIC_VALUES.forEach(is_public => {
 			grouped[is_public] = lists.filter(list => list.is_public === is_public);
+		});
+
+		return grouped;
+	}
+);
+
+export const getFilteredPublicLists = createSelector(
+	[getFilteredLists],
+	lists => {
+		return lists.filter(list => {
+			return list.is_public;
+		});
+	}
+);
+
+export const getMyGroupedAndFilteredLists = createSelector(
+	[getFilteredLists],
+	lists => {
+		const grouped = {};
+
+		LIST_IS_PUBLIC_VALUES.forEach(is_public => {
+			grouped[is_public] = lists.filter(list => (list.created_by === store.getState().auth.user.id) && (list.is_public === is_public));
 		});
 
 		return grouped;

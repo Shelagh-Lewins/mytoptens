@@ -59,7 +59,7 @@ class ListDetails extends Component {
 			// just finished loading; need to check if user should view this list
 			this.setState({
 				'canView': permissions.canViewList({ 'slug': this.state.slug }),
-				'canEdit': permissions.canUpdateList({ 'slug': this.state.slug }),
+				'canEdit': permissions.canEditList({ 'slug': this.state.slug }),
 				'list_name': this.props.list.name,
 				'list_description': this.props.list.description,
 			});

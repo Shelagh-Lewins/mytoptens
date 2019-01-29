@@ -11,35 +11,48 @@ class ListsPage extends Component {
 	constructor(props) {
 		super(props);
 
-		this.state = {};
-	}
-
-	componentDidUpdate(prevProps){
-
+		this.state = {
+			'selectedTab': 'my-lists',
+		};
 	}
 
 	onSearch = e => {
 		this.props.onSearch(e.target.value);
 	}
 
-	onDeleteList = (id) => {
-		this.props.onDeleteList(id);
-	}
-
 	onAddList = () => {
 		this.props.history.push('/newlist');
 	}
 
-	renderListsList() {
-		const { lists, onIsPublicChange, onDeleteList } = this.props;
+	renderPublicLists() {
+		const { publicLists, onIsPublicChange, onDeleteList } = this.props;
 
-		return Object.keys(lists).map((is_public, index) => {
-			const listsByIsPublic = lists[is_public];
+		return (
+			<ListsList>
+				{publicLists.map(list => 
+					<ListSummary
+						key={list.id}
+						list={list}
+						onIsPublicChange={onIsPublicChange}
+						onDeleteList={onDeleteList}
+						showOwner={true}
+					/>
+				)}
+			</ListsList>
+		);
+	}
+
+	renderMyLists() {
+		const { myLists, onIsPublicChange, onDeleteList } = this.props;
+
+		return Object.keys(myLists).map((is_public, index) => {
+			const listsByIsPublic = myLists[is_public];
+			let headerText = is_public === 'true' ? 'My public lists' : 'My private lists';
 
 			return (
 				<div key={index}>
 					{(listsByIsPublic.length > 0) && (
-						<ListsList is_public={is_public}>
+						<ListsList is_public={is_public} headerText={headerText}>
 							{listsByIsPublic.map(list => 
 								<ListSummary
 									key={list.id}
@@ -55,7 +68,38 @@ class ListsPage extends Component {
 		});
 	}
 
+	handleTabClick = (e) => {
+		this.setState({
+			'selectedTab': e.target.id,
+		});
+	}
+
+	renderTabs() {
+		return (
+			<ul><li>
+				<span
+					className={this.state.selectedTab === 'my-lists'? 'selected' : ''}
+					id='my-lists'
+					onClick={this.handleTabClick}>My lists
+				</span>
+				<span
+					className={this.state.selectedTab === 'public-lists'? 'selected' : ''}
+					id='public-lists'
+					onClick={this.handleTabClick}>Public lists
+				</span>
+			</li></ul>
+		);
+	}
+
 	render() {
+		let listsList;
+
+		if (this.state.selectedTab === 'my-lists') {
+			listsList = this.renderMyLists();
+		} else if (this.state.selectedTab === 'public-lists') {
+			listsList = this.renderPublicLists();
+		}
+
 		if (this.props.isLoading) {
 			return (
 				<div className="lists-loading">
@@ -84,8 +128,12 @@ class ListsPage extends Component {
 						</Col>
 					</Row>
 				</Container>
+				<div className="tabs">
+					{this.renderTabs()}
+					<div className="clearing"></div>
+				</div>
 				<div className="lists">
-					{this.renderListsList()}
+					{listsList}
 				</div>
 			</div>
 		);

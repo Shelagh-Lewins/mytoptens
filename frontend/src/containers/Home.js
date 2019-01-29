@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import ListsPage from './ListsPage';
 
 import * as lists from '../modules/lists';
-import { getGroupedAndFilteredLists } from '../modules/lists';
+import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules/lists';
 
 import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -34,8 +34,11 @@ class Home extends Component {
 		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
 	}
 
-	onDeleteList = (id) => {
-		this.props.dispatch(lists.deleteList(id));
+	onDeleteList = ({ id, name }) => {
+		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
+		{
+		  this.props.dispatch(lists.deleteList(id));
+		}
 	}
 
 	onCloseFlashMessage = () => {
@@ -57,7 +60,8 @@ class Home extends Component {
 					</Row>
 				</Container>)}
 				<ListsPage
-					lists={this.props.lists}
+					myLists={this.props.myLists}
+					publicLists={this.props.publicLists}
 					canCreateList={this.props.auth.canCreateList}
 					onSearch={this.onSearch}
 					onCreateList={this.onCreateList}
@@ -74,14 +78,16 @@ Home.propTypes = {
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'lists': PropTypes.object.isRequired,
+	'publicLists': PropTypes.array.isRequired,
+	'myLists': PropTypes.object.isRequired,
 };
 
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
 	'isLoading': state.lists.isLoading,
-	'lists': getGroupedAndFilteredLists(state),
+	'publicLists': getFilteredPublicLists(state),
+	'myLists': getMyGroupedAndFilteredLists(state),
 });
 
 export default connect(mapStateToProps)(Home);
