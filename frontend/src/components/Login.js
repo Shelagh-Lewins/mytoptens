@@ -15,8 +15,6 @@ class Login extends Component {
 			'email': '',
 			'password': '',
 		};
-		this.handleInputChange = this.handleInputChange.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	componentDidMount() {
@@ -50,7 +48,7 @@ class Login extends Component {
 		return(
 			<Container>
 				<h2>Login</h2>
-				<ValidatedForm onSubmit={ this.handleSubmit }>
+				<ValidatedForm onSubmit={this.handleSubmit.bind(this)}>
 					<Row>
 						<Col>
 							<div className="form-group">
@@ -60,8 +58,8 @@ class Login extends Component {
 									name="email"
 									id="email"
 									required={true}
-									onChange={ this.handleInputChange }
-									value={ this.state.email }
+									onChange={this.handleInputChange.bind(this)}
+									value={this.state.email}
 									placeholder="Email address or username"
 								/>
 								<div className='invalid-feedback' />
@@ -79,7 +77,7 @@ class Login extends Component {
 									id="password"
 									value={ this.state.password }
 									placeholder="Password"
-									onChange={ this.handleInputChange }
+									onChange={ this.handleInputChange.bind(this) }
 								/>
 								<div className='invalid-feedback' />
 							</div>

@@ -1,7 +1,8 @@
 // A text field that can be edited by clicking on it
-// It can be blank, it is not required, there is no validation
+// It can be blank, or required
 // note custom property data-state which is the name of the property in this.state
 // Can be used with keyboard only
+// It is a regular form with cancel, submit. This allows keyboard navigation but the form stays open on blur - otherwise cancel would not be possible with keyboard.
 
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
@@ -16,18 +17,24 @@ class EditableTextField extends Component {
 			'isValidated': false,
 			'initialValue': '',
 		};
+	}
 
-		this.handleSubmit = this.handleSubmit.bind(this);
-		this.showInput = this.showInput.bind(this);
-		this.toggleInput = this.toggleInput.bind(this);
-		this.cancel = this.cancel.bind(this);
-		this.validate = this.validate.bind(this);
+	onKeyUp(e) {
+		var code = e.keyCode || e.which;
+		if(code === 13) { //13 is the enter keycode
+			//Do stuff in here
+			this.showInput(e);
+		}
 	}
 
 	showInput(e) {
-		this.setState({
-			'initialValue': e.target.textContent,
-		});
+		const isPlaceholder = e.target.classList.contains('placeholder');
+
+		if (!isPlaceholder) {
+			this.setState({
+				'initialValue': e.target.textContent,
+			});
+		}
 		this.toggleInput();
 	}
 
@@ -71,8 +78,10 @@ class EditableTextField extends Component {
 		e.preventDefault();
 		// the user has typed a new value and the parent component should be notified
 
+		const inputElement = e.target.querySelector('input');
+
 		if (this.validate()) {
-			this.props.handleNewValue(e.target[this.props.id]);
+			this.props.handleNewValue(inputElement);
 			this.toggleInput();
 		}
 
@@ -99,7 +108,7 @@ class EditableTextField extends Component {
 				item = (
 					<form
 						noValidate
-						onSubmit={ this.handleSubmit }
+						onSubmit={this.handleSubmit.bind(this)}
 						className={classNames}
 					>
 						<Row>
@@ -137,13 +146,19 @@ class EditableTextField extends Component {
 				if (this.props.value !== '') {
 					item = (
 						<span
-							onClick={this.showInput}
+							onClick={this.showInput.bind(this)}
+							 onKeyUp={this.onKeyUp.bind(this)}
 							tabIndex="0"
 						>{this.props.value}</span>
 					);
 				} else {
 					item = (
-						<span className="placeholder" tabIndex="0" onClick={this.showInput} >{this.props.placeholder}</span>
+						<span
+							className="placeholder"
+							tabIndex="0"
+							onClick={this.showInput.bind(this)}
+							onKeyUp={this.onKeyUp.bind(this)}
+						>{this.props.placeholder}</span>
 					);
 				}
 			}
