@@ -13,6 +13,8 @@ from dynamic_rest.fields import (
     DynamicRelationField
 )
 
+#from users.models import CustomUser
+
 class ItemSerializer(serializers.ModelSerializer):
     """
     An item must belong to a list
@@ -28,23 +30,27 @@ class ListSerializer(serializers.ModelSerializer):
     """
     items = ItemSerializer(many=True)
 
-    # automatically set created_by as the current user
-    created_by = serializers.PrimaryKeyRelatedField(
+    # automatically set created_by_id as the current user's id
+    created_by_id = serializers.PrimaryKeyRelatedField(
         read_only=True,
-        default=serializers.CurrentUserDefault()
+    )
+
+    created_by_username = serializers.PrimaryKeyRelatedField(
+        read_only=True
     )
 
     class Meta:
         model = List
         fields = ('id', 'name', 'description', 'is_public',
-            'slug', 'created_by', 'created_at',
+            'slug', 'created_by_id', 'created_by_username', 'created_at',
             'modified_by', 'modified_at', 'items')
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', None)
+        validated_data['created_by_id'] = self.context['request'].user
+        validated_data['created_by_username'] = self.context['request'].user.username
         newlist = List.objects.create(**validated_data)
 
         for item_data in items_data:
             Item.objects.create(list=newlist, **item_data)
         return newlist
-

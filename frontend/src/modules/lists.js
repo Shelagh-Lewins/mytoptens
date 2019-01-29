@@ -300,7 +300,7 @@ export const getMyGroupedAndFilteredLists = createSelector(
 		const grouped = {};
 
 		LIST_IS_PUBLIC_VALUES.forEach(is_public => {
-			grouped[is_public] = lists.filter(list => (list.created_by === store.getState().auth.user.id) && (list.is_public === is_public));
+			grouped[is_public] = lists.filter(list => (list.created_by_id === store.getState().auth.user.id) && (list.is_public === is_public));
 		});
 
 		return grouped;

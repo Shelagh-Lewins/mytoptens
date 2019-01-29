@@ -12,12 +12,12 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        if hasattr(obj, 'created_by'):
-            return obj.created_by == request.user
+        if hasattr(obj, 'created_by_id'):
+            return obj.created_by_id == request.user
 
         if hasattr(obj, 'list'):
-            if hasattr(obj.list, 'created_by'):
-                return obj.list.created_by == request.user
+            if hasattr(obj.list, 'created_by_id'):
+                return obj.list.created_by_id == request.user
 
 
 class ListViewSet(viewsets.ModelViewSet):
@@ -32,14 +32,14 @@ class ListViewSet(viewsets.ModelViewSet):
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:
             return List.objects.filter(
-                Q(created_by=self.request.user) | 
+                Q(created_by_id=self.request.user) | 
                 Q(is_public=True)
             )
 
         return List.objects.filter(is_public=True)
 
     def pre_save(self, obj):
-        obj.created_by = self.request.user
+        obj.created_by_id = self.request.user
 
 
 class ListBySlugViewSet(viewsets.ModelViewSet):
@@ -54,7 +54,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:
             return List.objects.filter(slug=self.request.query_params.get('slug', None)).filter(
-                Q(created_by=self.request.user) | 
+                Q(created_by_id=self.request.user) | 
                 Q(is_public=True)
             )
 
@@ -70,7 +70,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         # can view items belonging to public lists and lists the usesr created
         if self.request.user.is_authenticated:
             return Item.objects.filter(
-                Q(list__created_by=self.request.user) | 
+                Q(list__created_by_id=self.request.user) | 
                 Q(list__is_public=True)
             )
 

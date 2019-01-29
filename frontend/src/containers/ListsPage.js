@@ -35,7 +35,7 @@ class ListsPage extends Component {
 						list={list}
 						onIsPublicChange={onIsPublicChange}
 						onDeleteList={onDeleteList}
-						showOwner={true}
+						showCreatedBy={true}
 					/>
 				)}
 			</ListsList>

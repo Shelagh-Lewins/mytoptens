@@ -15,10 +15,6 @@ const ListSummary = props => {
 	let value = props.list.is_public ? 'Public' : 'Private';
 	let canEdit = permissions.canEditList({ 'id': props.list.id });
 
-	if (props.showOwner) {
-		console.log('show owner');
-	}
-
 	return (
 		<Col sm="3" md="4" className="list-container">
 			<Link to={`/list/${props.list.slug}`}>
@@ -38,6 +34,10 @@ const ListSummary = props => {
 			</div>
 			{canEdit &&
 				<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+			}
+			{props.showCreatedBy && 
+				<div className="list-created-by">Created by: {props.list.created_by_username}</div>
+
 			}
 			
 		</Col>
