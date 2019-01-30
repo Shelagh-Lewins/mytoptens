@@ -11,8 +11,13 @@ class ListsPage extends Component {
 	constructor(props) {
 		super(props);
 
+		// which set of lists to view: my-lists, public-lists
+		// default my-lists
+		const urlParams = new URLSearchParams(this.props.location.search)
+		const listset = urlParams.get('listset') || 'my-lists';
+
 		this.state = {
-			'selectedTab': 'my-lists',
+			'selectedTab': listset,
 		};
 	}
 
@@ -28,7 +33,7 @@ class ListsPage extends Component {
 		const { publicLists, onIsPublicChange, onDeleteList } = this.props;
 
 		return (
-			<ListsList>
+			<ListsList headerText="All public lists">
 				{publicLists.map(list => 
 					<ListSummary
 						key={list.id}
@@ -69,9 +74,15 @@ class ListsPage extends Component {
 	}
 
 	handleTabClick = (e) => {
-		this.setState({
-			'selectedTab': e.target.id,
-		});
+		if (this.state.selectedTab !== e.target.id) {
+			const listset=e.target.id;
+			this.setState({
+				'selectedTab': listset,
+			});
+
+			let URL = `${this.props.location.pathname}?listset=${listset}`;
+			this.props.history.push(URL);
+		}
 	}
 
 	renderTabs() {
