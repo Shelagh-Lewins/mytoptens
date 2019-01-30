@@ -11,14 +11,30 @@ class ListsPage extends Component {
 	constructor(props) {
 		super(props);
 
-		// which set of lists to view: my-lists, public-lists
-		// default my-lists
-		const urlParams = new URLSearchParams(this.props.location.search)
-		const listset = urlParams.get('listset') || 'my-lists';
+		// which set of lists to view
+		// if logged in, default my-lists
+		// if not logged in, only show public-lists
+		let listset = 'public-lists';
+		if (props.auth.isAuthenticated) {
+			const urlParams = new URLSearchParams(this.props.location.search);
+			listset = urlParams.get('listset') || 'my-lists';
+		} else {
+			this.setListSetURL(listset);
+		}
 
 		this.state = {
 			'selectedTab': listset,
 		};
+	}
+
+	componentDidUpdate(prevProps) {
+		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+			this.setState({
+				'selectedTab': 'public-lists',
+			});
+
+			this.setListSetURL('public-lists');
+		}
 	}
 
 	onSearch = e => {
@@ -73,15 +89,18 @@ class ListsPage extends Component {
 		});
 	}
 
+	setListSetURL(listset) {
+		let URL = `${this.props.location.pathname}?listset=${listset}`;
+		this.props.history.push(URL);
+	}
+
 	handleTabClick = (e) => {
 		if (this.state.selectedTab !== e.target.id) {
-			const listset=e.target.id;
 			this.setState({
-				'selectedTab': listset,
+				'selectedTab': e.target.id,
 			});
 
-			let URL = `${this.props.location.pathname}?listset=${listset}`;
-			this.props.history.push(URL);
+			this.setListSetURL(e.target.id);
 		}
 	}
 
@@ -139,10 +158,10 @@ class ListsPage extends Component {
 						</Col>
 					</Row>
 				</Container>
-				<div className="tabs">
+				{this.props.auth.isAuthenticated && <div className="tabs">
 					{this.renderTabs()}
 					<div className="clearing"></div>
-				</div>
+				</div>}
 				<div className="lists">
 					{listsList}
 				</div>

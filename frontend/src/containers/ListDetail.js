@@ -54,7 +54,7 @@ class ListDetails extends Component {
 		this.props.dispatch(clearErrors());
 	}
 
-	componentDidUpdate(prevProps){
+	componentDidUpdate(prevProps) {
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading; need to check if user should view this list
 			this.setState({

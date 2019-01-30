@@ -60,6 +60,7 @@ class Home extends Component {
 					</Row>
 				</Container>)}
 				<ListsPage
+					auth={this.props.auth}
 					myLists={this.props.myLists}
 					publicLists={this.props.publicLists}
 					canCreateList={this.props.auth.canCreateList}
