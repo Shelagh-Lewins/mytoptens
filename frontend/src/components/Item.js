@@ -1,49 +1,73 @@
 // An individual item
+// It is a stateful component so that the description field can be shown only if there is a name defined.
 
-import React from 'react';
+import store from '../store';
+
+import React, { Component } from 'react';
 import { Col } from 'reactstrap';
 import EditableTextField from './EditableTextField.js';
 import './Item.scss';
 
-const Item = props => {
-	// TODO find a way to more elegantly hide the description if there is no item name.
-	// at present, description shows when you start typing name
-	// it's not obvious yet how to find whether the name field is being edited, when rendering the description field.
-	return (
-		<Col className="item-container">
-			<div className="item-header">
-				<span className="order">{props.item.order}:</span><EditableTextField
-					canEdit={props.canEdit}
-					name={`${props.item.order}_name`}
-					label="Item name"
-					placeholder="Click here to add an item"
-					data-state={`${props.item.order}_name`}
-					data-entityid={props.item.id} // database id of the item
-					id={`${props.item.order}_name`} // id of the html element
-					handleInputChange={props.handleInputChange}
-					handleNewValue={props.handleNewValue}
-					value={props.item.name}
-				/>
-			</div>
-			{(props.item.name !== '') &&
-				<div className="item-body">
-					<EditableTextField
-						textarea={true}
-						canEdit={props.canEdit}
-						name={`${props.item.order}_description`}
-						placeholder="Click here to add a description"
-						label="Item description"
-						data-state={`${props.item.order}_description`}
-						data-entityid={props.item.id} // database id of the item
-						id={`${props.item.order}_description`} // id of the html element
-						handleInputChange={props.handleInputChange}
-						handleNewValue={props.handleNewValue}
-						value={props.item.description}
+class Item extends Component {
+	constructor(props) {
+		super();
+
+		this.state = {
+			'isEditingName': false,
+		};
+	}
+
+	setIsEditingName(showInput) {
+		this.setState({
+			'isEditingName': showInput,
+		});
+	}
+
+	render() {
+		let showDescription = true;
+		if (this.props.item.name === '') {
+			showDescription = false;
+		} else if (this.state.isEditingName && store.getState().items.things[this.props.item.id] && store.getState().items.things[this.props.item.id].name === '') {
+			showDescription = false;
+		}
+
+		return (
+			<Col className="item-container">
+				<div className="item-header">
+					<span className="order">{this.props.item.order}:</span><EditableTextField
+						canEdit={this.props.canEdit}
+						name={`${this.props.item.order}_name`}
+						label="Item name"
+						placeholder="Click here to add an item"
+						data-state={`${this.props.item.order}_name`}
+						data-entityid={this.props.item.id} // database id of the item
+						id={`${this.props.item.order}_name`} // id of the html element
+						handleInputChange={this.props.handleInputChange}
+						handleNewValue={this.props.handleNewValue}
+						isEditing={this.setIsEditingName.bind(this)}
+						value={this.props.item.name}
 					/>
 				</div>
-			}
-		</Col>
-	);
+				{showDescription &&
+					<div className="item-body">
+						<EditableTextField
+							textarea={true}
+							canEdit={this.props.canEdit}
+							name={`${this.props.item.order}_description`}
+							placeholder="Click here to add a description"
+							label="Item description"
+							data-state={`${this.props.item.order}_description`}
+							data-entityid={this.props.item.id} // database id of the item
+							id={`${this.props.item.order}_description`} // id of the html element
+							handleInputChange={this.props.handleInputChange}
+							handleNewValue={this.props.handleNewValue}
+							value={this.props.item.description}
+						/>
+					</div>
+				}
+			</Col>
+		);
+	}
 };
 
 export default Item;

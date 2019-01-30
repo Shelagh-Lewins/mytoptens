@@ -18,6 +18,8 @@ class EditableTextField extends Component {
 			'initialValue': '',
 			'type': props.textarea ? 'textarea' : 'input',
 		};
+
+		//this.showInput = this.showInput.bind(this);
 	}
 
 	onKeyUp(e) {
@@ -40,8 +42,15 @@ class EditableTextField extends Component {
 	}
 
 	toggleInput() {
+		const newShowInputValue = !this.state.showInput;
+
+		// optionally, tell the parent component whether the field is being edited
+		if (typeof this.props.isEditing === 'function') {
+			this.props.isEditing(newShowInputValue);
+		}
+
 		this.setState({
-			'showInput': !this.state.showInput,
+			'showInput': newShowInputValue,
 		});
 	}
 
