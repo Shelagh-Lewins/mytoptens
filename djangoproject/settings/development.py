@@ -9,3 +9,5 @@ REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
     'anon': '1000/day',
     'user': '30/minute'
 }
+
+DEFAULT_FROM_EMAIL = 'Local test <noreply@localhost>'

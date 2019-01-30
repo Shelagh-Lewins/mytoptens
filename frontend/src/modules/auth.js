@@ -80,7 +80,6 @@ export const loginUser = (user, history) => dispatch => {
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
-	  	// history.push('/');
 	    return dispatch(setCurrentUser(response.key));
 	}).then(() => {
 		history.push('/');
