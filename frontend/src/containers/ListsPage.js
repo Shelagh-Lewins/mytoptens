@@ -18,9 +18,9 @@ class ListsPage extends Component {
 		if (props.auth.isAuthenticated) {
 			const urlParams = new URLSearchParams(this.props.location.search);
 			listset = urlParams.get('listset') || 'my-lists';
-		} else {
-			this.setListSetURL(listset);
 		}
+
+		this.setListSetURL(listset);
 
 		this.state = {
 			'selectedTab': listset,
@@ -28,6 +28,7 @@ class ListsPage extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
+		// user has just logged out
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
 			this.setState({
 				'selectedTab': 'public-lists',

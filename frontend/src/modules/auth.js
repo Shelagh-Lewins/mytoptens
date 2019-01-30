@@ -80,9 +80,10 @@ export const loginUser = (user, history) => dispatch => {
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
-	  	history.push('/');
+	  	// history.push('/');
 	    return dispatch(setCurrentUser(response.key));
 	}).then(() => {
+		history.push('/');
 		// after store has been updated with token, we can query the server for current user info
 		return store.dispatch(getUserInfo());
 	}).catch(error => {
