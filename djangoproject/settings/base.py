@@ -167,6 +167,7 @@ ACCOUNT_USERNAME_REQUIRED = False
 OLD_PASSWORD_FIELD_ENABLED = True
 LOGOUT_ON_PASSWORD_CHANGE = False
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 
 #Following is added to enable registration with email instead of username
 AUTHENTICATION_BACKENDS = (

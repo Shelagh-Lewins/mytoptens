@@ -1,5 +1,6 @@
 from rest_framework import viewsets, permissions
 from .models import List, Item
+from allauth.account.admin import EmailAddress
 from .serializers import ListSerializer, ItemSerializer
 from django.db.models import Q
 
@@ -31,6 +32,8 @@ class ListViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:
+            print('***')
+            print(EmailAddress.objects.filter(user=self.request.user, verified=True).exists())
             return List.objects.filter(
                 Q(created_by_id=self.request.user) | 
                 Q(is_public=True)
