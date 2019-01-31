@@ -24,6 +24,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
     slug = models.CharField(max_length=ID_LENGTH, default=pkgen, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email

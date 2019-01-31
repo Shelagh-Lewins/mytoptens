@@ -144,6 +144,7 @@ export const getUserInfo = () => (dispatch) => {
 			'email': user.email,
 			'id': user.id,
 			'slug': user.slug,
+			'email_verified': user.email_verified,
 		}));
 	}).catch(error => {
 		return dispatch(getErrors({ 'get user info': 'Unable to get user info' }));
@@ -267,6 +268,7 @@ export default function(state = initialState, action ) {
 					'email': action.payload.email,
 					'slug': action.payload.slug,
 					'id': action.payload.id,
+					'email_verified': action.payload.email_verified,
 				}
 			}, state);
 

@@ -32,8 +32,10 @@ class ListViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:
-            print('***')
+            print('is there a verified email address?')
             print(EmailAddress.objects.filter(user=self.request.user, verified=True).exists())
+            print('user status')
+            print(self.request.user.email_verified)
             return List.objects.filter(
                 Q(created_by_id=self.request.user) | 
                 Q(is_public=True)
