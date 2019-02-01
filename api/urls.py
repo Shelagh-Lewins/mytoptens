@@ -7,6 +7,8 @@ from .forms import SetPasswordFormCustom
 from .forms import PasswordResetFormCustom
 from allauth.account.views import confirm_email
 
+from users.views import EmailConfirmation
+
 #full_string_regex = "(?P<key>[\s\d\w().+-_',:&]+)/$."
 
 urlpatterns = [
@@ -30,6 +32,8 @@ urlpatterns = [
     path('content/', include('lists.endpoints')),
     # content is a path for lists, items etc found in the lists app
 
+
+    url(r'^/sendconfirmationemail/', EmailConfirmation.as_view(), name='send-email-confirmation')
 ]
 
 

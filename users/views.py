@@ -3,6 +3,9 @@ from allauth.account.signals import email_confirmed
 from django.dispatch import receiver
 from rest_framework import generics
 
+from allauth.account.utils import send_email_confirmation
+from rest_framework.views import APIView
+
 from . import models
 from . import serializers
 
@@ -17,3 +20,7 @@ def email_confirmed_(request, email_address, **kwargs):
 
     user.save()
     
+class EmailConfirmation(APIView):
+    def post(self):
+        send_email_confirmation(user=self.request.user)
+
