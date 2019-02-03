@@ -54,8 +54,8 @@ export const registerUser = (user, history) => dispatch => {
 		'data': formData,
 		'method': 'POST',
 	}).then(response => {
-	  	history.push('/welcome');
-	    return response;
+			history.push('/welcome');
+			return response;
 	}).catch(error => {
 		return dispatch(getErrors({ 'registration': error.message }));
 	});
@@ -80,7 +80,7 @@ export const loginUser = (user, history) => dispatch => {
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
-	    return dispatch(setCurrentUser(response.key));
+			return dispatch(setCurrentUser(response.key));
 	}).then(() => {
 		history.push('/');
 		// after store has been updated with token, we can query the server for current user info
@@ -112,10 +112,10 @@ export const logoutUser = (history) => dispatch => {
 		'useAuth': false,
 	}).then(response => {
 		removeAuthToken();
-	  return dispatch(logoutUserComplete());
-	  }).then(() => {
-	  	// ensure token is removed from localStorage and store before redirecting
-	  	history.push('/');
+		return dispatch(logoutUserComplete());
+		}).then(() => {
+			// ensure token is removed from localStorage and store before redirecting
+			history.push('/');
 	}).catch(error => {
 		return dispatch(getErrors({ 'logout user': 'Unable to logout' }));
 	});
@@ -139,7 +139,7 @@ export const getUserInfo = () => (dispatch) => {
 		'method': 'GET',
 		'useAuth': true,
 	}).then(user => {
-	  	return dispatch(setUserInfo({
+			return dispatch(setUserInfo({
 			'username': user.username,
 			'email': user.email,
 			'id': user.id,
@@ -181,7 +181,7 @@ export const forgotPassword = (email) => dispatch => {
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
-	   return dispatch(forgotPasswordEmailSent());
+		 return dispatch(forgotPasswordEmailSent());
 	}).catch(error => {
 		return dispatch(getErrors({ 'request password reset email': `Unable to send a password reset email. It is likely that the email address ${email} is not associated with a registered user` }));
 		// return dispatch(getErrors(error.response.data));
@@ -214,8 +214,8 @@ export const changePassword = (data) => (dispatch) => {
 		'method': 'POST',
 		'useAuth': true,
 	}).then(response => {
-	  dispatch(changePasswordComplete());
-	    return response;
+		dispatch(changePasswordComplete());
+		return response;
 	}).catch(error => {
 		return dispatch(getErrors({ 'changePassword': error.message }));
 	});
@@ -231,6 +231,28 @@ export const changePasswordComplete = (token) => {
 	return {
 		'type': CHANGE_PASSWORD_COMPLETE,
 	};
+};
+
+//////////////////////////////////
+// Email confirmation
+export const sendConfirmationEmail = () => (dispatch) => {
+	console.log('auth action');
+	//var csrftoken = getCookie('csrftoken');
+
+	dispatch(clearErrors());
+
+	return fetchAPI({
+		'url': '/api/v1/sendconfirmationemail/',
+		//'url': '/api/v1/rest-auth/user/resend',
+		'method': 'GET',
+		'useAuth': true,
+		//'useCSRF': true,
+	}).then(response => {
+		console.log('response ', response);
+		return response;
+	}).catch(error => {
+		return dispatch(getErrors({ 'sendConfirmationEmail': error.message }));
+	});
 };
 
 //////////////////////////////////

@@ -1,13 +1,14 @@
 # api/urls.py
 from django.urls import include, path, re_path
 from django.contrib.auth import views
-from django.conf.urls import include, url
+#from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from .forms import SetPasswordFormCustom
 from .forms import PasswordResetFormCustom
 from allauth.account.views import confirm_email
 
 from users.views import EmailConfirmation
+
 
 #full_string_regex = "(?P<key>[\s\d\w().+-_',:&]+)/$."
 
@@ -33,7 +34,7 @@ urlpatterns = [
     # content is a path for lists, items etc found in the lists app
 
 
-    url(r'^/sendconfirmationemail/', EmailConfirmation.as_view(), name='send-email-confirmation')
+    path('sendconfirmationemail/', EmailConfirmation.as_view(), name='send-email-confirmation')
 ]
 
 

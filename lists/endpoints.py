@@ -1,4 +1,5 @@
-from django.conf.urls import include, url
+#from django.conf.urls import include, url
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from .api import ListViewSet
@@ -11,5 +12,5 @@ router.register('list', ListBySlugViewSet, base_name='ListBySlug')
 router.register('items', ItemViewSet, base_name='Items')
 
 urlpatterns = [
-    url("^", include(router.urls)),
+    path('', include(router.urls)),
 ]
