@@ -10,6 +10,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         # handle permissions based on method
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
+        # Note this is not checked for create!!! Which makes sense given the object doesn't exist.
+        print('first')
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -20,12 +22,28 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             if hasattr(obj.list, 'created_by_id'):
                 return obj.list.created_by_id == request.user
 
+class HasVerifiedEmail(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if not request.user.is_authenticated:
+            print('not authenticated')
+            return False
+
+        print('has_permission')
+        print(request.user.email_verified)
+        if request.user.email_verified:
+            return True
+
+        return False
+
 
 class ListViewSet(viewsets.ModelViewSet):
     """
     ViewSet for lists.
     """
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = List
     serializer_class = ListSerializer
 
@@ -44,6 +62,7 @@ class ListViewSet(viewsets.ModelViewSet):
         return List.objects.filter(is_public=True)
 
     def pre_save(self, obj):
+        print('save new list')
         obj.created_by_id = self.request.user
 
 
@@ -51,7 +70,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
     """
     Find a list by slug.
     """
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = List
     serializer_class = ListSerializer
 
@@ -67,7 +86,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
 
 
 class ItemViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = Item
     serializer_class = ItemSerializer
 
