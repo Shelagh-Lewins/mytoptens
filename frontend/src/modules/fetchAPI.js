@@ -4,33 +4,9 @@
 import store from '../store';
 import formatErrorMessages from '../modules/formatErrorMessages';
 
-function getCookie(name) {
-	var cookieValue = null;
-	if (document.cookie && document.cookie !== '') {
-		var cookies = document.cookie.split(';');
-		for (var i = 0; i < cookies.length; i++) {
-			var cookie = cookies[i].trim();
-			//var cookie = jQuery.trim(cookies[i]);
-			// Does this cookie string begin with the name we want?
-			if (cookie.substring(0, name.length + 1) === (name + '=')) {
-				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-				break;
-			}
-		}
-	}
-	return cookieValue;
-}
-
-export default function fetchAPI({ url, data, method = 'GET', useAuth = false, useCSRF = false, headers = {} }) {
+export default function fetchAPI({ url, data, method = 'GET', useAuth = false, headers = {} }) {
 	if (useAuth) {
 		headers.Authorization = `Token ${store.getState().auth.user.token}`;
-	}
-
-
-	if (useCSRF) {
-		headers['X-CSRFToken'] = getCookie('csrftoken');
-		data = data || new FormData();
-		data.append('csrfmiddlewaretoken', getCookie('csrftoken'));
 	}
 
 	return fetch(url, { headers, 'method': method, 'body': data })

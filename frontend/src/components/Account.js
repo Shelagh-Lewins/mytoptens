@@ -4,6 +4,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import * as auth from '../modules/auth';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 import { sendConfirmationEmail } from '../modules/auth';
@@ -26,6 +27,7 @@ class Account extends Component {
 		if(!this.props.auth.isAuthenticated) {
 			this.props.history.push('/');
 		}
+		this.props.dispatch(auth.confirmEmailNotSent());
 	}
 
 	sendConfirmationEmail() {
@@ -34,7 +36,6 @@ class Account extends Component {
 
 	render() {
 		const email_verified = this.props.auth.user.email_verified;
-
 		const email_status = email_verified ? 'verified': 'unverified';
 		return(
 			<Container>
@@ -53,6 +54,7 @@ class Account extends Component {
 						</button>}
 					</Col>
 				</Row>
+				{this.props.auth.confirmEmailSent && (<div className="valid-feedback">A verification email has been sent to {this.props.auth.user.email}. If you don't see it within a few minutes, please check your junk mail folder.</div>)}
 			</Container>
 		);
 	}
@@ -60,13 +62,15 @@ class Account extends Component {
 
 Account.propTypes = {
 	'sendConfirmationEmail': PropTypes.func.isRequired,
+	'confirmEmailNotSent': PropTypes.func.isRequired,
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired
 };
 
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
-	'errors': state.errors
+	'errors': state.errors,
+	'confirmEmailNotSent': auth.confirmEmailNotSent,
 });
 
 export default connect(mapStateToProps, { sendConfirmationEmail })(Account);

@@ -18,6 +18,7 @@ export const PASSWORD_NOT_CHANGED = 'PASSWORD_NOT_CHANGED';
 export const CHANGE_PASSWORD_COMPLETE = 'CHANGE_PASSWORD_COMPLETE';
 export const SET_USER_INFO = 'SET_USER_INFO';
 export const FORGOT_PASSWORD_EMAIL_NOT_SENT = 'FORGOT_PASSWORD_EMAIL_NOT_SENT';
+export const CONFIRM_EMAIL_NOT_SENT = 'CONFIRM_EMAIL_NOT_SENT';
 
 // Side effects Services
 export const getAuthToken = () => {
@@ -54,8 +55,8 @@ export const registerUser = (user, history) => dispatch => {
 		'data': formData,
 		'method': 'POST',
 	}).then(response => {
-			history.push('/welcome');
-			return response;
+		history.push('/welcome');
+		return response;
 	}).catch(error => {
 		return dispatch(getErrors({ 'registration': error.message }));
 	});
@@ -80,7 +81,7 @@ export const loginUser = (user, history) => dispatch => {
 		'method': 'POST',
 		'useAuth': false,
 	}).then(response => {
-			return dispatch(setCurrentUser(response.key));
+		return dispatch(setCurrentUser(response.key));
 	}).then(() => {
 		history.push('/');
 		// after store has been updated with token, we can query the server for current user info
@@ -113,9 +114,9 @@ export const logoutUser = (history) => dispatch => {
 	}).then(response => {
 		removeAuthToken();
 		return dispatch(logoutUserComplete());
-		}).then(() => {
-			// ensure token is removed from localStorage and store before redirecting
-			history.push('/');
+	}).then(() => {
+		// ensure token is removed from localStorage and store before redirecting
+		history.push('/');
 	}).catch(error => {
 		return dispatch(getErrors({ 'logout user': 'Unable to logout' }));
 	});
@@ -139,7 +140,7 @@ export const getUserInfo = () => (dispatch) => {
 		'method': 'GET',
 		'useAuth': true,
 	}).then(user => {
-			return dispatch(setUserInfo({
+		return dispatch(setUserInfo({
 			'username': user.username,
 			'email': user.email,
 			'id': user.id,
@@ -235,6 +236,12 @@ export const changePasswordComplete = (token) => {
 
 //////////////////////////////////
 // Email confirmation
+export const confirmEmailNotSent = token => {
+	return {
+		'type': CONFIRM_EMAIL_NOT_SENT
+	};
+};
+
 export const sendConfirmationEmail = () => (dispatch) => {
 	console.log('auth action');
 	//var csrftoken = getCookie('csrftoken');
@@ -243,10 +250,8 @@ export const sendConfirmationEmail = () => (dispatch) => {
 
 	return fetchAPI({
 		'url': '/api/v1/sendconfirmationemail/',
-		//'url': '/api/v1/rest-auth/user/resend',
 		'method': 'GET',
 		'useAuth': true,
-		//'useCSRF': true,
 	}).then(response => {
 		console.log('response ', response);
 		return response;
@@ -302,6 +307,8 @@ export default function(state = initialState, action ) {
 			}, state);
 		}
 
+		/////////////////////////
+		// forgot password
 		case FORGOT_PASSWORD_EMAIL_NOT_SENT: {
 			return updeep({
 				'forgotPasswordEmailSent': false,
@@ -333,6 +340,15 @@ export default function(state = initialState, action ) {
 		case CHANGE_PASSWORD_COMPLETE: {
 			return updeep({
 				'changePasswordComplete': true,
+			}, state);
+		}
+
+		/////////////////////////
+		// confirm email
+		case CONFIRM_EMAIL_NOT_SENT: {
+			return updeep({
+				'forgotPasswordEmailSent': false,
+				'resetPasswordComplete': false,
 			}, state);
 		}
 
