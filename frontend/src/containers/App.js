@@ -16,6 +16,7 @@ import ListDetails from '../containers/ListDetail';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';
+import Verified from '../components/Verified';
 
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './App.scss';
@@ -49,6 +50,7 @@ class App extends Component {
 							<Route exact path="/forgotpassword" component={ ForgotPassword } />
 							<Route exact path="/account" component={ Account } />
 							<Route exact path="/changepassword" component={ ChangePassword } />
+							<Route exact path="/verified" component={ Verified } />
 						</div>
 					</div>
 				</Router>

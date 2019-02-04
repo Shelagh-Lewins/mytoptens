@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Input } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 import { sendConfirmationEmail } from '../modules/auth';
 
 class Account extends Component {
@@ -29,28 +29,13 @@ class Account extends Component {
 	}
 
 	sendConfirmationEmail() {
-		console.log('resend');
 		this.props.sendConfirmationEmail();
 	}
 
-	getCookie(name) {
-		var cookieValue = null;
-		if (document.cookie && document.cookie !== '') {
-			var cookies = document.cookie.split(';');
-			for (var i = 0; i < cookies.length; i++) {
-				var cookie = cookies[i].trim();
-				//var cookie = jQuery.trim(cookies[i]);
-				// Does this cookie string begin with the name we want?
-				if (cookie.substring(0, name.length + 1) === (name + '=')) {
-					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-					break;
-				}
-			}
-		}
-		return cookieValue;
-	}
-
 	render() {
+		const email_verified = this.props.auth.user.email_verified;
+
+		const email_status = email_verified ? 'verified': 'unverified';
 		return(
 			<Container>
 				<h2>Account management</h2>
@@ -61,17 +46,11 @@ class Account extends Component {
 				</Row>
 				<Row>
 					<Col>
-						<div>Email address</div>
-						<div>Status: </div>
-						<Input type="hidden" name="csrfmiddlewaretoken"  value={this.getCookie('csrftoken')} />
-						<button type="button" className="btn btn-primary"onClick={this.sendConfirmationEmail.bind(this)}>
+						<div>Email address: {this.props.auth.user.email}</div>
+						<div>Status: {email_status}</div>
+						{!email_verified &&	<button type="button" className="btn btn-primary"onClick={this.sendConfirmationEmail.bind(this)}>
 								Resend confirmation email
-						</button>
-
-						<form action="api/v1/sendconfirmationemail" method="POST">
-							<Input type="hidden" name="csrfmiddlewaretoken"  value={this.getCookie('csrftoken')} />
-							<button type="submit">Send</button>
-						</form>
+						</button>}
 					</Col>
 				</Row>
 			</Container>
@@ -90,4 +69,4 @@ const mapStateToProps = (state) => ({
 	'errors': state.errors
 });
 
-export  default connect(mapStateToProps, { sendConfirmationEmail })(Account);
+export default connect(mapStateToProps, { sendConfirmationEmail })(Account);
