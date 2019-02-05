@@ -64,9 +64,6 @@ export const registerUser = (user, history) => dispatch => {
 	});
 };
 
-// TODO rework auth as a saga with token refresh
-// https://github.com/redux-saga/redux-saga/issues/14
-// https://github.com/alvelig/redux-saga-auth
 export const loginUser = (user, history) => dispatch => {
 	dispatch(clearErrors());
 
@@ -126,9 +123,7 @@ export const logoutUser = (history) => dispatch => {
 
 ///////////////////////////////
 // get user info
-// TODO rebuild as saga with login using state token
 // http://v1k45.com/blog/modern-django-part-4-adding-authentication-to-react-spa-using-drf/
-// should get token from state. Currently it is passed in by referring function because state is not updated synchronously.
 export const setUserInfo = user => {
 	return {
 		'type': SET_USER_INFO,
@@ -147,7 +142,7 @@ export const getUserInfo = () => (dispatch) => {
 			'email': user.email,
 			'id': user.id,
 			'slug': user.slug,
-			'email_verified': user.email_verified,
+			'emailVerified': user.email_verified,
 		}));
 	}).catch(error => {
 		return dispatch(getErrors({ 'get user info': 'Unable to get user info' }));
@@ -278,7 +273,6 @@ var updeep = require('updeep');
 
 const initialState = {
 	'isAuthenticated': false,
-	'canCreateList': false,
 	'forgotPasswordEmailSent': false,
 	'resetPasswordComplete': false,
 	'changePasswordComplete': false,
@@ -286,18 +280,11 @@ const initialState = {
 	'user': {}
 };
 
-function canCreateList(token) {
-	// for now, simply check whether the user is logged in
-	// in future, further checks will be added e.g. email validated, number of lists exceeded?
-	return !isEmpty(token);
-}
-
 export default function(state = initialState, action ) {
 	switch(action.type) {
 		case SET_CURRENT_USER:
 			return updeep({
 				'isAuthenticated': !isEmpty(action.payload.token),
-				'canCreateList': canCreateList(action.payload.token),
 				'user': updeep.constant({ 'token': action.payload.token }) // remove user info
 			}, state);
 
@@ -308,14 +295,13 @@ export default function(state = initialState, action ) {
 					'email': action.payload.email,
 					'slug': action.payload.slug,
 					'id': action.payload.id,
-					'email_verified': action.payload.email_verified,
+					'emailVerified': action.payload.emailVerified,
 				}
 			}, state);
 
 		case LOGOUT_USER_COMPLETE: {
 			return updeep({
 				'isAuthenticated': false,
-				'canCreateList': canCreateList(),
 				'user': updeep.constant({}) // remove user profile
 			}, state);
 		}

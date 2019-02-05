@@ -13,6 +13,7 @@ import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
+import * as permissions from '../modules/permissions';
 
 class Home extends Component {
 	constructor(props) {
@@ -69,7 +70,7 @@ class Home extends Component {
 					auth={this.props.auth}
 					myLists={this.props.myLists}
 					publicLists={this.props.publicLists}
-					canCreateList={this.props.auth.canCreateList}
+					canCreateList={permissions.canCreateList}
 					onSearch={this.onSearch}
 					onCreateList={this.onCreateList}
 					onIsPublicChange={this.onIsPublicChange}

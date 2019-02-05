@@ -33,7 +33,7 @@ class Welcome extends Component {
 				<p>Your account has been created. Click the link below to login.</p>
 				<Row>
 					<Col>
-						<Link to="/login" className="nav-link">Login</Link>
+						<Link to="/login">Login</Link>
 					</Col>
 				</Row>
 			</Container>

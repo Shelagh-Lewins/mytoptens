@@ -9,6 +9,7 @@ import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
+import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm.js';
 import { MAX_ITEMS_IN_LIST } from '../constants';
@@ -78,7 +79,7 @@ class CreateList extends Component {
 
 	componentDidUpdate(prevProps){
 		// If the user cannot create a list, redirect to Home
-		if(!this.props.auth.canCreateList){
+		if(!permissions.canCreateList()){
 			this.props.history.push('/');
 		}
 	}

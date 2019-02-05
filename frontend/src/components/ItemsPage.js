@@ -5,7 +5,6 @@ import { Row, Col } from 'reactstrap';
 import * as itemsReducer from '../modules/items';
 
 import { MAX_ITEMS_IN_LIST } from '../constants';
-//import './ItemsPage.scss';
 import Item from './Item';
 
 class ItemsPage extends Component {

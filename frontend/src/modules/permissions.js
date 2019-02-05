@@ -55,3 +55,15 @@ export function canEditList(identifier) {
 
 	return canEditList;
 }
+
+export function canCreateList() {
+	// the user can create a list if they are logged in
+	// and have verified their email address
+	const state = store.getState();
+
+	if (state.auth.isAuthenticated && state.auth.user.emailVerified) {
+		return true;
+	} else {
+		return false;
+	}
+}

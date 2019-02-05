@@ -34,21 +34,26 @@ class Account extends Component {
 	}
 
 	render() {
-		const email_verified = this.props.auth.user.email_verified;
-		const email_status = email_verified ? 'verified': 'unverified';
+		const emailVerified = this.props.auth.user.emailVerified;
+		const email_status = emailVerified ? 'verified': 'unverified';
 		return(
 			<Container>
-				<h2>Account management</h2>
+				<h2>My account</h2>
 				<Row>
 					<Col>
-						<Link to="/changepassword" className="nav-link">Change password</Link>
+						<div>Username: {this.props.auth.user.username}</div>
+					</Col>
+				</Row>
+				<Row>
+					<Col>
+						<Link to="/changepassword">Change password</Link>
 					</Col>
 				</Row>
 				<Row>
 					<Col>
 						<div>Email address: {this.props.auth.user.email}</div>
 						<div>Status: {email_status}</div>
-						{!email_verified &&	<button type="button" className="btn btn-primary"onClick={this.sendConfirmationEmail.bind(this)}>
+						{!emailVerified &&	<button type="button" className="btn btn-primary"onClick={this.sendConfirmationEmail.bind(this)}>
 								Resend confirmation email
 						</button>}
 					</Col>

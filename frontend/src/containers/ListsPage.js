@@ -1,7 +1,7 @@
 // Page to display list of lists
 
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 import ListsList from '../components/ListsList';
 import ListSummary from '../components/ListSummary';
@@ -138,23 +138,30 @@ class ListsPage extends Component {
 				</div>
 			);
 		}
+
+		let createList;
+		if (this.props.canCreateList()) {
+			createList = (<button
+				className="btn btn-primary"
+				onClick={this.onAddList}
+			>+ New list</button>);
+		} else {
+			createList = (<div>In order to create new lists, please verify your email address by clicking the link in the email you were sent when you registered. You can request a new verification email in your <Link to="/account">Account</Link> page.</div>);
+		}
+
+
 		return (
 			<div className="lists-list">
 				<Container>
 					<Row>
-						<Col sm="6">
+						<Col sm="12" md="9">
 							<div className="lists-list-header">
 								<input className="form-control"
 									onChange={this.onSearch}
 									type="text"
 									placeholder="Search..."
 								/>
-								{this.props.canCreateList && (
-									<button
-										className="btn btn-primary"
-										onClick={this.onAddList}
-									>+ New list</button>
-								)}
+								{createList}
 							</div>
 						</Col>
 					</Row>
