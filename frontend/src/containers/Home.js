@@ -15,6 +15,12 @@ import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 
 class Home extends Component {
+	constructor(props) {
+		super();
+		
+		props.dispatch(clearErrors());
+	}
+
 	componentDidMount() {
 		this.props.dispatch(lists.fetchLists());
 	}

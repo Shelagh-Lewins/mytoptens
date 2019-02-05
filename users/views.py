@@ -23,17 +23,6 @@ class UserListView(generics.ListCreateAPIView):
     serializer_class = serializers.UserSerializer
     authentication_classes = (TokenAuthentication,)
 
-    #@transaction.atomic
-    @method_decorator(csrf_exempt)
-    @detail_route(
-        #detail=True,
-        methods=['patch'],
-        url_path='resend',
-        #permission_classes=[permissions.EmailAddressResendPermission]
-    )
-    def resend(self, request, pk=None):
-        print('resend')
-
 @receiver(email_confirmed)
 def email_confirmed_(request, email_address, **kwargs):
     user = email_address.user
@@ -41,18 +30,12 @@ def email_confirmed_(request, email_address, **kwargs):
 
     user.save()
     
-class EmailConfirmation(generics.ListCreateAPIView):
-    #queryset = models.CustomUser.objects.all()
-    #serializer_class = serializers.UserSerializer
-    #authentication_classes = (TokenAuthentication,) # doesn't work
-    #@method_decorator(csrf_exempt)
-    #authentication_classes = (TokenAuthentication,)
-
+class EmailConfirmation(APIView):
     permission_classes = [IsAuthenticated] 
 
-    #@method_decorator(csrf_exempt)
     def get(self, request):
-      # TODO check if already verified
-        send_email_confirmation(request, request.user)
+        if request.user.email_verified:
+            return Response({'message': 'Email already verified'}, status=status.HTTP_201_CREATED)
 
-        return Response({'Message': 'Email confirmation sent'}, status=status.HTTP_201_CREATED)
+        send_email_confirmation(request, request.user)
+        return Response({'message': 'Email confirmation sent'}, status=status.HTTP_201_CREATED)

@@ -13,8 +13,10 @@ import { clearErrors } from '../modules/errors';
 import ValidatedForm from '../components/ValidatedForm.js';
 import { MAX_ITEMS_IN_LIST } from '../constants';
 
+import './CreateList.scss';
+
 class CreateList extends Component {
-	constructor() {
+	constructor(props) {
 		super();
 		this.state = {
 			'name': '',
@@ -27,6 +29,8 @@ class CreateList extends Component {
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.cancel = this.cancel.bind(this);
+
+		props.dispatch(clearErrors());
 	}
 
 	handleInputChange(e) {
@@ -90,7 +94,7 @@ class CreateList extends Component {
 			elements.push(
 				<div className="form-group" key={`item${i}`}>
 					<Row>
-						<Col>
+						<Col lg="9">
 							<h3>Item {i}</h3>
 							<Label for={`item${i}_name`}>Name</Label>
 							<Input
@@ -105,7 +109,7 @@ class CreateList extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col lg="9">
 							<Label for={`item${i}_description`}>Description</Label>
 							<Input
 								type="text"
@@ -123,8 +127,6 @@ class CreateList extends Component {
 		return elements;
 	}
 
-	///////////////
-
 	render() {
 		return (
 			<Container>
@@ -141,9 +143,9 @@ class CreateList extends Component {
 				</Container>)}
 				<h2>Create a new list</h2>
 				<ValidatedForm onSubmit={ this.handleSubmit }>
-					<Row>
-						<Col>
-							<div className="form-group">
+					<div className="form-group">
+						<Row>
+							<Col lg="9">
 								<Label for="name">Name</Label>
 								<Input
 									type="text"
@@ -158,12 +160,12 @@ class CreateList extends Component {
 								<small className='form-text text-muted'>
 									<p>Name is required</p>
 								</small>
-							</div>
-						</Col>
-					</Row>
-					<Row>
-						<Col>
-							<div className="form-group">
+							</Col>
+						</Row>
+					</div>
+					<div className="form-group">
+						<Row>
+							<Col lg="9">
 								<Label for="username">Description</Label>
 								<Input
 									type="text"
@@ -174,12 +176,12 @@ class CreateList extends Component {
 									placeholder="Enter the list description"
 								/>
 								<div className='invalid-feedback' />
-							</div>
-						</Col>
-					</Row>
+							</Col>
+						</Row>
+					</div>
 					{this.renderItemInputs()}
 					<Row>
-						<Col>
+						<Col lg="9">
 							<button type="button" className="btn btn-secondary"onClick={this.cancel}>
 								Cancel
 							</button>
@@ -189,7 +191,7 @@ class CreateList extends Component {
 						</Col>
 					</Row>
 	        <Row>
-						<Col>
+						<Col lg="9">
 							{this.props.errors.lists && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.lists}</div>}
 						</Col>
 					</Row>

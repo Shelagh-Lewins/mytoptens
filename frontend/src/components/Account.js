@@ -7,7 +7,6 @@ import { connect } from 'react-redux';
 import * as auth from '../modules/auth';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
-import { sendConfirmationEmail } from '../modules/auth';
 
 class Account extends Component {
 	constructor() {
@@ -31,7 +30,7 @@ class Account extends Component {
 	}
 
 	sendConfirmationEmail() {
-		this.props.sendConfirmationEmail();
+		this.props.dispatch(auth.sendConfirmationEmail());
 	}
 
 	render() {
@@ -55,6 +54,7 @@ class Account extends Component {
 					</Col>
 				</Row>
 				{this.props.auth.confirmEmailSent && (<div className="valid-feedback">A verification email has been sent to {this.props.auth.user.email}. If you don't see it within a few minutes, please check your junk mail folder.</div>)}
+				{this.props.auth.confirmEmailAlreadyVerified && (<div className="valid-feedback">The email address {this.props.auth.user.email} has already been verified.</div>)}
 			</Container>
 		);
 	}
@@ -70,7 +70,8 @@ Account.propTypes = {
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
+	'sendConfirmationEmail': auth.sendConfirmationEmail,
 	'confirmEmailNotSent': auth.confirmEmailNotSent,
 });
 
-export default connect(mapStateToProps, { sendConfirmationEmail })(Account);
+export default connect(mapStateToProps)(Account);

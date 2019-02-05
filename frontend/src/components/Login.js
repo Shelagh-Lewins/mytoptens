@@ -50,7 +50,7 @@ class Login extends Component {
 				<h2>Login</h2>
 				<ValidatedForm onSubmit={this.handleSubmit.bind(this)}>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="email">Email address</Label>
 								<Input
@@ -67,7 +67,7 @@ class Login extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="password">Password</Label>
 								<Input
@@ -84,14 +84,14 @@ class Login extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<button type="submit" className="btn btn-primary">
 								Login
 							</button>
 						</Col>
 					</Row>
 	        <Row>
-						<Col>
+						<Col md="9" lg="6">
 							{this.props.errors.authentication && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.authentication}</div>}
 						</Col>
 					</Row>

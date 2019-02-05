@@ -81,7 +81,7 @@ class Register extends Component {
 					'message': 'Passwords must match',
 				} }>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="email">Email address</Label>
 								<Input
@@ -101,7 +101,7 @@ class Register extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="username">Username</Label>
 								<Input
@@ -121,7 +121,7 @@ class Register extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="password">Password</Label>
 								<Input
@@ -140,7 +140,7 @@ class Register extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="password_confirm">Confirm your password</Label>
 								<Input
@@ -164,7 +164,7 @@ class Register extends Component {
 							</div>
 						</Col>
 					</Row>
-					<Row>
+					<Row md="9" lg="6">
 						<Col>
 							<button type="submit" className="btn btn-primary">
 								Create account
@@ -172,7 +172,7 @@ class Register extends Component {
 						</Col>
 					</Row>
 	        <Row>
-						<Col>
+						<Col md="9" lg="6">
 							{this.props.errors.registration && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.registration}</div>}
 						</Col>
 					</Row>

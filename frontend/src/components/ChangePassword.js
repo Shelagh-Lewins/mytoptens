@@ -40,11 +40,6 @@ class ChangePassword extends Component {
 		if(!nextProps.auth.isAuthenticated) {
 			this.props.history.push('/'); // if not logged in, redirect to Home
 		}
-		/* if(nextProps.errors) {
-			this.setState({
-				'errors': nextProps.errors
-			});
-		} */
 	}
 
 	componentDidMount() {
@@ -65,7 +60,7 @@ class ChangePassword extends Component {
 					'message': 'New passwords must match',
 				} }>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="old_password">Old password</Label>
 								<Input
@@ -84,7 +79,7 @@ class ChangePassword extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="new_password">New password</Label>
 								<Input
@@ -103,7 +98,7 @@ class ChangePassword extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<div className="form-group">
 								<Label for="new_password_confirm">Confirm your new password</Label>
 								<Input
@@ -128,14 +123,14 @@ class ChangePassword extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
+						<Col md="9" lg="6">
 							<button type="submit" className="btn btn-primary">
 								Change password now
 							</button>
 						</Col>
 					</Row>
 	        <Row>
-						<Col>
+						<Col md="9" lg="6">
 							{this.props.errors.changePassword && <div className="invalid-feedback" style={{ 'display': 'block' }}>{this.props.errors.changePassword}</div>}
 						</Col>
 					</Row>

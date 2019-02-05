@@ -19,6 +19,8 @@ export const CHANGE_PASSWORD_COMPLETE = 'CHANGE_PASSWORD_COMPLETE';
 export const SET_USER_INFO = 'SET_USER_INFO';
 export const FORGOT_PASSWORD_EMAIL_NOT_SENT = 'FORGOT_PASSWORD_EMAIL_NOT_SENT';
 export const CONFIRM_EMAIL_NOT_SENT = 'CONFIRM_EMAIL_NOT_SENT';
+export const CONFIRM_EMAIL_SENT = 'CONFIRM_EMAIL_SENT';
+export const CONFIRM_EMAIL_ALREADY_VERIFIED = 'CONFIRM_EMAIL_ALREADY_VERIFIED';
 
 // Side effects Services
 export const getAuthToken = () => {
@@ -176,7 +178,6 @@ export const forgotPassword = (email) => dispatch => {
 	}
 
 	return fetchAPI({
-		//'url': '/api/v1/rest-auth/password/reset1/',
 		'url': '/api/v1/rest-auth/password/reset/',
 		'data': formData,
 		'method': 'POST',
@@ -185,7 +186,6 @@ export const forgotPassword = (email) => dispatch => {
 		 return dispatch(forgotPasswordEmailSent());
 	}).catch(error => {
 		return dispatch(getErrors({ 'request password reset email': `Unable to send a password reset email. It is likely that the email address ${email} is not associated with a registered user` }));
-		// return dispatch(getErrors(error.response.data));
 	});
 };
 
@@ -242,10 +242,19 @@ export const confirmEmailNotSent = token => {
 	};
 };
 
-export const sendConfirmationEmail = () => (dispatch) => {
-	console.log('auth action');
-	//var csrftoken = getCookie('csrftoken');
+export const confirmEmailSent = token => {
+	return {
+		'type': CONFIRM_EMAIL_SENT
+	};
+};
 
+export const confirmEmailAlreadyVerified = token => {
+	return {
+		'type': CONFIRM_EMAIL_ALREADY_VERIFIED
+	};
+};
+
+export const sendConfirmationEmail = () => (dispatch) => {
 	dispatch(clearErrors());
 
 	return fetchAPI({
@@ -253,8 +262,11 @@ export const sendConfirmationEmail = () => (dispatch) => {
 		'method': 'GET',
 		'useAuth': true,
 	}).then(response => {
-		console.log('response ', response);
-		return response;
+		if (response.message === 'Email confirmation sent') {
+			return dispatch(confirmEmailSent());
+		} else if (response.message === 'Email already verified') {
+			return dispatch(confirmEmailAlreadyVerified());
+		}
 	}).catch(error => {
 		return dispatch(getErrors({ 'sendConfirmationEmail': error.message }));
 	});
@@ -270,6 +282,7 @@ const initialState = {
 	'forgotPasswordEmailSent': false,
 	'resetPasswordComplete': false,
 	'changePasswordComplete': false,
+	'confirmEmailSent': false,
 	'user': {}
 };
 
@@ -347,8 +360,20 @@ export default function(state = initialState, action ) {
 		// confirm email
 		case CONFIRM_EMAIL_NOT_SENT: {
 			return updeep({
-				'forgotPasswordEmailSent': false,
-				'resetPasswordComplete': false,
+				'confirmEmailSent': false,
+				'confirmEmailAlreadyVerified': false,
+			}, state);
+		}
+
+		case CONFIRM_EMAIL_SENT: {
+			return updeep({
+				'confirmEmailSent': true,
+			}, state);
+		}
+
+		case CONFIRM_EMAIL_ALREADY_VERIFIED: {
+			return updeep({
+				'confirmEmailAlreadyVerified': true,
 			}, state);
 		}
 

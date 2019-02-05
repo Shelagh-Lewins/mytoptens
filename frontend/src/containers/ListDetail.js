@@ -14,7 +14,7 @@ import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty 
 import { clearErrors } from '../modules/errors';
 import { sortedItems } from '../modules/items';
 
-import './ListDetails.scss';
+import './ListDetail.scss';
 
 
 class ListDetails extends Component {
@@ -30,6 +30,7 @@ class ListDetails extends Component {
 		};
 
 		props.dispatch(lists.fetchListBySlug(slug));
+		props.dispatch(clearErrors());
 	}
 
 	handleInputChange = (e) => {

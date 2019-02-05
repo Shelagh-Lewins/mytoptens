@@ -10,8 +10,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         # handle permissions based on method
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
-        # Note this is not checked for create!!! Which makes sense given the object doesn't exist.
-        print('first')
+        # Note this is not checked for create, because the object doesn't exist.
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -28,11 +27,8 @@ class HasVerifiedEmail(permissions.BasePermission):
             return True
 
         if not request.user.is_authenticated:
-            print('not authenticated')
             return False
 
-        print('has_permission')
-        print(request.user.email_verified)
         if request.user.email_verified:
             return True
 
@@ -50,10 +46,6 @@ class ListViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:
-            print('is there a verified email address?')
-            print(EmailAddress.objects.filter(user=self.request.user, verified=True).exists())
-            print('user status')
-            print(self.request.user.email_verified)
             return List.objects.filter(
                 Q(created_by_id=self.request.user) | 
                 Q(is_public=True)
@@ -62,7 +54,6 @@ class ListViewSet(viewsets.ModelViewSet):
         return List.objects.filter(is_public=True)
 
     def pre_save(self, obj):
-        print('save new list')
         obj.created_by_id = self.request.user
 
 
