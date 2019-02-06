@@ -16,7 +16,7 @@ const ListSummary = props => {
 	let canEdit = permissions.canEditList({ 'id': props.list.id });
 
 	return (
-		<Col sm="3" md="4" className="list-container">
+		<Col sm="6" md="4" className="list-container">
 			<Link to={`/list/${props.list.slug}`}>
 				<div className="list-header">
 					<div>{props.list.name}</div>

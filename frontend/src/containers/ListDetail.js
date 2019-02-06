@@ -117,6 +117,7 @@ class ListDetails extends Component {
 						<Row>
 							<Col className="list-description">
 								<EditableTextField
+									textarea={true}
 									canEdit={this.state.canEdit}
 									name={'list_description'}
 									placeholder="Click here to add a description for the list"

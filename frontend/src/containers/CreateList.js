@@ -113,7 +113,7 @@ class CreateList extends Component {
 						<Col lg="9">
 							<Label for={`item${i}_description`}>Description</Label>
 							<Input
-								type="text"
+								type="textarea"
 								name={`item${i}_description`}
 								id={`item${i}_description`}
 								onChange={ this.handleInputChange }
