@@ -58,7 +58,7 @@ class Account extends Component {
 						</button>}
 					</Col>
 				</Row>
-				{this.props.auth.confirmEmailSent && (<div className="valid-feedback">A verification email has been sent to {this.props.auth.user.email}. If you don't see it within a few minutes, please check your junk mail folder.</div>)}
+				{this.props.auth.confirmEmailSent && (<div className="valid-feedback">A verification email has been sent to {this.props.auth.user.email}. If you do not receive the email within a few minutes, please check your Junk or Spam folder.</div>)}
 				{this.props.auth.confirmEmailAlreadyVerified && (<div className="valid-feedback">The email address {this.props.auth.user.email} has already been verified.</div>)}
 			</Container>
 		);
