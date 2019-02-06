@@ -30,10 +30,13 @@ class Welcome extends Component {
 		return(
 			<Container>
 				<h2>Welcome to My Top Tens</h2>
-				<p>Your account has been created. Click the link below to login.</p>
+				<p>Your account has been created.</p>
+				<p>To create lists, you will need to verify your email address. An email containing a verification link has been sent to the email address with which you registered. Please click the link to verify your email address.</p>
+				<p>If you do not receive the email within a few minutes, please check your Junk or Spam folder.</p>
 				<Row>
 					<Col>
-						<Link to="/login">Login</Link>
+						<p>You can request a new registration email by <Link to="/login">Logging in</Link> and going to your user account (click your username in the header bar).</p>
+						
 					</Col>
 				</Row>
 			</Container>

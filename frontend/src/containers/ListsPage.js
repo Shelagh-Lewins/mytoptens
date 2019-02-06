@@ -145,8 +145,10 @@ class ListsPage extends Component {
 				className="btn btn-primary"
 				onClick={this.onAddList}
 			>+ New list</button>);
+		} else if (this.props.auth.isAuthenticated) {
+			createList = (<div>In order to create new lists, please verify your email address by clicking the link in the email you were sent when you registered. You can request a new verification email from your <Link to="/account">Account</Link> page.</div>);
 		} else {
-			createList = (<div>In order to create new lists, please verify your email address by clicking the link in the email you were sent when you registered. You can request a new verification email in your <Link to="/account">Account</Link> page.</div>);
+			createList = (<div>In order to create new lists, please <Link to="/login">log in</Link> or <Link to="/register">register a My Top Tens account</Link>.</div>);
 		}
 
 

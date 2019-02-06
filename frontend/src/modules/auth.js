@@ -115,7 +115,7 @@ export const logoutUser = (history) => dispatch => {
 		return dispatch(logoutUserComplete());
 	}).then(() => {
 		// ensure token is removed from localStorage and store before redirecting
-		history.push('/');
+		// history.push('/');
 	}).catch(error => {
 		return dispatch(getErrors({ 'logout user': 'Unable to logout' }));
 	});

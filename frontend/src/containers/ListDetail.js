@@ -58,12 +58,26 @@ class ListDetails extends Component {
 	componentDidUpdate(prevProps) {
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading; need to check if user should view this list
+			const canEditList = permissions.canViewList({ 'slug': this.state.slug });
+
 			this.setState({
 				'canView': permissions.canViewList({ 'slug': this.state.slug }),
-				'canEdit': permissions.canEditList({ 'slug': this.state.slug }),
-				'list_name': this.props.list.name,
-				'list_description': this.props.list.description,
+				'canEdit': canEditList,
 			});
+
+			if(canEditList) {
+				this.setState({
+					'list_name': this.props.list.name,
+					'list_description': this.props.list.description,
+				});
+			}
+		}
+
+		// user has just logged out
+		// store needs to be repopulated
+		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+			this.props.dispatch(lists.fetchListBySlug(this.state.slug));
+			this.props.dispatch(clearErrors());
 		}
 	}
 
