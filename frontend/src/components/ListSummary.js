@@ -10,36 +10,39 @@ import { LIST_IS_PUBLIC_TEXTS } from '../constants';
 
 import * as permissions from '../modules/permissions';
 
+import './ListSummary.scss';
+
 const ListSummary = props => {
 	let id=`select-${props.list.id}`;
 	let value = props.list.is_public ? 'Public' : 'Private';
 	let canEdit = permissions.canEditList({ 'id': props.list.id });
 
 	return (
-		<Col sm="6" md="4" className="list-container">
-			<Link to={`/list/${props.list.slug}`}>
-				<div className="list-header">
-					<div>{props.list.name}</div>
+		<Col sm="12" md="6">
+			<div className="list-container">
+				<Link to={`/list/${props.list.slug}`}>
+					<div className="list-header">
+						<div>{props.list.name}</div>
+					</div>
+					<div className="list-body">{props.list.description}</div>
+				</Link>
+				<div className="list-status">
+					<label>Set list private/public status
+						<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
+							{LIST_IS_PUBLIC_TEXTS.map(is_public => (
+								<option key={is_public} value={is_public}>{is_public}</option>
+							))}
+						</select>
+					</label>
 				</div>
-				<div className="list-body">{props.list.description}</div>
-			</Link>
-			<div className="list-status">
-				<label>Set list private/public status
-					<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
-						{LIST_IS_PUBLIC_TEXTS.map(is_public => (
-							<option key={is_public} value={is_public}>{is_public}</option>
-						))}
-					</select>
-				</label>
-			</div>
-			{canEdit &&
-				<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
-			}
-			{props.showCreatedBy && 
-				<div className="list-created-by">Created by: {props.list.created_by_username}</div>
+				{canEdit &&
+					<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+				}
+				{props.showCreatedBy && 
+					<div className="list-created-by">Created by: {props.list.created_by_username}</div>
 
-			}
-			
+				}
+			</div>
 		</Col>
 	);
 

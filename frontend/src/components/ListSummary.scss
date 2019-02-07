@@ -1,0 +1,45 @@
+@import "../variables";
+
+.list-container {
+	overflow: hidden;
+
+	a {
+		color: $color-text;
+
+		&:hover {
+			text-decoration: none;
+		}
+	}
+}
+
+.list-header {
+	font-weight: bold;
+}
+
+.list-body {
+	background: $color-list-summary-bg;
+	display: block;
+	line-height: 1.5em;
+	max-height: 3em;
+	overflow: hidden;
+	position: relative;
+
+	&::before {
+		background: linear-gradient(to right, $color-list-fadeout 0%, $color-list-summary-bg 80%);
+		content: "\200C";
+		display: block;
+		position: absolute;
+		right: 0;
+		text-align: center;
+		top: 1.5em;
+		width: 4em;
+	}
+}
+
+.list-status {
+	float: left;
+}
+
+.btn-danger {
+	float: right;
+}

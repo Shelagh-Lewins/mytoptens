@@ -169,7 +169,7 @@ class CreateList extends Component {
 							<Col lg="9">
 								<Label for="username">Description</Label>
 								<Input
-									type="text"
+									type="textarea"
 									name="description"
 									id="description"
 									onChange={ this.handleInputChange }
