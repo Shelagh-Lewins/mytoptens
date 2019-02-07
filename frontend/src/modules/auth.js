@@ -249,12 +249,14 @@ export const confirmEmailAlreadyVerified = token => {
 	};
 };
 
+//////////////////////////////////
+
 export const sendConfirmationEmail = () => (dispatch) => {
 	dispatch(clearErrors());
 
 	return fetchAPI({
 		'url': '/api/v1/sendconfirmationemail/',
-		'method': 'GET',
+		'method': 'POST',
 		'useAuth': true,
 	}).then(response => {
 		if (response.message === 'Email confirmation sent') {
