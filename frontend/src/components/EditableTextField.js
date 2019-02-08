@@ -132,7 +132,6 @@ class EditableTextField extends Component {
 									<Input autoFocus
 										type={type}
 										name={this.props.id}
-										className="form-control"
 										required={this.props.required}
 										data-state={this.props['data-state']}
 										data-entityid={this.props['data-entityid']}
@@ -186,7 +185,7 @@ class EditableTextField extends Component {
 			}
 		}
 		return (
-			<div className="editable-text-field">
+			<div className={`editable-text-field ${showInput && 'editing'}`}>
 				{ item }
 			</div>
 		);

@@ -274,6 +274,7 @@ export const sendConfirmationEmail = () => (dispatch) => {
 var updeep = require('updeep');
 
 const initialState = {
+	'isLoading': false,
 	'isAuthenticated': false,
 	'forgotPasswordEmailSent': false,
 	'resetPasswordComplete': false,
@@ -287,11 +288,13 @@ export default function(state = initialState, action ) {
 		case SET_CURRENT_USER:
 			return updeep({
 				'isAuthenticated': !isEmpty(action.payload.token),
+				'isLoading': true,
 				'user': updeep.constant({ 'token': action.payload.token }) // remove user info
 			}, state);
 
 		case SET_USER_INFO: // update user info
 			return updeep({
+				'isLoading': false,
 				'user': {
 					'username': action.payload.username,
 					'email': action.payload.email,

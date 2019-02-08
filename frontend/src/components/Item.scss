@@ -1,20 +1,34 @@
 @import "../variables";
 
-.item-header div.editable-text-field {
-	margin-left: 1.5em;
+.item-header {
+	div {
+		&.editable-text-field {
+			margin-left: 1.5em;
+		}
+	}
+}
+
+.item-body {
+	clear: both;
 }
 
 .item-container {
 	border: 1px solid $color-panel-border;
 	border-radius: 8px;
 	margin: 0 8px 8px 0;
+	overflow: hidden;
 	padding: 8px;
 
 	.item-header {
 		font-weight: bold;
 
 		.editable-text-field {
+			float: left;
 			margin-left: 1.5em;
+
+			&.editing {
+				float: none;
+			}
 		}
 	}
 
@@ -33,5 +47,11 @@
 		float: left;
 		margin-right: 8px;
 		padding: 6px 0;
+	}
+
+	button {
+		&.create-sublist {
+			float: right;
+		}
 	}
 }

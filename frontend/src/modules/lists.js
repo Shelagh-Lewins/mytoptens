@@ -29,7 +29,9 @@ export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
 export const SET_LIST_IS_PUBLIC_SUCCEEDED = 'SET_LIST_IS_PUBLIC_SUCCEEDED';
 export const UPDATE_LIST_SUCCEEDED = 'UPDATE_LIST_SUCCEEDED';
 
-const itemSchema = new schema.Entity('items');
+const itemSchema = new schema.Entity('items', {
+	'list': ['listSchema'],
+});
 const listSchema = new schema.Entity('lists', {
 	'items': [itemSchema],
 });

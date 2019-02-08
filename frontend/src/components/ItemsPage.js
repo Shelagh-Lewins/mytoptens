@@ -77,6 +77,7 @@ class ItemsPage extends Component {
 								handleNewValue={this.handleNewValue}
 								list={this.props.list}
 								canEdit={canEdit}
+								onCreateSubList={this.props.onCreateSubList}
 							/>
 						</Col>
 					</Row>

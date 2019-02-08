@@ -51,6 +51,11 @@ class ListDetails extends Component {
 		this.props.dispatch(lists.updateList(listId, propertyName, value));
 	}
 
+	onCreateSubList = (itemId) => {
+		console.log('createSubList. Item ', itemId);
+		this.props.history.push(`/newlist?parent-item=${itemId}`);
+	}
+
 	onCloseFlashMessage = () => {
 		this.props.dispatch(clearErrors());
 	}
@@ -138,6 +143,7 @@ class ListDetails extends Component {
 								items={this.props.items}
 								list={this.props.list.id}
 								canEdit={this.state.canEdit}
+								onCreateSubList={this.onCreateSubList}
 							/>
 						)}
 					</Container>

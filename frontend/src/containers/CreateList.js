@@ -18,7 +18,8 @@ import './CreateList.scss';
 
 class CreateList extends Component {
 	constructor(props) {
-		super();
+		super(props);
+
 		this.state = {
 			'name': '',
 			'description': '',
@@ -32,6 +33,17 @@ class CreateList extends Component {
 		this.cancel = this.cancel.bind(this);
 
 		props.dispatch(clearErrors());
+
+		let parentItem;
+		if (props.auth.isAuthenticated) {
+			const urlParams = new URLSearchParams(props.location.search);
+			parentItem = urlParams.get('parent-item');
+		}
+		console.log('parent-item ', parentItem);
+
+		if (typeof parentItem === 'string') {
+			this.state.parentItem = parentItem;
+		}
 	}
 
 	handleInputChange(e) {
@@ -52,7 +64,6 @@ class CreateList extends Component {
 			'description': this.state.description,
 			'items': [],
 		};
-
 		
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
 			if (this.state[`item${i}`] !== '') {
@@ -63,6 +74,10 @@ class CreateList extends Component {
 				};
 				newList.items.push(newItem);
 			}
+		}
+
+		if (this.state.parentItem) {
+			newList.parent_item = this.state.parentItem;
 		}
 
 		this.onCreateList(newList);
@@ -79,7 +94,7 @@ class CreateList extends Component {
 
 	componentDidUpdate(prevProps){
 		// If the user cannot create a list, redirect to Home
-		if(!permissions.canCreateList()){
+		if(!permissions.canCreateList() && !this.props.auth.isLoading){
 			this.props.history.push('/');
 		}
 	}

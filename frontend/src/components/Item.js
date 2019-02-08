@@ -23,12 +23,24 @@ class Item extends Component {
 		});
 	}
 
+	onCreateSubList = () => {
+		console.log('createSubList');
+		this.props.onCreateSubList(this.props.item.id);
+	}
+
 	render() {
 		let showDescription = true;
 		if (this.props.item.name === '') {
 			showDescription = false;
 		} else if (this.state.isEditingName && store.getState().items.things[this.props.item.id] && store.getState().items.things[this.props.item.id].name === '') {
 			showDescription = false;
+		}
+
+		let showCreateSubList = true;
+		if (this.props.item.name === '') {
+			showCreateSubList = false;
+		} else if (this.state.isEditingName) {
+			showCreateSubList = false;
 		}
 
 		return (
@@ -48,6 +60,9 @@ class Item extends Component {
 						value={this.props.item.name}
 					/>
 				</div>
+				{showCreateSubList &&
+					<button className="btn btn-primary create-sublist" onClick={this.onCreateSubList.bind(this)}>Create sub-list</button>
+				}
 				{showDescription &&
 					<div className="item-body">
 						<EditableTextField

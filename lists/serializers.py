@@ -43,12 +43,14 @@ class ListSerializer(serializers.ModelSerializer):
         model = List
         fields = ('id', 'name', 'description', 'is_public',
             'slug', 'created_by_id', 'created_by_username', 'created_at',
-            'modified_by', 'modified_at', 'items')
+            'modified_by', 'modified_at', 'items', 'parent_item')
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', None)
         validated_data['created_by_id'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username
+        print('***')
+        print(validated_data)
         newlist = List.objects.create(**validated_data)
 
         for item_data in items_data:
