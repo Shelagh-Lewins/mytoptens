@@ -24,11 +24,11 @@ import './App.scss';
 
 // check if user is already logged in
 if(getAuthToken()) {
-	store.dispatch(setCurrentUser(localStorage.jwtToken));
+	store.dispatch(setCurrentUser(localStorage.mytoptensJwtToken));
 	store.dispatch(getUserInfo());
 
 	const currentTime = Date.now() / 1000;
-	if(localStorage.jwtToken.exp < currentTime) {
+	if(localStorage.mytoptensJwtToken.exp < currentTime) {
 		store.dispatch(logoutUser());
 	}
 }

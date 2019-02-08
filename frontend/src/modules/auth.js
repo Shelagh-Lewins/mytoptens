@@ -24,16 +24,16 @@ export const CONFIRM_EMAIL_ALREADY_VERIFIED = 'CONFIRM_EMAIL_ALREADY_VERIFIED';
 
 // Side effects Services
 export const getAuthToken = () => {
-	return localStorage.getItem('jwtToken');
+	return localStorage.getItem('mytoptensJwtToken');
 };
 
 function setAuthToken(token) {
-	localStorage.setItem('jwtToken', token);
+	localStorage.setItem('mytoptensJwtToken', token);
 	return;
 }
 
 function removeAuthToken() {
-	localStorage.removeItem('jwtToken');
+	localStorage.removeItem('mytoptensJwtToken');
 	return;
 }
 
