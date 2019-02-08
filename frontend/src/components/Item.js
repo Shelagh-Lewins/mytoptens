@@ -24,7 +24,6 @@ class Item extends Component {
 	}
 
 	onCreateSubList = () => {
-		console.log('createSubList');
 		this.props.onCreateSubList(this.props.item.id);
 	}
 

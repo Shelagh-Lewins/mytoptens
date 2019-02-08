@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from allauth.account.utils import send_email_confirmation
 from rest_framework.views import APIView
+from allauth.account.models import EmailAddress
 
 from . import models
 from . import serializers
@@ -33,6 +34,9 @@ class EmailConfirmation(APIView):
     permission_classes = [IsAuthenticated] 
 
     def post(self, request):
+        print('***')
+        #obj = EmailAddress.objects.get(pk=request.user.email)
+        #print(obj)
         if request.user.email_verified:
             return Response({'message': 'Email already verified'}, status=status.HTTP_201_CREATED)
 
