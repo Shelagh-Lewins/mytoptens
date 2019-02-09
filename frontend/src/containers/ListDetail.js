@@ -10,6 +10,7 @@ import ItemsPage from '../components/ItemsPage';
 
 import * as lists from '../modules/lists';
 import * as permissions from '../modules/permissions';
+import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 import { sortedItems } from '../modules/items';
@@ -180,6 +181,12 @@ ListDetails.propTypes = {
 
 const mapStateToProps = (state, ownProps) => {
 	const lists = state.lists.things;
+
+	// the store should contain our target list, identified by slug
+	// It may also contain the parent list, and / or any child lists
+	// first find the list
+	console.log('ownProps.slug ', ownProps.match.params.slug);
+	//const list = findObjectByProperty(lists, 'slug', ownProps.slug);
 	const list = lists[Object.keys(lists)[0]];
 
 	return ({
