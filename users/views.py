@@ -34,10 +34,8 @@ class EmailConfirmation(APIView):
     permission_classes = [IsAuthenticated] 
 
     def post(self, request):
-        print('***')
-        #obj = EmailAddress.objects.get(pk=request.user.email)
-        #print(obj)
-        if request.user.email_verified:
+        obj = EmailAddress.objects.get(email=request.user.email)
+        if obj.verified:
             return Response({'message': 'Email already verified'}, status=status.HTTP_201_CREATED)
 
         send_email_confirmation(request, request.user)
