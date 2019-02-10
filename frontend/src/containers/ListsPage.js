@@ -24,6 +24,7 @@ class ListsPage extends Component {
 
 		this.state = {
 			'selectedTab': listset,
+			'topLevelListsOnly': true,
 		};
 	}
 
@@ -49,9 +50,18 @@ class ListsPage extends Component {
 	renderPublicLists() {
 		const { publicLists, onIsPublicChange, onDeleteList } = this.props;
 
+		// filter out lists that are not top level
+		let ListsToShow = [];
+
+		publicLists.map(list => {
+			if (!list.parent_item) {
+				ListsToShow.push(list);
+			}
+		});
+
 		return (
 			<ListsList headerText="All public lists">
-				{publicLists.map(list => 
+				{ListsToShow.map(list => 
 					<ListSummary
 						key={list.id}
 						list={list}
@@ -71,11 +81,19 @@ class ListsPage extends Component {
 			const listsByIsPublic = myLists[is_public];
 			let headerText = is_public === 'true' ? 'My public lists' : 'My private lists';
 
+			let ListsToShow = [];
+
+			listsByIsPublic.map(list => {
+				if (!list.parent_item) {
+					ListsToShow.push(list);
+				}
+			});
+
 			return (
 				<div key={index}>
-					{(listsByIsPublic.length > 0) && (
+					{(ListsToShow.length > 0) && (
 						<ListsList is_public={is_public} headerText={headerText}>
-							{listsByIsPublic.map(list => 
+							{ListsToShow.map(list => 
 								<ListSummary
 									key={list.id}
 									list={list}
