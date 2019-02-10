@@ -59,8 +59,9 @@ class Item extends Component {
 						value={this.props.item.name}
 					/>
 				</div>
+				child list {this.props.item.childList && this.props.item.childList.name}
 				{showCreateSubList &&
-					<button className="btn btn-primary create-sublist" onClick={this.onCreateSubList.bind(this)}>Create sub-list</button>
+					<button className="btn btn-primary create-sublist" onClick={this.onCreateSubList.bind(this)}>Create child list</button>
 				}
 				{showDescription &&
 					<div className="item-body">

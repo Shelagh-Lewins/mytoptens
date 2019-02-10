@@ -66,22 +66,34 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
     serializer_class = ListSerializer
 
     def get_queryset(self):
-        mylist = List.objects.filter(slug=self.request.query_params.get('slug', None)).first()
-        print('***')
-        print(mylist.parent_item)
-        # we want the list itself
-        pk_list = [mylist.id]
+        my_list = List.objects.filter(slug=self.request.query_params.get('slug', None)).first()
 
-        # parent list, if any
-        if hasattr(mylist, 'parent_item'):
-            parent_item = Item.objects.filter(id=mylist.parent_item.id).first()
-            parent_list_id = parent_item.list.id
-            print('parent list')
-            print(parent_list_id)
+        # we want the list itself
+        pk_list = [my_list.id]
+
+        # then we want the parent list, if any
+        try:
+            parent_item = Item.objects.filter(id=my_list.parent_item.id).first()
             pk_list.append(parent_item.list.id)
 
+        except AttributeError:
+            pass # we don't mind no parent list
 
         # and child lists, if any
+        item_ids = [o.id for o in my_list.items.all()]
+
+        try:
+            child_lists = List.objects.filter(parent_item__in=item_ids)
+
+        except AttributeError:
+            pass
+
+        try:
+            child_list_ids = [o.id for o in child_lists]
+            pk_list += child_list_ids
+
+        except AttributeError:
+            pass # we don't mind no child lists
 
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:

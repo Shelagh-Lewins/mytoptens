@@ -31,6 +31,12 @@ class ItemsPage extends Component {
 				this.state[`${order}_id`] = items[key].id;
 				this.state[`${order}_name`] = items[key].name;
 				this.state[`${order}_description`] = items[key].description;
+
+				// child lists
+				console.log('child list ', items[key].childList);
+				if (items[key].childList) {
+					this.state[`${order}_childList`] = items[key].childList;
+				}
 			}
 		});
 	}
@@ -72,6 +78,7 @@ class ItemsPage extends Component {
 									'order': i,
 									'name': name,
 									'description': this.state[`${i}_description`],
+									'childList': this.state[`${i}_childList`],
 									 }}
 								handleInputChange={this.handleInputChange}
 								handleNewValue={this.handleNewValue}

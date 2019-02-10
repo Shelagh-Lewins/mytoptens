@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';
@@ -13,7 +13,7 @@ import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
-import { sortedItems } from '../modules/items';
+// import { sortedItems } from '../modules/items';
 
 import './ListDetail.scss';
 
@@ -23,15 +23,21 @@ class ListDetails extends Component {
 		super();
 
 		// to start with all we know is the slug. We have to find the list id, and then the list details and items can be loaded
-		const slug = props.match.params.slug;
+		this.state = {};
+		this.getListData = this.getListData.bind(this);
+		const slug = this.getListData(props);
 
 		this.state = {
-			// find the list slug from the url
 			slug,
 		};
+	}
+
+	getListData = (props) => {
+		const slug = props.match.params.slug;
 
 		props.dispatch(lists.fetchListBySlug(slug));
 		props.dispatch(clearErrors());
+		return slug;
 	}
 
 	handleInputChange = (e) => {
@@ -53,7 +59,6 @@ class ListDetails extends Component {
 	}
 
 	onCreateSubList = (itemId) => {
-		console.log('createSubList. Item ', itemId);
 		this.props.history.push(`/newlist?parent-item=${itemId}`);
 	}
 
@@ -77,6 +82,14 @@ class ListDetails extends Component {
 					'list_description': this.props.list.description,
 				});
 			}
+		}
+
+		// user has navigated to a different list
+		if (prevProps.match.params.slug !== this.props.match.params.slug) {
+			const slug = this.getListData(this.props);
+			this.setState({
+				slug,
+			});
 		}
 
 		// user has just logged out
@@ -103,6 +116,14 @@ class ListDetails extends Component {
 			{this.props.list && (
 				<div>
 					<Container>
+						{this.props.parentList && (
+							<Row>
+								<Col>
+									<div>Parent list: <Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link></div>
+									<div>Parent item: {this.props.parentItem.name}</div>
+								</Col>
+							</Row>
+						)}
 						<Row>
 							<Col className="list-name">
 								<EditableTextField
@@ -180,14 +201,53 @@ ListDetails.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
-	const lists = state.lists.things;
-
 	// the store should contain our target list, identified by slug
 	// It may also contain the parent list, and / or any child lists
-	// first find the list
-	console.log('ownProps.slug ', ownProps.match.params.slug);
-	//const list = findObjectByProperty(lists, 'slug', ownProps.slug);
-	const list = lists[Object.keys(lists)[0]];
+	// plus the items for all these lists
+	const lists = state.lists.things;
+	const items = state.items.things;
+
+	// first find the target list
+	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'slug', 'value': ownProps.match.params.slug });
+
+	let parentList; // list object
+	let parentItem; // item object
+	let targetListItems = []; // items for just the target list
+
+	// find the parent item and its list
+	if (list) { // avoid error while loading or if list not visible
+		// find the items for the target list
+		targetListItems = list.items.map((itemId) => {
+			return { ...items[itemId] }; // shallow copy so item is extensible
+		});
+
+		parentItem = findObjectByProperty({ 'parentObject': items, 'property': 'id', 'value': list.parent_item });
+
+		const keys = Object.keys(lists);
+
+		for (let i=0; i<keys.length; i++) {
+			// search lists to find the one which contains the parent item
+			// item ids are an array property of the list
+			const testList = lists[keys[i]];
+
+			if (list.parent_item) {
+				if (testList.items.indexOf(list.parent_item) !== -1) {
+					parentList = testList;
+				}
+			}
+
+			// find any list that is a child of an item in the target list
+			const index = list.items.indexOf(testList.parent_item);
+
+			if (index !== -1) {
+				targetListItems[index].childList = { ...testList };
+			}
+		}
+
+		console.log('targetListItems ', targetListItems);
+		console.log('parentList ', parentList);
+		console.log('parentItem ', parentItem);
+	}
 
 	return ({
 		'auth': state.auth,
@@ -195,7 +255,9 @@ const mapStateToProps = (state, ownProps) => {
 		'isLoading': state.lists.isLoading,
 		'lists': lists,
 		'list': list,
-		'items': sortedItems(state),
+		'parentList': parentList,
+		'items': targetListItems,
+		'parentItem': parentItem,
 	});
 };
 

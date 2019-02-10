@@ -146,8 +146,9 @@ export default function items(state = initialItemsState, action) {
 // all items, for selector to use
 export const getItems = state => state.items.things;
 
+//// not currently used but left in as an example of sorting list items by order
 // items belonging to the current list
-export const sortedItems = createSelector(
+/* export const sortedItems = createSelector(
 	[getItems],
 	(items) => {
 		let listItems = (Object.keys(items).map(id => {
@@ -158,5 +159,5 @@ export const sortedItems = createSelector(
 
 		return listItems;
 	}
-);
+); */
 
