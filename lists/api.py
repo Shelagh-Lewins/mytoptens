@@ -102,7 +102,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
                 Q(is_public=True)
             )
 
-        return List.objects.filter(slug=self.request.query_params.get('slug', None)).filter(is_public=True)
+        return List.objects.filter(pk__in=pk_list).filter(is_public=True)
 
 
 class ItemViewSet(viewsets.ModelViewSet):

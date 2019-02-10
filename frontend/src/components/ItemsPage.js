@@ -33,7 +33,6 @@ class ItemsPage extends Component {
 				this.state[`${order}_description`] = items[key].description;
 
 				// child lists
-				console.log('child list ', items[key].childList);
 				if (items[key].childList) {
 					this.state[`${order}_childList`] = items[key].childList;
 				}
@@ -84,7 +83,7 @@ class ItemsPage extends Component {
 								handleNewValue={this.handleNewValue}
 								list={this.props.list}
 								canEdit={canEdit}
-								onCreateSubList={this.props.onCreateSubList}
+								onCreateChildList={this.props.onCreateChildList}
 							/>
 						</Col>
 					</Row>

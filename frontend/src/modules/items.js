@@ -1,4 +1,4 @@
-import { createSelector } from 'reselect';
+// import { createSelector } from 'reselect';
 import { RECEIVE_ENTITIES } from '../modules/lists';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';

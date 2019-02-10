@@ -50,8 +50,13 @@
 	}
 
 	button {
-		&.create-sublist {
+		&.create-childlist {
 			float: right;
 		}
+	}
+
+	.child-list {
+		float: right;
+		padding: 6px 0;
 	}
 }

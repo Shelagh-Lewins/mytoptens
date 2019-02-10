@@ -5,7 +5,9 @@ import store from '../store';
 
 import React, { Component } from 'react';
 import { Col } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import EditableTextField from './EditableTextField.js';
+import * as permissions from '../modules/permissions';
 import './Item.scss';
 
 class Item extends Component {
@@ -23,8 +25,8 @@ class Item extends Component {
 		});
 	}
 
-	onCreateSubList = () => {
-		this.props.onCreateSubList(this.props.item.id);
+	onCreateChildList = () => {
+		this.props.onCreateChildList(this.props.item.id);
 	}
 
 	render() {
@@ -35,11 +37,31 @@ class Item extends Component {
 			showDescription = false;
 		}
 
-		let showCreateSubList = true;
-		if (this.props.item.name === '') {
-			showCreateSubList = false;
-		} else if (this.state.isEditingName) {
-			showCreateSubList = false;
+		let canCreateChildList = true; // should the "create child list" button be visible?
+
+		if (this.props.item.childList || // there is already a child list
+			this.props.item.name === '' || // there is no item
+			this.state.isEditingName || // the item name is being edited
+			!this.props.canEdit) { // the user can't edit this list
+			canCreateChildList = false;
+		}
+
+		let canViewChildList = false;
+
+		// child list exists and user can view it
+		if (this.props.item.childList && permissions.canViewList({ 'slug': this.props.item.childList.slug })) {
+			canViewChildList = true;
+		}
+
+		let childList;
+
+		if (canCreateChildList) {
+			childList = (<button className="btn btn-primary create-childlist" onClick={this.onCreateChildList.bind(this)}>Create child list</button>);	
+		} else if (canViewChildList) {
+			childList = (
+				<div className="child-list">	
+					<Link to={`/list/${this.props.item.childList.slug}`}>{this.props.item.childList.name} ></Link>
+				</div>);
 		}
 
 		return (
@@ -59,10 +81,7 @@ class Item extends Component {
 						value={this.props.item.name}
 					/>
 				</div>
-				child list {this.props.item.childList && this.props.item.childList.name}
-				{showCreateSubList &&
-					<button className="btn btn-primary create-sublist" onClick={this.onCreateSubList.bind(this)}>Create child list</button>
-				}
+				{childList}
 				{showDescription &&
 					<div className="item-body">
 						<EditableTextField

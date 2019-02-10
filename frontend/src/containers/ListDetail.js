@@ -58,7 +58,7 @@ class ListDetails extends Component {
 		this.props.dispatch(lists.updateList(listId, propertyName, value));
 	}
 
-	onCreateSubList = (itemId) => {
+	onCreateChildList = (itemId) => {
 		this.props.history.push(`/newlist?parent-item=${itemId}`);
 	}
 
@@ -69,7 +69,7 @@ class ListDetails extends Component {
 	componentDidUpdate(prevProps) {
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading; need to check if user should view this list
-			const canEditList = permissions.canViewList({ 'slug': this.state.slug });
+			const canEditList = permissions.canEditList({ 'slug': this.state.slug });
 
 			this.setState({
 				'canView': permissions.canViewList({ 'slug': this.state.slug }),
@@ -165,7 +165,7 @@ class ListDetails extends Component {
 								items={this.props.items}
 								list={this.props.list.id}
 								canEdit={this.state.canEdit}
-								onCreateSubList={this.onCreateSubList}
+								onCreateChildList={this.onCreateChildList}
 							/>
 						)}
 					</Container>
@@ -243,10 +243,6 @@ const mapStateToProps = (state, ownProps) => {
 				targetListItems[index].childList = { ...testList };
 			}
 		}
-
-		console.log('targetListItems ', targetListItems);
-		console.log('parentList ', parentList);
-		console.log('parentItem ', parentItem);
 	}
 
 	return ({
