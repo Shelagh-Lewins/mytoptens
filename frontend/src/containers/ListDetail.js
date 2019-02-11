@@ -70,13 +70,14 @@ class ListDetails extends Component {
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading; need to check if user should view this list
 			const canEditList = permissions.canEditList({ 'slug': this.state.slug });
+			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
 
 			this.setState({
-				'canView': permissions.canViewList({ 'slug': this.state.slug }),
+				'canView': canViewList,
 				'canEdit': canEditList,
 			});
 
-			if(canEditList) {
+			if(canViewList) {
 				this.setState({
 					'list_name': this.props.list.name,
 					'list_description': this.props.list.description,
@@ -119,8 +120,7 @@ class ListDetails extends Component {
 						{this.props.parentList && (
 							<Row>
 								<Col>
-									<div>Parent list: <Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link></div>
-									<div>Parent item: {this.props.parentItem.name}</div>
+									<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>
 								</Col>
 							</Row>
 						)}

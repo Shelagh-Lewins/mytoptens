@@ -18,14 +18,11 @@ class EditableTextField extends Component {
 			'initialValue': '',
 			'type': props.textarea ? 'textarea' : 'input',
 		};
-
-		//this.showInput = this.showInput.bind(this);
 	}
 
 	onKeyUp(e) {
 		var code = e.keyCode || e.which;
 		if(code === 13) { //13 is the enter keycode
-			//Do stuff in here
 			this.showInput(e);
 		}
 	}
