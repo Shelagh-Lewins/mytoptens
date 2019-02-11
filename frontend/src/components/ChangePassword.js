@@ -26,7 +26,7 @@ class ChangePassword extends Component {
 
 	handleSubmit(e) {
 		e.preventDefault();
-		console.log('submit changePassword');
+
 		const data = {
 			'old_password': this.state.old_password,
 			'new_password1': this.state.new_password,

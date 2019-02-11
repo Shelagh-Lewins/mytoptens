@@ -36,7 +36,7 @@ class List(models.Model):
         related_name='list_modified_by')
     modified_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, blank=True, default='')
+    description = models.CharField(max_length=5000, blank=True, default='')
     is_public = models.BooleanField(default=False)
 
     def __str__(self):
@@ -50,7 +50,7 @@ class Item(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     modified_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, blank=True, default='')
-    description = models.CharField(max_length=255, blank=True, default='')
+    description = models.CharField(max_length=5000, blank=True, default='')
     list = models.ForeignKey(List, on_delete=models.CASCADE, related_name='items')
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
 

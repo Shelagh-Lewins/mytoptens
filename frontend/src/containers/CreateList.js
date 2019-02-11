@@ -39,7 +39,6 @@ class CreateList extends Component {
 			const urlParams = new URLSearchParams(props.location.search);
 			parentItem = urlParams.get('parent-item');
 		}
-		console.log('parent-item ', parentItem);
 
 		if (typeof parentItem === 'string') {
 			this.state.parentItem = parentItem;
