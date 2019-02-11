@@ -13,7 +13,6 @@ import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
-// import { sortedItems } from '../modules/items';
 
 import './ListDetail.scss';
 
@@ -38,6 +37,31 @@ class ListDetails extends Component {
 		props.dispatch(lists.fetchListBySlug(slug));
 		props.dispatch(clearErrors());
 		return slug;
+	}
+
+	onIsPublicChange = ({ id, is_public }) => {
+		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
+	}
+
+	onDeleteList = () => {
+		const id = this.props.list.id;
+		const name = this.props.list.name;
+
+		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
+		{
+		  this.props.dispatch(lists.deleteList(id));
+
+		  // if there is a visible parent, navigate there
+		  if (this.props.parentList) {
+		  	if (permissions.canViewList({ 'id': this.props.parentList.id })) {
+		  		this.props.history.push(`/list/${this.props.parentList.slug}`);
+		  		return;
+		  	}
+		  }
+
+		  // otherwise navigate home
+		  this.props.history.push('/');
+		}
 	}
 
 	handleInputChange = (e) => {
@@ -101,7 +125,7 @@ class ListDetails extends Component {
 		}
 	}
 
-	renderItemsPage() {
+	renderPage() {
 		return <div>
 			{!isEmpty(this.props.errors) && (<Container>
 				<Row>
@@ -123,6 +147,9 @@ class ListDetails extends Component {
 									<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>
 								</Col>
 							</Row>
+						)}
+						{this.state.canEdit && (
+							<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
 						)}
 						<Row>
 							<Col className="list-name">
@@ -180,7 +207,7 @@ class ListDetails extends Component {
 		let content;
 
 		if (this.state.canView) {
-			content = this.renderItemsPage();
+			content = this.renderPage();
 		} else {
 			content = <p>Either this list does not exist or you do not have permission to view it</p>;
 		}
