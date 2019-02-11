@@ -5,16 +5,44 @@
 		padding: 6px 12px;
 	}
 
-	span {
-		display: inline-block;
-		padding: 6px 0;
-	}
-
 	.placeholder {
 		color: $color-placeholder;
 	}
 
 	.btn-primary {
 		margin-left: 8px;
+	}
+
+	.text {
+		display: inline-block;
+		margin: 6px 0;
+		max-height: 3em;
+		overflow: hidden;
+		position: relative;
+
+		&.expanded {
+			max-height: none;
+
+			.fader {
+				display: none;
+			}
+		}
+
+		.fader {
+			background: linear-gradient(to right, $color-list-fadeout 0%, $color-list-summary-bg 80%);
+			display: block;
+			height: 1.5em;
+			position: absolute;
+			right: 0;
+			text-align: center;
+			top: 1.5em;
+			width: 4em;
+		}
+	}
+
+	button {
+		&.show-more {
+			float: right;
+		}
 	}
 }

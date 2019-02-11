@@ -16,8 +16,47 @@ class EditableTextField extends Component {
 			'showInput': false,
 			'isValidated': false,
 			'initialValue': '',
+			'overflowActive': false,
 			'type': props.textarea ? 'textarea' : 'input',
 		};
+
+		if (props.textarea === true) {
+			this.state.expanded = false;
+		}
+	}
+
+	// does the text overflow its container?
+	isOverflowActive() {
+		if (!this.props.textarea) {
+			return false;
+		}
+
+		const element = this.textElement;
+		if (!element) {
+			return false;
+		}
+		console.log('element ', element);
+		const overflowActive = element.offsetHeight < element.scrollHeight;
+		console.log('offsetHeight ', element.offsetHeight);
+		console.log('scrollHeight ', element.scrollHeight);
+
+		if (overflowActive !== this.state.overflowActive) {
+			this.setState({ 'overflowActive': overflowActive });
+		}
+	}
+
+	toggleMore() {
+		this.setState({
+			'expanded': !this.state.expanded,
+		});
+	}
+
+	componentDidMount() {
+		this.isOverflowActive();
+	}
+
+	componentDidUpdate() {
+		this.isOverflowActive();
 	}
 
 	onKeyUp(e) {
@@ -112,6 +151,22 @@ class EditableTextField extends Component {
 		}
 
 		const showInput = this.state.showInput;
+		let expanded = '';
+		if (this.state.expanded) {
+			expanded = 'expanded';
+		}
+
+		let showMoreButton = false;
+		console.log('overflow ', this.state.overflowActive);
+		if (this.state.overflowActive || this.state.expanded) {
+			showMoreButton = true;
+		}
+
+		let moreButtonText = 'More...';
+		if (this.state.expanded) {
+			moreButtonText = 'Less...';
+		}
+
 		let item;
 
 		if(this.props.canEdit) {
@@ -143,7 +198,7 @@ class EditableTextField extends Component {
 						</Row>
 						<Row>
 							<Col>
-								<button type="button" className="btn btn-secondary"onClick={this.cancel}>
+								<button type="button" className="btn btn-secondary" onClick={this.cancel}>
 								Cancel
 								</button>
 								<button type="submit" className="btn btn-primary">
@@ -155,11 +210,15 @@ class EditableTextField extends Component {
 			} else {
 				if (this.props.value !== '') {
 					item = (
-						<span
-							onClick={this.showInput.bind(this)}
-							 onKeyUp={this.onKeyUp.bind(this)}
-							tabIndex="0"
-						>{this.props.value}</span>
+						<span>
+							<span className={`text ${expanded}`}
+								ref={ref => (this.textElement = ref)}
+								onClick={this.showInput.bind(this)}
+								onKeyUp={this.onKeyUp.bind(this)}
+								tabIndex="0"
+							>{this.props.value}{showMoreButton && <span className="fader"></span>}</span>
+							{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
+						</span>
 					);
 				} else {
 					item = (
@@ -175,10 +234,12 @@ class EditableTextField extends Component {
 		} else {
 			if (this.props.value !== '') {
 				item = (
-					<span>{this.props.value}</span>
+					<span>
+						<span className={`text ${expanded}`}
+							ref={ref => (this.textElement = ref)}>{this.props.value}{showMoreButton && <span className="fader"></span>}</span>
+						{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
+					</span>
 				);
-			} else {
-
 			}
 		}
 		return (
