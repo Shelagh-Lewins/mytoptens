@@ -41,5 +41,16 @@
 			color: $color-selector-text-selected;
 		}
 	}
-
 }
+
+.btn-primary.create-list {
+	margin: 8px 0;
+}
+
+.top-level-lists-control {
+	.form-check-input {
+		margin: 8px 0;
+		position: relative;
+	}
+}
+

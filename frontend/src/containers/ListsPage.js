@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Label, Input } from 'reactstrap';
 import ListsList from '../components/ListsList';
 import ListSummary from '../components/ListSummary';
 import './ListsPage.scss';
@@ -47,21 +47,31 @@ class ListsPage extends Component {
 		this.props.history.push('/newlist');
 	}
 
+	getListsToShow = (listsList) => {
+		let ListsToShow = [];
+
+		// filter out lists that are not top level
+		if (this.state.topLevelListsOnly) {
+			listsList.map(list => {
+				if (!list.parent_item) {
+					ListsToShow.push(list);
+				}
+			});
+
+			return ListsToShow;
+		}
+
+		return listsList;
+	}
+
 	renderPublicLists() {
 		const { publicLists, onIsPublicChange, onDeleteList } = this.props;
 
-		// filter out lists that are not top level
-		let ListsToShow = [];
-
-		publicLists.map(list => {
-			if (!list.parent_item) {
-				ListsToShow.push(list);
-			}
-		});
+		const listsToShow = this.getListsToShow(publicLists);
 
 		return (
 			<ListsList headerText="All public lists">
-				{ListsToShow.map(list => 
+				{listsToShow.map(list => 
 					<ListSummary
 						key={list.id}
 						list={list}
@@ -81,19 +91,13 @@ class ListsPage extends Component {
 			const listsByIsPublic = myLists[is_public];
 			let headerText = is_public === 'true' ? 'My public lists' : 'My private lists';
 
-			let ListsToShow = [];
-
-			listsByIsPublic.map(list => {
-				if (!list.parent_item) {
-					ListsToShow.push(list);
-				}
-			});
+			const listsToShow = this.getListsToShow(listsByIsPublic);
 
 			return (
 				<div key={index}>
-					{(ListsToShow.length > 0) && (
+					{(listsToShow.length > 0) && (
 						<ListsList is_public={is_public} headerText={headerText}>
-							{ListsToShow.map(list => 
+							{listsToShow.map(list => 
 								<ListSummary
 									key={list.id}
 									list={list}
@@ -111,6 +115,12 @@ class ListsPage extends Component {
 	setListSetURL(listset) {
 		let URL = `${this.props.location.pathname}?listset=${listset}`;
 		this.props.history.push(URL);
+	}
+
+	handleTopLevelListsChange() {
+		this.setState({
+			'topLevelListsOnly': !this.state.topLevelListsOnly,
+		});
 	}
 
 	handleTabClick = (e) => {
@@ -160,7 +170,7 @@ class ListsPage extends Component {
 		let createList;
 		if (this.props.canCreateList()) {
 			createList = (<button
-				className="btn btn-primary"
+				className="btn btn-primary create-list"
 				onClick={this.onAddList}
 			>+ New list</button>);
 		} else if (this.props.auth.isAuthenticated) {
@@ -174,15 +184,30 @@ class ListsPage extends Component {
 			<div className="lists-list">
 				<Container>
 					<Row>
+						<Col  className="top-level-lists-control">
+							<Label check>
+								<Input
+									type="checkbox"
+									defaultChecked={this.state.topLevelListsOnly}
+									onChange={this.handleTopLevelListsChange.bind(this)}/>{' '}
+								Show top level lists only
+							</Label>
+						</Col>
+					</Row>
+					<Row>
 						<Col sm="12" md="9">
-							<div className="lists-list-header">
-								<input className="form-control"
+							<div className="search">
+								<Input className="form-control"
 									onChange={this.onSearch}
 									type="text"
 									placeholder="Search..."
 								/>
-								{createList}
 							</div>
+						</Col>
+					</Row>
+					<Row>
+						<Col>
+							{createList}
 						</Col>
 					</Row>
 				</Container>
