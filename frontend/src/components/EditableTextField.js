@@ -35,10 +35,8 @@ class EditableTextField extends Component {
 		if (!element) {
 			return false;
 		}
-		console.log('element ', element);
+
 		const overflowActive = element.offsetHeight < element.scrollHeight;
-		console.log('offsetHeight ', element.offsetHeight);
-		console.log('scrollHeight ', element.scrollHeight);
 
 		if (overflowActive !== this.state.overflowActive) {
 			this.setState({ 'overflowActive': overflowActive });
@@ -134,6 +132,51 @@ class EditableTextField extends Component {
 		this.setState({ 'isValidated': true });
 	}
 
+	renderValue() {
+		// construct the display of the value
+		let expanded = '';
+		if (this.state.expanded) {
+			expanded = 'expanded';
+		}
+
+		let showMoreButton = false;
+
+		if (this.state.overflowActive || this.state.expanded) {
+			showMoreButton = true;
+		}
+
+		let moreButtonText = 'More...';
+		if (this.state.expanded) {
+			moreButtonText = 'Less...';
+		}
+
+		let onClick;
+		let onKeyUp;
+		let tabIndex = '';
+
+		if (this.props.canEdit) {
+			tabIndex = '0';
+			onClick=this.showInput.bind(this);
+			onKeyUp=this.onKeyUp.bind(this);
+		}
+
+		let item = (
+			<span>
+				<span className={`text ${expanded}`}
+					ref={ref => (this.textElement = ref)}
+					onKeyUp={onKeyUp}
+					onClick={onClick}
+					tabIndex={tabIndex}	
+				>{this.props.value}{showMoreButton && <span className="fader"></span>}</span>
+				{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
+			</span>
+		);
+
+
+
+		return item;
+	}
+
 	render() {
 		let type = 'text';
 		if (this.props.textarea) {
@@ -151,7 +194,7 @@ class EditableTextField extends Component {
 		}
 
 		const showInput = this.state.showInput;
-		let expanded = '';
+		/*let expanded = '';
 		if (this.state.expanded) {
 			expanded = 'expanded';
 		}
@@ -165,11 +208,11 @@ class EditableTextField extends Component {
 		let moreButtonText = 'More...';
 		if (this.state.expanded) {
 			moreButtonText = 'Less...';
-		}
+		} */
 
 		let item;
 
-		if(this.props.canEdit) {
+		if (this.props.canEdit) {
 			if (showInput) {			
 				item = (
 					<form
@@ -209,17 +252,7 @@ class EditableTextField extends Component {
 					</form>);
 			} else {
 				if (this.props.value !== '') {
-					item = (
-						<span>
-							<span className={`text ${expanded}`}
-								ref={ref => (this.textElement = ref)}
-								onClick={this.showInput.bind(this)}
-								onKeyUp={this.onKeyUp.bind(this)}
-								tabIndex="0"
-							>{this.props.value}{showMoreButton && <span className="fader"></span>}</span>
-							{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
-						</span>
-					);
+					item = this.renderValue();
 				} else {
 					item = (
 						<span
@@ -233,13 +266,7 @@ class EditableTextField extends Component {
 			}
 		} else {
 			if (this.props.value !== '') {
-				item = (
-					<span>
-						<span className={`text ${expanded}`}
-							ref={ref => (this.textElement = ref)}>{this.props.value}{showMoreButton && <span className="fader"></span>}</span>
-						{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
-					</span>
-				);
+				item = this.renderValue();
 			}
 		}
 		return (

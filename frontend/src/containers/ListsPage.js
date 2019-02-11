@@ -52,7 +52,7 @@ class ListsPage extends Component {
 
 		// filter out lists that are not top level
 		if (this.state.topLevelListsOnly) {
-			listsList.map(list => {
+			listsList.map(list => { // eslint-disable-line array-callback-return
 				if (!list.parent_item) {
 					ListsToShow.push(list);
 				}
