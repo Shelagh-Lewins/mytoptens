@@ -1,9 +1,19 @@
 @import "../variables";
 
 .item-header {
-	div {
-		&.editable-text-field {
-			margin-left: 1.5em;
+	font-weight: bold;
+
+	.editable-text-field {
+		float: left;
+		margin-left: 0;
+
+		&.editing {
+			float: none;
+		}
+
+		.placeholder {
+			display: inline-block;
+			padding: 6px 0;
 		}
 	}
 }
@@ -18,19 +28,6 @@
 	margin: 0 8px 8px 0;
 	overflow: hidden;
 	padding: 8px;
-
-	.item-header {
-		font-weight: bold;
-
-		.editable-text-field {
-			float: left;
-			margin-left: 1.5em;
-
-			&.editing {
-				float: none;
-			}
-		}
-	}
 
 	// hide label but leave contents visible and entire label still readable
 	label {

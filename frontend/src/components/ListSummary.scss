@@ -37,14 +37,15 @@
 }
 
 .list-status {
-	float: left;
+	float: right;
 }
 
 .btn-danger {
 	float: right;
+	margin-left: 15px;
 }
 
 .list-created-by {
-	float: right;
-	margin: 6px 0;
+	float: left;
+	margin: 6px 0;	
 }

@@ -133,7 +133,7 @@ class EditableTextField extends Component {
 	}
 
 	renderValue() {
-		// construct the display of the value
+		// construct the display of the text value
 		let expanded = '';
 		if (this.state.expanded) {
 			expanded = 'expanded';
@@ -172,8 +172,6 @@ class EditableTextField extends Component {
 			</span>
 		);
 
-
-
 		return item;
 	}
 
@@ -194,22 +192,6 @@ class EditableTextField extends Component {
 		}
 
 		const showInput = this.state.showInput;
-		/*let expanded = '';
-		if (this.state.expanded) {
-			expanded = 'expanded';
-		}
-
-		let showMoreButton = false;
-		console.log('overflow ', this.state.overflowActive);
-		if (this.state.overflowActive || this.state.expanded) {
-			showMoreButton = true;
-		}
-
-		let moreButtonText = 'More...';
-		if (this.state.expanded) {
-			moreButtonText = 'Less...';
-		} */
-
 		let item;
 
 		if (this.props.canEdit) {
