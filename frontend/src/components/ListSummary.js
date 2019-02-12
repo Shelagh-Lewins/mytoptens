@@ -1,4 +1,4 @@
-// An individual list
+// Top-level summary of a list
 
 import React from 'react';
 import { Col } from 'reactstrap';
@@ -6,20 +6,18 @@ import { Link } from 'react-router-dom';
 // Note how the is_public is updated without making this into a React Component with state.
 // By using props to populate the UI, we enable time travel and a direct connection with the store.
 
-import { LIST_IS_PUBLIC_TEXTS } from '../constants';
+import SetListIsPublic from './SetListIsPublic';
 
 import * as permissions from '../modules/permissions';
 
 import './ListSummary.scss';
 
 const ListSummary = props => {
-	let id=`select-${props.list.id}`;
-	let value = props.list.is_public ? 'Public' : 'Private';
 	let canEdit = permissions.canEditList({ 'id': props.list.id });
 
 	return (
 		<Col sm="12" md="6">
-			<div className="list-container">
+			<div className="list-summary">
 				<Link to={`/list/${props.list.slug}`}>
 					<div className="list-header">
 						<div>{props.list.name}</div>
@@ -30,32 +28,18 @@ const ListSummary = props => {
 					<div className="list-created-by">{props.list.created_by_username}</div>
 
 				}
-				{canEdit &&
-					<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
-				}
-				{canEdit &&
-					<div className="list-status">
-						<label>Set list private/public status
-							<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
-								{LIST_IS_PUBLIC_TEXTS.map(is_public => (
-									<option key={is_public} value={is_public}>{is_public}</option>
-								))}
-							</select>
-						</label>
+				{canEdit && (
+					<div className="list-controls">
+						<SetListIsPublic
+							list={props.list}
+							onIsPublicChange={props.onIsPublicChange}
+						/>
+						<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
 					</div>
-				}
-
-
-
+				)}
 			</div>
 		</Col>
 	);
-
-	function onIsPublicChange(e) {
-		// map from select options to true / false
-		const value = e.target.value === 'Public' ? true : false;
-		props.onIsPublicChange({ 'id': props.list.id, 'is_public': value });
-	}
 
 	function onDeleteList(e) {
 		props.onDeleteList({ 'id': props.list.id, 'name': props.list.name });

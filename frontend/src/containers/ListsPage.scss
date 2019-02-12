@@ -1,56 +1,45 @@
 @import "../variables";
 
-.list-container {
-	border: 1px solid $color-panel-border;
-	border-radius: 8px;
-	margin: 0 8px 8px 0;
-	padding: 8px;
+.lists-list {
+	.tabs {
+		display: flex;
+		justify-content: center;
+		margin: 6px 0;
 
-	.list-header {
-		font-weight: bold;
+		ul {
+			border: 1px solid $color-selector-border;
+			border-radius: 12px;
+			float: left;
+			list-style-type: none;
+			margin: 0;
+			overflow: hidden;
+			padding: 0;
+		}
+
+		span {
+			cursor: pointer;
+			display: inline-block;
+			padding: 6px 12px;
+
+			&.selected {
+				background-color: $color-selector-background-selected;
+				color: $color-selector-text-selected;
+			}
+		}
 	}
 
-	// hide label but leave contents visible and entire label still readable
-	label {
-		font-size: 0;
-	}
-}
-
-.tabs {
-	display: flex;
-	justify-content: center;
-	margin: 6px 0;
-
-	ul {
-		border: 1px solid $color-selector-border;
-		border-radius: 12px;
-		float: left;
-		list-style-type: none;
-		margin: 0;
-		overflow: hidden;
-		padding: 0;
+	.create-list {
+		margin: 8px 0;
 	}
 
-	span {
-		cursor: pointer;
-		display: inline-block;
-		padding: 6px 12px;
+	.top-level-lists-control {
+		.form-check-input {
+			margin: 8px 0;
+			position: relative;
+		}
 
-		&.selected {
-			background-color: $color-selector-background-selected;
-			color: $color-selector-text-selected;
+		label {
+			font-size: 1rem;
 		}
 	}
 }
-
-.btn-primary.create-list {
-	margin: 8px 0;
-}
-
-.top-level-lists-control {
-	.form-check-input {
-		margin: 8px 0;
-		position: relative;
-	}
-}
-

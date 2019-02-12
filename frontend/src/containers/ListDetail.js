@@ -1,3 +1,5 @@
+// Full detail view of a list
+
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -5,6 +7,7 @@ import { withRouter, Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';
+import SetListIsPublic from '../components/SetListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
 
@@ -86,6 +89,10 @@ class ListDetails extends Component {
 		this.props.history.push(`/newlist?parent-item=${itemId}`);
 	}
 
+	onIsPublicChange = ({ id, is_public }) => {
+		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
+	}
+
 	onCloseFlashMessage = () => {
 		this.props.dispatch(clearErrors());
 	}
@@ -126,6 +133,23 @@ class ListDetails extends Component {
 	}
 
 	renderPage() {
+		if (!this.props.list) {
+			return;
+		}
+
+		let showPrivacyWarning = false;
+		let privacyWarningText = '';
+
+		if (this.state.canEdit && this.props.parentList) {
+			if (this.props.list.is_public && !this.props.parentList.is_public) {
+				privacyWarningText = 'This public list has a private parent list';
+				showPrivacyWarning = true;
+			} else if (!this.props.list.is_public && this.props.parentList.is_public) {
+				privacyWarningText = 'This private list has a public parent list';
+				showPrivacyWarning = true;
+			}
+		}
+
 		return <div>
 			{!isEmpty(this.props.errors) && (<Container>
 				<Row>
@@ -144,12 +168,30 @@ class ListDetails extends Component {
 						{this.props.parentList && (
 							<Row>
 								<Col>
-									<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>
+									<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
+									</div>
 								</Col>
 							</Row>
 						)}
 						{this.state.canEdit && (
-							<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
+							<Row>
+								<Col>
+									<div className="list-detail-controls">
+										<SetListIsPublic
+											list={this.props.list}
+											onIsPublicChange={this.onIsPublicChange}
+										/>
+										<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
+									</div>
+								</Col>
+							</Row>
+						)}
+						{showPrivacyWarning && (
+							<Row>
+								<Col>
+									<div className="privacy-warning">{privacyWarningText}</div>
+								</Col>
+							</Row>
 						)}
 						<Row>
 							<Col className="list-name">
@@ -212,7 +254,7 @@ class ListDetails extends Component {
 			content = <p>Either this list does not exist or you do not have permission to view it</p>;
 		}
 		return(
-			<div>
+			<div className="list-detail">
 				{ content }
 			</div>
 		);

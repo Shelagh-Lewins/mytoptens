@@ -1,7 +1,11 @@
 @import "../variables";
 
-.list-container {
+.list-summary {
+	border: 1px solid $color-panel-border;
+	border-radius: 8px;
+	margin: 0 8px 8px 0;
 	overflow: hidden;
+	padding: 8px;
 
 	a {
 		color: $color-text;
@@ -10,10 +14,23 @@
 			text-decoration: none;
 		}
 	}
-}
 
-.list-header {
-	font-weight: bold;
+	.list-header {
+		font-weight: bold;
+	}
+
+	.list-controls {
+		float: right;
+
+		.list-status {
+			float: left;
+		}
+
+		.btn-danger {
+			float: left;
+			margin-left: 15px;
+		}
+	}
 }
 
 .list-body {
@@ -34,15 +51,6 @@
 		top: 1.5em;
 		width: 4em;
 	}
-}
-
-.list-status {
-	float: right;
-}
-
-.btn-danger {
-	float: right;
-	margin-left: 15px;
 }
 
 .list-created-by {
