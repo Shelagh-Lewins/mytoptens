@@ -84,6 +84,7 @@ class ItemsPage extends Component {
 								list={this.props.list}
 								canEdit={canEdit}
 								onCreateChildList={this.props.onCreateChildList}
+								onMoveItemUp={this.props.onMoveItemUp}
 							/>
 						</Col>
 					</Row>

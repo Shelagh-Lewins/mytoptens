@@ -49,8 +49,7 @@ class ListSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items', None)
         validated_data['created_by_id'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username
-        print('***')
-        print(validated_data)
+
         newlist = List.objects.create(**validated_data)
 
         for item_data in items_data:

@@ -4,11 +4,11 @@
 import store from '../store';
 
 import React, { Component } from 'react';
-import { Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import EditableTextField from './EditableTextField.js';
 import * as permissions from '../modules/permissions';
 import './Item.scss';
+import { MAX_ITEMS_IN_LIST } from '../constants';
 
 class Item extends Component {
 	constructor(props) {
@@ -27,6 +27,15 @@ class Item extends Component {
 
 	onCreateChildList = () => {
 		this.props.onCreateChildList(this.props.item.id);
+	}
+
+	onMoveUp = () => {
+		console.log('move up');
+		this.props.onMoveItemUp(this.props.item.id);
+	}
+
+	onMoveDown = () => {
+		console.log('move down');
 	}
 
 	render() {
@@ -64,8 +73,22 @@ class Item extends Component {
 				</div>);
 		}
 
+		let showUp = true;
+		let showDown = true;
+
+		if (!this.props.canEdit ||
+			this.props.item.name === '' ||
+			!showDescription) { // assume that showDescription means there is a saved name i.e. the item exists
+			showUp = false;
+			showDown = false;
+		} else if (this.props.item.order === 1) {
+			showUp = false;
+		} else if (this.props.item.order === MAX_ITEMS_IN_LIST) {
+			showDown = false;
+		}
+
 		return (
-			<Col className="item-container">
+			<div className="item-container">
 				<div className="item-header">
 					<span className="order">{this.props.item.order}:</span><EditableTextField
 						canEdit={this.props.canEdit}
@@ -99,7 +122,11 @@ class Item extends Component {
 						/>
 					</div>
 				}
-			</Col>
+				{showUp && <button className="btn btn-secondary move-up" onClick={this.onMoveUp.bind(this)}>Up</button>
+				}
+				{showDown && <button className="btn btn-secondary move-down" onClick={this.onMoveDown.bind(this)}>Down</button>
+				}
+			</div>
 		);
 	}
 };

@@ -4,6 +4,11 @@ from allauth.account.admin import EmailAddress
 from .serializers import ListSerializer, ItemSerializer
 from django.db.models import Q
 
+from rest_framework.decorators import detail_route
+from rest_framework import status
+from rest_framework.response import Response
+import copy
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -111,7 +116,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
 
     def get_queryset(self):
-        # can view items belonging to public lists and lists the usesr created
+        # can view items belonging to public lists and lists the user created
         if self.request.user.is_authenticated:
             return Item.objects.filter(
                 Q(list__created_by_id=self.request.user) | 
@@ -120,3 +125,41 @@ class ItemViewSet(viewsets.ModelViewSet):
 
         return Item.objects.filter(list__is_public=True)
 
+    @detail_route(methods=['post'])
+    def moveup(self, request, pk=None):
+
+        if self.request.user.is_authenticated:
+            # find the item to move up
+            item = Item.objects.get(pk=pk)
+           
+            item_order = item.order
+            parent_list = item.list
+
+            if item.order == 1:
+                return Response({'message': 'Item is already at top of list'}, status=status.HTTP_403_FORBIDDEN)
+
+            item_copy = copy.deepcopy(item)
+
+            # find the item above with which to swap the first item
+            item_above = Item.objects.get(list=parent_list, order=item_order-1)
+            item_above_copy = copy.deepcopy(item_above)
+
+            # swap the order on the item copies
+            item_copy.order = item_order-1
+            item_above_copy.order = item_order
+
+            # set pk to None so save() will create new objects
+            item_copy.pk = None
+            item_above_copy.pk = None
+
+            # delete the original items to free up the order values for the new items
+            item.delete()
+            item_above.delete()
+
+            # with pk = None, save() will create new objects
+            item_copy.save()
+            item_above_copy.save()
+
+            return Response({'message': 'Item moved up'}, status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_401_UNAUTHORIZED)

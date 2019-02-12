@@ -12,6 +12,7 @@ import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
 
 import * as lists from '../modules/lists';
+import * as items from '../modules/items';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
@@ -87,6 +88,11 @@ class ListDetails extends Component {
 
 	onCreateChildList = (itemId) => {
 		this.props.history.push(`/newlist?parent-item=${itemId}`);
+	}
+
+	onMoveItemUp = (itemId) => {
+		console.log('move up in listDetail.js');
+		this.props.dispatch(items.moveItemUp({ itemId }));
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
@@ -235,6 +241,7 @@ class ListDetails extends Component {
 								list={this.props.list.id}
 								canEdit={this.state.canEdit}
 								onCreateChildList={this.onCreateChildList}
+								onMoveItemUp={this.onMoveItemUp}
 							/>
 						)}
 					</Container>

@@ -21,6 +21,8 @@ export const CREATE_ITEM_SUCCEEDED = 'CREATE_ITEM_SUCCEEDED';
 export const UPDATE_ITEM_SUCCEEDED = 'UPDATE_ITEM_SUCCEEDED';
 export const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
 
+////////////////////////////////////
+// create item
 export const createItem = item => dispatch => {
 	dispatch(createItemRequested());
 
@@ -52,6 +54,8 @@ export function createItemSucceeded(item) {
 	};
 }
 
+////////////////////////////////////
+// update item
 export const updateItem = (itemId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
 
@@ -77,6 +81,25 @@ export function updateItemSucceeded({ id }) {
 	};
 }
 
+//////////////////////////////////
+// move item up
+export const moveItemUp = ({ itemId }) => dispatch => {
+	return fetchAPI({
+		'url': `/api/v1/content/items/${itemId}/moveup/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'method': 'POST',
+		'useAuth': true,
+	}).then(response => {
+		console.log('move item up response ', response);
+		//return dispatch(updateItemSucceeded(response));
+		return;
+	}).catch(error => {
+		return dispatch(getErrors({ 'move item up error ': error.message }));
+	});
+};
+
+//////////////////////////////////
+// delete item
 export const deleteItem = ({ itemId, listId }) => dispatch => {
 	return fetchAPI({
 		'url': `/api/v1/content/items/${itemId}/`,
