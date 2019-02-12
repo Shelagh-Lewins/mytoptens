@@ -20,6 +20,7 @@ export const CREATE_ITEM_REQUESTED = 'CREATE_ITEM_REQUESTED';
 export const CREATE_ITEM_SUCCEEDED = 'CREATE_ITEM_SUCCEEDED';
 export const UPDATE_ITEM_SUCCEEDED = 'UPDATE_ITEM_SUCCEEDED';
 export const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
+export const MOVE_ITEM_UP_SUCCEEDED = 'MOVE_ITEM_UP_SUCCEEDED';
 
 ////////////////////////////////////
 // create item
@@ -87,16 +88,22 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 	return fetchAPI({
 		'url': `/api/v1/content/items/${itemId}/moveup/`,
 		'headers': { 'Content-Type': 'application/json' },
-		'method': 'POST',
+		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
 		console.log('move item up response ', response);
-		//return dispatch(updateItemSucceeded(response));
-		return;
+		return dispatch(moveItemUpSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'move item up error ': error.message }));
 	});
 };
+
+export function moveItemUpSucceeded(items) {
+	return {
+		'type': 'MOVE_ITEM_UP_SUCCEEDED',
+		'payload': items,
+	};
+}
 
 //////////////////////////////////
 // delete item

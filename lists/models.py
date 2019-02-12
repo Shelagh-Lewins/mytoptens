@@ -55,7 +55,7 @@ class Item(models.Model):
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     class Meta:
-        unique_together = ('list', 'order')
+        # unique_together = ('list', 'order') # prevents items from being swapped because deferred is not available in mysql
         ordering = ['order']
 
     def __unicode__(self):

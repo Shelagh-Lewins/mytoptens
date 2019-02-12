@@ -1,14 +1,12 @@
 from rest_framework import viewsets, permissions
-from .models import List, Item
-from allauth.account.admin import EmailAddress
-from .serializers import ListSerializer, ItemSerializer
-from django.db.models import Q
-
 from rest_framework.decorators import detail_route
 from rest_framework import status
 from rest_framework.response import Response
-import copy
+from rest_framework.exceptions import APIException
 
+from .models import List, Item
+from .serializers import ListSerializer, ItemSerializer
+from django.db.models import Q
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -125,41 +123,42 @@ class ItemViewSet(viewsets.ModelViewSet):
 
         return Item.objects.filter(list__is_public=True)
 
-    @detail_route(methods=['post'])
+    @detail_route(methods=['patch'])
     def moveup(self, request, pk=None):
 
         if self.request.user.is_authenticated:
             # find the item to move up
-            item = Item.objects.get(pk=pk)
-           
+            item = Item.objects.get(pk=pk)       
             item_order = item.order
             parent_list = item.list
 
             if item.order == 1:
                 return Response({'message': 'Item is already at top of list'}, status=status.HTTP_403_FORBIDDEN)
 
-            item_copy = copy.deepcopy(item)
+            # change the item order up one
+            item.order = item.order - 1
 
-            # find the item above with which to swap the first item
+            # find the existing item above
             item_above = Item.objects.get(list=parent_list, order=item_order-1)
-            item_above_copy = copy.deepcopy(item_above)
+            # and change its order down one
+            item_above.order = item_order
 
-            # swap the order on the item copies
-            item_copy.order = item_order-1
-            item_above_copy.order = item_order
+            item.save()
+            item_above.save()
 
-            # set pk to None so save() will create new objects
-            item_copy.pk = None
-            item_above_copy.pk = None
+            # return the new items so the UI can update
+            items = [item, item_above]
+            serializer = ItemSerializer(items, many=True)
+            data = serializer.data
+            data.message = 'Item moved up'
 
-            # delete the original items to free up the order values for the new items
-            item.delete()
-            item_above.delete()
-
-            # with pk = None, save() will create new objects
-            item_copy.save()
-            item_above_copy.save()
-
-            return Response({'message': 'Item moved up'}, status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    def perform_update(self, serializer):
+        # do not allow order to be changed
+        if serializer.validated_data.get('order', None) is not None:
+            raise APIException("Item order may not be changed. Use moveup instead.")
+ 
+        serializer.save()
