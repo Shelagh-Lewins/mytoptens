@@ -21,7 +21,8 @@ class ItemsPage extends Component {
 			this.state[`${i}_description`] = '';
 		}
 
-		// fill in whatever items exist
+		// build the items
+		// each item's order and the field to update are coded in the 'state' data e.g. '1_name'
 		const items = this.props.items;
 
 		Object.keys(items).forEach((key) => {
@@ -38,6 +39,32 @@ class ItemsPage extends Component {
 				}
 			}
 		});
+	}
+
+	componentDidUpdate(prevProps) {
+		let update = [];
+		for (let i=0; i<this.props.items.length; i++) {
+			const item = this.props.items[i];
+
+			if (prevProps.items[i].id !== this.props.items[i].id) {
+				const order = item.order;
+
+				update[`${order}_id`] = item.id;
+				update[`${order}_name`] = item.name;
+				update[`${order}_description`] = item.description;
+
+				this.setState({
+					[`${order}_id`]: item.id,
+					[`${order}_name`]: item.name,
+					[`${order}_description`]: item.description,
+				});
+			}
+		}
+		// only setState if there is a change to make
+		// otherwise it triggers endless updates
+		if (Object.keys(update).length > 0) {
+			this.setState(update);
+		}
 	}
 
 	handleInputChange = (e) => {
@@ -85,6 +112,7 @@ class ItemsPage extends Component {
 								canEdit={canEdit}
 								onCreateChildList={this.props.onCreateChildList}
 								onMoveItemUp={this.props.onMoveItemUp}
+								onMoveItemDown={this.props.onMoveItemDown}
 							/>
 						</Col>
 					</Row>

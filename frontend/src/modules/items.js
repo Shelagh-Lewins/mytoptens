@@ -2,6 +2,7 @@
 import { RECEIVE_ENTITIES } from '../modules/lists';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
+import store from '../store';
 
 import {
 	LOGOUT_USER_COMPLETE
@@ -91,17 +92,35 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
-		console.log('move item up response ', response);
 		return dispatch(moveItemUpSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'move item up error ': error.message }));
 	});
 };
 
+export const moveItemDown = ({ itemId }) => dispatch => {
+	// to move an item down, we move the item below up
+	// find the item
+	const item = store.getState().items.things[itemId];
+
+	// find its parent list
+	const listId = item.list;
+
+	// find the item's order
+	const order = item.order;
+
+	// find the item below it in the parent list
+	const item_below_id = store.getState().lists.things[listId].items[order];
+
+	dispatch(moveItemUp({ 'itemId': item_below_id }));
+};
+
 export function moveItemUpSucceeded(items) {
 	return {
 		'type': 'MOVE_ITEM_UP_SUCCEEDED',
-		'payload': items,
+		'payload': {
+			items,
+		}
 	};
 }
 
@@ -166,6 +185,18 @@ export default function items(state = initialItemsState, action) {
 
 		case DELETE_ITEM_SUCCEEDED: {
 			return updeep({ 'things': updeep.omit([action.payload.id]) }, state);
+		}
+
+		case MOVE_ITEM_UP_SUCCEEDED: {
+			const itemsArray = action.payload.items; // array containing the two items that have been swapped
+			// update items.things object, change order
+
+			let itemsObject = {};
+			itemsArray.map((item) => { // eslint-disable-line array-callback-return
+				itemsObject[item.id] = item;
+			});
+			//return state;
+			return updeep({ 'things': itemsObject }, state);
 		}
 
 		default:

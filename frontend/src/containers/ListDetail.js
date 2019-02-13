@@ -91,8 +91,11 @@ class ListDetails extends Component {
 	}
 
 	onMoveItemUp = (itemId) => {
-		console.log('move up in listDetail.js');
 		this.props.dispatch(items.moveItemUp({ itemId }));
+	}
+
+	onMoveItemDown = (itemId) => {
+		this.props.dispatch(items.moveItemDown({ itemId }));
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
@@ -242,6 +245,7 @@ class ListDetails extends Component {
 								canEdit={this.state.canEdit}
 								onCreateChildList={this.onCreateChildList}
 								onMoveItemUp={this.onMoveItemUp}
+								onMoveItemDown={this.onMoveItemDown}
 							/>
 						)}
 					</Container>

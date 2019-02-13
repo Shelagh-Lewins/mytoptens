@@ -148,11 +148,10 @@ class ItemViewSet(viewsets.ModelViewSet):
 
             # return the new items so the UI can update
             items = [item, item_above]
-            serializer = ItemSerializer(items, many=True)
-            data = serializer.data
-            data.message = 'Item moved up'
 
-            return Response(data, status=status.HTTP_200_OK)
+            serializer = ItemSerializer(items, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 

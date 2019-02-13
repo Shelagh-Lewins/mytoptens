@@ -12,7 +12,8 @@ import {
 
 import {
 	CREATE_ITEM_SUCCEEDED,
-	DELETE_ITEM_SUCCEEDED
+	DELETE_ITEM_SUCCEEDED,
+	MOVE_ITEM_UP_SUCCEEDED,
 } from './items';
 
 // define action types so they are visible
@@ -398,6 +399,23 @@ export default function lists(state = initialListsState, action) {
 			}
 
 			return updeep.updateIn(`things.${action.payload.listId}.items`, deleteItem, state);
+		}
+
+		case MOVE_ITEM_UP_SUCCEEDED: {
+			const itemsArray = action.payload.items; // array containing the two items that have been swapped
+			// update the Items array in their parent list, change order
+			const listId = itemsArray[0].list;
+
+			function replaceItems(items) {
+				let newItems = [].concat(items);
+				itemsArray.map((item) => { // eslint-disable-line array-callback-return
+					newItems[item.order-1] = item.id;
+				});
+
+				return newItems;
+			}
+
+			return updeep.updateIn(`things.${listId}.items`, replaceItems, state);
 		}
 
 		default:
