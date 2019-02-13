@@ -92,6 +92,7 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
+		console.log('response ', response);
 		return dispatch(moveItemUpSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'move item up error ': error.message }));
@@ -104,7 +105,7 @@ export const moveItemDown = ({ itemId }) => dispatch => {
 	const item = store.getState().items.things[itemId];
 
 	// find its parent list
-	const listId = item.list;
+	const listId = item.list_id;
 
 	// find the item's order
 	const order = item.order;

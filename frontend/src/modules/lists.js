@@ -404,7 +404,7 @@ export default function lists(state = initialListsState, action) {
 		case MOVE_ITEM_UP_SUCCEEDED: {
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped
 			// update the Items array in their parent list, change order
-			const listId = itemsArray[0].list;
+			const listId = itemsArray[0].list_id;
 
 			function replaceItems(items) {
 				let newItems = [].concat(items);

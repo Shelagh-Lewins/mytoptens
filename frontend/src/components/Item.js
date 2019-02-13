@@ -30,17 +30,10 @@ class Item extends Component {
 	}
 
 	onMoveUp = () => {
-		if (this.props.item.order === 1) {
-			return; // this shouldn't happen but just in case
-		}
 		this.props.onMoveItemUp(this.props.item.id);
 	}
 
 	onMoveDown = () => {
-		if (this.props.item.order === MAX_ITEMS_IN_LIST) {
-			return; // this shouldn't happen but just in case
-		}
-
 		this.props.onMoveItemDown(this.props.item.id);
 	}
 

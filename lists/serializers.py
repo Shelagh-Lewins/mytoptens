@@ -21,8 +21,8 @@ class ItemSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Item
-        fields = ('id', 'name', 'description', 'list', 'modified_at', 'order', 'slug')
-
+        fields = ('id', 'name', 'description', 'list_id', 'modified_at', 'order', 'slug')
+        # note 'list_id' is the field that can be returned, even though 'list' is the actual foreign key in the model
 
 class ListSerializer(serializers.ModelSerializer):
     """
