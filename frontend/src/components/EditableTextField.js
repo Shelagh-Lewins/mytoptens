@@ -8,6 +8,8 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Row, Col, Label, Input } from 'reactstrap';
 import './EditableTextField.scss';
+import Markdown from 'react-markdown';
+import { Link } from 'react-router-dom';
 
 class EditableTextField extends Component {
 	constructor(props) {
@@ -167,7 +169,12 @@ class EditableTextField extends Component {
 					onKeyUp={onKeyUp}
 					onClick={onClick}
 					tabIndex={tabIndex}	
-				>{this.props.value}{showMoreButton && <span className="fader"></span>}</span>
+				>
+					<Markdown 
+						escapeHtml={true}
+						source={this.props.value} 
+					/>
+					{showMoreButton && <span className="fader"></span>}</span>
 				{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
 			</span>
 		);
@@ -222,13 +229,14 @@ class EditableTextField extends Component {
 							</Col>
 						</Row>
 						<Row>
-							<Col>
+							<Col className="controls">
 								<button type="button" className="btn btn-secondary" onClick={this.cancel}>
 								Cancel
 								</button>
 								<button type="submit" className="btn btn-primary">
 								Done
 								</button>
+								<span className="hint">You can use <Link to="https://help.github.com/articles/basic-writing-and-formatting-syntax/">Markdown</Link></span>
 							</Col>
 						</Row>
 					</form>);

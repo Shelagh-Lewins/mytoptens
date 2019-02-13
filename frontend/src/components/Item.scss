@@ -50,6 +50,10 @@
 		&.create-childlist {
 			float: right;
 		}
+
+		&.move-up {
+			margin-right: 6px;
+		}
 	}
 
 	.child-list {

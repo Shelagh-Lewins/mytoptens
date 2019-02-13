@@ -45,4 +45,18 @@
 			float: right;
 		}
 	}
+
+	.controls {
+		margin-bottom: 6px;
+	}
+
+	.hint {
+		color: $color-hint;
+		margin-left: 6px;
+
+		a {
+			color: $color-hint;
+			text-decoration: underline;
+		}
+	}
 }
