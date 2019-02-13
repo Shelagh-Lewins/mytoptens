@@ -9,7 +9,7 @@ const store = createStore(
 	// inititalState, // by not supplying initial state, we tell the store to use the defaults specified in the reducer
 	compose(applyMiddleware(thunk), 
 		process.env.NODE_ENV !== 'production' &&
-    window.devToolsExtension ? window.devToolsExtension() : f => f));
+    window.devToolsExtension ? window.devToolsExtension() : f => f)); // devTools in production break app on mobile
 
 if (process.env.NODE_ENV !== 'production' && module.hot) {
 	module.hot.accept('./modules/rootReducer', () => store.replaceReducer(rootReducer));

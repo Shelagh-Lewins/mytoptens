@@ -49,15 +49,14 @@ class ItemsPage extends Component {
 			if (prevProps.items[i].id !== this.props.items[i].id) {
 				const order = item.order;
 
+				// update item properties
 				update[`${order}_id`] = item.id;
 				update[`${order}_name`] = item.name;
 				update[`${order}_description`] = item.description;
 
-				this.setState({
-					[`${order}_id`]: item.id,
-					[`${order}_name`]: item.name,
-					[`${order}_description`]: item.description,
-				});
+				// set child list if exists
+				// or set to null if it does not
+				update[`${order}_childList`] = item.childList;
 			}
 		}
 		// only setState if there is a change to make

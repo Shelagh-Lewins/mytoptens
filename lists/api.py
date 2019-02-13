@@ -130,9 +130,8 @@ class ItemViewSet(viewsets.ModelViewSet):
             # find the item to move up
             item = Item.objects.get(pk=pk)       
             item_order = item.order
-            parent_list = item.list_id
-            print('parent_list')
-            print(parent_list)
+            parent_list = item.list_id # note 'list_id' not 'list'
+
             if item.order == 1:
                 return Response({'message': 'Item is already at top of list'}, status=status.HTTP_403_FORBIDDEN)
 
