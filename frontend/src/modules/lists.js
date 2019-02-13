@@ -12,7 +12,7 @@ import {
 
 import {
 	CREATE_ITEM_SUCCEEDED,
-	DELETE_ITEM_SUCCEEDED,
+	// DELETE_ITEM_SUCCEEDED,
 	MOVE_ITEM_UP_SUCCEEDED,
 } from './items';
 
@@ -390,7 +390,7 @@ export default function lists(state = initialListsState, action) {
 			return updeep.updateIn(`things.${item.list}.items`, addItem, state);
 		}
 
-		case DELETE_ITEM_SUCCEEDED: {
+		/* case DELETE_ITEM_SUCCEEDED: {
 			function deleteItem(items) {
 				const itemIndex = items.findIndex((item) => item === action.payload.itemId); 
 				let newItems = [].concat(items);
@@ -399,7 +399,7 @@ export default function lists(state = initialListsState, action) {
 			}
 
 			return updeep.updateIn(`things.${action.payload.listId}.items`, deleteItem, state);
-		}
+		} */
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped

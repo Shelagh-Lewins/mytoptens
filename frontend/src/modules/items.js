@@ -20,7 +20,7 @@ import {
 export const CREATE_ITEM_REQUESTED = 'CREATE_ITEM_REQUESTED';
 export const CREATE_ITEM_SUCCEEDED = 'CREATE_ITEM_SUCCEEDED';
 export const UPDATE_ITEM_SUCCEEDED = 'UPDATE_ITEM_SUCCEEDED';
-export const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
+// export const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
 export const MOVE_ITEM_UP_SUCCEEDED = 'MOVE_ITEM_UP_SUCCEEDED';
 
 ////////////////////////////////////
@@ -127,7 +127,7 @@ export function moveItemUpSucceeded(items) {
 
 //////////////////////////////////
 // delete item
-export const deleteItem = ({ itemId, listId }) => dispatch => {
+/* export const deleteItem = ({ itemId, listId }) => dispatch => {
 	return fetchAPI({
 		'url': `/api/v1/content/items/${itemId}/`,
 		'method': 'DELETE',
@@ -146,7 +146,7 @@ export function deleteItemSucceeded({ itemId, listId }) {
 			listId
 		}
 	};
-}
+} */
 
 //////////////////////////////////
 // Reducer
@@ -184,9 +184,9 @@ export default function items(state = initialItemsState, action) {
 			return updeep({ 'things': { [item.id]: item } }, state);
 		}
 
-		case DELETE_ITEM_SUCCEEDED: {
+		/* case DELETE_ITEM_SUCCEEDED: {
 			return updeep({ 'things': updeep.omit([action.payload.id]) }, state);
-		}
+		} */
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped
