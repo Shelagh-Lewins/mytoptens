@@ -8,7 +8,8 @@ const store = createStore(
 	rootReducer, 
 	// inititalState, // by not supplying initial state, we tell the store to use the defaults specified in the reducer
 	compose(applyMiddleware(thunk), 
-		window.__REDUX_DEVTOOLS_EXTENSION__&& window.__REDUX_DEVTOOLS_EXTENSION__()));
+		process.env.NODE_ENV !== 'production' &&
+    window.devToolsExtension ? window.devToolsExtension() : f => f));
 
 if (process.env.NODE_ENV !== 'production' && module.hot) {
 	module.hot.accept('./modules/rootReducer', () => store.replaceReducer(rootReducer));
