@@ -8,6 +8,8 @@ from .models import List, Item
 from .serializers import ListSerializer, ItemSerializer
 from django.db.models import Q
 
+from rest_flex_fields import FlexFieldsModelViewSet
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # handle permissions based on method
@@ -38,13 +40,15 @@ class HasVerifiedEmail(permissions.BasePermission):
         return False
 
 
-class ListViewSet(viewsets.ModelViewSet):
+# class ListViewSet(viewsets.ModelViewSet):
+class ListViewSet(FlexFieldsModelViewSet):
     """
     ViewSet for lists.
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = List
     serializer_class = ListSerializer
+    permit_list_expands = ['item']
 
     def get_queryset(self):
         # can view public lists and lists the user created
@@ -83,7 +87,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
             pass # we don't mind no parent list
 
         # and child lists, if any
-        item_ids = [o.id for o in my_list.items.all()]
+        item_ids = [o.id for o in my_list.item.all()]
 
         try:
             child_lists = List.objects.filter(parent_item__in=item_ids)

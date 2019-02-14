@@ -30,11 +30,11 @@ export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
 export const SET_LIST_IS_PUBLIC_SUCCEEDED = 'SET_LIST_IS_PUBLIC_SUCCEEDED';
 export const UPDATE_LIST_SUCCEEDED = 'UPDATE_LIST_SUCCEEDED';
 
-const itemSchema = new schema.Entity('items', {
+const itemSchema = new schema.Entity('item', {
 	'list': ['listSchema'],
 });
 const listSchema = new schema.Entity('lists', {
-	'items': [itemSchema],
+	'item': [itemSchema],
 });
 
 function receiveEntities(entities) {
@@ -241,6 +241,43 @@ export function setListIsPublicSucceeded({ id, is_public }) {
 }
 
 //////////////////////////////////
+// fetch the names of my lists and their items
+// for changing a list's parent item
+// returns only the fields that are required for this function
+export function fetchMyListNames() {
+	console.log('dispatch fetchMyListNames');
+	return (dispatch, getState) => {
+		// dispatch(fetchMyListNamesStarted());
+		// TODO association dispatch actions
+		// TODO store
+		// TODO filter to get only my lists
+		// TODO select only required fields (name, id, parent_list, items...?)
+
+		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
+
+		return fetchAPI({
+			'url': '/api/v1/content/lists/?expand=item&fields=id,name,item',
+			'method': 'GET',
+			'useAuth': useAuth,
+		}).then(response => {
+			console.log('response ', response);
+			const normalizedData = normalize(response, [listSchema]);
+			console.log('normalizedData ', normalizedData);
+			// return dispatch(receiveEntities(normalizedData));
+		}).catch(error => {
+			dispatch(fetchListsFailed());
+
+			return dispatch(getErrors({ 'fetch my list names': error.message }));
+		});
+	};
+}
+
+//////////////////////////////////
 // Reducer
 var updeep = require('updeep');
 
@@ -387,7 +424,7 @@ export default function lists(state = initialListsState, action) {
 				return [].concat(items, item.id);
 			}
 
-			return updeep.updateIn(`things.${item.list}.items`, addItem, state);
+			return updeep.updateIn(`things.${item.list}.item`, addItem, state);
 		}
 
 		/* case DELETE_ITEM_SUCCEEDED: {

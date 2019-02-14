@@ -3,6 +3,8 @@ from rest_framework import serializers
 # dynamic rest extension enables nested data for lists, see chapter 8
 from dynamic_rest.serializers import DynamicModelSerializer
 
+from rest_flex_fields import FlexFieldsModelSerializer
+
 from .models import List, Item
 
 from dynamic_rest.fields import (
@@ -15,7 +17,8 @@ from dynamic_rest.fields import (
 
 #from users.models import CustomUser
 
-class ItemSerializer(serializers.ModelSerializer):
+class ItemSerializer(FlexFieldsModelSerializer):
+    # class ItemSerializer(serializers.ModelSerializer):
     """
     An item must belong to a list
     """
@@ -24,11 +27,12 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'list_id', 'modified_at', 'order', 'slug')
         # note 'list_id' is the field that can be returned, even though 'list' is the actual foreign key in the model
 
-class ListSerializer(serializers.ModelSerializer):
+class ListSerializer(FlexFieldsModelSerializer):
+#class ListSerializer(serializers.ModelSerializer):
     """
     A list may be created with items
     """
-    items = ItemSerializer(many=True)
+    item = ItemSerializer(many=True)
 
     # automatically set created_by_id as the current user's id
     created_by_id = serializers.PrimaryKeyRelatedField(
@@ -39,14 +43,18 @@ class ListSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    expandable_fields = {
+        'item': (ItemSerializer, {'source': 'item', 'many': True, 'fields': ['name', 'id', 'list_id']})
+    }
+
     class Meta:
         model = List
         fields = ('id', 'name', 'description', 'is_public',
             'slug', 'created_by_id', 'created_by_username', 'created_at',
-            'modified_by', 'modified_at', 'items', 'parent_item')
+            'modified_by', 'modified_at', 'item', 'parent_item')
 
     def create(self, validated_data):
-        items_data = validated_data.pop('items', None)
+        items_data = validated_data.pop('item', None)
         validated_data['created_by_id'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username
 

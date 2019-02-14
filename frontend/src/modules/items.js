@@ -102,7 +102,7 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 export const moveItemDown = ({ itemId }) => dispatch => {
 	// to move an item down, we move the item below up
 	// find the item
-	const item = store.getState().items.things[itemId];
+	const item = store.getState().item.things[itemId];
 
 	// find its parent list
 	const listId = item.list_id;
@@ -111,7 +111,7 @@ export const moveItemDown = ({ itemId }) => dispatch => {
 	const order = item.order;
 
 	// find the item below it in the parent list
-	const item_below_id = store.getState().lists.things[listId].items[order];
+	const item_below_id = store.getState().lists.things[listId].item[order];
 
 	dispatch(moveItemUp({ 'itemId': item_below_id }));
 };
@@ -166,8 +166,9 @@ export default function items(state = initialItemsState, action) {
 		
 		case RECEIVE_ENTITIES: {
 			const { entities } = action.payload;
-			if (entities && entities.items) {
-				return updeep({ 'things': entities.items, 'isLoading': false }, state);
+			console.log('items RECEIVE_ENTITIES ', entities);
+			if (entities && entities.item) {
+				return updeep({ 'things': entities.item, 'isLoading': false }, state);
 			}
 
 			return state;
@@ -189,6 +190,7 @@ export default function items(state = initialItemsState, action) {
 		} */
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
+			console.log('payload ', action.payload);
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped
 			// update items.things object, change order
 

@@ -61,7 +61,7 @@ class CreateList extends Component {
 		let newList = {
 			'name': this.state.name,
 			'description': this.state.description,
-			'items': [],
+			'item': [],
 		};
 		
 		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
@@ -71,7 +71,7 @@ class CreateList extends Component {
 					'description': this.state[`item${i}_description`],
 					'order': i,
 				};
-				newList.items.push(newItem);
+				newList.item.push(newItem);
 			}
 		}
 

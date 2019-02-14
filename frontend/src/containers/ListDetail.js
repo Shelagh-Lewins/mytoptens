@@ -43,6 +43,11 @@ class ListDetails extends Component {
 		return slug;
 	}
 
+	getMyListNames = () => {
+		// minimal data for all my lists and items to allow parent list to be changed.
+		this.props.dispatch(lists.fetchMyListNames());
+	}
+
 	onIsPublicChange = ({ id, is_public }) => {
 		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
 	}
@@ -179,6 +184,9 @@ class ListDetails extends Component {
 								<Col>
 									<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
 									</div>
+									<div className="change-parent-list">
+										<button className="btn btn-secondary" onClick={this.getMyListNames.bind(this)}>...</button>
+									</div>
 								</Col>
 							</Row>
 						)}
@@ -297,7 +305,7 @@ const mapStateToProps = (state, ownProps) => {
 	// find the parent item and its list
 	if (list) { // avoid error while loading or if list not visible
 		// find the items for the target list
-		targetListItems = list.items.map((itemId) => {
+		targetListItems = list.item.map((itemId) => {
 			return { ...items[itemId] }; // shallow copy so item is extensible
 		});
 
@@ -311,13 +319,13 @@ const mapStateToProps = (state, ownProps) => {
 			const testList = lists[keys[i]];
 
 			if (list.parent_item) {
-				if (testList.items.indexOf(list.parent_item) !== -1) {
+				if (testList.item.indexOf(list.parent_item) !== -1) {
 					parentList = testList;
 				}
 			}
 
 			// find any list that is a child of an item in the target list
-			const index = list.items.indexOf(testList.parent_item);
+			const index = list.item.indexOf(testList.parent_item);
 
 			if (index !== -1) {
 				targetListItems[index].childList = { ...testList };
