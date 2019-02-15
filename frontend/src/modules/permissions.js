@@ -19,7 +19,7 @@ export function canViewList(identifier) {
 	const property = Object.keys(identifier)[0];
 	const value = identifier[property];
 	const state = store.getState();
-	const lists = state.lists.things;
+	const lists = state.list.things;
 	const userId = state.auth.user.id;
 
 	let canViewList = false;
@@ -40,7 +40,7 @@ export function canEditList(identifier) {
 	const property = Object.keys(identifier)[0];
 	const value = identifier[property];
 	const state = store.getState();
-	const lists = state.lists.things;
+	const lists = state.list.things;
 	const userId = state.auth.user.id;
 
 	let canEditList = false;

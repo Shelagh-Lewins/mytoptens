@@ -1,6 +1,6 @@
 import {
 	FILTER_LISTS,
-} from './lists';
+} from './list';
 
 
 var updeep = require('updeep');

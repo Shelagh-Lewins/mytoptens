@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
-import { createList } from '../modules/lists';
+import { createList } from '../modules/list';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';

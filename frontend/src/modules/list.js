@@ -14,7 +14,7 @@ import {
 	CREATE_ITEM_SUCCEEDED,
 	// DELETE_ITEM_SUCCEEDED,
 	MOVE_ITEM_UP_SUCCEEDED,
-} from './items';
+} from './item';
 
 // define action types so they are visible
 // and export them so other reducers can use them
@@ -33,7 +33,7 @@ export const UPDATE_LIST_SUCCEEDED = 'UPDATE_LIST_SUCCEEDED';
 const itemSchema = new schema.Entity('item', {
 	'list': ['listSchema'],
 });
-const listSchema = new schema.Entity('lists', {
+const listSchema = new schema.Entity('list', {
 	'item': [itemSchema],
 });
 
@@ -68,7 +68,7 @@ export function fetchLists() {
 		}
 
 		return fetchAPI({
-			'url': '/api/v1/content/lists/',
+			'url': '/api/v1/content/list/',
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -109,7 +109,7 @@ export function fetchListBySlug(slug) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/list/?slug=${slug}`,
+			'url': `/api/v1/content/listbyslug/?slug=${slug}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -137,7 +137,7 @@ export const createList = (list, history) => dispatch => {
 	dispatch(createListStarted());
 
 	return fetchAPI({
-		'url': '/api/v1/content/lists/',
+		'url': '/api/v1/content/list/',
 		'data': JSON.stringify(list),
 		'method': 'POST',
 		'useAuth': true,
@@ -172,7 +172,7 @@ export const updateList = (listId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
 
 	return fetchAPI({
-		'url': `/api/v1/content/lists/${listId}/`,
+		'url': `/api/v1/content/list/${listId}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ [propertyName]: value }),
 		'method': 'PATCH',
@@ -197,7 +197,7 @@ export function updateListSucceeded({ id }) {
 // delete list
 export const deleteList = id => (dispatch, getState) => {
 	return fetchAPI({
-		'url': `/api/v1/content/lists/${id}/`,
+		'url': `/api/v1/content/list/${id}/`,
 		'method': 'DELETE',
 		'useAuth': true,
 	}).then(response => {
@@ -218,7 +218,7 @@ export function deleteListSucceeded(id) {
 
 export const setListIsPublic = ({ id, is_public }) => dispatch => {
 	return fetchAPI({
-		'url': `/api/v1/content/lists/${id}/`,
+		'url': `/api/v1/content/list/${id}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ is_public }),
 		'method': 'PATCH',
@@ -261,7 +261,7 @@ export function fetchMyListNames() {
 		}
 
 		return fetchAPI({
-			'url': '/api/v1/content/lists/?expand=item&fields=id,name,item',
+			'url': '/api/v1/content/list/?expand=item&fields=id,name,item',
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -295,8 +295,8 @@ export const getSearchTerm = state => {
 };
 
 export const getLists = state => {
-	return Object.keys(state.lists.things).map(id => {
-		return state.lists.things[id];
+	return Object.keys(state.list.things).map(id => {
+		return state.list.things[id];
 	});
 };
 
@@ -353,18 +353,20 @@ export const getMyGroupedAndFilteredLists = createSelector(
 // as 'items' for us is a specific thing, we need another name for the set of entities to be displayed i.e. the lists themselves
 // so those are globalState.lists.things
 // i.e. state.things here
-export default function lists(state = initialListsState, action) {
+export default function list(state = initialListsState, action) {
 	switch (action.type) {
 		case LOGOUT_USER_COMPLETE: {
 			return updeep(initialListsState, {});
 		}
 
 		case RECEIVE_ENTITIES: {
+			// load lists data into store
+			console.log('receiveEntities ', action.payload);
 			const { entities } = action.payload;
 			let lists = {};
 
-			if (entities && entities.lists) {
-				lists = entities.lists; // there is at least one list
+			if (entities && entities.list) {
+				lists = entities.list; // there is at least one list
 			}
 
 			return updeep({ 'things': lists, 'isLoading': false }, state);

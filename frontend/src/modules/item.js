@@ -1,5 +1,5 @@
 // import { createSelector } from 'reselect';
-import { RECEIVE_ENTITIES } from '../modules/lists';
+// import { RECEIVE_ENTITIES,  } from '../modules/list';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import store from '../store';
@@ -9,8 +9,8 @@ import {
 } from './auth';
 
 import {
-	FETCH_LIST_BY_SLUG_STARTED
-} from './lists';
+	RECEIVE_ENTITIES, FETCH_LIST_BY_SLUG_STARTED
+} from './list';
 
 //////////////////////////////////
 // Action creators
@@ -29,7 +29,7 @@ export const createItem = item => dispatch => {
 	dispatch(createItemRequested());
 
 	return fetchAPI({
-		'url': '/api/v1/content/items/',
+		'url': '/api/v1/content/item/',
 		'data': JSON.stringify(item),
 		'method': 'POST',
 		'useAuth': true,
@@ -62,7 +62,7 @@ export const updateItem = (itemId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
 
 	return fetchAPI({
-		'url': `/api/v1/content/items/${itemId}/`,
+		'url': `/api/v1/content/item/${itemId}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ [propertyName]: value }),
 		'method': 'PATCH',
@@ -87,7 +87,7 @@ export function updateItemSucceeded({ id }) {
 // move item up
 export const moveItemUp = ({ itemId }) => dispatch => {
 	return fetchAPI({
-		'url': `/api/v1/content/items/${itemId}/moveup/`,
+		'url': `/api/v1/content/item/${itemId}/moveup/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'method': 'PATCH',
 		'useAuth': true,
@@ -101,7 +101,7 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 export const moveItemDown = ({ itemId }) => dispatch => {
 	// to move an item down, we move the item below up
 	// find the item
-	const item = store.getState().items.things[itemId];
+	const item = store.getState().item.things[itemId];
 
 	// find its parent list
 	const listId = item.list_id;
@@ -110,7 +110,7 @@ export const moveItemDown = ({ itemId }) => dispatch => {
 	const order = item.order;
 
 	// find the item below it in the parent list
-	const item_below_id = store.getState().lists.things[listId].item[order];
+	const item_below_id = store.getState().list.things[listId].item[order];
 
 	dispatch(moveItemUp({ 'itemId': item_below_id }));
 };
@@ -128,7 +128,7 @@ export function moveItemUpSucceeded(items) {
 // delete item
 /* export const deleteItem = ({ itemId, listId }) => dispatch => {
 	return fetchAPI({
-		'url': `/api/v1/content/items/${itemId}/`,
+		'url': `/api/v1/content/item/${itemId}/`,
 		'method': 'DELETE',
 	}).then(response => {
 		return dispatch(deleteItemSucceeded({ itemId, listId }));
@@ -157,7 +157,7 @@ const initialItemsState = {
 	'error': null,
 };
 
-export default function items(state = initialItemsState, action) {
+export default function item(state = initialItemsState, action) {
 	switch (action.type) {
 		case LOGOUT_USER_COMPLETE: {
 			return updeep(initialItemsState, {});
@@ -206,7 +206,7 @@ export default function items(state = initialItemsState, action) {
 }
 
 // all items, for selector to use
-export const getItems = state => state.items.things;
+export const getItems = state => state.item.things;
 
 //// not currently used but left in as an example of sorting list items by order
 // items belonging to the current list

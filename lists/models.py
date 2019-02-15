@@ -31,7 +31,7 @@ class List(models.Model):
     created_by_id = models.ForeignKey(USER, on_delete=models.CASCADE, related_name='list_created_by_id')
     created_by_username = models.CharField(max_length=255) # this shold be OK given that the list will be deleted if the created_by_id user is deleted
     created_at = models.DateTimeField(auto_now_add=True)
-    parent_item = models.ForeignKey('Item', on_delete=models.SET_NULL, null=True, related_name='lists')
+    parent_item = models.ForeignKey('Item', on_delete=models.SET_NULL, null=True, related_name='parent_item')
     modified_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
         related_name='list_modified_by')
     modified_at = models.DateTimeField(auto_now_add=True)

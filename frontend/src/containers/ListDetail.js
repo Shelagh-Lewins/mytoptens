@@ -11,8 +11,7 @@ import SetListIsPublic from '../components/SetListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
 
-import * as listsReducer from '../modules/lists';
-// import * as items from '../modules/items';
+import * as listsReducer from '../modules/list';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
@@ -284,8 +283,8 @@ const mapStateToProps = (state, ownProps) => {
 	// the store should contain our target list, identified by slug
 	// It may also contain the parent list, and / or any child lists
 	// plus the items for all these lists
-	const lists = state.lists.things;
-	const items = state.items.things;
+	const lists = state.list.things;
+	const items = state.item.things;
 
 	// first find the target list
 	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'slug', 'value': ownProps.match.params.slug });
@@ -328,7 +327,7 @@ const mapStateToProps = (state, ownProps) => {
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
-		'isLoading': state.lists.isLoading,
+		'isLoading': state.list.isLoading,
 		'lists': lists,
 		'list': list,
 		'parentList': parentList,

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 
-import * as itemsReducer from '../modules/items';
+import * as itemsReducer from '../modules/item';
 
 import { MAX_ITEMS_IN_LIST } from '../constants';
 import Item from './Item';

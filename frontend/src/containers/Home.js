@@ -6,8 +6,8 @@ import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import ListsPage from './ListsPage';
 
-import * as lists from '../modules/lists';
-import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules/lists';
+import * as listReducer from '../modules/list';
+import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules/list';
 
 import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -23,28 +23,28 @@ class Home extends Component {
 	}
 
 	componentDidMount() {
-		this.props.dispatch(lists.fetchLists());
+		this.props.dispatch(listReducer.fetchLists());
 	}
 
 	componentDidUpdate(prevProps){
 		// If the user's status has changed, refresh Lists
 		if(prevProps.auth.user.token !== this.props.auth.user.token){
-			this.props.dispatch(lists.fetchLists());
+			this.props.dispatch(listReducer.fetchLists());
 		}
 	}
 
 	onSearch = searchTerm => {
-		this.props.dispatch(lists.filterLists(searchTerm));
+		this.props.dispatch(listReducer.filterLists(searchTerm));
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
-		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
+		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
 	onDeleteList = ({ id, name }) => {
 		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
 		{
-		  this.props.dispatch(lists.deleteList(id));
+		  this.props.dispatch(listReducer.deleteList(id));
 		}
 	}
 
@@ -93,7 +93,7 @@ Home.propTypes = {
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
-	'isLoading': state.lists.isLoading,
+	'isLoading': state.list.isLoading,
 	'publicLists': getFilteredPublicLists(state),
 	'myLists': getMyGroupedAndFilteredLists(state),
 });

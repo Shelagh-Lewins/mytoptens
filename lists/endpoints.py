@@ -7,9 +7,9 @@ from .api import ListBySlugViewSet
 from .api import ItemViewSet
 
 router = routers.DefaultRouter()
-router.register('lists', ListViewSet, base_name='Lists')
-router.register('list', ListBySlugViewSet, base_name='ListBySlug')
-router.register('items', ItemViewSet, base_name='Items')
+router.register('list', ListViewSet, base_name='Lists')
+router.register('listbyslug', ListBySlugViewSet, base_name='ListBySlug')
+router.register('item', ItemViewSet, base_name='Items')
 
 urlpatterns = [
     path('', include(router.urls)),
