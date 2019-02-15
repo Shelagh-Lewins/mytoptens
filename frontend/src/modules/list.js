@@ -242,16 +242,16 @@ export function setListIsPublicSucceeded({ id, is_public }) {
 
 //////////////////////////////////
 // fetch the names of my lists and their items
-// for changing a list's parent item
+// for displaying and managing list hierarchy i.e. list parent_item
 // returns only the fields that are required for this function
 export function fetchMyListNames() {
 	console.log('dispatch fetchMyListNames');
+	console.log('userId ', store.getState().auth.user.id);
+	const userId = store.getState().auth.user.id;
 	return (dispatch, getState) => {
 		// dispatch(fetchMyListNamesStarted());
 		// TODO association dispatch actions
 		// TODO store
-		// TODO filter to get only my lists
-		// TODO select only required fields (name, id, parent_list, items...?)
 
 		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
@@ -261,7 +261,7 @@ export function fetchMyListNames() {
 		}
 
 		return fetchAPI({
-			'url': '/api/v1/content/list/?expand=item&fields=id,name,item',
+			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,parent_item&created_by_id=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -361,7 +361,6 @@ export default function list(state = initialListsState, action) {
 
 		case RECEIVE_ENTITIES: {
 			// load lists data into store
-			console.log('receiveEntities ', action.payload);
 			const { entities } = action.payload;
 			let lists = {};
 

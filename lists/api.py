@@ -51,14 +51,23 @@ class ListViewSet(FlexFieldsModelViewSet):
     permit_list_expands = ['item']
 
     def get_queryset(self):
-        # can view public lists and lists the user created
+        # unauthenticated user can only view public lists
+        queryset = List.objects.filter(is_public=True)
+
+        # authenticated user can view public lists and lists the user created
         if self.request.user.is_authenticated:
-            return List.objects.filter(
+            queryset = List.objects.filter(
                 Q(created_by_id=self.request.user) | 
                 Q(is_public=True)
             )
 
-        return List.objects.filter(is_public=True)
+        # allow filter by URL parameter created_by_id
+        created_by_id = self.request.query_params.get('created_by_id', None)
+
+        if created_by_id is not None:
+            queryset = queryset.filter(created_by_id=created_by_id)
+
+        return queryset
 
     def pre_save(self, obj):
         obj.created_by_id = self.request.user

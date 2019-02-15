@@ -41,7 +41,7 @@ class Item extends Component {
 		let showDescription = true;
 		if (this.props.item.name === '') {
 			showDescription = false;
-		} else if (this.state.isEditingName && store.getState().items.things[this.props.item.id] && store.getState().items.things[this.props.item.id].name === '') {
+		} else if (this.state.isEditingName && store.getState().item.things[this.props.item.id] && store.getState().item.things[this.props.item.id].name === '') {
 			showDescription = false;
 		}
 
