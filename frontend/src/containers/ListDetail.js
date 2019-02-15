@@ -10,6 +10,7 @@ import FlashMessage from '../components/FlashMessage';
 import SetListIsPublic from '../components/SetListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
+import ListOrganizer from '../components/ListOrganizer';
 
 import * as listsReducer from '../modules/list';
 import * as permissions from '../modules/permissions';
@@ -31,6 +32,7 @@ class ListDetails extends Component {
 
 		this.state = {
 			slug,
+			'showListOrganizer': false,
 		};
 	}
 
@@ -40,11 +42,6 @@ class ListDetails extends Component {
 		props.dispatch(listsReducer.fetchListBySlug(slug));
 		props.dispatch(clearErrors());
 		return slug;
-	}
-
-	getMyListNames = () => {
-		// minimal data for all my lists and items to allow parent list to be changed.
-		this.props.dispatch(listsReducer.fetchMyListNames());
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
@@ -155,102 +152,105 @@ class ListDetails extends Component {
 			}
 		}
 
-		return <div>
-			{!isEmpty(this.props.errors) && (<Container>
-				<Row>
-					<Col>
-						<FlashMessage
-							message={formatErrorMessages(this.props.errors)}
-							type="error"
-							onClick={this.onCloseFlashMessage}
-						/>
-					</Col>
-				</Row>
-			</Container>)}
-			{this.props.list && (
-				<div>
-					<Container>
-						{this.props.parentList && (
-							<Row>
-								<Col>
-									<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
-									</div>
-									<div className="change-parent-list">
-										<button className="btn btn-secondary" onClick={this.getMyListNames.bind(this)}>...</button>
-									</div>
-								</Col>
-							</Row>
-						)}
-						{this.state.canEdit && (
-							<Row>
-								<Col>
-									<div className="list-detail-controls">
-										<SetListIsPublic
-											list={this.props.list}
-											onIsPublicChange={this.onIsPublicChange}
-										/>
-										<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
-									</div>
-								</Col>
-							</Row>
-						)}
-						{showPrivacyWarning && (
-							<Row>
-								<Col>
-									<div className="privacy-warning">{privacyWarningText}</div>
-								</Col>
-							</Row>
-						)}
-						<Row>
-							<Col className="list-name">
-								<EditableTextField
-									canEdit={this.state.canEdit}
-									required={true}
-									name={'list_name'}
-									placeholder="Click here to add a name for the list"
-									label="Item name"
-									data-state={'list_name'} // this.state property
-									data-entityid={this.props.list.id} // database id of the item
-									id='list_name' // id of the html element
-									handleInputChange={this.handleInputChange}
-									handleNewValue={this.handleNewValue}
-									value={this.state.list_name}
-								/>
-							</Col>
-						</Row>
-						<Row>
-							<Col className="list-description">
-								<EditableTextField
-									textarea={true}
-									canEdit={this.state.canEdit}
-									name={'list_description'}
-									placeholder="Click here to add a description for the list"
-									label="Item description"
-									data-state={'list_description'} // this.state property
-									data-entityid={this.props.list.id} // database id of the item
-									id='list_description' // id of the html element
-									handleInputChange={this.handleInputChange}
-									handleNewValue={this.handleNewValue}
-									value={this.state.list_description}
-								/>
-							</Col>
-						</Row>
-					</Container>
-					<Container>
-						{this.props.items && (
-							<ItemsPage
-								items={this.props.items}
-								list={this.props.list.id}
-								canEdit={this.state.canEdit}
-								onCreateChildList={this.onCreateChildList}
-								onMoveItemUp={this.onMoveItemUp}
-								onMoveItemDown={this.onMoveItemDown}
+		return (
+			<div>
+				{!isEmpty(this.props.errors) && (<Container>
+					<Row>
+						<Col>
+							<FlashMessage
+								message={formatErrorMessages(this.props.errors)}
+								type="error"
+								onClick={this.onCloseFlashMessage}
 							/>
-						)}
-					</Container>
-				</div>
-			)}
-		</div>;
+						</Col>
+					</Row>
+				</Container>)}
+				{this.props.list && (
+					<div>
+						<Container>
+							{this.props.parentList && (
+								<Row>
+									<Col>
+										<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
+										</div>
+									</Col>
+								</Row>
+							)}
+							{this.state.canEdit &&
+								<ListOrganizer
+									list={this.props.list}
+								/>}
+							{this.state.canEdit && (
+								<Row>
+									<Col>
+										<div className="list-detail-controls">
+											<SetListIsPublic
+												list={this.props.list}
+												onIsPublicChange={this.onIsPublicChange}
+											/>
+											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
+										</div>
+									</Col>
+								</Row>
+							)}
+							{showPrivacyWarning && (
+								<Row>
+									<Col>
+										<div className="privacy-warning">{privacyWarningText}</div>
+									</Col>
+								</Row>
+							)}
+							<Row>
+								<Col className="list-name">
+									<EditableTextField
+										canEdit={this.state.canEdit}
+										required={true}
+										name={'list_name'}
+										placeholder="Click here to add a name for the list"
+										label="Item name"
+										data-state={'list_name'} // this.state property
+										data-entityid={this.props.list.id} // database id of the item
+										id='list_name' // id of the html element
+										handleInputChange={this.handleInputChange}
+										handleNewValue={this.handleNewValue}
+										value={this.state.list_name}
+									/>
+								</Col>
+							</Row>
+							<Row>
+								<Col className="list-description">
+									<EditableTextField
+										textarea={true}
+										canEdit={this.state.canEdit}
+										name={'list_description'}
+										placeholder="Click here to add a description for the list"
+										label="Item description"
+										data-state={'list_description'} // this.state property
+										data-entityid={this.props.list.id} // database id of the item
+										id='list_description' // id of the html element
+										handleInputChange={this.handleInputChange}
+										handleNewValue={this.handleNewValue}
+										value={this.state.list_description}
+									/>
+								</Col>
+							</Row>
+						</Container>
+						<Container>
+							{this.props.items && (
+								<ItemsPage
+									items={this.props.items}
+									list={this.props.list.id}
+									canEdit={this.state.canEdit}
+									onCreateChildList={this.onCreateChildList}
+									onMoveItemUp={this.onMoveItemUp}
+									onMoveItemDown={this.onMoveItemDown}
+								/>
+							)}
+						</Container>
+					</div>
+				)}
+			</div>
+		);
 	}
 
 	///////////////

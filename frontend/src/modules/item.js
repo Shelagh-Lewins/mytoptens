@@ -9,7 +9,9 @@ import {
 } from './auth';
 
 import {
-	RECEIVE_ENTITIES, FETCH_LIST_BY_SLUG_STARTED
+	RECEIVE_ENTITIES,
+	FETCH_LIST_BY_SLUG_STARTED,
+	RECEIVE_LIST_ORGANIZER_DATA,
 } from './list';
 
 //////////////////////////////////
@@ -155,6 +157,7 @@ const initialItemsState = {
 	'things': {},
 	'isLoading': false,
 	'error': null,
+	'listOrganizerData': {},
 };
 
 export default function item(state = initialItemsState, action) {
@@ -196,8 +199,17 @@ export default function item(state = initialItemsState, action) {
 			itemsArray.map((item) => { // eslint-disable-line array-callback-return
 				itemsObject[item.id] = item;
 			});
-			//return state;
 			return updeep({ 'things': itemsObject }, state);
+		}
+
+		case RECEIVE_LIST_ORGANIZER_DATA: {
+			const { entities } = action.payload;
+
+			if (entities && entities.item) {
+				return updeep({ 'listOrganizerData': entities.item, 'isLoading': false }, state);
+			}
+
+			return state;
 		}
 
 		default:

@@ -30,6 +30,10 @@ export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
 export const SET_LIST_IS_PUBLIC_SUCCEEDED = 'SET_LIST_IS_PUBLIC_SUCCEEDED';
 export const UPDATE_LIST_SUCCEEDED = 'UPDATE_LIST_SUCCEEDED';
 
+export const RECEIVE_LIST_ORGANIZER_DATA = 'RECEIVE_LIST_ORGANIZER_DATA';
+export const FETCH_LIST_ORGANIZER_DATA_STARTED = 'FETCH_LIST_ORGANIZER_DATA_STARTED';
+export const FETCH_LIST_ORGANIZER_DATA_FAILED = 'FETCH_LIST_ORGANIZER_DATA_FAILED';
+
 const itemSchema = new schema.Entity('item', {
 	'list': ['listSchema'],
 });
@@ -244,9 +248,26 @@ export function setListIsPublicSucceeded({ id, is_public }) {
 // fetch the names of my lists and their items
 // for displaying and managing list hierarchy i.e. list parent_item
 // returns only the fields that are required for this function
-export function fetchMyListNames() {
-	console.log('dispatch fetchMyListNames');
-	console.log('userId ', store.getState().auth.user.id);
+function receiveListOrganizerData(entities) {
+	return {
+		'type': RECEIVE_LIST_ORGANIZER_DATA,
+		'payload': entities,
+	};
+}
+
+export function fetchListOrganizerDataStarted(is_public) {
+	return {
+		'type': FETCH_LIST_ORGANIZER_DATA_STARTED,
+	};
+}
+
+function fetchListOrganizerDataFailed() {
+	return {
+		'type': FETCH_LIST_ORGANIZER_DATA_FAILED
+	};
+}
+
+export function fetchListOrganizerData() {
 	const userId = store.getState().auth.user.id;
 	return (dispatch, getState) => {
 		// dispatch(fetchMyListNamesStarted());
@@ -265,12 +286,11 @@ export function fetchMyListNames() {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			console.log('response ', response);
 			const normalizedData = normalize(response, [listSchema]);
-			console.log('normalizedData ', normalizedData);
-			// return dispatch(receiveEntities(normalizedData));
+			
+			return dispatch(receiveListOrganizerData(normalizedData));
 		}).catch(error => {
-			dispatch(fetchListsFailed());
+			dispatch(fetchListOrganizerDataFailed());
 
 			return dispatch(getErrors({ 'fetch my list names': error.message }));
 		});
@@ -287,6 +307,7 @@ const initialListsState = {
 	'isLoading': false,
 	'error': null,
 	'things': {},
+	'listOrganizerData': {},
 };
 
 // 'state' here is global state
@@ -455,6 +476,26 @@ export default function list(state = initialListsState, action) {
 			}
 
 			return updeep.updateIn(`things.${listId}.item`, replaceItems, state);
+		}
+
+		case RECEIVE_LIST_ORGANIZER_DATA: {
+			// load lists data into store
+			const { entities } = action.payload;
+			let lists = {};
+
+			if (entities && entities.list) {
+				lists = entities.list; // there is at least one list
+			}
+
+			return updeep({ 'listOrganizerData': lists, 'isLoading': false }, state);
+		}
+
+		case FETCH_LIST_ORGANIZER_DATA_STARTED: {
+			return updeep({ 'isLoading': true }, state);
+		}
+
+		case FETCH_LIST_ORGANIZER_DATA_FAILED: {
+			return updeep({ 'isLoading': false }, state);
 		}
 
 		default:
