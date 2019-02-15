@@ -28,6 +28,12 @@
 			}
 		}
 
+		// Markdown component inserts a p
+		p {
+			margin: 0;
+			padding: 0;
+		}
+
 		.fader {
 			background: linear-gradient(to right, $color-list-fadeout 0%, $color-list-summary-bg 80%);
 			display: block;
@@ -52,6 +58,8 @@
 
 	.hint {
 		color: $color-hint;
+		font-size: 1rem !important; // eslint-disable-line no-important
+		font-weight: normal !important; // eslint-disable-line no-important
 		margin-left: 6px;
 
 		a {

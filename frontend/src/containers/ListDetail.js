@@ -11,8 +11,8 @@ import SetListIsPublic from '../components/SetListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
 
-import * as lists from '../modules/lists';
-import * as items from '../modules/items';
+import * as listsReducer from '../modules/lists';
+// import * as items from '../modules/items';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
@@ -38,18 +38,18 @@ class ListDetails extends Component {
 	getListData = (props) => {
 		const slug = props.match.params.slug;
 
-		props.dispatch(lists.fetchListBySlug(slug));
+		props.dispatch(listsReducer.fetchListBySlug(slug));
 		props.dispatch(clearErrors());
 		return slug;
 	}
 
 	getMyListNames = () => {
 		// minimal data for all my lists and items to allow parent list to be changed.
-		this.props.dispatch(lists.fetchMyListNames());
+		this.props.dispatch(listsReducer.fetchMyListNames());
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
-		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
+		this.props.dispatch(listsReducer.setListIsPublic({ id, is_public }));
 	}
 
 	onDeleteList = () => {
@@ -58,7 +58,7 @@ class ListDetails extends Component {
 
 		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
 		{
-		  this.props.dispatch(lists.deleteList(id));
+		  this.props.dispatch(listsReducer.deleteList(id));
 
 		  // if there is a visible parent, navigate there
 		  if (this.props.parentList) {
@@ -88,23 +88,15 @@ class ListDetails extends Component {
 		const propertyName = identifiers[1];
 		const value = element.value;
 
-		this.props.dispatch(lists.updateList(listId, propertyName, value));
+		this.props.dispatch(listsReducer.updateList(listId, propertyName, value));
 	}
 
 	onCreateChildList = (itemId) => {
 		this.props.history.push(`/newlist?parent-item=${itemId}`);
 	}
 
-	onMoveItemUp = (itemId) => {
-		this.props.dispatch(items.moveItemUp({ itemId }));
-	}
-
-	onMoveItemDown = (itemId) => {
-		this.props.dispatch(items.moveItemDown({ itemId }));
-	}
-
 	onIsPublicChange = ({ id, is_public }) => {
-		this.props.dispatch(lists.setListIsPublic({ id, is_public }));
+		this.props.dispatch(listsReducer.setListIsPublic({ id, is_public }));
 	}
 
 	onCloseFlashMessage = () => {
@@ -141,7 +133,7 @@ class ListDetails extends Component {
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			this.props.dispatch(lists.fetchListBySlug(this.state.slug));
+			this.props.dispatch(listsReducer.fetchListBySlug(this.state.slug));
 			this.props.dispatch(clearErrors());
 		}
 	}

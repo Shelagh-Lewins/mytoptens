@@ -27,8 +27,13 @@
 		}
 
 		span {
-			font-size: 150%;
+			font-size: 1.5rem;
 			font-weight: bold;
+
+			&.hint {
+				font-size: 1rem;
+				font-weight: normal;
+			}
 		}
 	}
 

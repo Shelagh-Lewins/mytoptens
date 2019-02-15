@@ -282,6 +282,7 @@ export function fetchMyListNames() {
 var updeep = require('updeep');
 
 // this is initial state of lists and the list loading states
+// note that the lists's list of items is called 'item' for consistency with the database.
 const initialListsState = {
 	'isLoading': false,
 	'error': null,
@@ -444,7 +445,7 @@ export default function lists(state = initialListsState, action) {
 			const listId = itemsArray[0].list_id;
 
 			function replaceItems(items) {
-				let newItems = [].concat(items);
+				let newItems = [].concat(state.things[listId].item);
 				itemsArray.map((item) => { // eslint-disable-line array-callback-return
 					newItems[item.order-1] = item.id;
 				});
@@ -452,7 +453,7 @@ export default function lists(state = initialListsState, action) {
 				return newItems;
 			}
 
-			return updeep.updateIn(`things.${listId}.items`, replaceItems, state);
+			return updeep.updateIn(`things.${listId}.item`, replaceItems, state);
 		}
 
 		default:

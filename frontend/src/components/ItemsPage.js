@@ -41,6 +41,14 @@ class ItemsPage extends Component {
 		});
 	}
 
+	onMoveItemUp = (itemId) => {
+		this.props.dispatch(itemsReducer.moveItemUp({ itemId }));
+	}
+
+	onMoveItemDown = (itemId) => {
+		this.props.dispatch(itemsReducer.moveItemDown({ itemId }));
+	}
+
 	componentDidUpdate(prevProps) {
 		let update = [];
 		for (let i=0; i<this.props.items.length; i++) {
@@ -110,8 +118,8 @@ class ItemsPage extends Component {
 								list={this.props.list}
 								canEdit={canEdit}
 								onCreateChildList={this.props.onCreateChildList}
-								onMoveItemUp={this.props.onMoveItemUp}
-								onMoveItemDown={this.props.onMoveItemDown}
+								onMoveItemUp={this.onMoveItemUp}
+								onMoveItemDown={this.onMoveItemDown}
 							/>
 						</Col>
 					</Row>

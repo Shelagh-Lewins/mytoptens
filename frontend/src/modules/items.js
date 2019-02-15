@@ -92,7 +92,6 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
-		console.log('response ', response);
 		return dispatch(moveItemUpSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'move item up error ': error.message }));
@@ -102,7 +101,7 @@ export const moveItemUp = ({ itemId }) => dispatch => {
 export const moveItemDown = ({ itemId }) => dispatch => {
 	// to move an item down, we move the item below up
 	// find the item
-	const item = store.getState().item.things[itemId];
+	const item = store.getState().items.things[itemId];
 
 	// find its parent list
 	const listId = item.list_id;
@@ -166,7 +165,7 @@ export default function items(state = initialItemsState, action) {
 		
 		case RECEIVE_ENTITIES: {
 			const { entities } = action.payload;
-			console.log('items RECEIVE_ENTITIES ', entities);
+
 			if (entities && entities.item) {
 				return updeep({ 'things': entities.item, 'isLoading': false }, state);
 			}
@@ -190,7 +189,6 @@ export default function items(state = initialItemsState, action) {
 		} */
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
-			console.log('payload ', action.payload);
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped
 			// update items.things object, change order
 
