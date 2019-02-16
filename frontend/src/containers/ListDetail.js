@@ -10,7 +10,7 @@ import FlashMessage from '../components/FlashMessage';
 import SetListIsPublic from '../components/SetListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
-import ListOrganizer from '../components/ListOrganizer';
+import Organizer from '../components/Organizer';
 
 import * as listsReducer from '../modules/list';
 import * as permissions from '../modules/permissions';
@@ -26,13 +26,13 @@ class ListDetails extends Component {
 		super();
 
 		// to start with all we know is the slug. We have to find the list id, and then the list details and items can be loaded
-		this.state = {};
+
 		this.getListData = this.getListData.bind(this);
 		const slug = this.getListData(props);
 
 		this.state = {
 			slug,
-			'showListOrganizer': false,
+			'showOrganizer': false,
 		};
 	}
 
@@ -177,7 +177,7 @@ class ListDetails extends Component {
 								</Row>
 							)}
 							{this.state.canEdit &&
-								<ListOrganizer
+								<Organizer
 									list={this.props.list}
 								/>}
 							{this.state.canEdit && (

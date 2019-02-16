@@ -7,17 +7,17 @@ import { Row, Col } from 'reactstrap';
 
 import * as listsReducer from '../modules/list';
 
-class ListOrganizer extends Component {
+class Organizer extends Component {
 	constructor(props) {
 		super(props);
 
 		
 
 		this.state = {
-			'showListOrganizer': false,
+			'showOrganizer': false,
 		};
 
-		this.getListOrganizerData();
+		this.getOrganizerData();
 	}
 
 	componentDidUpdate = (prevProps) => {
@@ -36,16 +36,22 @@ class ListOrganizer extends Component {
 		}
 	}
 
-	getListOrganizerData = () => {
+	getOrganizerData = () => {
 		// minimal data for all my lists and items to allow parent list to be changed.
-		this.props.dispatch(listsReducer.fetchListOrganizerData());
+		this.props.dispatch(listsReducer.fetchOrganizerData());
 	}
 
 	onClickOrganize = () => {
-		const showListOrganizer = !this.state.showListOrganizer;
+		const showOrganizer = !this.state.showOrganizer;
 		this.setState({
-			'showListOrganizer': showListOrganizer,
+			'showOrganizer': showOrganizer,
 		});
+	}
+
+	renderLists() {
+		return (
+			<p>Some content. List id {this.props.list.id}</p>
+		);
 	}
 
 	render() {
@@ -68,7 +74,7 @@ class ListOrganizer extends Component {
 						</div>
 					</Col>
 				</Row>
-				{this.state.showListOrganizer && <p>Some content. List id {this.props.list.id}</p>}
+				{this.state.showOrganizer && this.renderLists()}
 			</div>
 		);
 	}
@@ -76,9 +82,9 @@ class ListOrganizer extends Component {
 
 const mapStateToProps = (state, ownProps) => {
 	return ({
-		'listData': state.list.listOrganizerData, // limited list info: id, name, item (array of child items), parent_item
+		'listData': state.list.organizerData, // limited list info: id, name, item (array of child items), parent_item
 		'itemData': state.item.listOrganizerData, // limited item info: id, name, list_id
 	});
 };
 
-export default connect(mapStateToProps)(ListOrganizer);
+export default connect(mapStateToProps)(Organizer);

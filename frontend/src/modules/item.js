@@ -11,7 +11,7 @@ import {
 import {
 	RECEIVE_ENTITIES,
 	FETCH_LIST_BY_SLUG_STARTED,
-	RECEIVE_LIST_ORGANIZER_DATA,
+	RECEIVE_ORGANIZER_DATA,
 } from './list';
 
 //////////////////////////////////
@@ -157,7 +157,7 @@ const initialItemsState = {
 	'things': {},
 	'isLoading': false,
 	'error': null,
-	'listOrganizerData': {},
+	'organizerData': {},
 };
 
 export default function item(state = initialItemsState, action) {
@@ -202,11 +202,11 @@ export default function item(state = initialItemsState, action) {
 			return updeep({ 'things': itemsObject }, state);
 		}
 
-		case RECEIVE_LIST_ORGANIZER_DATA: {
+		case RECEIVE_ORGANIZER_DATA: {
 			const { entities } = action.payload;
 
 			if (entities && entities.item) {
-				return updeep({ 'listOrganizerData': entities.item, 'isLoading': false }, state);
+				return updeep({ 'organizerData': entities.item, 'isLoading': false }, state);
 			}
 
 			return state;
