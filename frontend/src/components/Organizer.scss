@@ -23,6 +23,7 @@
 
 		& > span {
 			background: $color-organizer-item-background;
+			border: 1px solid transparent;
 			color: $color-organizer-item-text;
 			float: left;
 			padding: 6px 12px;

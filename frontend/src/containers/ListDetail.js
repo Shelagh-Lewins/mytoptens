@@ -44,6 +44,38 @@ class ListDetails extends Component {
 		return slug;
 	}
 
+	findParentData() {
+		const lists = this.props.lists;
+		const items = this.props.items;
+		const list = this.props.list;
+
+		let parentList; // list object
+		let parentItem; // item object
+
+		if (this.props.list.parent_item) {
+			parentItem = findObjectByProperty({ 'parentObject': items, 'property': 'id', 'value': list.parent_item });
+
+			const keys = Object.keys(lists);
+
+			for (let i=0; i<keys.length; i++) {
+				// search lists to find the one which contains the parent item
+				// item ids are an array property of the list
+				const testList = lists[keys[i]];
+
+				if (list.parent_item) {
+					if (testList.item.indexOf(list.parent_item) !== -1) {
+						parentList = testList;
+					}
+				}
+			}
+		}
+
+		this.setState({
+			'parentList': parentList,
+			'parentItem': parentItem,
+		});
+	}
+
 	onIsPublicChange = ({ id, is_public }) => {
 		this.props.dispatch(listsReducer.setListIsPublic({ id, is_public }));
 	}
@@ -116,6 +148,15 @@ class ListDetails extends Component {
 					'list_description': this.props.list.description,
 				});
 			}
+
+			this.findParentData();
+		}
+
+		// parent list had changed
+		if (prevProps.list && this.props.list) {
+			if (prevProps.list.parent_item !== this.props.list.parent_item) {
+				this.findParentData();
+			}
 		}
 
 		// user has navigated to a different list
@@ -168,10 +209,10 @@ class ListDetails extends Component {
 				{this.props.list && (
 					<div>
 						<Container>
-							{this.props.parentList && (
+							{this.state.parentList && (
 								<Row>
 									<Col>
-										<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
+										<div className="breadcrumbs"><Link to={`/list/${this.state.parentList.slug}`}>{this.state.parentList.name}</Link> > {this.state.parentItem.name}
 										</div>
 									</Col>
 								</Row>
@@ -179,7 +220,7 @@ class ListDetails extends Component {
 							{this.state.canEdit &&
 								<Organizer
 									list={this.props.list}
-									parentListId={this.props.parentList ? this.props.parentList.id : undefined}
+									parentListId={this.state.parentList ? this.state.parentList.id : undefined}
 								/>}
 							{this.state.canEdit && (
 								<Row>
@@ -237,9 +278,9 @@ class ListDetails extends Component {
 							</Row>
 						</Container>
 						<Container>
-							{this.props.items && (
+							{this.props.thisListItems && (
 								<ItemsPage
-									items={this.props.items}
+									items={this.props.thisListItems}
 									list={this.props.list.id}
 									canEdit={this.state.canEdit}
 									onCreateChildList={this.onCreateChildList}
@@ -276,32 +317,29 @@ ListDetails.propTypes = {
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'lists': PropTypes.object.isRequired,
-	'items': PropTypes.array.isRequired,
+	'lists': PropTypes.object.isRequired, // all lists from the store
+	'items': PropTypes.object.isRequired, // all items from the store
+	'thisListItems': PropTypes.array.isRequired, // items belonging to this list
 };
 
 const mapStateToProps = (state, ownProps) => {
 	// the store should contain our target list, identified by slug
 	// It may also contain the parent list, and / or any child lists
 	// plus the items for all these lists
+	// find the list and items data that won't be changed by user actions on this page
 	const lists = state.list.things;
 	const items = state.item.things;
 
 	// first find the target list
 	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'slug', 'value': ownProps.match.params.slug });
 
-	let parentList; // list object
-	let parentItem; // item object
-	let targetListItems = []; // items for just the target list
+	let thisListItems = []; // items for just the target list
 
-	// find the parent item and its list
+	// find this list's items
 	if (list) { // avoid error while loading or if list not visible
-		// find the items for the target list
-		targetListItems = list.item.map((itemId) => {
+		thisListItems = list.item.map((itemId) => {
 			return { ...items[itemId] }; // shallow copy so item is extensible
 		});
-
-		parentItem = findObjectByProperty({ 'parentObject': items, 'property': 'id', 'value': list.parent_item });
 
 		const keys = Object.keys(lists);
 
@@ -310,17 +348,11 @@ const mapStateToProps = (state, ownProps) => {
 			// item ids are an array property of the list
 			const testList = lists[keys[i]];
 
-			if (list.parent_item) {
-				if (testList.item.indexOf(list.parent_item) !== -1) {
-					parentList = testList;
-				}
-			}
-
-			// find any list that is a child of an item in the target list
+			// find any list that is a child of an item in this list
 			const index = list.item.indexOf(testList.parent_item);
 
 			if (index !== -1) {
-				targetListItems[index].childList = { ...testList };
+				thisListItems[index].childList = { ...testList };
 			}
 		}
 	}
@@ -331,9 +363,8 @@ const mapStateToProps = (state, ownProps) => {
 		'isLoading': state.list.isLoading,
 		'lists': lists,
 		'list': list,
-		'parentList': parentList,
-		'items': targetListItems,
-		'parentItem': parentItem,
+		'thisListItems': thisListItems,
+		'items': items,
 	});
 };
 

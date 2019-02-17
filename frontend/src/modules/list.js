@@ -475,8 +475,6 @@ export default function list(state = initialListsState, action) {
 		} */
 
 		case UPDATE_LIST_SUCCEEDED: {
-			console.log('UPDATE_LIST_SUCCEEDED ', action.payload);
-
 			// update editable properties
 			const update = {
 				'name': action.payload.name,
