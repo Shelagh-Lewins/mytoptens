@@ -179,7 +179,7 @@ class ListDetails extends Component {
 							{this.state.canEdit &&
 								<Organizer
 									list={this.props.list}
-									parentList={this.props.parentList}
+									parentListId={this.props.parentList ? this.props.parentList.id : undefined}
 								/>}
 							{this.state.canEdit && (
 								<Row>

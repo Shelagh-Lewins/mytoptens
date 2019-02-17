@@ -25,7 +25,7 @@ class OrganizerList extends Component {
 	}
 
 	renderItems() {
-		const selectedItemOrder = this.props.selectedItemOrder;
+		const selectedItemOrder = parseInt(this.props.selectedItemOrder); // element property is a string. Order should be a number.
 		const listId = this.props.list.id;
 		const selectedListId = this.props.selectedListId;
 
@@ -49,17 +49,20 @@ class OrganizerList extends Component {
 	}
 
 	render() {
+		const name = this.props.list.name;
+
 		let showItemsButtonText = '+';
 
 		if (this.state.showItems) {
 			showItemsButtonText = '-';
 		}
 
+
 		return (
 			<Row className="organizer-list">
 				<Col>
 					<button className="btn btn-light show-items" onClick={this.onShowItems.bind(this)}>{showItemsButtonText}</button>
-					<div className="name">{this.props.list.name}</div>
+					<div className="name">{name}</div>
 					{this.state.showItems && this.renderItems()}
 				</Col>
 			</Row>

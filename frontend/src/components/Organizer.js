@@ -18,24 +18,20 @@ class Organizer extends Component {
 
 		this.state = {
 			'showOrganizer': false,
-			'newParentItem': props.list.parent_item,
+			'parentItemId': props.list.parent_item,
+			'parentListId': props.parentListId,
+			'selectedItemOrder': undefined,
 		};
 
 		this.getOrganizerData();
 	}
 
 	componentDidUpdate = (prevProps) => {
-		if ((!prevProps.item && !prevProps.list) && (this.props.item && this.props.list)) {
-			const parent_item_id = this.props.list.parent_item;
-
-			if (parent_item_id) {
-				const parent_item = this.props.item[parent_item_id];
-				const parent_list_id = parent_item.list;
-				const parent_list = this.props.list[parent_list_id];
-			}
+		if (prevProps.listData.length === 0 && this.props.listData !== 0) {
+			this.setState({
+				'selectedItemOrder': this.selectedItemOrder(),
+			});
 		}
-
-		console.log('newParentItem ', this.state.newParentItem);
 	}
 
 	getOrganizerData = () => {
@@ -59,13 +55,18 @@ class Organizer extends Component {
 		this.setState({
 			'showOrganizer': false,
 		});
-		console.log('parent item ', this.state.newParentItem);
-		this.props.dispatch(listReducer.updateList(this.props.list.id, 'parent_item_id', this.state.newParentItem));
+
+		this.props.dispatch(listReducer.updateList(
+			this.props.list.id,
+			'parent_item_id',
+			this.state.parentItemId));
 	}
 
 	onSelectParentItem = ({ list, order }) => {
 		this.setState({
-			'newParentItem': list.item[order-1],
+			'parentItemId': list.item[order-1],
+			'parentListId': list.id,
+			'selectedItemOrder': order,
 		});
 	}
 
@@ -73,32 +74,43 @@ class Organizer extends Component {
 		// find the order of the parent item
 		let order; // there may not be a parent item, so there may not be a default selection
 
-		if (this.props.parentList) {
-			let parentItemId = this.props.list.parent_item;
-			let parentListItems = this.props.parentList.item;
+		if (this.state.parentListId) {
+			let parentItemId = this.state.parentItemId;
+			//const parentList = this.props.listData[this.state.parentListId];
+			const parentList = this.props.listData.find(list => list.id === this.state.parentListId);
+			let parentListItems = parentList.item;
 			order = parentListItems.indexOf(parentItemId) + 1;
+		}
+
+		if (this.state.parentItem) {
+
 		}
 
 		return order;
 	}
 
-	renderParentList() {
+	/* renderParentList() {
 		let content;
+		const parentListId = this.state.parentListId;
 
-		if (this.props.parentList) {
-			content = (
-				<div className="parent-list">
-					<span>Current parent: </span>
-					<OrganizerList
-						list={this.props.parentList}
-						items={this.props.itemData[this.props.parentList.id]}
-						showItems={true}
-						selectedListId={this.props.parentList.id}
-						selectedItemOrder={this.selectedItemOrder()}
-						onSelectItem={this.onSelectParentItem.bind(this)}
-					/>
-				</div>
-			);
+		if (parentListId) {
+			const parentList = this.props.listData.find(list => list.id === parentListId);
+
+			if (parentList) { // make sure data are loaded
+				content = (
+					<div className="parent-list">
+						<span>Current parent: </span>
+						<OrganizerList
+							list={parentList}
+							items={this.props.itemData[parentListId]}
+							showItems={true}
+							selectedListId={parentListId}
+							selectedItemOrder={this.state.selectedItemOrder}
+							onSelectItem={this.onSelectParentItem.bind(this)}
+						/>
+					</div>
+				);
+			}
 		}
 
 		return (
@@ -106,26 +118,25 @@ class Organizer extends Component {
 				{content}
 			</div>
 		);
-	}
+	} */
 
 	renderLists() {
-		let parentListId;
-		if (this.props.parentList) {
-			parentListId = this.props.parentList.id;
-		}
-
 		return (
 			<div className="lists">
 				<span>Select a new parent: </span>
-				{this.props.listData.map(list =>
-					<OrganizerList
+				{this.props.listData.map(list => {
+					const showItems = list.id === this.state.parentListId ? true : false;
+
+					return (<OrganizerList
 						list={list}
 						items={this.props.itemData[list.id]}
 						key={list.id}
-						selectedListId={parentListId}
-						selectedItemOrder={this.selectedItemOrder()}
+						selectedListId={this.state.parentListId}
+						selectedItemOrder={this.state.selectedItemOrder}
 						onSelectItem={this.onSelectParentItem.bind(this)}
-					/>
+						showItems={showItems}
+					/>);
+				}
 				)}
 			</div>
 		);
@@ -162,7 +173,7 @@ class Organizer extends Component {
 		return (
 			<div className="list-organizer">
 				{controls}
-				{this.state.showOrganizer && this.props.list.parent_item && this.renderParentList()}
+				{/* {this.state.showOrganizer && this.props.list.parent_item && this.renderParentList()}*/}
 				{this.state.showOrganizer && this.renderLists()}
 			</div>
 		);
