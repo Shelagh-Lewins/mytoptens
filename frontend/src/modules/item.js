@@ -160,6 +160,30 @@ const initialItemsState = {
 	'organizerData': {},
 };
 
+/////////////////////////////
+// organizer data
+export const getOrganizerItemsByList = state => {
+	// return an object containing all items, keyed by parent list id
+	let itemsByList = {};
+
+	Object.keys(state.list.organizerData).map(listId => { // eslint-disable-line array-callback-return
+		const list = state.list.organizerData[listId];
+
+		let itemsArray = [];
+
+		for (let i=0; i<list.item.length; i++) {
+			itemsArray.push(state.item.organizerData[list.item[i]]);
+		}
+
+		itemsByList[list.id] = itemsArray;
+	});
+
+	return itemsByList;
+};
+
+/////////////////////////////
+// state updates
+
 export default function item(state = initialItemsState, action) {
 	switch (action.type) {
 		case LOGOUT_USER_COMPLETE: {

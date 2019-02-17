@@ -5,13 +5,16 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 
-import * as listsReducer from '../modules/list';
+import * as listReducer from '../modules/list';
+import * as itemReducer from '../modules/item';
+
+import OrganizerList from './OrganizerList';
+
+import './Organizer.scss';
 
 class Organizer extends Component {
 	constructor(props) {
 		super(props);
-
-		
 
 		this.state = {
 			'showOrganizer': false,
@@ -28,17 +31,13 @@ class Organizer extends Component {
 				const parent_item = this.props.item[parent_item_id];
 				const parent_list_id = parent_item.list;
 				const parent_list = this.props.list[parent_list_id];
-
-				console.log('parent_list ', parent_list);
-
-				
 			}
 		}
 	}
 
 	getOrganizerData = () => {
 		// minimal data for all my lists and items to allow parent list to be changed.
-		this.props.dispatch(listsReducer.fetchOrganizerData());
+		this.props.dispatch(listReducer.fetchOrganizerData());
 	}
 
 	onClickOrganize = () => {
@@ -48,9 +47,41 @@ class Organizer extends Component {
 		});
 	}
 
+	renderParentList() {
+		console.log('props ', this.props);
+
+		let content;
+
+		if (this.props.parentList) {
+			content = (
+				<div className="parent-list">
+					<span>Current parent list: </span>
+					<OrganizerList
+						list={this.props.parentList}
+						items={this.props.itemData[this.props.parentList.id]}
+					/>
+				</div>
+			);
+		}
+
+		return (
+			<div className="parent-list">
+				{content}
+			</div>
+		);
+	}
+
 	renderLists() {
 		return (
-			<p>Some content. List id {this.props.list.id}</p>
+			<div className="lists">
+				{this.props.listData.map(list =>
+					<OrganizerList
+						list={list}
+						key={list.id}
+						items={this.props.itemData[list.id]}
+					/>
+				)}
+			</div>
 		);
 	}
 
@@ -61,8 +92,8 @@ class Organizer extends Component {
 		// should there be a Cancel button?
 		let organizeButtonText = 'Organize...';
 
-		if (this.state.showListOrganizer) {
-			organizeButtonText = 'Hide organizer';
+		if (this.state.showOrganizer) {
+			organizeButtonText = 'Done';
 		}
 
 		return (
@@ -74,6 +105,7 @@ class Organizer extends Component {
 						</div>
 					</Col>
 				</Row>
+				{this.state.showOrganizer && this.props.list.parent_item && this.renderParentList()}
 				{this.state.showOrganizer && this.renderLists()}
 			</div>
 		);
@@ -82,8 +114,8 @@ class Organizer extends Component {
 
 const mapStateToProps = (state, ownProps) => {
 	return ({
-		'listData': state.list.organizerData, // limited list info: id, name, item (array of child items), parent_item
-		'itemData': state.item.listOrganizerData, // limited item info: id, name, list_id
+		'listData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
+		'itemData': itemReducer.getOrganizerItemsByList(state), // object. limited item info: id, name, list_id
 	});
 };
 

@@ -1,0 +1,19 @@
+@import "../variables";
+
+.organizer-list {
+	.show-items {
+		float: left;
+		width: 36px;
+	}
+
+	.name {
+		display: inline-block;
+		font-weight: bold;
+		margin-left: 12px;
+		padding: 6px 0;
+	}
+
+	.items {
+		margin-left: 64px;
+	}
+}

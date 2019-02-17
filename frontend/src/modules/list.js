@@ -369,6 +369,21 @@ export const getMyGroupedAndFilteredLists = createSelector(
 	}
 );
 
+/////////////////////////////
+// organizer data
+export const getOrganizerLists = state => {
+	const lists = Object.keys(state.list.organizerData).map(id => {
+		return state.list.organizerData[id];
+	});
+
+	lists.sort(function (a, b) {
+	  return a.name.localeCompare(b.name);
+	});
+
+	return lists;
+};
+
+
 // state here is the substate state.lists
 // the book uses 'items' for the list of things i.e. lists. items
 // as 'items' for us is a specific thing, we need another name for the set of entities to be displayed i.e. the lists themselves

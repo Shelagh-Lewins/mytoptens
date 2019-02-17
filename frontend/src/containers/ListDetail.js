@@ -179,6 +179,7 @@ class ListDetails extends Component {
 							{this.state.canEdit &&
 								<Organizer
 									list={this.props.list}
+									parentList={this.props.parentList}
 								/>}
 							{this.state.canEdit && (
 								<Row>
