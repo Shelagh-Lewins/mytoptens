@@ -32,10 +32,11 @@ class ListSerializer(FlexFieldsModelSerializer):
     """
     A list may be created with items
     """
+    parent_item_id = serializers.UUIDField(write_only=True)
     item = ItemSerializer(many=True)
 
-    # automatically set created_by_id as the current user's id
-    created_by_id = serializers.PrimaryKeyRelatedField(
+    # automatically set created_by as the current user's id
+    created_by = serializers.PrimaryKeyRelatedField(
         read_only=True,
     )
 
@@ -50,12 +51,12 @@ class ListSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = List
         fields = ('id', 'name', 'description', 'is_public',
-            'slug', 'created_by_id', 'created_by_username', 'created_at',
-            'modified_by', 'modified_at', 'item', 'parent_item')
+            'slug', 'created_by', 'created_by_username', 'created_at',
+            'modified_by', 'modified_at', 'item', 'parent_item', 'parent_item_id')
 
     def create(self, validated_data):
         items_data = validated_data.pop('item', None)
-        validated_data['created_by_id'] = self.context['request'].user
+        validated_data['created_by'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username
 
         newlist = List.objects.create(**validated_data)

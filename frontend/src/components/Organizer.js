@@ -18,6 +18,7 @@ class Organizer extends Component {
 
 		this.state = {
 			'showOrganizer': false,
+			'newParentItem': props.list.parent_item,
 		};
 
 		this.getOrganizerData();
@@ -33,6 +34,8 @@ class Organizer extends Component {
 				const parent_list = this.props.list[parent_list_id];
 			}
 		}
+
+		console.log('newParentItem ', this.state.newParentItem);
 	}
 
 	getOrganizerData = () => {
@@ -41,24 +44,58 @@ class Organizer extends Component {
 	}
 
 	onClickOrganize = () => {
-		const showOrganizer = !this.state.showOrganizer;
 		this.setState({
-			'showOrganizer': showOrganizer,
+			'showOrganizer': true,
 		});
 	}
 
-	renderParentList() {
-		console.log('props ', this.props);
+	onClickCancel = () => {
+		this.setState({
+			'showOrganizer': false,
+		});
+	}
 
+	onClickDone = () => {
+		this.setState({
+			'showOrganizer': false,
+		});
+		console.log('parent item ', this.state.newParentItem);
+		this.props.dispatch(listReducer.updateList(this.props.list.id, 'parent_item_id', this.state.newParentItem));
+	}
+
+	onSelectParentItem = ({ list, order }) => {
+		this.setState({
+			'newParentItem': list.item[order-1],
+		});
+	}
+
+	selectedItemOrder() {
+		// find the order of the parent item
+		let order; // there may not be a parent item, so there may not be a default selection
+
+		if (this.props.parentList) {
+			let parentItemId = this.props.list.parent_item;
+			let parentListItems = this.props.parentList.item;
+			order = parentListItems.indexOf(parentItemId) + 1;
+		}
+
+		return order;
+	}
+
+	renderParentList() {
 		let content;
 
 		if (this.props.parentList) {
 			content = (
 				<div className="parent-list">
-					<span>Current parent list: </span>
+					<span>Current parent: </span>
 					<OrganizerList
 						list={this.props.parentList}
 						items={this.props.itemData[this.props.parentList.id]}
+						showItems={true}
+						selectedListId={this.props.parentList.id}
+						selectedItemOrder={this.selectedItemOrder()}
+						onSelectItem={this.onSelectParentItem.bind(this)}
 					/>
 				</div>
 			);
@@ -72,13 +109,22 @@ class Organizer extends Component {
 	}
 
 	renderLists() {
+		let parentListId;
+		if (this.props.parentList) {
+			parentListId = this.props.parentList.id;
+		}
+
 		return (
 			<div className="lists">
+				<span>Select a new parent: </span>
 				{this.props.listData.map(list =>
 					<OrganizerList
 						list={list}
-						key={list.id}
 						items={this.props.itemData[list.id]}
+						key={list.id}
+						selectedListId={parentListId}
+						selectedItemOrder={this.selectedItemOrder()}
+						onSelectItem={this.onSelectParentItem.bind(this)}
 					/>
 				)}
 			</div>
@@ -90,21 +136,32 @@ class Organizer extends Component {
 		// then all others
 		// by top level?
 		// should there be a Cancel button?
-		let organizeButtonText = 'Organize...';
+		let controls;
 
 		if (this.state.showOrganizer) {
-			organizeButtonText = 'Done';
+			controls = (
+				<Row>
+					<Col>
+						<div className="controls">
+							<button className="btn btn-secondary" onClick={this.onClickCancel.bind(this)}>Cancel</button>
+							<button className="btn btn-primary" onClick={this.onClickDone.bind(this)}>Done</button>
+						</div>
+					</Col>
+				</Row>);
+		} else {
+			controls = (
+				<Row>
+					<Col>
+						<div className="controls">
+							<button className="btn btn-secondary" onClick={this.onClickOrganize.bind(this)}>Organize...</button>
+						</div>
+					</Col>
+				</Row>);
 		}
 
 		return (
 			<div className="list-organizer">
-				<Row>
-					<Col>
-						<div className="change-parent-list">
-							<button className="btn btn-secondary" onClick={this.onClickOrganize.bind(this)}>{organizeButtonText}</button>
-						</div>
-					</Col>
-				</Row>
+				{controls}
 				{this.state.showOrganizer && this.props.list.parent_item && this.renderParentList()}
 				{this.state.showOrganizer && this.renderLists()}
 			</div>

@@ -27,7 +27,7 @@ export function canViewList(identifier) {
 	if (Object.keys(lists).length > 0) {
 		let list = findObjectByProperty({ 'parentObject': lists, property, value });
 
-		if (list && (list.is_public || (list.created_by_id === userId))) {
+		if (list && (list.is_public || (list.created_by === userId))) {
 			canViewList = true;
 		}
 	}
@@ -48,7 +48,7 @@ export function canEditList(identifier) {
 	if (Object.keys(lists).length > 0) {
 		let list = findObjectByProperty({ 'parentObject': lists, property, value });
 
-		if (list && (list.created_by_id === userId)) {
+		if (list && (list.created_by === userId)) {
 			canEditList = true;
 		}
 	}

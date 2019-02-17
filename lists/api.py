@@ -19,12 +19,12 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        if hasattr(obj, 'created_by_id'):
-            return obj.created_by_id == request.user
+        if hasattr(obj, 'created_by'):
+            return obj.created_by == request.user
 
         if hasattr(obj, 'list'):
-            if hasattr(obj.list, 'created_by_id'):
-                return obj.list.created_by_id == request.user
+            if hasattr(obj.list, 'created_by'):
+                return obj.list.created_by == request.user
 
 class HasVerifiedEmail(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -57,20 +57,20 @@ class ListViewSet(FlexFieldsModelViewSet):
         # authenticated user can view public lists and lists the user created
         if self.request.user.is_authenticated:
             queryset = List.objects.filter(
-                Q(created_by_id=self.request.user) | 
+                Q(created_by=self.request.user) | 
                 Q(is_public=True)
             )
 
-        # allow filter by URL parameter created_by_id
-        created_by_id = self.request.query_params.get('created_by_id', None)
+        # allow filter by URL parameter created_by
+        created_by = self.request.query_params.get('created_by', None)
 
-        if created_by_id is not None:
-            queryset = queryset.filter(created_by_id=created_by_id)
+        if created_by is not None:
+            queryset = queryset.filter(created_by=created_by)
 
         return queryset
 
     def pre_save(self, obj):
-        obj.created_by_id = self.request.user
+        obj.created_by = self.request.user
 
 
 class ListBySlugViewSet(viewsets.ModelViewSet):
@@ -114,7 +114,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
         # can view public lists and lists the user created
         if self.request.user.is_authenticated:
             return List.objects.filter(pk__in=pk_list).filter(
-                Q(created_by_id=self.request.user) | 
+                Q(created_by=self.request.user) | 
                 Q(is_public=True)
             )
 
@@ -130,7 +130,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         # can view items belonging to public lists and lists the user created
         if self.request.user.is_authenticated:
             return Item.objects.filter(
-                Q(list__created_by_id=self.request.user) | 
+                Q(list__created_by=self.request.user) | 
                 Q(list__is_public=True)
             )
 

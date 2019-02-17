@@ -10,7 +10,7 @@ class OrganizerList extends Component {
 		super();
 
 		this.state = {
-			'showItems': false,
+			'showItems': props.showItems,
 		};
 	}
 
@@ -20,13 +20,29 @@ class OrganizerList extends Component {
 		});
 	}
 
+	onSelectItem (e) {
+		this.props.onSelectItem({ 'list': this.props.list, 'order': e.target.dataset.order });
+	}
+
 	renderItems() {
+		const selectedItemOrder = this.props.selectedItemOrder;
+		const listId = this.props.list.id;
+		const selectedListId = this.props.selectedListId;
+
 		return (
 			<div className="items">
-				{this.props.items.map(item =>
-					<div key={item.id}>
-						{item.name}
-					</div>
+				{this.props.items.map((item, index) => { // eslint-disable-line array-callback-return
+					const isSelectedItem = ((listId === selectedListId) && (index+1 === selectedItemOrder));
+
+					if (item.name) {
+						return (<div key={item.id} className={`item ${isSelectedItem ? 'selected' : ''}`}>
+							<span
+								onClick={this.onSelectItem.bind(this)}
+								data-order={index+1}
+							><span className="order">{index+1}:</span>{item.name}</span>
+						</div>);
+					}
+				}
 				)}
 			</div>
 		);
