@@ -57,7 +57,6 @@ class OrganizerList extends Component {
 			showItemsButtonText = '-';
 		}
 
-
 		return (
 			<Row className="organizer-list">
 				<Col>

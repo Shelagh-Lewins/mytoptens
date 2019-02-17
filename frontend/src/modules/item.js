@@ -76,12 +76,10 @@ export const updateItem = (itemId, propertyName, value) => dispatch => {
 	});
 };
 
-export function updateItemSucceeded({ id }) {
+export function updateItemSucceeded(response) {
 	return {
 		'type': UPDATE_ITEM_SUCCEEDED,
-		'payload': {
-			'id': id,
-		}
+		'payload': response,
 	};
 }
 
@@ -214,6 +212,18 @@ export default function item(state = initialItemsState, action) {
 		/* case DELETE_ITEM_SUCCEEDED: {
 			return updeep({ 'things': updeep.omit([action.payload.id]) }, state);
 		} */
+
+		case UPDATE_ITEM_SUCCEEDED: {
+			// update editable properties
+			const update = {
+				'name': action.payload.name,
+				'description': action.payload.description,
+				'modified_at': action.payload.modified_at,
+				'order': action.payload.order,
+			};
+
+			return updeep({ 'things': { [action.payload.id]: update } }, state);
+		}
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped

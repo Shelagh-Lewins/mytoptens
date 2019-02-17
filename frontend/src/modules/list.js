@@ -188,12 +188,10 @@ export const updateList = (listId, propertyName, value) => dispatch => {
 	});
 };
 
-export function updateListSucceeded({ id }) {
+export function updateListSucceeded(response) {
 	return {
 		'type': UPDATE_LIST_SUCCEEDED,
-		'payload': {
-			'id': id,
-		}
+		'payload': response,
 	};
 }
 
@@ -475,6 +473,22 @@ export default function list(state = initialListsState, action) {
 
 			return updeep.updateIn(`things.${action.payload.listId}.items`, deleteItem, state);
 		} */
+
+		case UPDATE_LIST_SUCCEEDED: {
+			console.log('UPDATE_LIST_SUCCEEDED ', action.payload);
+
+			// update editable properties
+			const update = {
+				'name': action.payload.name,
+				'description': action.payload.description,
+				'is_public': action.payload.is_public,
+				'modified_by': action.payload.modified_by,
+				'modified_at': action.payload.modified_at,
+				'parent_item': action.payload.parent_item,
+			};
+
+			return updeep({ 'things': { [action.payload.id]: update } }, state);
+		}
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped
