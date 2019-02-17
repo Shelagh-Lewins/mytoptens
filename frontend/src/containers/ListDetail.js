@@ -45,16 +45,19 @@ class ListDetails extends Component {
 	}
 
 	findParentData() {
+		console.log('find parent data');
 		const lists = this.props.lists;
 		const items = this.props.items;
 		const list = this.props.list;
 
 		let parentList; // list object
 		let parentItem; // item object
+		console.log('this.props.list ', this.props.list);
+		console.log('this.props.items ', this.props.items);
 
-		if (this.props.list.parent_item) {
+		if (list.parent_item) {
 			parentItem = findObjectByProperty({ 'parentObject': items, 'property': 'id', 'value': list.parent_item });
-
+			console.log('parentItem ', parentItem);
 			const keys = Object.keys(lists);
 
 			for (let i=0; i<keys.length; i++) {
@@ -62,10 +65,8 @@ class ListDetails extends Component {
 				// item ids are an array property of the list
 				const testList = lists[keys[i]];
 
-				if (list.parent_item) {
-					if (testList.item.indexOf(list.parent_item) !== -1) {
-						parentList = testList;
-					}
+				if (testList.item.indexOf(list.parent_item) !== -1) {
+					parentList = testList;
 				}
 			}
 		}

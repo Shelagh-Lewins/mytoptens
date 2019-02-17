@@ -89,37 +89,6 @@ class Organizer extends Component {
 		return order;
 	}
 
-	/* renderParentList() {
-		let content;
-		const parentListId = this.state.parentListId;
-
-		if (parentListId) {
-			const parentList = this.props.listData.find(list => list.id === parentListId);
-
-			if (parentList) { // make sure data are loaded
-				content = (
-					<div className="parent-list">
-						<span>Current parent: </span>
-						<OrganizerList
-							list={parentList}
-							items={this.props.itemData[parentListId]}
-							showItems={true}
-							selectedListId={parentListId}
-							selectedItemOrder={this.state.selectedItemOrder}
-							onSelectItem={this.onSelectParentItem.bind(this)}
-						/>
-					</div>
-				);
-			}
-		}
-
-		return (
-			<div className="parent-list">
-				{content}
-			</div>
-		);
-	} */
-
 	renderLists() {
 		return (
 			<div className="lists">
@@ -129,7 +98,8 @@ class Organizer extends Component {
 
 					return (<OrganizerList
 						list={list}
-						items={this.props.itemData[list.id]}
+						listData={this.props.listData}
+						itemData={this.props.itemData}
 						key={list.id}
 						selectedListId={this.state.parentListId}
 						selectedItemOrder={this.state.selectedItemOrder}
@@ -143,10 +113,7 @@ class Organizer extends Component {
 	}
 
 	render() {
-		// show current parent list
-		// then all others
 		// by top level?
-		// should there be a Cancel button?
 		let controls;
 
 		if (this.state.showOrganizer) {
@@ -173,7 +140,6 @@ class Organizer extends Component {
 		return (
 			<div className="list-organizer">
 				{controls}
-				{/* {this.state.showOrganizer && this.props.list.parent_item && this.renderParentList()}*/}
 				{this.state.showOrganizer && this.renderLists()}
 			</div>
 		);
