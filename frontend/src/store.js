@@ -1,15 +1,20 @@
 // store.js
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension/logOnlyInProduction';
 import thunk from 'redux-thunk';
 import rootReducer from './modules/rootReducer';
+
+const composeEnhancers = composeWithDevTools({
+	// options like actionSanitizer, stateSanitizer
+});
 
 const store = createStore(
 	rootReducer, 
 	// inititalState, // by not supplying initial state, we tell the store to use the defaults specified in the reducer
-	compose(applyMiddleware(thunk), 
-		process.env.NODE_ENV !== 'production' &&
-    window.devToolsExtension ? window.devToolsExtension() : f => f)); // devTools in production break app on mobile
+	composeEnhancers(
+		applyMiddleware(thunk),
+	));
 
 if (process.env.NODE_ENV !== 'production' && module.hot) {
 	module.hot.accept('./modules/rootReducer', () => store.replaceReducer(rootReducer));
