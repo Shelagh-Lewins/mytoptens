@@ -283,7 +283,7 @@ export function fetchOrganizerData(userId) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,parent_item,slug&created_by=${userId}`,
+			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,order,parent_item,slug&created_by=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {

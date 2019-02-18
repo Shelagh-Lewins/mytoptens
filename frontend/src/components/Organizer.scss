@@ -26,19 +26,28 @@
 			border: 1px solid transparent;
 			color: $color-organizer-item-text;
 			float: left;
-			padding: 6px 12px;
+			padding: 6px 12px 6px 8px;
 
 			.order {
 				display: inline-block;
-				padding: 0;
-				width: 1.5rem;
+				padding: 0 6px 0 0;
+				text-align: right;
+				width: 2.2rem;
 			}
+		}
+
+		.child-list {
+			color: $color-hint;
 		}
 
 		&.selected {
 			& > span {
 				border: 1px solid $color-organizer-item-selected;
 				border-radius: 1rem;
+			}
+
+			.child-list {
+				border: 1px solid transparent;
 			}
 		}
 	}

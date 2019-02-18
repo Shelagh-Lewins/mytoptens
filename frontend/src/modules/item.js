@@ -164,16 +164,38 @@ export const getOrganizerItemsByList = state => {
 	// return an object containing all items, keyed by parent list id
 	let itemsByList = {};
 
+	// find the items for each list
 	Object.keys(state.list.organizerData).map(listId => { // eslint-disable-line array-callback-return
 		const list = state.list.organizerData[listId];
 
 		let itemsArray = [];
 
 		for (let i=0; i<list.item.length; i++) {
-			itemsArray.push(state.item.organizerData[list.item[i]]);
+			let item = { ...state.item.organizerData[list.item[i]] };
+			itemsArray.push(item);
 		}
 
 		itemsByList[list.id] = itemsArray;
+	});
+
+	// note the parent_item, if any, of each list
+	// add the list's id to the item as childListId
+	Object.keys(state.list.organizerData).map(listId => { // eslint-disable-line array-callback-return
+		const list = state.list.organizerData[listId];
+//console.log('list ', list.name);
+		if (list.parent_item) {
+			//console.log('list.parent item ', list.parent_item);
+			//const itemsArray = itemsByList[list.id];
+			const parentItem = state.item.organizerData[list.parent_item];
+			//console.log('parent item ', parentItem);
+			if (parentItem) {
+				//const parentItemList = itemsByList[parentItem.list_id];
+
+				itemsByList[parentItem.list_id][parentItem.order-1].childListId = list.id;
+				
+				//parent_item.childList = { ...list };
+			}
+		}
 	});
 
 	return itemsByList;

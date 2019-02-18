@@ -12,8 +12,6 @@ class OrganizerList extends Component {
 		this.state = {
 			'showItems': props.showItems,
 		};
-
-		//console.log('OrganizerList ', props);
 	}
 
 	onShowItems() {
@@ -33,15 +31,24 @@ class OrganizerList extends Component {
 
 		return (
 			<div className="items">
-				{this.props.itemOrganizerData[listId].map((item, index) => { // eslint-disable-line array-callback-return
-					const isSelectedItem = ((listId === selectedListId) && (index+1 === selectedItemOrder));
+				{this.props.itemOrganizerData[listId].map((item) => { // eslint-disable-line array-callback-return
+					const isSelectedItem = ((listId === selectedListId) && (item.order === selectedItemOrder));
+
+					let childListElm;
+
+					if (item.childListId) {
+						const childList = this.props.listOrganizerData.find((list) => list.id === item.childListId);
+						childListElm = (
+							<span className="child-list">> {childList.name}</span>
+						);
+					}
 
 					if (item.name) {
 						return (<div key={item.id} className={`item ${isSelectedItem ? 'selected' : ''}`}>
 							<span
 								onClick={this.onSelectItem.bind(this)}
-								data-order={index+1}
-							><span className="order">{index+1}:</span>{item.name}</span>
+								data-order={item.order}
+							><span className="order">{item.order}:</span>{item.name}</span>{childListElm}
 						</div>);
 					}
 				}

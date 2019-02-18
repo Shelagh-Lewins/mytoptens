@@ -67,7 +67,7 @@ class Organizer extends Component {
 	selectedItemOrder() {
 		// find the order of the parent item
 		let order; // there may not be a parent item, so there may not be a default selection
-		//console.log('this.props.listOrganizerData ', this.props.listOrganizerData);
+
 		if (this.props.parentListId) {
 			let parentItemId = this.state.parentItemId;
 			const parentList = this.props.listOrganizerData.find(list => list.id === this.props.parentListId);
@@ -80,7 +80,6 @@ class Organizer extends Component {
 			}
 		}
 
-		//console.log('selectedItemOrder ', order);
 		return order;
 	}
 
@@ -90,9 +89,6 @@ class Organizer extends Component {
 				<span>Select a new parent: </span>
 				{this.props.listOrganizerData.map(list => {
 					const showItems = (list.id === this.state.parentListId);
-					//console.log('list.id ', list.id);
-					//console.log('this.props.parentListId ', this.props.parentListId);
-					//console.log('showItems ', showItems);
 
 					return (<OrganizerList
 						list={list}
