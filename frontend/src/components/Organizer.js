@@ -6,10 +6,8 @@ import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 
 import * as listReducer from '../modules/list';
-//import * as itemReducer from '../modules/item';
 
 import OrganizerList from './OrganizerList';
-
 import './Organizer.scss';
 
 class Organizer extends Component {
@@ -22,23 +20,15 @@ class Organizer extends Component {
 			'parentListId': props.parentListId,
 			'selectedItemOrder': undefined,
 		};
-
-		//this.getOrganizerData();
 	}
 
 	componentDidUpdate = (prevProps) => {
 		if (prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0) {
-
 			this.setState({
 				'selectedItemOrder': this.selectedItemOrder(),
 			});
 		}
 	}
-
-	/* getOrganizerData = () => {
-		// minimal data for all my lists and items to allow parent list to be changed.
-		this.props.dispatch(listReducer.fetchOrganizerData());
-	} */
 
 	onClickOrganize = () => {
 		this.setState({
@@ -77,7 +67,6 @@ class Organizer extends Component {
 
 		if (this.state.parentListId) {
 			let parentItemId = this.state.parentItemId;
-			//const parentList = this.props.listOrganizerData[this.state.parentListId];
 			const parentList = this.props.listOrganizerData.find(list => list.id === this.state.parentListId);
 			let parentListItems = parentList.item;
 			order = parentListItems.indexOf(parentItemId) + 1;
@@ -114,7 +103,6 @@ class Organizer extends Component {
 	}
 
 	render() {
-		// by top level?
 		let controls;
 
 		if (this.state.showOrganizer) {
@@ -147,12 +135,4 @@ class Organizer extends Component {
 	}
 }
 
-/* const mapStateToProps = (state, ownProps) => {
-	return ({
-		'listOrganizerData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
-		'itemOrganizerData': itemReducer.getOrganizerItemsByList(state), // object. limited item info: id, name, list_id
-	});
-}; */
-
 export default connect()(Organizer);
-// export default connect(mapStateToProps)(Organizer);

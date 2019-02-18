@@ -27,7 +27,6 @@ class ListDetails extends Component {
 		super();
 
 		// to start with all we know is the slug. We have to find the list id, and then the list details and items can be loaded
-
 		this.getListData = this.getListData.bind(this);
 		const slug = this.getListData(props);
 
@@ -35,8 +34,6 @@ class ListDetails extends Component {
 			slug,
 			'showOrganizer': false,
 		};
-
-		// this.getOrganizerData(props);
 	}
 
 	getListData = (props) => {
@@ -53,53 +50,6 @@ class ListDetails extends Component {
 		this.props.dispatch(listReducer.fetchOrganizerData(this.props.list.created_by));
 		this.props.dispatch(clearErrors());
 	}
-
-	/*findParentData() {
-		console.log('find parent data');
-		const lists = this.props.listOrganizerData;
-		// const lists = this.props.lists;
-		const items = this.props.itemOrganizerData;
-		// const items = this.props.items;
-		const list = this.props.list;
-
-		let parentList; // list object
-		let parentItem; // item object
-		console.log('this.props.list ', this.props.list);
-		console.log('this.props.items ', this.props.items);
-
-		if (list.parent_item) {
-			const listIds = Object.keys(items); // items are keyed by parent list
-			for (var i=0; i<lists.length; i++) { // iterate over lists object
-				const itemsArray = items[listIds[i]];
-				for (var j=0; j<itemsArray.length; j++) { // iterate over items array for that list
-					if (itemsArray[j].id === list.parent_item) {
-						parentItem = itemsArray[j];
-						parentList = listIds[i];
-						break;
-					}
-				}
-			}*/
-			/*
-			parentItem = findObjectByProperty({ 'parentObject': items, 'property': 'id', 'value': list.parent_item });
-			console.log('parentItem ', parentItem);
-			const keys = Object.keys(lists);
-
-			for (let i=0; i<keys.length; i++) {
-				// search lists to find the one which contains the parent item
-				// item ids are an array property of the list
-				const testList = lists[keys[i]];
-
-				if (testList.item.indexOf(list.parent_item) !== -1) {
-					parentList = testList;
-				}
-			}
-		}
-
-		this.setState({
-			'parentList': parentList,
-			'parentItem': parentItem,
-		});
-	}*/
 
 	onIsPublicChange = ({ id, is_public }) => {
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
@@ -157,7 +107,6 @@ class ListDetails extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
-		//console.log('updated ', this.props);
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading; need to check if user should view this list
 			this.getOrganizerData();
@@ -176,16 +125,7 @@ class ListDetails extends Component {
 					'list_description': this.props.list.description,
 				});
 			}
-
-			//this.findParentData();
 		}
-
-		// parent list had changed
-		/*if (prevProps.list && this.props.list) {
-			if (prevProps.list.parent_item !== this.props.list.parent_item) {
-				this.findParentData();
-			}
-		} */
 
 		// user has navigated to a different list
 		if (prevProps.match.params.slug !== this.props.match.params.slug) {

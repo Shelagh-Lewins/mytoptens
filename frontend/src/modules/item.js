@@ -227,7 +227,6 @@ export default function item(state = initialItemsState, action) {
 
 		case MOVE_ITEM_UP_SUCCEEDED: {
 			const itemsArray = action.payload.items; // array containing the two items that have been swapped
-			// update items.things object, change order
 
 			let itemsObject = {};
 			itemsArray.map((item) => { // eslint-disable-line array-callback-return
