@@ -161,6 +161,8 @@ class ListDetails extends Component {
 			}
 		}
 
+		//console.log('listdetail render ', this.props.parentList);
+
 		return (
 			<div>
 				{!isEmpty(this.props.errors) && (<Container>
@@ -188,7 +190,7 @@ class ListDetails extends Component {
 							{this.state.canEdit &&
 								<Organizer
 									list={this.props.list}
-									parentListId={this.state.parentList ? this.state.parentList.id : undefined}
+									parentListId={this.props.parentList ? this.props.parentList.id : undefined}
 									listOrganizerData={this.props.listOrganizerData}
 									itemOrganizerData={this.props.itemOrganizerData}
 								/>}

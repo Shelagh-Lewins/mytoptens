@@ -271,7 +271,7 @@ export function fetchOrganizerData(userId) {
 	// for use in organizer
 	//const userId = store.getState().auth.user.id;
 	return (dispatch, getState) => {
-		// dispatch(fetchMyListNamesStarted());
+		dispatch(fetchOrganizerDataStarted());
 		// TODO association dispatch actions
 		// TODO store
 
@@ -570,11 +570,11 @@ export default function list(state = initialListsState, action) {
 		}
 
 		case FETCH_ORGANIZER_DATA_STARTED: {
-			return updeep({ 'isLoading': true }, state);
+			return updeep({ 'organizerData': updeep.constant({}) }, state);
 		}
 
 		case FETCH_ORGANIZER_DATA_FAILED: {
-			return updeep({ 'isLoading': false }, state);
+			return updeep(state, state);
 		}
 
 		default:

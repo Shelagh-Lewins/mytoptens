@@ -12,6 +12,8 @@ class OrganizerList extends Component {
 		this.state = {
 			'showItems': props.showItems,
 		};
+
+		//console.log('OrganizerList ', props);
 	}
 
 	onShowItems() {
