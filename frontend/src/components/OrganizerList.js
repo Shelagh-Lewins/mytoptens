@@ -31,7 +31,7 @@ class OrganizerList extends Component {
 
 		return (
 			<div className="items">
-				{this.props.itemData[listId].map((item, index) => { // eslint-disable-line array-callback-return
+				{this.props.itemOrganizerData[listId].map((item, index) => { // eslint-disable-line array-callback-return
 					const isSelectedItem = ((listId === selectedListId) && (index+1 === selectedItemOrder));
 
 					if (item.name) {

@@ -2,6 +2,7 @@ import { createSelector } from 'reselect';
 import { LIST_IS_PUBLIC_VALUES } from '../constants';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
+import findObjectByProperty from './findObjectByProperty';
 import { normalize, schema } from 'normalizr';
 import store from '../store';
 
@@ -265,8 +266,10 @@ function fetchOrganizerDataFailed() {
 	};
 }
 
-export function fetchOrganizerData() {
-	const userId = store.getState().auth.user.id;
+export function fetchOrganizerData(userId) {
+	// get minimal information about all lists owned by one user
+	// for use in organizer
+	//const userId = store.getState().auth.user.id;
 	return (dispatch, getState) => {
 		// dispatch(fetchMyListNamesStarted());
 		// TODO association dispatch actions
@@ -280,7 +283,7 @@ export function fetchOrganizerData() {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,parent_item&created_by=${userId}`,
+			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,parent_item,slug&created_by=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -379,6 +382,55 @@ export const getOrganizerLists = state => {
 	});
 
 	return lists;
+};
+
+export const getItemsForList = (state, list) => {
+	let listItems = [];
+	const lists = state.list.things;
+
+	if (list) {
+		list.item.map((itemId) => { // eslint-disable-line array-callback-return
+			let item = { ...state.item.things[itemId] }; // shallow copy so copy is extensible
+			
+			// note any list that is a child of this item
+			const childList = findObjectByProperty({
+				'parentObject': lists,
+				'property': 'parent_item',
+				'value': itemId
+			});
+
+			if (childList) {
+				item.childList = { ...childList };
+			}
+
+			listItems.push(item);
+		});
+	}
+
+	return listItems;
+};
+
+export const getItemAndList = (state, list) => {
+	// typically used to find the parent item and its list
+	// for a child list
+	// use the organizer data which has minimal data for all lists belonging to that user
+	let parentItem;
+	let parentList;
+
+	if (list && list.parent_item) {
+		const items = state.item.organizerData;
+		const lists = state.list.organizerData;
+
+		if (items) {
+			parentItem = items[list.parent_item];
+
+			if (parentItem) {
+				parentList = lists[parentItem.list_id];
+			}
+		}
+	}
+
+	return { parentItem, parentList };
 };
 
 

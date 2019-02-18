@@ -76,6 +76,7 @@ class ListViewSet(FlexFieldsModelViewSet):
 class ListBySlugViewSet(viewsets.ModelViewSet):
     """
     Find a list by slug.
+    Return the list itself and associated child / parent lists for navigation
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = List

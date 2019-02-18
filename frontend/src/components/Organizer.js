@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 
 import * as listReducer from '../modules/list';
-import * as itemReducer from '../modules/item';
+//import * as itemReducer from '../modules/item';
 
 import OrganizerList from './OrganizerList';
 
@@ -23,21 +23,22 @@ class Organizer extends Component {
 			'selectedItemOrder': undefined,
 		};
 
-		this.getOrganizerData();
+		//this.getOrganizerData();
 	}
 
 	componentDidUpdate = (prevProps) => {
-		if (prevProps.listData.length === 0 && this.props.listData !== 0) {
+		if (prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0) {
+
 			this.setState({
 				'selectedItemOrder': this.selectedItemOrder(),
 			});
 		}
 	}
 
-	getOrganizerData = () => {
+	/* getOrganizerData = () => {
 		// minimal data for all my lists and items to allow parent list to be changed.
 		this.props.dispatch(listReducer.fetchOrganizerData());
-	}
+	} */
 
 	onClickOrganize = () => {
 		this.setState({
@@ -76,8 +77,8 @@ class Organizer extends Component {
 
 		if (this.state.parentListId) {
 			let parentItemId = this.state.parentItemId;
-			//const parentList = this.props.listData[this.state.parentListId];
-			const parentList = this.props.listData.find(list => list.id === this.state.parentListId);
+			//const parentList = this.props.listOrganizerData[this.state.parentListId];
+			const parentList = this.props.listOrganizerData.find(list => list.id === this.state.parentListId);
 			let parentListItems = parentList.item;
 			order = parentListItems.indexOf(parentItemId) + 1;
 		}
@@ -93,13 +94,13 @@ class Organizer extends Component {
 		return (
 			<div className="lists">
 				<span>Select a new parent: </span>
-				{this.props.listData.map(list => {
+				{this.props.listOrganizerData.map(list => {
 					const showItems = list.id === this.state.parentListId ? true : false;
 
 					return (<OrganizerList
 						list={list}
-						listData={this.props.listData}
-						itemData={this.props.itemData}
+						listOrganizerData={this.props.listOrganizerData}
+						itemOrganizerData={this.props.itemOrganizerData}
 						key={list.id}
 						selectedListId={this.state.parentListId}
 						selectedItemOrder={this.state.selectedItemOrder}
@@ -146,11 +147,12 @@ class Organizer extends Component {
 	}
 }
 
-const mapStateToProps = (state, ownProps) => {
+/* const mapStateToProps = (state, ownProps) => {
 	return ({
-		'listData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
-		'itemData': itemReducer.getOrganizerItemsByList(state), // object. limited item info: id, name, list_id
+		'listOrganizerData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
+		'itemOrganizerData': itemReducer.getOrganizerItemsByList(state), // object. limited item info: id, name, list_id
 	});
-};
+}; */
 
-export default connect(mapStateToProps)(Organizer);
+export default connect()(Organizer);
+// export default connect(mapStateToProps)(Organizer);

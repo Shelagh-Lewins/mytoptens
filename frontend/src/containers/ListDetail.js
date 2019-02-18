@@ -12,7 +12,8 @@ import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
 import Organizer from '../components/Organizer';
 
-import * as listsReducer from '../modules/list';
+import * as listReducer from '../modules/list';
+import * as itemReducer from '../modules/item';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
@@ -34,20 +35,31 @@ class ListDetails extends Component {
 			slug,
 			'showOrganizer': false,
 		};
+
+		// this.getOrganizerData(props);
 	}
 
 	getListData = (props) => {
 		const slug = props.match.params.slug;
 
-		props.dispatch(listsReducer.fetchListBySlug(slug));
+		props.dispatch(listReducer.fetchListBySlug(slug));
 		props.dispatch(clearErrors());
 		return slug;
 	}
 
-	findParentData() {
+	getOrganizerData = () => {
+		// minimal data for all my lists and items to allow parent list to be changed.
+		// can't do this until the list has been loaded, to find the owner
+		this.props.dispatch(listReducer.fetchOrganizerData(this.props.list.created_by));
+		this.props.dispatch(clearErrors());
+	}
+
+	/*findParentData() {
 		console.log('find parent data');
-		const lists = this.props.lists;
-		const items = this.props.items;
+		const lists = this.props.listOrganizerData;
+		// const lists = this.props.lists;
+		const items = this.props.itemOrganizerData;
+		// const items = this.props.items;
 		const list = this.props.list;
 
 		let parentList; // list object
@@ -56,6 +68,18 @@ class ListDetails extends Component {
 		console.log('this.props.items ', this.props.items);
 
 		if (list.parent_item) {
+			const listIds = Object.keys(items); // items are keyed by parent list
+			for (var i=0; i<lists.length; i++) { // iterate over lists object
+				const itemsArray = items[listIds[i]];
+				for (var j=0; j<itemsArray.length; j++) { // iterate over items array for that list
+					if (itemsArray[j].id === list.parent_item) {
+						parentItem = itemsArray[j];
+						parentList = listIds[i];
+						break;
+					}
+				}
+			}*/
+			/*
 			parentItem = findObjectByProperty({ 'parentObject': items, 'property': 'id', 'value': list.parent_item });
 			console.log('parentItem ', parentItem);
 			const keys = Object.keys(lists);
@@ -75,10 +99,10 @@ class ListDetails extends Component {
 			'parentList': parentList,
 			'parentItem': parentItem,
 		});
-	}
+	}*/
 
 	onIsPublicChange = ({ id, is_public }) => {
-		this.props.dispatch(listsReducer.setListIsPublic({ id, is_public }));
+		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
 	onDeleteList = () => {
@@ -87,7 +111,7 @@ class ListDetails extends Component {
 
 		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
 		{
-		  this.props.dispatch(listsReducer.deleteList(id));
+		  this.props.dispatch(listReducer.deleteList(id));
 
 		  // if there is a visible parent, navigate there
 		  if (this.props.parentList) {
@@ -117,7 +141,7 @@ class ListDetails extends Component {
 		const propertyName = identifiers[1];
 		const value = element.value;
 
-		this.props.dispatch(listsReducer.updateList(listId, propertyName, value));
+		this.props.dispatch(listReducer.updateList(listId, propertyName, value));
 	}
 
 	onCreateChildList = (itemId) => {
@@ -125,7 +149,7 @@ class ListDetails extends Component {
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
-		this.props.dispatch(listsReducer.setListIsPublic({ id, is_public }));
+		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
 	onCloseFlashMessage = () => {
@@ -133,8 +157,11 @@ class ListDetails extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
+		//console.log('updated ', this.props);
 		if (prevProps.isLoading && !this.props.isLoading) {
 			// just finished loading; need to check if user should view this list
+			this.getOrganizerData();
+
 			const canEditList = permissions.canEditList({ 'slug': this.state.slug });
 			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
 
@@ -150,15 +177,15 @@ class ListDetails extends Component {
 				});
 			}
 
-			this.findParentData();
+			//this.findParentData();
 		}
 
 		// parent list had changed
-		if (prevProps.list && this.props.list) {
+		/*if (prevProps.list && this.props.list) {
 			if (prevProps.list.parent_item !== this.props.list.parent_item) {
 				this.findParentData();
 			}
-		}
+		} */
 
 		// user has navigated to a different list
 		if (prevProps.match.params.slug !== this.props.match.params.slug) {
@@ -171,7 +198,7 @@ class ListDetails extends Component {
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			this.props.dispatch(listsReducer.fetchListBySlug(this.state.slug));
+			this.props.dispatch(listReducer.fetchListBySlug(this.state.slug));
 			this.props.dispatch(clearErrors());
 		}
 	}
@@ -210,10 +237,10 @@ class ListDetails extends Component {
 				{this.props.list && (
 					<div>
 						<Container>
-							{this.state.parentList && (
+							{this.props.parentList && (
 								<Row>
 									<Col>
-										<div className="breadcrumbs"><Link to={`/list/${this.state.parentList.slug}`}>{this.state.parentList.name}</Link> > {this.state.parentItem.name}
+										<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
 										</div>
 									</Col>
 								</Row>
@@ -222,6 +249,8 @@ class ListDetails extends Component {
 								<Organizer
 									list={this.props.list}
 									parentListId={this.state.parentList ? this.state.parentList.id : undefined}
+									listOrganizerData={this.props.listOrganizerData}
+									itemOrganizerData={this.props.itemOrganizerData}
 								/>}
 							{this.state.canEdit && (
 								<Row>
@@ -318,54 +347,29 @@ ListDetails.propTypes = {
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'lists': PropTypes.object.isRequired, // all lists from the store
-	'items': PropTypes.object.isRequired, // all items from the store
 	'thisListItems': PropTypes.array.isRequired, // items belonging to this list
+	'listOrganizerData': PropTypes.array.isRequired, // minimal data for all lists owned by the same user.
+	'itemOrganizerData': PropTypes.object.isRequired, // minimal data for all lists owned by the same user
 };
 
 const mapStateToProps = (state, ownProps) => {
-	// the store should contain our target list, identified by slug
-	// It may also contain the parent list, and / or any child lists
-	// plus the items for all these lists
-	// find the list and items data that won't be changed by user actions on this page
-	const lists = state.list.things;
-	const items = state.item.things;
+	const lists = state.list.things; // details of the current list, with parent and child lists if they exist
 
 	// first find the target list
 	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'slug', 'value': ownProps.match.params.slug });
 
-	let thisListItems = []; // items for just the target list
-
-	// find this list's items
-	if (list) { // avoid error while loading or if list not visible
-		thisListItems = list.item.map((itemId) => {
-			return { ...items[itemId] }; // shallow copy so item is extensible
-		});
-
-		const keys = Object.keys(lists);
-
-		for (let i=0; i<keys.length; i++) {
-			// search lists to find the one which contains the parent item
-			// item ids are an array property of the list
-			const testList = lists[keys[i]];
-
-			// find any list that is a child of an item in this list
-			const index = list.item.indexOf(testList.parent_item);
-
-			if (index !== -1) {
-				thisListItems[index].childList = { ...testList };
-			}
-		}
-	}
+	const parentItemAndList = listReducer.getItemAndList(state, list);
 
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
 		'isLoading': state.list.isLoading,
-		'lists': lists,
 		'list': list,
-		'thisListItems': thisListItems,
-		'items': items,
+		'thisListItems': listReducer.getItemsForList(state, list),
+		'parentList': parentItemAndList.parentList,
+		'parentItem': parentItemAndList.parentItem,
+		'listOrganizerData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
+		'itemOrganizerData': itemReducer.getOrganizerItemsByList(state), // object. limited item info: id, name, list_id
 	});
 };
 
