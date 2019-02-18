@@ -570,6 +570,7 @@ export default function list(state = initialListsState, action) {
 		}
 
 		case FETCH_ORGANIZER_DATA_STARTED: {
+			// clear out any old data, this is important if navigating between lists
 			return updeep({ 'organizerData': updeep.constant({}) }, state);
 		}
 

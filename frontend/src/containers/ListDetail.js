@@ -161,8 +161,6 @@ class ListDetails extends Component {
 			}
 		}
 
-		//console.log('listdetail render ', this.props.parentList);
-
 		return (
 			<div>
 				{!isEmpty(this.props.errors) && (<Container>
