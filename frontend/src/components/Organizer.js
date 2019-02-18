@@ -18,6 +18,7 @@ class Organizer extends Component {
 			'showOrganizer': false,
 			'parentItemId': props.list.parent_item,
 			'parentListId': props.parentListId,
+			'selectedItemChildListId': undefined,
 			'selectedItemOrder': undefined,
 		};
 	}
@@ -46,6 +47,18 @@ class Organizer extends Component {
 	}
 
 	onClickDone = () => {
+		if (this.state.selectedItemChildListId) {
+			const childList = this.props.listOrganizerData.find((list) => list.id === this.state.selectedItemChildListId);
+			if (confirm(`The existing child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
+				this.setParentItem();
+			}
+			return;
+		}
+
+		this.setParentItem();
+	}
+
+	setParentItem() {
 		this.setState({
 			'showOrganizer': false,
 		});
@@ -56,10 +69,11 @@ class Organizer extends Component {
 			this.state.parentItemId));
 	}
 
-	onSelectParentItem = ({ list, order }) => {
+	onSelectParentItem = ({ list, order, childListId }) => {
 		this.setState({
 			'parentItemId': list.item[order-1],
 			'parentListId': list.id,
+			'selectedItemChildListId': childListId,
 			'selectedItemOrder': order,
 		});
 	}
@@ -86,7 +100,7 @@ class Organizer extends Component {
 	renderLists() {
 		return (
 			<div className="lists">
-				<span>Select a new parent: </span>
+				<span>Select a new parent item for this list: </span>
 				{this.props.listOrganizerData.map(list => {
 					const showItems = (list.id === this.state.parentListId);
 
@@ -131,7 +145,7 @@ class Organizer extends Component {
 		}
 
 		return (
-			<div className="list-organizer">
+			<div className={`list-organizer ${this.state.showOrganizer ? 'open' : ''}`}>
 				{controls}
 				{this.state.showOrganizer && this.renderLists()}
 			</div>

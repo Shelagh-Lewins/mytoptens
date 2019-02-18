@@ -59,7 +59,7 @@ class ListDetails extends Component {
 		const id = this.props.list.id;
 		const name = this.props.list.name;
 
-		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
+		if (confirm(`Are you sure you want to delete the list ${name}?`)) // eslint-disable-line no-restricted-globals
 		{
 		  this.props.dispatch(listReducer.deleteList(id));
 
@@ -192,19 +192,6 @@ class ListDetails extends Component {
 									listOrganizerData={this.props.listOrganizerData}
 									itemOrganizerData={this.props.itemOrganizerData}
 								/>}
-							{this.state.canEdit && (
-								<Row>
-									<Col>
-										<div className="list-detail-controls">
-											<SetListIsPublic
-												list={this.props.list}
-												onIsPublicChange={this.onIsPublicChange}
-											/>
-											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
-										</div>
-									</Col>
-								</Row>
-							)}
 							{showPrivacyWarning && (
 								<Row>
 									<Col>
@@ -229,6 +216,19 @@ class ListDetails extends Component {
 									/>
 								</Col>
 							</Row>
+							{this.state.canEdit && (
+								<Row>
+									<Col>
+										<div className="list-detail-controls">
+											<SetListIsPublic
+												list={this.props.list}
+												onIsPublicChange={this.onIsPublicChange}
+											/>
+											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
+										</div>
+									</Col>
+								</Row>
+							)}
 							<Row>
 								<Col className="list-description">
 									<EditableTextField

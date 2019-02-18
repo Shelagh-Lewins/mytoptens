@@ -21,7 +21,7 @@ class OrganizerList extends Component {
 	}
 
 	onSelectItem (e) {
-		this.props.onSelectItem({ 'list': this.props.list, 'order': e.target.dataset.order });
+		this.props.onSelectItem({ 'list': this.props.list, 'order': e.target.dataset.order, 'childListId': e.target.dataset.childlistid });
 	}
 
 	renderItems() {
@@ -48,6 +48,7 @@ class OrganizerList extends Component {
 							<span
 								onClick={this.onSelectItem.bind(this)}
 								data-order={item.order}
+								data-childlistid={item.childListId}
 							><span className="order">{item.order}:</span>{item.name}</span>{childListElm}
 						</div>);
 					}

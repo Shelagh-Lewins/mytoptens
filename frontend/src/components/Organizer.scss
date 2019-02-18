@@ -1,6 +1,19 @@
 @import "../variables";
 
+.list-organizer {
+	.lists {
+		background: $color-organizer-background;
+		border: 1px solid $color-organizer-border;
+		border-radius: 8px;
+		margin-top: 8px;
+		padding: 8px;
+	}
+
+}
+
 .organizer-list {
+	margin: 4px 0;
+
 	.show-items {
 		float: left;
 		width: 36px;
@@ -42,11 +55,13 @@
 
 		&.selected {
 			& > span {
+				background: $color-organizer-item-selected-bg;
 				border: 1px solid $color-organizer-item-selected;
 				border-radius: 1rem;
 			}
 
 			.child-list {
+				background: transparent;
 				border: 1px solid transparent;
 			}
 		}
