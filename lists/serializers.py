@@ -32,7 +32,7 @@ class ListSerializer(FlexFieldsModelSerializer):
     """
     A list may be created with items
     """
-    parent_item_id = serializers.UUIDField(write_only=True)
+    parent_item_id = serializers.UUIDField(write_only=True) # this entry allows parent_item to be updated
     item = ItemSerializer(many=True)
 
     # automatically set created_by as the current user's id
@@ -64,3 +64,4 @@ class ListSerializer(FlexFieldsModelSerializer):
         for item_data in items_data:
             Item.objects.create(list=newlist, **item_data)
         return newlist
+

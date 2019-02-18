@@ -72,6 +72,24 @@ class ListViewSet(FlexFieldsModelViewSet):
     def pre_save(self, obj):
         obj.created_by = self.request.user
 
+    def perform_update(self, serializer):
+        # housekeeping if parent_item is changed
+        parent_item_id = serializer.validated_data.get('parent_item_id', None)
+
+        # check parent item exists
+        if parent_item_id is not None:
+            item = Item.objects.get(pk=parent_item_id)
+
+            if not item: # if the item isn't found, don't save the new value
+                raise APIException("Unable to set parent_item. No item found with id: " + parent_item_id)
+
+            # set any Lists with this parent_item to null parent_item
+            # an item can only have one child list
+            print(List.objects.filter(parent_item_id=parent_item_id))
+            List.objects.filter(parent_item_id=parent_item_id).update(parent_item_id=None)
+ 
+        serializer.save()
+
 
 class ListBySlugViewSet(viewsets.ModelViewSet):
     """
