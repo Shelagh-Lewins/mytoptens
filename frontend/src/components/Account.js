@@ -8,6 +8,8 @@ import * as auth from '../modules/auth';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 
+import Loading from '../components/Loading';
+
 class Account extends Component {
 	constructor() {
 		super();
@@ -38,6 +40,7 @@ class Account extends Component {
 		const email_status = emailVerified ? 'verified': 'unverified';
 		return(
 			<Container>
+				{this.props.isLoading && <Loading />}
 				<h2>My account</h2>
 				<Row>
 					<Col>
@@ -66,15 +69,17 @@ class Account extends Component {
 }
 
 Account.propTypes = {
+	'auth': PropTypes.object.isRequired,
+	'errors': PropTypes.object.isRequired,
+	'isLoading': PropTypes.bool.isRequired,
 	'sendConfirmationEmail': PropTypes.func.isRequired,
 	'confirmEmailNotSent': PropTypes.func.isRequired,
-	'auth': PropTypes.object.isRequired,
-	'errors': PropTypes.object.isRequired
 };
 
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
+	'isLoading': state.list.isLoading,
 	'sendConfirmationEmail': auth.sendConfirmationEmail,
 	'confirmEmailNotSent': auth.confirmEmailNotSent,
 });
