@@ -269,11 +269,8 @@ function fetchOrganizerDataFailed() {
 export function fetchOrganizerData(userId) {
 	// get minimal information about all lists owned by one user
 	// for use in organizer
-	//const userId = store.getState().auth.user.id;
 	return (dispatch, getState) => {
 		dispatch(fetchOrganizerDataStarted());
-		// TODO association dispatch actions
-		// TODO store
 
 		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
@@ -283,7 +280,7 @@ export function fetchOrganizerData(userId) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,order,parent_item,slug&created_by=${userId}`,
+			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,is_public,order,parent_item,slug&created_by=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
