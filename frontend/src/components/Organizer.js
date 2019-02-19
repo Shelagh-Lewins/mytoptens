@@ -100,22 +100,24 @@ class Organizer extends Component {
 	renderLists() {
 		return (
 			<div className="lists">
-				<span>Select a new parent item for this list: </span>
-				{this.props.listOrganizerData.map(list => {
-					const showItems = (list.id === this.state.parentListId);
+				<div className="inner-tube">
+					<span>Select a new parent item for this list: </span>
+					{this.props.listOrganizerData.map(list => {
+						const showItems = (list.id === this.state.parentListId);
 
-					return (<OrganizerList
-						list={list}
-						listOrganizerData={this.props.listOrganizerData}
-						itemOrganizerData={this.props.itemOrganizerData}
-						key={list.id}
-						selectedListId={this.state.parentListId}
-						selectedItemOrder={this.state.selectedItemOrder}
-						onSelectItem={this.onSelectParentItem.bind(this)}
-						showItems={showItems}
-					/>);
-				}
-				)}
+						return (<OrganizerList
+							list={list}
+							listOrganizerData={this.props.listOrganizerData}
+							itemOrganizerData={this.props.itemOrganizerData}
+							key={list.id}
+							selectedListId={this.state.parentListId}
+							selectedItemOrder={this.state.selectedItemOrder}
+							onSelectItem={this.onSelectParentItem.bind(this)}
+							showItems={showItems}
+						/>);
+					}
+					)}
+				</div>
 			</div>
 		);
 	}

@@ -7,12 +7,18 @@
 		border-radius: 8px;
 		margin-top: 8px;
 		padding: 8px;
-	}
 
+		.inner-tube {
+			max-height: 500px;
+			overflow: auto;
+		}
+	}
 }
 
 .organizer-list {
-	margin: 4px 0;
+	&.row {
+		margin: 4px 0;
+	}
 
 	.show-items {
 		float: left;
