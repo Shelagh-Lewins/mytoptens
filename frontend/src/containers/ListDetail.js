@@ -94,8 +94,8 @@ class ListDetails extends Component {
 		this.props.dispatch(listReducer.updateList(listId, propertyName, value));
 	}
 
-	onCreateChildList = (itemId) => {
-		this.props.history.push(`/newlist?parent-item=${itemId}`);
+	onCreateChildList = (item) => {
+		this.props.history.push(`/newlist?parent-item-id=${item.id}&parent-item-name=${item.name}&parent-list-name=${this.props.list.name}&parent-list-slug=${this.props.list.slug}`);
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {

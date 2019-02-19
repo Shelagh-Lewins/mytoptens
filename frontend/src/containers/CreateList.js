@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { createList } from '../modules/list';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
 
@@ -34,14 +34,12 @@ class CreateList extends Component {
 
 		props.dispatch(clearErrors());
 
-		let parentItem;
 		if (props.auth.isAuthenticated) {
 			const urlParams = new URLSearchParams(props.location.search);
-			parentItem = urlParams.get('parent-item');
-		}
-
-		if (typeof parentItem === 'string') {
-			this.state.parentItem = parentItem;
+			this.state.parentItemId = urlParams.get('parent-item-id');
+			this.state.parentItemName = urlParams.get('parent-item-name');
+			this.state.parentListName = urlParams.get('parent-list-name');
+			this.state.parentListSlug = urlParams.get('parent-list-slug');
 		}
 	}
 
@@ -75,8 +73,8 @@ class CreateList extends Component {
 			}
 		}
 
-		if (this.state.parentItem) {
-			newList.parent_item = this.state.parentItem;
+		if (this.state.parentItemId) {
+			newList.parent_item = this.state.parentItemId;
 		}
 
 		this.onCreateList(newList);
@@ -157,6 +155,9 @@ class CreateList extends Component {
 					</Row>
 				</Container>)}
 				<h2>Create a new list</h2>
+				{this.state.parentItemName && (
+					<div className="parent-item"><Link to={`/list/${this.state.parentListSlug}`}>{this.state.parentListName}</Link> > {this.state.parentItemName}</div>
+				)}
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">
 						<Row>

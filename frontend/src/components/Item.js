@@ -26,7 +26,7 @@ class Item extends Component {
 	}
 
 	onCreateChildList = () => {
-		this.props.onCreateChildList(this.props.item.id);
+		this.props.onCreateChildList(this.props.item);
 	}
 
 	onMoveUp = () => {
