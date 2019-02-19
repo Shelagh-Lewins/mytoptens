@@ -11,6 +11,7 @@ import SetListIsPublic from '../components/SetListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
 import ItemsPage from '../components/ItemsPage';
 import Organizer from '../components/Organizer';
+import Loading from '../components/Loading';
 
 import * as listReducer from '../modules/list';
 import * as itemReducer from '../modules/item';
@@ -174,6 +175,7 @@ class ListDetails extends Component {
 						</Col>
 					</Row>
 				</Container>)}
+				{this.props.isLoading && <Loading />}
 				{this.props.list && (
 					<div>
 						<Container>

@@ -10,6 +10,7 @@ import * as listReducer from '../modules/list';
 import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules/list';
 
 import FlashMessage from '../components/FlashMessage';
+import Loading from '../components/Loading';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
@@ -66,6 +67,7 @@ class Home extends Component {
 						</Col>
 					</Row>
 				</Container>)}
+				{this.props.isLoading && <Loading />}
 				<ListsPage
 					auth={this.props.auth}
 					myLists={this.props.myLists}
