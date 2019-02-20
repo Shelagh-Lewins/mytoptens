@@ -1,6 +1,7 @@
 // Home.js
 
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
@@ -18,12 +19,23 @@ import * as permissions from '../modules/permissions';
 
 class Home extends Component {
 	constructor(props) {
-		super();
+		super(props);
 		
 		props.dispatch(clearErrors());
 
+		// which set of lists to view
+		// if logged in, default my-lists
+		// if not logged in, only show public-lists
+		let listset = 'public-lists';
+		if (props.auth.isAuthenticated) {
+			const urlParams = new URLSearchParams(props.location.search);
+			listset = urlParams.get('listset') || 'my-lists';
+		}
+
+		this.setListSetURL(listset);
+
 		this.state = {
-			//'selectedTab': listset,
+			'selectedTab': listset,
 			'topLevelListsOnly': true,
 		};
 	}
@@ -36,6 +48,15 @@ class Home extends Component {
 		// If the user's status has changed, refresh Lists
 		if(prevProps.auth.user.token !== this.props.auth.user.token){
 			this.props.dispatch(listReducer.fetchLists());
+		}
+
+		// user has just logged out
+		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+			this.setState({
+				'selectedTab': 'public-lists',
+			});
+
+			this.setListSetURL('public-lists');
 		}
 	}
 
@@ -54,14 +75,36 @@ class Home extends Component {
 		}
 	}
 
+	// refresh lists based on user choices
+	fetchLists({ listset, topLevelListsOnly }) {
+		this.props.dispatch(listReducer.fetchLists({ listset, topLevelListsOnly }));
+	}
+
 	handleTopLevelListsChange() {
-		console.log('handleTopLevelListsChange ');
 		const topLevelListsOnly = !this.state.topLevelListsOnly;
 		this.setState({
 			'topLevelListsOnly': topLevelListsOnly,
 		});
 
-		this.props.dispatch(listReducer.fetchLists({ 'topLevelListsOnly': topLevelListsOnly }));
+		this.fetchLists({ 'listset': this.state.selectedTab, topLevelListsOnly });
+	}
+
+	setListSetURL(listset) { // indicate current list set in URL; depends on selected tab
+		let URL = `${this.props.location.pathname}?listset=${listset}`;
+		this.props.history.push(URL);
+	}
+
+	handleTabClick = (e) => {
+		const selectedTab = e.target.id;
+
+		if (this.state.selectedTab !== selectedTab) {
+			this.setState({
+				'selectedTab': selectedTab,
+			});
+
+			this.setListSetURL(e.target.id);
+			this.fetchLists({ 'listset': selectedTab, 'topLevelListsOnly': this.state.topLevelListsOnly });
+		}
 	}
 
 	onCloseFlashMessage = () => {
@@ -95,6 +138,8 @@ class Home extends Component {
 					isLoading={this.props.isLoading}
 					topLevelListsOnly={this.state.topLevelListsOnly}
 					handleTopLevelListsChange={this.handleTopLevelListsChange.bind(this)}
+					handleTabClick={this.handleTabClick.bind(this)}
+					selectedTab={this.state.selectedTab}
 				/>
 			</div>
 		);
@@ -117,4 +162,4 @@ const mapStateToProps = (state) => ({
 	'myLists': getMyGroupedAndFilteredLists(state),
 });
 
-export default connect(mapStateToProps)(Home);
+export default connect(mapStateToProps)(withRouter(Home));

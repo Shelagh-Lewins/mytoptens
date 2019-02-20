@@ -57,11 +57,21 @@ class ListViewSet(FlexFieldsModelViewSet):
         queryset = List.objects.filter(is_public=True)
 
         # authenticated user can view public lists and lists the user created
+        # listset in query parameters can be additional filter
         if self.request.user.is_authenticated:
-            queryset = List.objects.filter(
-                Q(created_by=self.request.user) | 
-                Q(is_public=True)
-            )
+            listset = self.request.query_params.get('listset', None)
+
+            if listset == 'my-lists':
+                queryset = List.objects.filter(created_by=self.request.user)
+
+            elif listset == 'public-lists':
+                queryset = List.objects.filter(is_public=True)
+
+            else:
+                queryset = List.objects.filter(
+                    Q(created_by=self.request.user) | 
+                    Q(is_public=True)
+                )
 
         # allow filter by URL parameter created_by
         created_by = self.request.query_params.get('created_by', None)

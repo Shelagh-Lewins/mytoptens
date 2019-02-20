@@ -61,12 +61,12 @@ function fetchListsFailed() {
 	};
 }
 
-export function fetchLists({ topLevelListsOnly }) {
+export function fetchLists({ listset, topLevelListsOnly } = {}) {
 	return (dispatch, getState) => {
 		dispatch(fetchListsStarted());
 		// TODO
 		// read in limit, offset
-		// my lists or all public lists
+		
 
 		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
@@ -77,21 +77,21 @@ export function fetchLists({ topLevelListsOnly }) {
 
 		let url = `/api/v1/content/list/?limit=${PAGE_SIZE}&offset=0`;
 
-		console.log('fetcLists topLevelListsOnly, ', topLevelListsOnly);
 		if (topLevelListsOnly) {
 			url += '&toplevel=1';
 		}
 
+		if (listset) {
+			url += `&listset=${listset}`;
+		}
+
 		return fetchAPI({
-			//'url': '/api/v1/content/list/',
-			//'url': `/api/v1/content/list/?limit=${PAGE_SIZE}&offset=1&toplevel=1`,
 			'url': url,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
 			console.log('response ', response);
-			//const normalizedData = normalize(response, [listSchema]);
-			//console.log('normalizedData ', normalizedData);
+
 			let data = {
 				'count': response.count,
 				'next': response.next,
