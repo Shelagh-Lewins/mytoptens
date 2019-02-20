@@ -1,0 +1,45 @@
+@import "../variables";
+
+.lists-list {
+	.tabs {
+		display: flex;
+		justify-content: center;
+		margin: 6px 0;
+
+		ul {
+			border: 1px solid $color-selector-border;
+			border-radius: 12px;
+			float: left;
+			list-style-type: none;
+			margin: 0;
+			overflow: hidden;
+			padding: 0;
+		}
+
+		span {
+			cursor: pointer;
+			display: inline-block;
+			padding: 6px 12px;
+
+			&.selected {
+				background-color: $color-selector-background-selected;
+				color: $color-selector-text-selected;
+			}
+		}
+	}
+
+	.create-list {
+		margin: 8px 0;
+	}
+
+	.top-level-lists-control {
+		.form-check-input {
+			margin: 8px 0;
+			position: relative;
+		}
+
+		label {
+			font-size: 1rem;
+		}
+	}
+}

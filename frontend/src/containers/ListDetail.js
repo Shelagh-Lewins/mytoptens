@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { withRouter, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';
@@ -315,4 +315,4 @@ const mapStateToProps = (state, ownProps) => {
 	});
 };
 
-export default connect(mapStateToProps)(withRouter(ListDetails));
+export default connect(mapStateToProps)(ListDetails);

@@ -5,13 +5,13 @@ import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
-import ListsPage from './ListsPage';
-
 import * as listReducer from '../modules/list';
 import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules/list';
 
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
+import ListsPage from '../components/ListsPage';
+import Pagination from '../components/Pagination';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
@@ -34,10 +34,22 @@ class Home extends Component {
 
 		this.setListSetURL(listset);
 
+		// an example array of 150 items to be paged
+		var exampleItems = [...Array(150).keys()].map(i => ({ 'id': (i+1), 'name': 'Item ' + (i+1) }));
+
 		this.state = {
 			'selectedTab': listset,
 			'topLevelListsOnly': true,
+			'exampleItems': exampleItems,
+			'pageOfItems': [],
 		};
+
+		this.onChangePage = this.onChangePage.bind(this);
+	}
+
+	onChangePage(pageOfItems) {
+		// update state with new page of items
+		this.setState({ 'pageOfItems': pageOfItems });
 	}
 
 	componentDidMount() {
@@ -71,7 +83,7 @@ class Home extends Component {
 	onDeleteList = ({ id, name }) => {
 		if (confirm(`Are you sure you want to delete the list ${name}`)) // eslint-disable-line no-restricted-globals
 		{
-		  this.props.dispatch(listReducer.deleteList(id));
+			this.props.dispatch(listReducer.deleteList(id));
 		}
 	}
 
@@ -141,6 +153,15 @@ class Home extends Component {
 					handleTabClick={this.handleTabClick.bind(this)}
 					selectedTab={this.state.selectedTab}
 				/>
+				<div className="container">
+					<div className="text-center">
+						<h1>React - Pagination Example with logic like Google</h1>
+						{this.state.pageOfItems.map(item =>
+							<div key={item.id}>{item.name}</div>
+						)}
+						<Pagination items={this.state.exampleItems} onChangePage={this.onChangePage} />
+					</div>
+				</div>
 			</div>
 		);
 	}
