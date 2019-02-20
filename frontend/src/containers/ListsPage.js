@@ -24,7 +24,7 @@ class ListsPage extends Component {
 
 		this.state = {
 			'selectedTab': listset,
-			'topLevelListsOnly': true,
+			//'topLevelListsOnly': true,
 		};
 	}
 
@@ -48,8 +48,8 @@ class ListsPage extends Component {
 	}
 
 	getListsToShow = (listsList) => {
-		let ListsToShow = [];
-
+		//let ListsToShow = [];
+		/*
 		// filter out lists that are not top level
 		if (this.state.topLevelListsOnly) {
 			listsList.map(list => { // eslint-disable-line array-callback-return
@@ -59,7 +59,7 @@ class ListsPage extends Component {
 			});
 
 			return ListsToShow;
-		}
+		} */
 
 		return listsList;
 	}
@@ -117,11 +117,11 @@ class ListsPage extends Component {
 		this.props.history.push(URL);
 	}
 
-	handleTopLevelListsChange() {
+	/* handleTopLevelListsChange() {
 		this.setState({
 			'topLevelListsOnly': !this.state.topLevelListsOnly,
 		});
-	}
+	} */
 
 	handleTabClick = (e) => {
 		if (this.state.selectedTab !== e.target.id) {
@@ -188,8 +188,8 @@ class ListsPage extends Component {
 							<Label check>
 								<Input
 									type="checkbox"
-									defaultChecked={this.state.topLevelListsOnly}
-									onChange={this.handleTopLevelListsChange.bind(this)}/>{' '}
+									defaultChecked={this.props.topLevelListsOnly}
+									onChange={this.props.handleTopLevelListsChange}/>{' '}
 								Show top level lists only
 							</Label>
 						</Col>

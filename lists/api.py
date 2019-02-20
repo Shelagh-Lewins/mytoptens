@@ -9,6 +9,7 @@ from .serializers import ListSerializer, ItemSerializer
 from django.db.models import Q
 
 from rest_flex_fields import FlexFieldsModelViewSet
+from rest_framework.pagination import LimitOffsetPagination
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -49,6 +50,7 @@ class ListViewSet(FlexFieldsModelViewSet):
     model = List
     serializer_class = ListSerializer
     permit_list_expands = ['item']
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         # unauthenticated user can only view public lists
@@ -66,6 +68,11 @@ class ListViewSet(FlexFieldsModelViewSet):
 
         if created_by is not None:
             queryset = queryset.filter(created_by=created_by)
+
+        # return only lists that have no parent item
+        toplevel = self.request.query_params.get('toplevel')
+        if toplevel is not None:
+            queryset = queryset.filter(parent_item=None)
 
         return queryset
 

@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { LIST_IS_PUBLIC_VALUES } from '../constants';
+import { LIST_IS_PUBLIC_VALUES, PAGE_SIZE } from '../constants';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import findObjectByProperty from './findObjectByProperty';
@@ -61,9 +61,12 @@ function fetchListsFailed() {
 	};
 }
 
-export function fetchLists() {
+export function fetchLists({ topLevelListsOnly }) {
 	return (dispatch, getState) => {
 		dispatch(fetchListsStarted());
+		// TODO
+		// read in limit, offset
+		// my lists or all public lists
 
 		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
@@ -72,14 +75,31 @@ export function fetchLists() {
 			useAuth = true;
 		}
 
+		let url = `/api/v1/content/list/?limit=${PAGE_SIZE}&offset=0`;
+
+		console.log('fetcLists topLevelListsOnly, ', topLevelListsOnly);
+		if (topLevelListsOnly) {
+			url += '&toplevel=1';
+		}
+
 		return fetchAPI({
-			'url': '/api/v1/content/list/',
+			//'url': '/api/v1/content/list/',
+			//'url': `/api/v1/content/list/?limit=${PAGE_SIZE}&offset=1&toplevel=1`,
+			'url': url,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			const normalizedData = normalize(response, [listSchema]);
-			
-			return dispatch(receiveEntities(normalizedData));
+			console.log('response ', response);
+			//const normalizedData = normalize(response, [listSchema]);
+			//console.log('normalizedData ', normalizedData);
+			let data = {
+				'count': response.count,
+				'next': response.next,
+				'previous': response.previous,
+				'entities': normalize(response.results, [listSchema]).entities,
+			};
+			console.log('data ', data);
+			return dispatch(receiveEntities(data));
 		}).catch(error => {
 			dispatch(fetchListsFailed());
 
@@ -304,6 +324,9 @@ var updeep = require('updeep');
 const initialListsState = {
 	'isLoading': false,
 	'error': null,
+	'count': null,
+	'next': null,
+	'previous': null,
 	'things': {},
 	'organizerData': {},
 };
@@ -444,14 +467,19 @@ export default function list(state = initialListsState, action) {
 
 		case RECEIVE_ENTITIES: {
 			// load lists data into store
-			const { entities } = action.payload;
-			let lists = {};
+			const { count, previous, next, entities } = action.payload;
 
 			if (entities && entities.list) {
-				lists = entities.list; // there is at least one list
+				return updeep({
+					'count': count,
+					'previous': previous,
+					'next': next,
+					'things': updeep.constant(entities.list), // constant provides placement instead of update, so all previous entries are removed
+					'isLoading': false
+				}, state);
 			}
 
-			return updeep({ 'things': lists, 'isLoading': false }, state);
+			return updeep(state, state);
 		}
 
 		case FETCH_LISTS_STARTED: {
@@ -465,7 +493,6 @@ export default function list(state = initialListsState, action) {
 		case FETCH_LIST_BY_SLUG_STARTED: {
 			return updeep({
 				'isLoading': true,
-				'things': updeep.constant({}), // remove all existing lists
 			}, state);
 		}
 
@@ -563,12 +590,11 @@ export default function list(state = initialListsState, action) {
 				lists = entities.list; // there is at least one list
 			}
 
-			return updeep({ 'organizerData': lists, 'isLoading': false }, state);
+			return updeep({ 'organizerData': updeep.constant(lists), 'isLoading': false }, state);
 		}
 
 		case FETCH_ORGANIZER_DATA_STARTED: {
-			// clear out any old data, this is important if navigating between lists
-			return updeep({ 'organizerData': updeep.constant({}) }, state);
+			return updeep(state, state);
 		}
 
 		case FETCH_ORGANIZER_DATA_FAILED: {

@@ -21,10 +21,15 @@ class Home extends Component {
 		super();
 		
 		props.dispatch(clearErrors());
+
+		this.state = {
+			//'selectedTab': listset,
+			'topLevelListsOnly': true,
+		};
 	}
 
 	componentDidMount() {
-		this.props.dispatch(listReducer.fetchLists());
+		this.props.dispatch(listReducer.fetchLists({ 'topLevelListsOnly': true }));
 	}
 
 	componentDidUpdate(prevProps){
@@ -47,6 +52,16 @@ class Home extends Component {
 		{
 		  this.props.dispatch(listReducer.deleteList(id));
 		}
+	}
+
+	handleTopLevelListsChange() {
+		console.log('handleTopLevelListsChange ');
+		const topLevelListsOnly = !this.state.topLevelListsOnly;
+		this.setState({
+			'topLevelListsOnly': topLevelListsOnly,
+		});
+
+		this.props.dispatch(listReducer.fetchLists({ 'topLevelListsOnly': topLevelListsOnly }));
 	}
 
 	onCloseFlashMessage = () => {
@@ -78,6 +93,8 @@ class Home extends Component {
 					onIsPublicChange={this.onIsPublicChange}
 					onDeleteList={this.onDeleteList}
 					isLoading={this.props.isLoading}
+					topLevelListsOnly={this.state.topLevelListsOnly}
+					handleTopLevelListsChange={this.handleTopLevelListsChange.bind(this)}
 				/>
 			</div>
 		);

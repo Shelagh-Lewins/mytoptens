@@ -152,9 +152,12 @@ export function deleteItemSucceeded({ itemId, listId }) {
 var updeep = require('updeep');
 
 const initialItemsState = {
-	'things': {},
 	'isLoading': false,
 	'error': null,
+	'count': null,
+	'next': null,
+	'previous': null,
+	'things': {},
 	'organizerData': {},
 };
 
@@ -182,18 +185,12 @@ export const getOrganizerItemsByList = state => {
 	// add the list's id to the item as childListId
 	Object.keys(state.list.organizerData).map(listId => { // eslint-disable-line array-callback-return
 		const list = state.list.organizerData[listId];
-//console.log('list ', list.name);
-		if (list.parent_item) {
-			//console.log('list.parent item ', list.parent_item);
-			//const itemsArray = itemsByList[list.id];
-			const parentItem = state.item.organizerData[list.parent_item];
-			//console.log('parent item ', parentItem);
-			if (parentItem) {
-				//const parentItemList = itemsByList[parentItem.list_id];
 
+		if (list.parent_item) {
+			const parentItem = state.item.organizerData[list.parent_item];
+
+			if (parentItem) {
 				itemsByList[parentItem.list_id][parentItem.order-1].childListId = list.id;
-				
-				//parent_item.childList = { ...list };
 			}
 		}
 	});
@@ -207,23 +204,21 @@ export const getOrganizerItemsByList = state => {
 export default function item(state = initialItemsState, action) {
 	switch (action.type) {
 		case LOGOUT_USER_COMPLETE: {
-			return updeep(initialItemsState, {});
+			return updeep(initialItemsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
 		
 		case RECEIVE_ENTITIES: {
 			const { entities } = action.payload;
 
 			if (entities && entities.item) {
-				return updeep({ 'things': entities.item, 'isLoading': false }, state);
+				return updeep({ 'things': updeep.constant(entities.item), 'isLoading': false }, state);
 			}
 
 			return state;
 		}
 
 		case FETCH_LIST_BY_SLUG_STARTED: {
-			return updeep({
-				'things': updeep.constant({}), // remove all existing items
-			}, state);
+			return updeep(state, state);
 		}
 
 		case CREATE_ITEM_SUCCEEDED: {
@@ -261,7 +256,7 @@ export default function item(state = initialItemsState, action) {
 			const { entities } = action.payload;
 
 			if (entities && entities.item) {
-				return updeep({ 'organizerData': entities.item, 'isLoading': false }, state);
+				return updeep({ 'organizerData': updeep.constant(entities.item), 'isLoading': false }, state);
 			}
 
 			return state;
