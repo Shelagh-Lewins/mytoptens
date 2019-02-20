@@ -84,7 +84,7 @@ class ListViewSet(FlexFieldsModelViewSet):
         if toplevel is not None:
             queryset = queryset.filter(parent_item=None)
 
-        return queryset
+        return queryset.order_by('name')
 
     def pre_save(self, obj):
         obj.created_by = self.request.user

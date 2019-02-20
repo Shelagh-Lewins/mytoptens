@@ -210,11 +210,13 @@ export default function item(state = initialItemsState, action) {
 		case RECEIVE_ENTITIES: {
 			const { entities } = action.payload;
 
+			let things = {};
+
 			if (entities && entities.item) {
-				return updeep({ 'things': updeep.constant(entities.item), 'isLoading': false }, state);
+				things = entities.list;
 			}
 
-			return state;
+			return updeep({ 'things': updeep.constant(things), 'isLoading': false }, state);
 		}
 
 		case FETCH_LIST_BY_SLUG_STARTED: {

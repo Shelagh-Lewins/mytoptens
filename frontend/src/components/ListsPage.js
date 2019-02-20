@@ -1,7 +1,7 @@
 // Page to display list of lists
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
 import ListsList from '../components/ListsList';
 import ListSummary from '../components/ListSummary';
@@ -150,4 +150,4 @@ class ListsPage extends Component {
 	}
 }
 
-export default ListsPage;
+export default withRouter(ListsPage);

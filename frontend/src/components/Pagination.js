@@ -1,17 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
- 
-const propTypes = {
-	'items': PropTypes.array.isRequired,
-	'onChangePage': PropTypes.func.isRequired,
-	'initialPage': PropTypes.number,
-	'pageSize': PropTypes.number
-};
- 
-const defaultProps = {
-	'initialPage': 1,
-	'pageSize': 10
-};
+// adapted from http://jasonwatmore.com/post/2017/03/14/react-pagination-example-with-logic-like-google
+// major changes to render only pagination controls, not data
+// replaced <a> with <button> for accessibility
  
 class Pagination extends React.Component {
 	constructor(props) {
@@ -21,37 +12,43 @@ class Pagination extends React.Component {
  
 	componentDidMount() {
 		// set page if items array isn't empty
-		if (this.props.items && this.props.items.length) {
+		if (this.props.count) {
 			this.setPage(this.props.initialPage);
 		}
 	}
  
 	componentDidUpdate(prevProps, prevState) {
+		console.log('Pagination update');
+		console.log('prevProps count ', prevProps.count);
+		console.log('props count ', this.props.count);
 		// reset page if items array has changed
-		if (this.props.items !== prevProps.items) {
+		if (this.props.count !== prevProps.count) {
 			this.setPage(this.props.initialPage);
 		}
 	}
  
-	setPage(page) {
-		var { items, pageSize } = this.props;
+	setPage(pageNumber) {
+		var { count, pageSize } = this.props;
 		var pager = this.state.pager;
  
-		if (page < 1 || page > pager.totalPages) {
+
+		// get new pager object for specified page
+		pager = this.getPager(count, pageNumber, pageSize);
+
+		if (pageNumber < 1 || pageNumber > pager.totalPages) {
 			return;
 		}
- 
-		// get new pager object for specified page
-		pager = this.getPager(items.length, page, pageSize);
- 
-		// get new page of items from items array
-		var pageOfItems = items.slice(pager.startIndex, pager.endIndex + 1);
+		console.log('setPage. count ', count);
+		console.log('pager.totalPages ', pager.totalPages);
+
+		pageNumber = Math.min(pageNumber, pager.totalPages);
+
+		console.log('pageNumber after ', pageNumber);
  
 		// update state
 		this.setState({ 'pager': pager });
  
-		// call change page function in parent component
-		this.props.onChangePage(pageOfItems);
+		this.props.onChangePage(pageNumber);
 	}
  
 	getPager(totalItems, currentPage, pageSize) {
@@ -135,7 +132,18 @@ class Pagination extends React.Component {
 		);
 	}
 }
- 
-Pagination.propTypes = propTypes;
-Pagination.defaultProps = defaultProps;
+
+Pagination.propTypes = {
+	'count': PropTypes.number,
+	'onChangePage': PropTypes.func.isRequired,
+	'initialPage': PropTypes.number,
+	'pageSize': PropTypes.number
+};
+
+Pagination.defaultProps = {
+	'count': 0,
+	'initialPage': 1,
+	'pageSize': 10
+};
+
 export default Pagination;

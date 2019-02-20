@@ -61,12 +61,10 @@ function fetchListsFailed() {
 	};
 }
 
-export function fetchLists({ listset, topLevelListsOnly } = {}) {
+export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 	return (dispatch, getState) => {
 		dispatch(fetchListsStarted());
-		// TODO
-		// read in limit, offset
-		
+
 
 		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
@@ -75,7 +73,7 @@ export function fetchLists({ listset, topLevelListsOnly } = {}) {
 			useAuth = true;
 		}
 
-		let url = `/api/v1/content/list/?limit=${PAGE_SIZE}&offset=0`;
+		let url = `/api/v1/content/list/?`;
 
 		if (topLevelListsOnly) {
 			url += '&toplevel=1';
@@ -83,6 +81,14 @@ export function fetchLists({ listset, topLevelListsOnly } = {}) {
 
 		if (listset) {
 			url += `&listset=${listset}`;
+		}
+
+		if (limit) {
+			url += `&limit=${limit}`;
+		}
+
+		if (offset) {
+			url += `&offset=${offset}`;
 		}
 
 		return fetchAPI({
@@ -324,9 +330,9 @@ var updeep = require('updeep');
 const initialListsState = {
 	'isLoading': false,
 	'error': null,
-	'count': null,
-	'next': null,
-	'previous': null,
+	'count': 0,
+	'next': '',
+	'previous': '',
 	'things': {},
 	'organizerData': {},
 };
@@ -468,18 +474,23 @@ export default function list(state = initialListsState, action) {
 		case RECEIVE_ENTITIES: {
 			// load lists data into store
 			const { count, previous, next, entities } = action.payload;
+			console.log('receiveEntities count ', count);
+
+			let things = {};
 
 			if (entities && entities.list) {
-				return updeep({
-					'count': count,
-					'previous': previous,
-					'next': next,
-					'things': updeep.constant(entities.list), // constant provides placement instead of update, so all previous entries are removed
-					'isLoading': false
-				}, state);
+				things = entities.list;
 			}
 
-			return updeep(state, state);
+			return updeep({
+				'count': count,
+				'previous': previous,
+				'next': next,
+				'things': updeep.constant(things), // constant provides placement instead of update, so all previous entries are removed
+				'isLoading': false
+			}, state);
+
+			//return updeep({ 'isLoading': false }, state);
 		}
 
 		case FETCH_LISTS_STARTED: {

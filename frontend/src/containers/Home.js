@@ -16,11 +16,12 @@ import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
+import { PAGE_SIZE } from '../constants';
 
 class Home extends Component {
 	constructor(props) {
 		super(props);
-		
+
 		props.dispatch(clearErrors());
 
 		// which set of lists to view
@@ -34,32 +35,32 @@ class Home extends Component {
 
 		this.setListSetURL(listset);
 
-		// an example array of 150 items to be paged
-		var exampleItems = [...Array(150).keys()].map(i => ({ 'id': (i+1), 'name': 'Item ' + (i+1) }));
-
 		this.state = {
 			'selectedTab': listset,
 			'topLevelListsOnly': true,
-			'exampleItems': exampleItems,
-			'pageOfItems': [],
+			'currentPage': 1,
 		};
 
 		this.onChangePage = this.onChangePage.bind(this);
 	}
 
-	onChangePage(pageOfItems) {
+	onChangePage(currentPage) {
 		// update state with new page of items
-		this.setState({ 'pageOfItems': pageOfItems });
+		this.setState({ 'currentPage': currentPage });
+
+		if (currentPage !== this.state.currentPage) {
+			this.fetchLists({ currentPage });
+		}
 	}
 
 	componentDidMount() {
-		this.props.dispatch(listReducer.fetchLists({ 'topLevelListsOnly': true }));
+		this.fetchLists({});
 	}
 
 	componentDidUpdate(prevProps){
 		// If the user's status has changed, refresh Lists
 		if(prevProps.auth.user.token !== this.props.auth.user.token){
-			this.props.dispatch(listReducer.fetchLists());
+			this.fetchLists({});
 		}
 
 		// user has just logged out
@@ -88,8 +89,15 @@ class Home extends Component {
 	}
 
 	// refresh lists based on user choices
-	fetchLists({ listset, topLevelListsOnly }) {
-		this.props.dispatch(listReducer.fetchLists({ listset, topLevelListsOnly }));
+	fetchLists({ listset = this.state.listset, topLevelListsOnly = this.state.topLevelListsOnly, currentPage = this.state.currentPage }) {
+		// use state values by default
+		// however these may be passed in by functions that set state because setState is not synchronous
+		this.props.dispatch(listReducer.fetchLists({
+			listset,
+			topLevelListsOnly,
+			'limit': PAGE_SIZE,
+			'offset': (currentPage - 1) * PAGE_SIZE,
+		}));
 	}
 
 	handleTopLevelListsChange() {
@@ -98,7 +106,7 @@ class Home extends Component {
 			'topLevelListsOnly': topLevelListsOnly,
 		});
 
-		this.fetchLists({ 'listset': this.state.selectedTab, topLevelListsOnly });
+		this.fetchLists({ topLevelListsOnly });
 	}
 
 	setListSetURL(listset) { // indicate current list set in URL; depends on selected tab
@@ -115,7 +123,7 @@ class Home extends Component {
 			});
 
 			this.setListSetURL(e.target.id);
-			this.fetchLists({ 'listset': selectedTab, 'topLevelListsOnly': this.state.topLevelListsOnly });
+			this.fetchLists({ 'listset': selectedTab });
 		}
 	}
 
@@ -138,6 +146,16 @@ class Home extends Component {
 					</Row>
 				</Container>)}
 				{this.props.isLoading && <Loading />}
+				<div className="container">
+					<div className="text-center">
+						<Pagination
+							count={this.props.count}
+							pageSize={PAGE_SIZE}
+							currentPage={this.state.currentPage}
+							onChangePage={this.onChangePage}
+						/>
+					</div>
+				</div>
 				<ListsPage
 					auth={this.props.auth}
 					myLists={this.props.myLists}
@@ -153,15 +171,6 @@ class Home extends Component {
 					handleTabClick={this.handleTabClick.bind(this)}
 					selectedTab={this.state.selectedTab}
 				/>
-				<div className="container">
-					<div className="text-center">
-						<h1>React - Pagination Example with logic like Google</h1>
-						{this.state.pageOfItems.map(item =>
-							<div key={item.id}>{item.name}</div>
-						)}
-						<Pagination items={this.state.exampleItems} onChangePage={this.onChangePage} />
-					</div>
-				</div>
 			</div>
 		);
 	}
@@ -173,6 +182,9 @@ Home.propTypes = {
 	'isLoading': PropTypes.bool.isRequired,
 	'publicLists': PropTypes.array.isRequired,
 	'myLists': PropTypes.object.isRequired,
+	'count': PropTypes.number, // data may not yet be loaded
+	'next': PropTypes.string, // there may be no 'next' page
+	'previous': PropTypes.string, // there may be no 'previous' page
 };
 
 const mapStateToProps = (state) => ({
@@ -181,6 +193,9 @@ const mapStateToProps = (state) => ({
 	'isLoading': state.list.isLoading,
 	'publicLists': getFilteredPublicLists(state),
 	'myLists': getMyGroupedAndFilteredLists(state),
+	'count': state.list.count,
+	'next': state.list.next,
+	'previous': state.list.previous,
 });
 
 export default connect(mapStateToProps)(withRouter(Home));
