@@ -1,4 +1,4 @@
-// import { createSelector } from 'reselect';
+import { createSelector } from 'reselect';
 // import { RECEIVE_ENTITIES,  } from '../modules/list';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
@@ -163,7 +163,11 @@ const initialItemsState = {
 
 /////////////////////////////
 // organizer data
-export const getOrganizerItemsByList = state => {
+// all items and lists, for selector to use
+export const getOrganizerItems = state => state.item.organizerData;
+export const getOrganizerLists = state => state.list.organizerData;
+
+/* export const getOrganizerItemsByList = state => {
 	// return an object containing all items, keyed by parent list id
 	let itemsByList = {};
 
@@ -196,7 +200,65 @@ export const getOrganizerItemsByList = state => {
 	});
 
 	return itemsByList;
-};
+}; */
+
+export const groupedItems = createSelector(
+	[getOrganizerItems, getOrganizerLists],
+	(items, lists) => {
+		let itemsByList = {};
+
+		// find the items for each list
+		Object.keys(lists).map(listId => { // eslint-disable-line array-callback-return
+			const list = lists[listId];
+
+			let itemsArray = [];
+
+			for (let i=0; i<list.item.length; i++) {
+				let item = { ...items[list.item[i]] };
+				//console.log('name ', item.name);
+				if (item.name !== '') {
+					//console.log('really here ', item.name);
+					itemsArray.push(item);
+				}
+			}
+
+			itemsByList[list.id] = itemsArray;
+		});
+
+		// note the parent_item, if any, of each list
+		// add the list's id to the item as childListId
+		Object.keys(lists).map(listId => { // eslint-disable-line array-callback-return
+			const list = lists[listId];
+
+			if (list.parent_item) {
+				const parentItem = items[list.parent_item];
+				//console.log('parentItem ', parentItem);
+
+				if (parentItem) {
+					// can't use array order to pull out item, because items with no name have been removed
+					// instead, explicitly find the item object in the array by its 'order' property
+					let itemsArray = itemsByList[parentItem.list_id];
+					let item = itemsArray.find(item => item.order === parentItem.order);
+					//console.log('item ', item);
+					item.childListId = list.id;
+//					itemsByList[parentItem.list_id][parentItem.order-1].childListId = list.id;
+				}
+			}
+		});
+
+		return itemsByList;
+	}
+	/*[getItems],
+	(items) => {
+		let listItems = (Object.keys(items).map(id => {
+			return items[id];
+		})).sort(function(a, b){
+			return a.order - b.order; // sort to index order
+		});
+
+		return listItems;*/
+	//}
+);
 
 /////////////////////////////
 // state updates
@@ -213,7 +275,7 @@ export default function item(state = initialItemsState, action) {
 			let things = {};
 
 			if (entities && entities.item) {
-				things = entities.list;
+				things = entities.item;
 			}
 
 			return updeep({ 'things': updeep.constant(things), 'isLoading': false }, state);
@@ -270,7 +332,7 @@ export default function item(state = initialItemsState, action) {
 }
 
 // all items, for selector to use
-export const getItems = state => state.item.things;
+// export const getItems = state => state.item.things;
 
 //// not currently used but left in as an example of sorting list items by order
 // items belonging to the current list

@@ -79,7 +79,6 @@ class ListsPage extends Component {
 	}
 
 	render() {
-		console.log('listsPage render. currentPage ', this.props.currentPage);
 		let listsList;
 
 		if (this.props.selectedTab === 'my-lists') {

@@ -161,7 +161,12 @@ class ListDetails extends Component {
 				showPrivacyWarning = true;
 			}
 		}
-
+		console.log('ListDetail render. parent ', this.props.parentList);
+		let parentListId;
+		if (this.props.parentList) {
+			parentListId = this.props.parentList.id;
+			console.log('ListDetail render. id ', parentListId);
+		}
 		return (
 			<div>
 				{!isEmpty(this.props.errors) && (<Container>
@@ -190,7 +195,7 @@ class ListDetails extends Component {
 							{this.state.canEdit &&
 								<Organizer
 									list={this.props.list}
-									parentListId={this.props.parentList ? this.props.parentList.id : undefined}
+									parentListId={parentListId}
 									listOrganizerData={this.props.listOrganizerData}
 									itemOrganizerData={this.props.itemOrganizerData}
 								/>}
@@ -307,7 +312,8 @@ const mapStateToProps = (state, ownProps) => {
 		'parentList': parentItemAndList.parentList,
 		'parentItem': parentItemAndList.parentItem,
 		'listOrganizerData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
-		'itemOrganizerData': itemReducer.getOrganizerItemsByList(state), // object. limited item info: id, name, list_id
+		// 'itemOrganizerData': itemReducer.getOrganizerItemsByList(state),
+		'itemOrganizerData': itemReducer.groupedItems(state), // object. limited item info: id, name, list_id
 	});
 };
 

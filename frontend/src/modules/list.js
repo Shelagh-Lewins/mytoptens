@@ -90,14 +90,11 @@ export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 		if (offset) {
 			url += `&offset=${offset}`;
 		}
-		console.log('url ', url);
 		return fetchAPI({
 			'url': url,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			console.log('response ', response);
-
 			let data = {
 				'count': response.count,
 				'next': response.next,
@@ -145,7 +142,7 @@ export function fetchListBySlug(slug) {
 			'useAuth': useAuth,
 		}).then(response => {
 			const normalizedData = normalize(response, [listSchema]);
-
+			console.log('got list by slug. data ', normalizedData);
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
 			dispatch(fetchListBySlugFailed());
@@ -409,7 +406,7 @@ export const getOrganizerLists = state => {
 
 	return lists;
 };
-
+// TODO rework with selectors to avoid rerunning functions
 export const getItemsForList = (state, list) => {
 	let listItems = [];
 	const lists = state.list.things;
@@ -474,7 +471,6 @@ export default function list(state = initialListsState, action) {
 		case RECEIVE_ENTITIES: {
 			// load lists data into store
 			const { count, previous, next, entities } = action.payload;
-			console.log('receiveEntities count ', count);
 
 			let things = {};
 
