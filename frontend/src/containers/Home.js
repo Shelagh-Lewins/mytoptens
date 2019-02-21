@@ -41,6 +41,8 @@ class Home extends Component {
 		};
 
 		this.onChangePage = this.onChangePage.bind(this);
+		this.handleTopLevelListsChange = this.handleTopLevelListsChange.bind(this);
+		this.handleTabClick = this.handleTabClick.bind(this);
 	}
 
 	componentDidMount() {
@@ -65,6 +67,7 @@ class Home extends Component {
 
 	// refresh lists based on user choices
 	fetchLists({ listset = this.state.listset, topLevelListsOnly = this.state.topLevelListsOnly, currentPage = this.state.currentPage }) {
+
 		// use state values by default
 		// however these may be passed in by functions that set state because setState is not synchronous
 		this.props.dispatch(listReducer.fetchLists({
@@ -88,8 +91,7 @@ class Home extends Component {
 		this.props.dispatch(listReducer.filterLists(searchTerm));
 	}
 
-	onIsPublicChange = ({ id, is_public }) => {
-		console.log('onIsPublicChange ', id, is_public);
+	onChangeIsPublic = ({ id, is_public }) => {
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
@@ -153,12 +155,12 @@ class Home extends Component {
 					canCreateList={permissions.canCreateList}
 					onSearch={this.onSearch}
 					onCreateList={this.onCreateList}
-					onIsPublicChange={this.onIsPublicChange}
+					onChangeIsPublic={this.onChangeIsPublic}
 					onDeleteList={this.onDeleteList}
 					isLoading={this.props.isLoading}
 					topLevelListsOnly={this.state.topLevelListsOnly}
-					handleTopLevelListsChange={this.handleTopLevelListsChange.bind(this)}
-					handleTabClick={this.handleTabClick.bind(this)}
+					handleTopLevelListsChange={this.handleTopLevelListsChange}
+					handleTabClick={this.handleTabClick}
 					selectedTab={this.state.selectedTab}
 					count={this.props.count}
 					pageSize={PAGE_SIZE}

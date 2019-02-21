@@ -12,16 +12,18 @@ class Pagination extends React.Component {
 	}
  
 	componentDidMount() {
-		// set page if items array isn't empty
+		// set page if there is a count
+		// also check for currentPage. Parent component may re-render, causing this component to be recreated.
 		if (this.props.count) {
-			this.setPage(this.props.initialPage);
+			const initialPage = this.props.currentPage ? this.props.currentPage : this.props.defaultPage;
+			this.setPage(initialPage);
 		}
 	}
  
 	componentDidUpdate(prevProps, prevState) {
 		// reset page if items array has changed
 		if (this.props.count !== prevProps.count) {
-			this.setPage(this.props.initialPage);
+			this.setPage(this.props.defaultPage);
 		}
 	}
  
@@ -131,13 +133,13 @@ class Pagination extends React.Component {
 Pagination.propTypes = {
 	'count': PropTypes.number,
 	'onChangePage': PropTypes.func.isRequired,
-	'initialPage': PropTypes.number,
+	'defaultPage': PropTypes.number,
 	'pageSize': PropTypes.number
 };
 
 Pagination.defaultProps = {
 	'count': 0,
-	'initialPage': 1,
+	'defaultPage': 1,
 	'pageSize': 10
 };
 

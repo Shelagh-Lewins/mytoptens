@@ -12,16 +12,16 @@ const SetListIsPublic = props => {
 	const tooltip = props.isPublic ? 'Public' : 'Private';
 
 
-	function onIsPublicChange(e) {
+	function onChangeIsPublic(e) {
 		// map from button data to true / false
 		const value = e.target.dataset.ispublic === 'public' ? true : false;
-		props.onIsPublicChange({ 'id': e.target.dataset.listid, 'is_public': !value });
+		props.onChangeIsPublic({ 'id': e.target.dataset.listid, 'is_public': !value });
 	}
 
 	return (
 		<div className="is-public">
 			<button
-				onClick={onIsPublicChange}
+				onClick={onChangeIsPublic}
 				data-listid={listId}
 				data-ispublic={isPublic}
 				className={`${isPublic} btn btn-default`}

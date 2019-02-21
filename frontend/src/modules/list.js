@@ -90,7 +90,7 @@ export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 		if (offset) {
 			url += `&offset=${offset}`;
 		}
-
+		console.log('url ', url);
 		return fetchAPI({
 			'url': url,
 			'method': 'GET',

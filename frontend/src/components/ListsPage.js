@@ -18,7 +18,7 @@ class ListsPage extends Component {
 	}
 
 	renderPublicLists() {
-		const { publicLists, onIsPublicChange, onDeleteList } = this.props;
+		const { publicLists, onChangeIsPublic, onDeleteList } = this.props;
 
 		return (
 			<ListsList headerText="All public lists">
@@ -26,7 +26,7 @@ class ListsPage extends Component {
 					<ListSummary
 						key={list.id}
 						list={list}
-						onIsPublicChange={onIsPublicChange}
+						onChangeIsPublic={onChangeIsPublic}
 						onDeleteList={onDeleteList}
 						showCreatedBy={true}
 					/>
@@ -36,7 +36,7 @@ class ListsPage extends Component {
 	}
 
 	renderMyLists() {
-		const { myLists, onIsPublicChange, onDeleteList } = this.props;
+		const { myLists, onChangeIsPublic, onDeleteList } = this.props;
 
 		return Object.keys(myLists).map((is_public, index) => {
 			const listsByIsPublic = myLists[is_public];
@@ -50,7 +50,7 @@ class ListsPage extends Component {
 								<ListSummary
 									key={list.id}
 									list={list}
-									onIsPublicChange={onIsPublicChange}
+									onChangeIsPublic={onChangeIsPublic}
 									onDeleteList={onDeleteList}
 								/>
 							)}
@@ -79,6 +79,7 @@ class ListsPage extends Component {
 	}
 
 	render() {
+		console.log('listsPage render. currentPage ', this.props.currentPage);
 		let listsList;
 
 		if (this.props.selectedTab === 'my-lists') {

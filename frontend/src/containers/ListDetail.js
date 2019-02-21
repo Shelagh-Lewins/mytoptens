@@ -52,7 +52,7 @@ class ListDetails extends Component {
 		this.props.dispatch(clearErrors());
 	}
 
-	onIsPublicChange = ({ id, is_public }) => {
+	onChangeIsPublic = ({ id, is_public }) => {
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
@@ -99,7 +99,7 @@ class ListDetails extends Component {
 		this.props.history.push(`/newlist?parent-item-id=${item.id}&parent-item-name=${item.name}&parent-list-name=${this.props.list.name}&parent-list-slug=${this.props.list.slug}`);
 	}
 
-	onIsPublicChange = ({ id, is_public }) => {
+	onChangeIsPublic = ({ id, is_public }) => {
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
@@ -224,7 +224,7 @@ class ListDetails extends Component {
 										<div className="list-detail-controls">
 											<SetListIsPublic
 												list={this.props.list}
-												onIsPublicChange={this.onIsPublicChange}
+												onChangeIsPublic={this.onChangeIsPublic}
 											/>
 											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>X</button>
 										</div>

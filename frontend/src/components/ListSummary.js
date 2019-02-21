@@ -33,7 +33,7 @@ const ListSummary = props => {
 						<SetListIsPublic
 							listId={props.list.id}
 							isPublic={props.list.is_public}
-							onIsPublicChange={props.onIsPublicChange}
+							onChangeIsPublic={props.onChangeIsPublic}
 						/>
 						<button className="btn btn-danger" title="Delete" onClick={onDeleteList}>X</button>
 					</div>
