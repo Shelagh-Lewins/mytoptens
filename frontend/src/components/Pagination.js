@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './Pagination.scss';
 // adapted from http://jasonwatmore.com/post/2017/03/14/react-pagination-example-with-logic-like-google
 // major changes to render only pagination controls, not data
 // replaced <a> with <button> for accessibility
@@ -18,9 +19,6 @@ class Pagination extends React.Component {
 	}
  
 	componentDidUpdate(prevProps, prevState) {
-		console.log('Pagination update');
-		console.log('prevProps count ', prevProps.count);
-		console.log('props count ', this.props.count);
 		// reset page if items array has changed
 		if (this.props.count !== prevProps.count) {
 			this.setPage(this.props.initialPage);
@@ -31,19 +29,14 @@ class Pagination extends React.Component {
 		var { count, pageSize } = this.props;
 		var pager = this.state.pager;
  
-
 		// get new pager object for specified page
 		pager = this.getPager(count, pageNumber, pageSize);
 
 		if (pageNumber < 1 || pageNumber > pager.totalPages) {
 			return;
 		}
-		console.log('setPage. count ', count);
-		console.log('pager.totalPages ', pager.totalPages);
 
 		pageNumber = Math.min(pageNumber, pager.totalPages);
-
-		console.log('pageNumber after ', pageNumber);
  
 		// update state
 		this.setState({ 'pager': pager });
@@ -117,11 +110,13 @@ class Pagination extends React.Component {
 				<li className={pager.currentPage === 1 ? 'disabled' : ''}>
 					<button type="button" className="btn pagination previous" onClick={() => this.setPage(pager.currentPage - 1)}>Previous</button>
 				</li>
+				<li className="spacer"></li>
 				{pager.pages.map((page, index) =>
 					<li key={index} className={pager.currentPage === page ? 'active' : ''}>
 						<button type="button" className="btn pagination page" onClick={() => this.setPage(page)}>{page}</button>
 					</li>
 				)}
+				<li className="spacer"></li>
 				<li className={pager.currentPage === pager.totalPages ? 'disabled' : ''}>
 					<button type="button" className="btn pagination next" onClick={() => this.setPage(pager.currentPage + 1)}>Next</button>
 				</li>

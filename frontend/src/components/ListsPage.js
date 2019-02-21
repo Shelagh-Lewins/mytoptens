@@ -6,6 +6,7 @@ import { Container, Row, Col, Label, Input } from 'reactstrap';
 import ListsList from '../components/ListsList';
 import ListSummary from '../components/ListSummary';
 import './ListsPage.scss';
+import Pagination from '../components/Pagination';
 
 class ListsPage extends Component {
 	onSearch = e => {
@@ -144,6 +145,16 @@ class ListsPage extends Component {
 				</div>}
 				<div className="lists">
 					{listsList}
+				</div>
+				<div className="container">
+					<div className="text-center">
+						<Pagination
+							count={this.props.count}
+							pageSize={this.props.pageSize}
+							currentPage={this.props.currentPage}
+							onChangePage={this.props.onChangePage}
+						/>
+					</div>
 				</div>
 			</div>
 		);

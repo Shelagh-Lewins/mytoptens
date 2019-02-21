@@ -11,7 +11,6 @@ import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
 import ListsPage from '../components/ListsPage';
-import Pagination from '../components/Pagination';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
@@ -44,15 +43,6 @@ class Home extends Component {
 		this.onChangePage = this.onChangePage.bind(this);
 	}
 
-	onChangePage(currentPage) {
-		// update state with new page of items
-		this.setState({ 'currentPage': currentPage });
-
-		if (currentPage !== this.state.currentPage) {
-			this.fetchLists({ currentPage });
-		}
-	}
-
 	componentDidMount() {
 		this.fetchLists({});
 	}
@@ -73,6 +63,27 @@ class Home extends Component {
 		}
 	}
 
+	// refresh lists based on user choices
+	fetchLists({ listset = this.state.listset, topLevelListsOnly = this.state.topLevelListsOnly, currentPage = this.state.currentPage }) {
+		// use state values by default
+		// however these may be passed in by functions that set state because setState is not synchronous
+		this.props.dispatch(listReducer.fetchLists({
+			listset,
+			topLevelListsOnly,
+			'limit': PAGE_SIZE,
+			'offset': (currentPage - 1) * PAGE_SIZE,
+		}));
+	}
+
+	onChangePage(currentPage) {
+		// update state with new page of items
+		this.setState({ 'currentPage': currentPage });
+
+		if (currentPage !== this.state.currentPage) {
+			this.fetchLists({ currentPage });
+		}
+	}
+
 	onSearch = searchTerm => {
 		this.props.dispatch(listReducer.filterLists(searchTerm));
 	}
@@ -86,18 +97,6 @@ class Home extends Component {
 		{
 			this.props.dispatch(listReducer.deleteList(id));
 		}
-	}
-
-	// refresh lists based on user choices
-	fetchLists({ listset = this.state.listset, topLevelListsOnly = this.state.topLevelListsOnly, currentPage = this.state.currentPage }) {
-		// use state values by default
-		// however these may be passed in by functions that set state because setState is not synchronous
-		this.props.dispatch(listReducer.fetchLists({
-			listset,
-			topLevelListsOnly,
-			'limit': PAGE_SIZE,
-			'offset': (currentPage - 1) * PAGE_SIZE,
-		}));
 	}
 
 	handleTopLevelListsChange() {
@@ -146,16 +145,6 @@ class Home extends Component {
 					</Row>
 				</Container>)}
 				{this.props.isLoading && <Loading />}
-				<div className="container">
-					<div className="text-center">
-						<Pagination
-							count={this.props.count}
-							pageSize={PAGE_SIZE}
-							currentPage={this.state.currentPage}
-							onChangePage={this.onChangePage}
-						/>
-					</div>
-				</div>
 				<ListsPage
 					auth={this.props.auth}
 					myLists={this.props.myLists}
@@ -170,6 +159,10 @@ class Home extends Component {
 					handleTopLevelListsChange={this.handleTopLevelListsChange.bind(this)}
 					handleTabClick={this.handleTabClick.bind(this)}
 					selectedTab={this.state.selectedTab}
+					count={this.props.count}
+					pageSize={PAGE_SIZE}
+					currentPage={this.state.currentPage}
+					onChangePage={this.onChangePage}
 				/>
 			</div>
 		);
