@@ -26,6 +26,10 @@
 			width: 1px;
 		}
 
+		.editable-text-field {
+			float: left;
+		}
+
 		span {
 			font-size: 1.5rem;
 			font-weight: bold;
@@ -41,6 +45,7 @@
 		// hide label but leave contents visible and entire label still readable
 		label {
 			border: 0;
+			clear: both;
 			clip: rect(0 0 0 0);
 			height: 1px;
 			margin: -1px;

@@ -216,11 +216,7 @@ class ListDetails extends Component {
 										handleNewValue={this.handleNewValue}
 										value={this.state.list_name}
 									/>
-								</Col>
-							</Row>
-							{this.state.canEdit && (
-								<Row>
-									<Col>
+									{this.state.canEdit && (
 										<div className="list-detail-controls">
 											<SetListIsPublic
 												list={this.props.list}
@@ -228,9 +224,9 @@ class ListDetails extends Component {
 											/>
 											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>X</button>
 										</div>
-									</Col>
-								</Row>
-							)}
+									)}
+								</Col>
+							</Row>
 							<Row>
 								<Col className="list-description">
 									<EditableTextField
