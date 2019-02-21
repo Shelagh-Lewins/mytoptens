@@ -1,5 +1,19 @@
-// hide label but leave contents visible and entire label still readable
+@import "../variables";
 
-label {
-	font-size: 0;
+.is-public {
+	button {
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 32px 32px;
+		border-color: $color-isprivate-btn-border;
+		width: 40px;
+
+		&.private {
+			background-image: url("/images/private.svg");
+		}
+
+		&.public {
+			background-image: url("/images/public.svg");
+		}
+	}
 }

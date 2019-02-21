@@ -89,6 +89,7 @@ class Home extends Component {
 	}
 
 	onIsPublicChange = ({ id, is_public }) => {
+		console.log('onIsPublicChange ', id, is_public);
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 

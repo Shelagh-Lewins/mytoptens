@@ -3,31 +3,30 @@
 // By using props to populate the UI, we enable time travel and a direct connection with the store.
 
 import React from 'react';
-import { Label } from 'reactstrap';
-
-import { LIST_IS_PUBLIC_TEXTS } from '../constants';
 
 import './SetListIsPublic.scss';
 
 const SetListIsPublic = props => {
-	let id=`select-${props.list.id}`;
-	let value = props.list.is_public ? 'Public' : 'Private';
+	const listId = props.listId;
+	const isPublic = props.isPublic ? 'public' : 'private';
+	const tooltip = props.isPublic ? 'Public' : 'Private';
+
 
 	function onIsPublicChange(e) {
-		// map from select options to true / false
-		const value = e.target.value === 'Public' ? true : false;
-		props.onIsPublicChange({ 'id': props.list.id, 'is_public': value });
+		// map from button data to true / false
+		const value = e.target.dataset.ispublic === 'public' ? true : false;
+		props.onIsPublicChange({ 'id': e.target.dataset.listid, 'is_public': !value });
 	}
 
 	return (
-		<div className="list-status">
-			<Label>Set list private/public status
-				<select className="form-control" value={value} onChange={onIsPublicChange} id={id}>
-					{LIST_IS_PUBLIC_TEXTS.map(is_public => (
-						<option key={is_public} value={is_public}>{is_public}</option>
-					))}
-				</select>
-			</Label>
+		<div className="is-public">
+			<button
+				onClick={onIsPublicChange}
+				data-listid={listId}
+				data-ispublic={isPublic}
+				className={`${isPublic} btn btn-default`}
+				title={tooltip}
+			>&nbsp;</button>
 		</div>
 	);
 };

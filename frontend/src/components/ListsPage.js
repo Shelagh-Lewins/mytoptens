@@ -107,7 +107,6 @@ class ListsPage extends Component {
 			createList = (<div>In order to create new lists, please <Link to="/login">log in</Link> or <Link to="/register">register a My Top Tens account</Link>.</div>);
 		}
 
-
 		return (
 			<div className="lists-list">
 				<Container>

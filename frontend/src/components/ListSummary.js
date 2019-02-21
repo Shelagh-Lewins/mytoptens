@@ -29,12 +29,13 @@ const ListSummary = props => {
 
 				}
 				{canEdit && (
-					<div className="list-controls">
+					<div className="list-summary-controls">
 						<SetListIsPublic
-							list={props.list}
+							listId={props.list.id}
+							isPublic={props.list.is_public}
 							onIsPublicChange={props.onIsPublicChange}
 						/>
-						<button className="btn btn-danger" onClick={onDeleteList}>Delete</button>
+						<button className="btn btn-danger" title="Delete" onClick={onDeleteList}>X</button>
 					</div>
 				)}
 			</div>

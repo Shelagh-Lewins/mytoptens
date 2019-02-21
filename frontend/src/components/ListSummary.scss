@@ -16,19 +16,20 @@
 	}
 
 	.list-header {
+		float: left;
 		font-weight: bold;
 	}
 
-	.list-controls {
+	.list-summary-controls {
 		float: right;
 
-		.list-status {
+		.is-public {
 			float: left;
 		}
 
 		.btn-danger {
 			float: left;
-			margin-left: 15px;
+			margin-left: 8px;
 		}
 	}
 }

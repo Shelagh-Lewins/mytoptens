@@ -226,7 +226,7 @@ class ListDetails extends Component {
 												list={this.props.list}
 												onIsPublicChange={this.onIsPublicChange}
 											/>
-											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>Delete</button>
+											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>X</button>
 										</div>
 									</Col>
 								</Row>
