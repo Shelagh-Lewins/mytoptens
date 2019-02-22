@@ -17,7 +17,7 @@ class Organizer extends Component {
 		this.state = {
 			'showOrganizer': false,
 			'parentItemId': props.list.parent_item,
-			'parentListId': props.parentListId,
+			'parentListId': props.parentListId, // parent list and item are stored in state so a new value can be selected, with the old value still present in props if the user cancels
 			'selectedItemChildListId': null,
 			'selectedItemOrder': null,
 		};
@@ -28,12 +28,30 @@ class Organizer extends Component {
 		this.onClickOrganize = this.onClickOrganize.bind(this);
 	}
 
+	componentDidMount() {
+		//console.log('organizer mount. props ', this.props);
+
+		this.setState({
+			//'parentListId': this.props.parentListId,
+			'showOrganizer': false,
+			'selectedItemOrder': this.selectedItemOrder(),
+		});
+	}
+
 	componentDidUpdate = (prevProps) => {
 		//console.log('Oganizer. parentItemId ', this.props.list.parent_item);
 		//console.log('Organizer. parentListId ', this.props.parentListId);
 		// just loaded
+		///console.log('Organizer update. listOrganizerData ', this.props.listOrganizerData);
+
+		// data for new list have loaded
+		if (prevProps.list.id !== this.props.list.id) {
+			//console.log('Organizer has new list ', this.props.list.id);
+		}
+
 		if ((prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0) ||
-			(prevProps.list.parent_item !== this.props.list.parent_item)) { // navigated to new list
+			(prevProps.list.id !== this.props.list.id)) { // navigated to new list
+			//console.log('Organizer update state');
 			this.setState({
 				'parentListId': this.props.parentListId,
 				'selectedItemOrder': this.selectedItemOrder(),
@@ -62,8 +80,8 @@ class Organizer extends Component {
 			return;
 		}
 
-		console.log('selectedItemChildListId ', this.state.selectedItemChildListId);
-		console.log('current parent ', this.state.parentItemId);
+		//console.log('selectedItemChildListId ', this.state.selectedItemChildListId);
+		//console.log('current parent ', this.state.parentItemId);
 		if (this.state.selectedItemChildListId) {
 			const childList = this.props.listOrganizerData.find((list) => list.id === this.state.selectedItemChildListId);
 			if (confirm(`The existing child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
@@ -94,7 +112,7 @@ class Organizer extends Component {
 	selectedItemOrder() {
 		// find the order of the parent item
 		let order; // there may not be a parent item, so there may not be a default selection
-		console.log('Organizer. selectedItemOrder. parentListId ', this.props.parentListId);
+		//console.log('Organizer. selectedItemOrder. parentListId ', this.props.parentListId);
 		if (this.props.parentListId) {
 			let parentItemId = this.state.parentItemId;
 			const parentList = this.props.listOrganizerData.find(list => list.id === this.props.parentListId);
@@ -161,14 +179,14 @@ class Organizer extends Component {
 				<Row>
 					<Col>
 						<div className="controls">
-							<button className="btn btn-secondary" onClick={this.onClickOrganize}>Organize...</button>
+							<button className="btn btn-default organize" onClick={this.onClickOrganize}>...</button>
 						</div>
 					</Col>
 				</Row>);
 		}
 
 		return (
-			<div className={`list-organizer ${this.state.showOrganizer ? 'open' : ''}`}>
+			<div className={`organizer ${this.state.showOrganizer ? 'open' : ''}`}>
 				{controls}
 				{this.state.showOrganizer && this.renderLists()}
 			</div>

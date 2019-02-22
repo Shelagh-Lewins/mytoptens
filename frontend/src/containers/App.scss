@@ -1,8 +1,8 @@
 @import "../variables";
 
 .valid-feedback {
-	display: block;
 	color: $color-valid;
+	display: block;
 	font-size: 80%;
 	margin-top: .25rem;
 	width: 100%;
@@ -45,3 +45,8 @@
 		}
 	}
 }
+
+.btn-default {
+	border-color: $color-btn-default-border;
+}
+

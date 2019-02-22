@@ -50,11 +50,14 @@ class ItemsPage extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
-		let update = [];
+		let update = {};
 		for (let i=0; i<this.props.items.length; i++) {
 			const item = this.props.items[i];
 
-			if (prevProps.items[i].id !== this.props.items[i].id) {
+			// first the list is loaded and this just gives ids
+			// only when the full data are loaded and getItemsForList recalculated do we find the childList
+			if (prevProps.items[i].id !== this.props.items[i].id ||
+				prevProps.items[i].childList !== this.props.items[i].childList) {
 				const order = item.order;
 
 				// update item properties

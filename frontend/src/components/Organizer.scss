@@ -1,6 +1,6 @@
 @import "../variables";
 
-.list-organizer {
+.organizer {
 	.lists {
 		background: $color-organizer-background;
 		border: 1px solid $color-organizer-border;
@@ -12,6 +12,10 @@
 			max-height: 500px;
 			overflow: auto;
 		}
+	}
+
+	.organize {
+		padding: 1px 6px;
 	}
 }
 

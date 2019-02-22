@@ -167,41 +167,6 @@ const initialItemsState = {
 export const getOrganizerItems = state => state.item.organizerData;
 export const getOrganizerLists = state => state.list.organizerData;
 
-/* export const getOrganizerItemsByList = state => {
-	// return an object containing all items, keyed by parent list id
-	let itemsByList = {};
-
-	// find the items for each list
-	Object.keys(state.list.organizerData).map(listId => { // eslint-disable-line array-callback-return
-		const list = state.list.organizerData[listId];
-
-		let itemsArray = [];
-
-		for (let i=0; i<list.item.length; i++) {
-			let item = { ...state.item.organizerData[list.item[i]] };
-			itemsArray.push(item);
-		}
-
-		itemsByList[list.id] = itemsArray;
-	});
-
-	// note the parent_item, if any, of each list
-	// add the list's id to the item as childListId
-	Object.keys(state.list.organizerData).map(listId => { // eslint-disable-line array-callback-return
-		const list = state.list.organizerData[listId];
-
-		if (list.parent_item) {
-			const parentItem = state.item.organizerData[list.parent_item];
-
-			if (parentItem) {
-				itemsByList[parentItem.list_id][parentItem.order-1].childListId = list.id;
-			}
-		}
-	});
-
-	return itemsByList;
-}; */
-
 export const groupedItems = createSelector(
 	[getOrganizerItems, getOrganizerLists],
 	(items, lists) => {
@@ -215,9 +180,8 @@ export const groupedItems = createSelector(
 
 			for (let i=0; i<list.item.length; i++) {
 				let item = { ...items[list.item[i]] };
-				//console.log('name ', item.name);
+
 				if (item.name !== '') {
-					//console.log('really here ', item.name);
 					itemsArray.push(item);
 				}
 			}
@@ -232,16 +196,14 @@ export const groupedItems = createSelector(
 
 			if (list.parent_item) {
 				const parentItem = items[list.parent_item];
-				//console.log('parentItem ', parentItem);
 
 				if (parentItem) {
 					// can't use array order to pull out item, because items with no name have been removed
 					// instead, explicitly find the item object in the array by its 'order' property
+
 					let itemsArray = itemsByList[parentItem.list_id];
 					let item = itemsArray.find(item => item.order === parentItem.order);
-					//console.log('item ', item);
 					item.childListId = list.id;
-//					itemsByList[parentItem.list_id][parentItem.order-1].childListId = list.id;
 				}
 			}
 		});
@@ -278,7 +240,10 @@ export default function item(state = initialItemsState, action) {
 				things = entities.item;
 			}
 
-			return updeep({ 'things': updeep.constant(things), 'isLoading': false }, state);
+			return updeep({
+				'things': updeep.constant(things),
+				'organizerData': updeep.constant({}), // new list data so clear out old organizer data, this must be loaded separately
+				'isLoading': false }, state);
 		}
 
 		case FETCH_LIST_BY_SLUG_STARTED: {

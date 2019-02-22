@@ -109,6 +109,7 @@ class ListDetails extends Component {
 
 	componentDidUpdate(prevProps) {
 		if (prevProps.isLoading && !this.props.isLoading) {
+
 			// just finished loading; need to check if user should view this list
 			this.getOrganizerData();
 
@@ -161,11 +162,14 @@ class ListDetails extends Component {
 				showPrivacyWarning = true;
 			}
 		}
-		console.log('ListDetail render. parent ', this.props.parentList);
+
+		let breadcrumbs = <div className="breadcrumbs">Top level list</div>;
+
 		let parentListId;
 		if (this.props.parentList) {
 			parentListId = this.props.parentList.id;
-			console.log('ListDetail render. id ', parentListId);
+
+			breadcrumbs = <div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
 		}
 		return (
 			<div>
@@ -184,28 +188,6 @@ class ListDetails extends Component {
 				{this.props.list && (
 					<div>
 						<Container>
-							{this.props.parentList && (
-								<Row>
-									<Col>
-										<div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}
-										</div>
-									</Col>
-								</Row>
-							)}
-							{this.state.canEdit &&
-								<Organizer
-									list={this.props.list}
-									parentListId={parentListId}
-									listOrganizerData={this.props.listOrganizerData}
-									itemOrganizerData={this.props.itemOrganizerData}
-								/>}
-							{showPrivacyWarning && (
-								<Row>
-									<Col>
-										<div className="privacy-warning">{privacyWarningText}</div>
-									</Col>
-								</Row>
-							)}
 							<Row>
 								<Col className="list-name">
 									<EditableTextField
@@ -232,6 +214,25 @@ class ListDetails extends Component {
 									)}
 								</Col>
 							</Row>
+							<Row>
+								<Col>
+									{breadcrumbs}
+									{this.state.canEdit &&
+									<Organizer
+										list={this.props.list}
+										parentListId={parentListId}
+										listOrganizerData={this.props.listOrganizerData}
+										itemOrganizerData={this.props.itemOrganizerData}
+									/>}
+								</Col>
+							</Row>
+							{showPrivacyWarning && (
+								<Row>
+									<Col>
+										<div className="privacy-warning">{privacyWarningText}</div>
+									</Col>
+								</Row>
+							)}
 							<Row>
 								<Col className="list-description">
 									<EditableTextField

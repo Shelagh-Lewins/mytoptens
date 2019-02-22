@@ -1,11 +1,10 @@
 import { createSelector } from 'reselect';
-import { LIST_IS_PUBLIC_VALUES, PAGE_SIZE } from '../constants';
+import { LIST_IS_PUBLIC_VALUES } from '../constants';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import findObjectByProperty from './findObjectByProperty';
 import { normalize, schema } from 'normalizr';
 import store from '../store';
-
 
 import {
 	LOGOUT_USER_COMPLETE
@@ -64,8 +63,6 @@ function fetchListsFailed() {
 export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 	return (dispatch, getState) => {
 		dispatch(fetchListsStarted());
-
-
 		// if the user is not logged in, don't use auth. The server should return only the lists a non-authenticated user should see.
 		let useAuth = false;
 
@@ -101,7 +98,7 @@ export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 				'previous': response.previous,
 				'entities': normalize(response.results, [listSchema]).entities,
 			};
-			console.log('data ', data);
+
 			return dispatch(receiveEntities(data));
 		}).catch(error => {
 			dispatch(fetchListsFailed());
@@ -142,7 +139,7 @@ export function fetchListBySlug(slug) {
 			'useAuth': useAuth,
 		}).then(response => {
 			const normalizedData = normalize(response, [listSchema]);
-			console.log('got list by slug. data ', normalizedData);
+
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
 			dispatch(fetchListBySlugFailed());
@@ -406,7 +403,8 @@ export const getOrganizerLists = state => {
 
 	return lists;
 };
-// TODO rework with selectors to avoid rerunning functions
+// TODO rework with selectors to avoid rerunning functions?
+// not sure if this is possible because list is dynamic
 export const getItemsForList = (state, list) => {
 	let listItems = [];
 	const lists = state.list.things;
@@ -483,6 +481,7 @@ export default function list(state = initialListsState, action) {
 				'previous': previous,
 				'next': next,
 				'things': updeep.constant(things), // constant provides placement instead of update, so all previous entries are removed
+				'organizerData': updeep.constant({}), // new list data so clear out old organizer data, this must be loaded separately
 				'isLoading': false
 			}, state);
 

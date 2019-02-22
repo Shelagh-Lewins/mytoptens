@@ -14,6 +14,15 @@
 }
 
 .list-detail {
+	.breadcrumbs {
+		float: left;
+	}
+
+	.list-organizer {
+		float: left;
+		margin-left: 8px;
+	}
+
 	.list-name {
 		// hide label but leave contents visible and entire label still readable
 		label {
@@ -42,6 +51,8 @@
 	}
 
 	.list-description {
+		max-height: none;
+
 		// hide label but leave contents visible and entire label still readable
 		label {
 			border: 0;

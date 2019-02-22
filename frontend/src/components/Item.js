@@ -17,6 +17,11 @@ class Item extends Component {
 		this.state = {
 			'isEditingName': false,
 		};
+
+		this.onCreateChildList = this.onCreateChildList.bind(this);
+		this.setIsEditingName = this.setIsEditingName.bind(this);
+		this.onMoveUp = this.onMoveUp.bind(this);
+		this.onMoveDown = this.onMoveDown.bind(this);
 	}
 
 	setIsEditingName(showInput) {
@@ -44,7 +49,7 @@ class Item extends Component {
 		} else if (this.state.isEditingName && store.getState().item.things[this.props.item.id] && store.getState().item.things[this.props.item.id].name === '') {
 			showDescription = false;
 		}
-
+		//console.log('item render. props ', this.props);
 		let canCreateChildList = true; // should the "create child list" button be visible?
 
 		if (this.props.item.childList || // there is already a child list
@@ -64,7 +69,7 @@ class Item extends Component {
 		let childList;
 
 		if (canCreateChildList) {
-			childList = (<button className="btn btn-primary create-childlist" onClick={this.onCreateChildList.bind(this)}>Create child list</button>);	
+			childList = (<button className="btn btn-primary create-childlist" onClick={this.onCreateChildList}>Create child list</button>);	
 		} else if (canViewChildList) {
 			childList = (
 				<div className="child-list">	
@@ -99,7 +104,7 @@ class Item extends Component {
 						id={`${this.props.item.order}_name`} // id of the html element
 						handleInputChange={this.props.handleInputChange}
 						handleNewValue={this.props.handleNewValue}
-						isEditing={this.setIsEditingName.bind(this)}
+						isEditing={this.setIsEditingName}
 						value={this.props.item.name}
 					/>
 				</div>
@@ -121,9 +126,9 @@ class Item extends Component {
 						/>
 					</div>
 				}
-				{showUp && <button className="btn btn-secondary move-up" onClick={this.onMoveUp.bind(this)}>Up</button>
+				{showUp && <button className="btn btn-secondary move-up" onClick={this.onMoveUp}>Up</button>
 				}
-				{showDown && <button className="btn btn-secondary move-down" onClick={this.onMoveDown.bind(this)}>Down</button>
+				{showDown && <button className="btn btn-secondary move-down" onClick={this.onMoveDown}>Down</button>
 				}
 			</div>
 		);
