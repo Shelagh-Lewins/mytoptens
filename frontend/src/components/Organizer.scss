@@ -1,6 +1,11 @@
 @import "../variables";
 
 .organizer {
+	margin-bottom: 8px;
+	&.open {
+		clear: both;
+	}
+
 	.lists {
 		background: $color-organizer-background;
 		border: 1px solid $color-organizer-border;

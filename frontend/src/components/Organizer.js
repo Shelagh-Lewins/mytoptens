@@ -29,29 +29,22 @@ class Organizer extends Component {
 	}
 
 	componentDidMount() {
-		//console.log('organizer mount. props ', this.props);
-
 		this.setState({
-			//'parentListId': this.props.parentListId,
 			'showOrganizer': false,
 			'selectedItemOrder': this.selectedItemOrder(),
 		});
 	}
 
 	componentDidUpdate = (prevProps) => {
-		//console.log('Oganizer. parentItemId ', this.props.list.parent_item);
-		//console.log('Organizer. parentListId ', this.props.parentListId);
-		// just loaded
-		///console.log('Organizer update. listOrganizerData ', this.props.listOrganizerData);
-
 		// data for new list have loaded
 		if (prevProps.list.id !== this.props.list.id) {
-			//console.log('Organizer has new list ', this.props.list.id);
+			this.setState({
+				'showOrganizer': false,
+				'selectedItemOrder': this.selectedItemOrder(),
+			});
 		}
 
-		if ((prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0) ||
-			(prevProps.list.id !== this.props.list.id)) { // navigated to new list
-			//console.log('Organizer update state');
+		if ((prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0)) { // navigated to new list
 			this.setState({
 				'parentListId': this.props.parentListId,
 				'selectedItemOrder': this.selectedItemOrder(),
@@ -76,12 +69,11 @@ class Organizer extends Component {
 			'showOrganizer': false,
 		});
 
-		if (this.state.selectedItemChildListId === this.state.parentItemId) {
+		if (this.state.selectedItemChildListId && this.state.selectedItemChildListId === this.state.parentItemId) {
+			console.log('match');
 			return;
 		}
 
-		//console.log('selectedItemChildListId ', this.state.selectedItemChildListId);
-		//console.log('current parent ', this.state.parentItemId);
 		if (this.state.selectedItemChildListId) {
 			const childList = this.props.listOrganizerData.find((list) => list.id === this.state.selectedItemChildListId);
 			if (confirm(`The existing child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
@@ -101,12 +93,24 @@ class Organizer extends Component {
 	}
 
 	onSelectParentItem = ({ list, order, childListId }) => {
-		this.setState({
-			'parentItemId': list.item[order-1],
-			'parentListId': list.id,
-			'selectedItemChildListId': childListId,
-			'selectedItemOrder': order,
-		});
+		// if the user clicks the selected item, deselect it
+		// i.e. make this a top-level list
+		if (list.id === this.state.parentListId && list.item[order-1] === this.state.parentItemId) {
+			console.log('clicked current item');
+			this.setState({
+				'parentItemId': null,
+				'parentListId': null,
+				'selectedItemChildListId': null,
+				'selectedItemOrder': null,
+			});
+		} else {
+			this.setState({
+				'parentItemId': list.item[order-1],
+				'parentListId': list.id,
+				'selectedItemChildListId': childListId,
+				'selectedItemOrder': order,
+			});
+		}
 	}
 
 	selectedItemOrder() {

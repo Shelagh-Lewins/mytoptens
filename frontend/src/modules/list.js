@@ -195,7 +195,8 @@ export function createListSucceeded(list) {
 // update list
 export const updateList = (listId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
-
+	console.log('update list ', listId);
+	console.log('value ', value);
 	return fetchAPI({
 		'url': `/api/v1/content/list/${listId}/`,
 		'headers': { 'Content-Type': 'application/json' },
