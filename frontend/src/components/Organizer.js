@@ -69,15 +69,22 @@ class Organizer extends Component {
 			'showOrganizer': false,
 		});
 
-		if (this.state.selectedItemChildListId && this.state.selectedItemChildListId === this.state.parentItemId) {
-			console.log('match');
+		// check this, I'm not sure it's possible?
+		if (this.state.parentListId === this.props.list.id) {
+			console.log('cant be own parent');
 			return;
 		}
 
+		// if the new parent item already has a child list
 		if (this.state.selectedItemChildListId) {
 			const childList = this.props.listOrganizerData.find((list) => list.id === this.state.selectedItemChildListId);
-			if (confirm(`The existing child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
-				this.setParentItem();
+
+			if (this.state.parentItemId === this.props.list.parent_item) {
+				return;
+			} else {
+				if (confirm(`The existing child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
+					this.setParentItem();
+				}
 			}
 			return;
 		}
