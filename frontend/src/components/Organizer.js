@@ -29,27 +29,30 @@ class Organizer extends Component {
 	}
 
 	componentDidMount() {
-		this.setState({
+		/* this.setState({
 			'showOrganizer': false,
 			'selectedItemOrder': this.selectedItemOrder(),
-		});
+		}); */
 	}
 
 	componentDidUpdate = (prevProps) => {
 		// data for new list have loaded
-		if (prevProps.list.id !== this.props.list.id) {
-			this.setState({
-				'showOrganizer': false,
-				'selectedItemOrder': this.selectedItemOrder(),
-			});
+		if (prevProps.list.parent_item !== this.props.list.parent_item) {
+			this.reset();
 		}
 
 		if ((prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0)) { // navigated to new list
-			this.setState({
-				'parentListId': this.props.parentListId,
-				'selectedItemOrder': this.selectedItemOrder(),
-			});
+			this.reset();
 		}
+	}
+
+	reset() {
+		this.setState({
+			'showOrganizer': false,
+			'selectedItemOrder': this.selectedItemOrder(),
+			'parentItemId': this.props.list.parent_item,
+			'parentListId': this.props.parentListId,
+		});
 	}
 
 	onClickOrganize = () => {
@@ -69,7 +72,7 @@ class Organizer extends Component {
 			'showOrganizer': false,
 		});
 
-		// check this, I'm not sure it's possible?
+		// Don't allow the user to select an item from the current list.
 		if (this.state.parentListId === this.props.list.id) {
 			console.log('cant be own parent');
 			return;
@@ -123,10 +126,10 @@ class Organizer extends Component {
 	selectedItemOrder() {
 		// find the order of the parent item
 		let order; // there may not be a parent item, so there may not be a default selection
-		//console.log('Organizer. selectedItemOrder. parentListId ', this.props.parentListId);
 		if (this.props.parentListId) {
-			let parentItemId = this.state.parentItemId;
+			let parentItemId = this.props.list.parent_item;
 			const parentList = this.props.listOrganizerData.find(list => list.id === this.props.parentListId);
+
 			let parentListItems = parentList.item;
 
 			order = parentListItems.indexOf(parentItemId);
@@ -146,12 +149,12 @@ class Organizer extends Component {
 					<span>Select a new parent item for this list: </span>
 					{this.props.listOrganizerData.map(list => {
 						const numberOfItems = this.props.itemOrganizerData[list.id].length;
-						const showItems = (list.id === this.state.parentListId);
-						//console.log('number of items ', this.props.itemOrganizerData[list.id]);
-						//console.log('list ', list.name);
-						//console.log('items ', this.props.itemOrganizerData[list.id]);
 						
-						if (numberOfItems > 0) {
+						// only show lists with at least one item
+						// and don't show the page list - it can't be its own parent
+						if (numberOfItems > 0 && (list.id !== this.props.list.id)) {
+							const showItems = (list.id === this.state.parentListId);
+
 							return (<OrganizerList
 								list={list}
 								listOrganizerData={this.props.listOrganizerData}
