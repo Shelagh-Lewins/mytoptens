@@ -239,8 +239,6 @@ export function deleteListSucceeded(id) {
 }
 
 export const setListIsPublic = ({ id, is_public }) => dispatch => {
-	console.log('action setListIsPublic ', id);
-	console.log('is_public ', is_public);
 	return fetchAPI({
 		'url': `/api/v1/content/list/${id}/`,
 		'headers': { 'Content-Type': 'application/json' },

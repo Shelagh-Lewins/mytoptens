@@ -14,7 +14,6 @@ const SetListIsPublic = props => {
 
 	function onChangeIsPublic(e) {
 		// map from button data to true / false
-		console.log('in component ', e.target.dataset.listid);
 		const value = e.target.dataset.ispublic === 'public' ? true : false;
 		props.onChangeIsPublic({ 'id': e.target.dataset.listid, 'is_public': !value });
 	}

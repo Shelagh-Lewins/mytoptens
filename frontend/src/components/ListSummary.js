@@ -22,18 +22,21 @@ const ListSummary = props => {
 					<div className="list-name">
 						<div>{props.list.name}</div>
 					</div>
-					{canEdit && (
-						<div className="list-summary-controls">
-							<SetListIsPublic
-								listId={props.list.id}
-								isPublic={props.list.is_public}
-								onChangeIsPublic={props.onChangeIsPublic}
-							/>
-							<button className="btn btn-danger" title="Delete" onClick={onDeleteList}>X</button>
-						</div>
-					)}
+				</Link>
+				{canEdit && (
+					<div className="list-summary-controls">
+						<SetListIsPublic
+							listId={props.list.id}
+							isPublic={props.list.is_public}
+							onChangeIsPublic={props.onChangeIsPublic}
+						/>
+						<button className="btn btn-danger" title="Delete" onClick={onDeleteList}>X</button>
+					</div>
+				)}
+				<Link to={`/list/${props.list.slug}`}>
 					<div className="list-description">{props.list.description}</div>
 				</Link>
+				
 				{props.showCreatedBy && 
 					<div className="list-created-by">{props.list.created_by_username}</div>
 
