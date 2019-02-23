@@ -39,6 +39,48 @@ class ListDetails extends Component {
 		this.onDeleteList = this.onDeleteList.bind(this);
 	}
 
+	componentDidUpdate(prevProps) {
+		if (prevProps.isLoading && !this.props.isLoading) {
+
+			// just finished loading; need to check if user should view this list
+			const canEditList = permissions.canEditList({ 'slug': this.state.slug });
+			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
+
+			if (!canViewList) {
+				this.props.history.push('/');
+			}
+
+			this.getOrganizerData();
+
+			this.setState({
+				'canView': canViewList,
+				'canEdit': canEditList,
+			});
+
+			if(canViewList) {
+				this.setState({
+					'list_name': this.props.list.name,
+					'list_description': this.props.list.description,
+				});
+			}
+		}
+
+		// user has navigated to a different list
+		if (prevProps.match.params.slug !== this.props.match.params.slug) {
+			const slug = this.getListData(this.props);
+			this.setState({
+				slug,
+			});
+		}
+
+		// user has just logged out
+		// store needs to be repopulated
+		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+			this.props.dispatch(listReducer.fetchListBySlug(this.state.slug));
+			this.props.dispatch(clearErrors());
+		}
+	}
+
 	getListData = (props) => {
 		const slug = props.match.params.slug;
 
@@ -50,11 +92,15 @@ class ListDetails extends Component {
 	getOrganizerData = () => {
 		// minimal data for all my lists and items to allow parent list to be changed.
 		// can't do this until the list has been loaded, to find the owner
+		if (!this.props.list) { // probably the user does not have permission to view this list
+			return;
+		}
 		this.props.dispatch(listReducer.fetchOrganizerData(this.props.list.created_by));
 		this.props.dispatch(clearErrors());
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
+		console.log('onChangeIsPublic ', id);
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
@@ -93,7 +139,7 @@ class ListDetails extends Component {
 		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
 		const value = element.value;
-		console.log('list detail handleNewValue');
+
 		this.props.dispatch(listReducer.updateList(listId, propertyName, value));
 	}
 
@@ -107,44 +153,6 @@ class ListDetails extends Component {
 
 	onCloseFlashMessage = () => {
 		this.props.dispatch(clearErrors());
-	}
-
-	componentDidUpdate(prevProps) {
-		if (prevProps.isLoading && !this.props.isLoading) {
-
-			// just finished loading; need to check if user should view this list
-			this.getOrganizerData();
-
-			const canEditList = permissions.canEditList({ 'slug': this.state.slug });
-			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
-
-			this.setState({
-				'canView': canViewList,
-				'canEdit': canEditList,
-			});
-
-			if(canViewList) {
-				this.setState({
-					'list_name': this.props.list.name,
-					'list_description': this.props.list.description,
-				});
-			}
-		}
-
-		// user has navigated to a different list
-		if (prevProps.match.params.slug !== this.props.match.params.slug) {
-			const slug = this.getListData(this.props);
-			this.setState({
-				slug,
-			});
-		}
-
-		// user has just logged out
-		// store needs to be repopulated
-		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			this.props.dispatch(listReducer.fetchListBySlug(this.state.slug));
-			this.props.dispatch(clearErrors());
-		}
 	}
 
 	renderPage() {
@@ -208,7 +216,8 @@ class ListDetails extends Component {
 									{this.state.canEdit && (
 										<div className="list-detail-controls">
 											<SetListIsPublic
-												list={this.props.list}
+												listId={this.props.list.id}
+												isPublic={this.props.list.is_public}
 												onChangeIsPublic={this.onChangeIsPublic}
 											/>
 											<button className="btn btn-danger" onClick={this.onDeleteList}>X</button>
