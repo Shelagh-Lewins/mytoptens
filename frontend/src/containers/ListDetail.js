@@ -302,18 +302,17 @@ const mapStateToProps = (state, ownProps) => {
 	// first find the target list
 	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'slug', 'value': ownProps.match.params.slug });
 
-	const parentItemAndList = listReducer.getItemAndList(state, list);
+	const parentItemAndList = listReducer.getParentItemAndList(state)(list);
 
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
 		'isLoading': state.list.isLoading,
 		'list': list,
-		'thisListItems': listReducer.getItemsForList(state, list),
+		'thisListItems': listReducer.getItemsForList(state)(list),
 		'parentList': parentItemAndList.parentList,
 		'parentItem': parentItemAndList.parentItem,
-		'listOrganizerData': listReducer.getOrganizerLists(state), // array. limited list info: id, name, item (array of child items), parent_item
-		// 'itemOrganizerData': itemReducer.getOrganizerItemsByList(state),
+		'listOrganizerData': listReducer.getSortedOrganizerLists(state), // array containing limited list info: id, name, item (array of child items), parent_item
 		'itemOrganizerData': itemReducer.groupedItems(state), // object. limited item info: id, name, list_id
 	});
 };

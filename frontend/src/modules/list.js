@@ -335,11 +335,14 @@ export const getSearchTerm = state => {
 	return state.page.searchTerm;
 };
 
+// returns lists as an array not an object
 export const getLists = state => {
 	return Object.keys(state.list.things).map(id => {
 		return state.list.things[id];
 	});
 };
+
+const getItems = state => state.item.things;
 
 export const getFilteredLists = createSelector(
 	[getLists, getSearchTerm],
@@ -391,67 +394,73 @@ export const getMyGroupedAndFilteredLists = createSelector(
 
 /////////////////////////////
 // organizer data
-export const getOrganizerLists = state => {
-	const lists = Object.keys(state.list.organizerData).map(id => {
-		return state.list.organizerData[id];
-	});
+export const getOrganizerLists = state => state.list.organizerData;
+const getOrganizerItems = state => state.item.organizerData;
 
-	lists.sort(function (a, b) {
-	  return a.name.localeCompare(b.name);
-	});
-
-	return lists;
-};
-// TODO rework with selectors to avoid rerunning functions?
-// not sure if this is possible because list is dynamic
-export const getItemsForList = (state, list) => {
-	let listItems = [];
-	const lists = state.list.things;
-
-	if (list) {
-		list.item.map((itemId) => { // eslint-disable-line array-callback-return
-			let item = { ...state.item.things[itemId] }; // shallow copy so copy is extensible
-			
-			// note any list that is a child of this item
-			const childList = findObjectByProperty({
-				'parentObject': lists,
-				'property': 'parent_item',
-				'value': itemId
-			});
-
-			if (childList) {
-				item.childList = { ...childList };
-			}
-
-			listItems.push(item);
+// returns lists in an array, sorted by name
+// instead of the state.list.organizerData object, keyed by id
+export const getSortedOrganizerLists = createSelector(
+	[getOrganizerLists],
+	(lists) => {
+		const listsArray = Object.keys(lists).map(id => {
+			return lists[id];
 		});
+
+		listsArray.sort(function (a, b) {
+			return a.name.localeCompare(b.name);
+		});
+
+		return listsArray;
 	}
+);
 
-	return listItems;
-};
+// lists, items should be memoized
+// even though the rest of the selector will be rerun, it's still a gain
+export const getItemsForList = createSelector(
+	[getLists, getItems],
+	(lists, items) => (list) => {
+		let listItems = [];
 
-export const getItemAndList = (state, list) => {
-	// typically used to find the parent item and its list
-	// for a child list
-	// use the organizer data which has minimal data for all lists belonging to that user
-	let parentItem;
-	let parentList;
+		if (list) {
+			list.item.map((itemId) => { // eslint-disable-line array-callback-return
+				let item = { ...items[itemId] }; // shallow copy is extensible
 
-	if (list && list.parent_item) {
-		const items = state.item.organizerData;
-		const lists = state.list.organizerData;
+				const childList = lists.find(list => list.parent_item === itemId);
 
-		if (items) {
-			parentItem = items[list.parent_item];
+				if (childList) {
+					item.childList = { ...childList };
+				}
 
-			if (parentItem) {
-				parentList = lists[parentItem.list_id];
+				listItems.push(item);
+			});
+		}
+		return listItems;
+	}
+);
+
+// lists, items should be memoized
+// even though the rest of the selector will be rerun, it's still a gain
+export const getParentItemAndList = createSelector(
+	[getOrganizerLists, getOrganizerItems],
+	// find a lists's parent item and the parent list, if any
+	// uses the organizer data which has minimal data for all lists belonging to that user
+	(lists, items) => (list) => {
+		let parentItem;
+		let parentList;
+
+		if (list && list.parent_item) {
+			if (items) {
+				parentItem = items[list.parent_item];
+
+				if (parentItem) {
+					parentList = lists[parentItem.list_id];
+				}
 			}
 		}
-	}
 
-	return { parentItem, parentList };
-};
+		return { parentItem, parentList };
+	}
+);
 
 /////////////////////////////
 // state updates

@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect';
-// import { RECEIVE_ENTITIES,  } from '../modules/list';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import store from '../store';
@@ -22,7 +21,6 @@ import {
 export const CREATE_ITEM_REQUESTED = 'CREATE_ITEM_REQUESTED';
 export const CREATE_ITEM_SUCCEEDED = 'CREATE_ITEM_SUCCEEDED';
 export const UPDATE_ITEM_SUCCEEDED = 'UPDATE_ITEM_SUCCEEDED';
-// export const DELETE_ITEM_SUCCEEDED = 'DELETE_ITEM_SUCCEEDED';
 export const MOVE_ITEM_UP_SUCCEEDED = 'MOVE_ITEM_UP_SUCCEEDED';
 
 ////////////////////////////////////
@@ -125,29 +123,6 @@ export function moveItemUpSucceeded(items) {
 }
 
 //////////////////////////////////
-// delete item
-/* export const deleteItem = ({ itemId, listId }) => dispatch => {
-	return fetchAPI({
-		'url': `/api/v1/content/item/${itemId}/`,
-		'method': 'DELETE',
-	}).then(response => {
-		return dispatch(deleteItemSucceeded({ itemId, listId }));
-	}).catch(error => {
-		return dispatch(getErrors({ 'delete item': error.message }));
-	});
-};
-
-export function deleteItemSucceeded({ itemId, listId }) {
-	return {
-		'type': 'DELETE_ITEM_SUCCEEDED',
-		'payload': {
-			itemId,
-			listId
-		}
-	};
-} */
-
-//////////////////////////////////
 // Reducer
 var updeep = require('updeep');
 
@@ -165,7 +140,7 @@ const initialItemsState = {
 // organizer data
 // all items and lists, for selector to use
 export const getOrganizerItems = state => state.item.organizerData;
-export const getOrganizerLists = state => state.list.organizerData;
+const getOrganizerLists = state => state.list.organizerData;
 
 export const groupedItems = createSelector(
 	[getOrganizerItems, getOrganizerLists],
@@ -210,6 +185,7 @@ export const groupedItems = createSelector(
 
 		return itemsByList;
 	}
+
 );
 
 /////////////////////////////
@@ -244,10 +220,6 @@ export default function item(state = initialItemsState, action) {
 			const item = action.payload.item;
 			return updeep({ 'things': { [item.id]: item } }, state);
 		}
-
-		/* case DELETE_ITEM_SUCCEEDED: {
-			return updeep({ 'things': updeep.omit([action.payload.id]) }, state);
-		} */
 
 		case UPDATE_ITEM_SUCCEEDED: {
 			// update editable properties
