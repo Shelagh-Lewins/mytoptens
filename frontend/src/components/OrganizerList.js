@@ -12,6 +12,9 @@ class OrganizerList extends Component {
 		this.state = {
 			'showItems': props.showItems,
 		};
+
+		this.onSelectItem = this.onSelectItem.bind(this);
+		this.onShowItems = this.onShowItems.bind(this);
 	}
 
 	onShowItems() {
@@ -50,7 +53,7 @@ class OrganizerList extends Component {
 					if (item.name) {
 						return (<div key={item.id} className={`item ${isSelectedItem ? 'selected' : ''}`}>
 							<span
-								onClick={this.onSelectItem.bind(this)}
+								onClick={this.onSelectItem}
 								data-order={item.order}
 								data-childlistid={item.childListId}
 							><span className="order">{item.order}:</span>{item.name}</span>{childListElm}
@@ -74,7 +77,7 @@ class OrganizerList extends Component {
 		return (
 			<Row className="organizer-list">
 				<Col>
-					<button className="btn btn-light show-items" onClick={this.onShowItems.bind(this)}>{showItemsButtonText}</button>
+					<button className="btn btn-light show-items" onClick={this.onShowItems}>{showItemsButtonText}</button>
 					<div className="name">{name}</div>
 					{this.state.showItems && this.renderItems()}
 				</Col>

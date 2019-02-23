@@ -29,30 +29,20 @@ class Organizer extends Component {
 	}
 
 	componentDidMount() {
-		/* this.setState({
-			'showOrganizer': false,
-			'selectedItemOrder': this.selectedItemOrder(),
-		}); */
 	}
 
 	componentDidUpdate = (prevProps) => {
 		// data for new list have loaded
-		if (prevProps.list.parent_item !== this.props.list.parent_item) {
-			this.reset();
+		if ((prevProps.list.parent_item !== this.props.list.parent_item) ||
+		// navigated to new list
+		(prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0)) {
+			this.setState({ // reset component
+				'showOrganizer': false,
+				'selectedItemOrder': this.selectedItemOrder(),
+				'parentItemId': this.props.list.parent_item,
+				'parentListId': this.props.parentListId,
+			});
 		}
-
-		if ((prevProps.listOrganizerData.length === 0 && this.props.listOrganizerData.length !== 0)) { // navigated to new list
-			this.reset();
-		}
-	}
-
-	reset() {
-		this.setState({
-			'showOrganizer': false,
-			'selectedItemOrder': this.selectedItemOrder(),
-			'parentItemId': this.props.list.parent_item,
-			'parentListId': this.props.parentListId,
-		});
 	}
 
 	onClickOrganize = () => {
@@ -73,8 +63,15 @@ class Organizer extends Component {
 		});
 
 		// Don't allow the user to select an item from the current list.
+		// this shouldn't happen as the current list is not displayed in the organizer.
 		if (this.state.parentListId === this.props.list.id) {
-			console.log('cant be own parent');
+			return;
+		}
+
+		if (!this.state.parentItemId) {
+			if (confirm(`'${this.props.list.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
+				this.setParentItem();
+			}
 			return;
 		}
 
@@ -82,10 +79,11 @@ class Organizer extends Component {
 		if (this.state.selectedItemChildListId) {
 			const childList = this.props.listOrganizerData.find((list) => list.id === this.state.selectedItemChildListId);
 
+			// no change
 			if (this.state.parentItemId === this.props.list.parent_item) {
 				return;
-			} else {
-				if (confirm(`The existing child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
+			} else { // will disconnect the existing child list
+				if (confirm(`The child list '${childList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
 					this.setParentItem();
 				}
 			}
@@ -106,7 +104,6 @@ class Organizer extends Component {
 		// if the user clicks the selected item, deselect it
 		// i.e. make this a top-level list
 		if (list.id === this.state.parentListId && list.item[order-1] === this.state.parentItemId) {
-			console.log('clicked current item');
 			this.setState({
 				'parentItemId': null,
 				'parentListId': null,

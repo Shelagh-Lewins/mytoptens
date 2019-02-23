@@ -35,6 +35,8 @@ class ListDetails extends Component {
 			slug,
 			'showOrganizer': false,
 		};
+
+		this.onDeleteList = this.onDeleteList.bind(this);
 	}
 
 	getListData = (props) => {
@@ -91,7 +93,7 @@ class ListDetails extends Component {
 		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
 		const value = element.value;
-
+		console.log('list detail handleNewValue');
 		this.props.dispatch(listReducer.updateList(listId, propertyName, value));
 	}
 
@@ -169,7 +171,7 @@ class ListDetails extends Component {
 		if (this.props.parentList) {
 			parentListId = this.props.parentList.id;
 
-			breadcrumbs = <div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
+			breadcrumbs = <div className="breadcrumbs">Parent list: <Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
 		}
 		return (
 			<div>
@@ -209,7 +211,7 @@ class ListDetails extends Component {
 												list={this.props.list}
 												onChangeIsPublic={this.onChangeIsPublic}
 											/>
-											<button className="btn btn-danger" onClick={this.onDeleteList.bind(this)}>X</button>
+											<button className="btn btn-danger" onClick={this.onDeleteList}>X</button>
 										</div>
 									)}
 								</Col>

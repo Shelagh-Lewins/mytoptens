@@ -25,6 +25,11 @@ class EditableTextField extends Component {
 		if (props.textarea === true) {
 			this.state.expanded = false;
 		}
+
+		this.showInput = this.showInput.bind(this);
+		this.onKeyUp = this.onKeyUp.bind(this);
+		this.toggleMore = this.toggleMore.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	// does the text overflow its container?
@@ -122,8 +127,9 @@ class EditableTextField extends Component {
 
 	handleSubmit(e) {
 		e.preventDefault();
-		// the user has typed a new value and the parent component should be notified
 
+		// the user has typed a new value and the parent component should be notified
+		
 		const inputElement = e.target.querySelector(this.state.type);
 
 		if (this.validate()) {
@@ -158,8 +164,8 @@ class EditableTextField extends Component {
 
 		if (this.props.canEdit) {
 			tabIndex = '0';
-			onClick=this.showInput.bind(this);
-			onKeyUp=this.onKeyUp.bind(this);
+			onClick=this.showInput;
+			onKeyUp=this.onKeyUp;
 		}
 
 		let item = (
@@ -175,7 +181,7 @@ class EditableTextField extends Component {
 						source={this.props.value} 
 					/>
 					{showMoreButton && <span className="fader"></span>}</span>
-				{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore.bind(this)}>{moreButtonText}</button>}
+				{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore}>{moreButtonText}</button>}
 			</span>
 		);
 
@@ -206,7 +212,7 @@ class EditableTextField extends Component {
 				item = (
 					<form
 						noValidate
-						onSubmit={this.handleSubmit.bind(this)}
+						onSubmit={this.handleSubmit}
 						className={classNames}
 					>
 						<Row>
@@ -248,8 +254,8 @@ class EditableTextField extends Component {
 						<span
 							className="placeholder"
 							tabIndex="0"
-							onClick={this.showInput.bind(this)}
-							onKeyUp={this.onKeyUp.bind(this)}
+							onClick={this.showInput}
+							onKeyUp={this.onKeyUp}
 						>{this.props.placeholder}</span>
 					);
 				}

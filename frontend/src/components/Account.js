@@ -16,6 +16,8 @@ class Account extends Component {
 		this.state = {
 			'errors': {}
 		};
+
+		this.sendConfirmationEmail = this.sendConfirmationEmail.bind(this);
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -56,7 +58,7 @@ class Account extends Component {
 					<Col>
 						<div>Email address: {this.props.auth.user.email}</div>
 						<div>Status: {email_status}</div>
-						{!emailVerified &&	<button type="button" className="btn btn-primary"onClick={this.sendConfirmationEmail.bind(this)}>
+						{!emailVerified &&	<button type="button" className="btn btn-primary"onClick={this.sendConfirmationEmail}>
 								Resend confirmation email
 						</button>}
 					</Col>

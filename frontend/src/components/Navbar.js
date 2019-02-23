@@ -13,6 +13,8 @@ class Navbar extends Component {
 		this.state = {
 			'showDropdown': false,
 		};
+
+		this.onLogout = this.onLogout.bind(this);
 	}
 	showDropdown(e) {
 		e.preventDefault();
@@ -32,7 +34,7 @@ class Navbar extends Component {
 		const authLinks = (
 			<ul className="navbar-nav ml-auto">
 				{user.username && <li className="nav-item"><Link to="/account" className="nav-link">{user.username}</Link></li>}
-				<li className="nav-item"><Link to="/" className="nav-link" onClick={this.onLogout.bind(this)}>Logout</Link></li>
+				<li className="nav-item"><Link to="/" className="nav-link" onClick={this.onLogout}>Logout</Link></li>
 			</ul>
 		);
 		const guestLinks = (
