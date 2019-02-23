@@ -185,7 +185,7 @@ class ListDetails extends Component {
 					</Row>
 				</Container>)}
 				{this.props.isLoading && <Loading />}
-				{this.props.list && (
+				{this.props.list && !this.props.isLoading && (
 					<div>
 						<Container>
 							<Row>

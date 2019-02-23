@@ -210,16 +210,6 @@ export const groupedItems = createSelector(
 
 		return itemsByList;
 	}
-	/*[getItems],
-	(items) => {
-		let listItems = (Object.keys(items).map(id => {
-			return items[id];
-		})).sort(function(a, b){
-			return a.order - b.order; // sort to index order
-		});
-
-		return listItems;*/
-	//}
 );
 
 /////////////////////////////

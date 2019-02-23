@@ -453,6 +453,8 @@ export const getItemAndList = (state, list) => {
 	return { parentItem, parentList };
 };
 
+/////////////////////////////
+// state updates
 
 // state here is the substate state.lists
 // the book uses 'items' for the list of things i.e. lists. items
@@ -496,9 +498,7 @@ export default function list(state = initialListsState, action) {
 		}
 
 		case FETCH_LIST_BY_SLUG_STARTED: {
-			return updeep({
-				'isLoading': true,
-			}, state);
+			return updeep({ 'isLoading': true	}, state);
 		}
 
 		case FETCH_LIST_BY_SLUG_FAILED: {
