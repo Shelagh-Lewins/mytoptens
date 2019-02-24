@@ -4,6 +4,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
+import ReactDOM from 'react-dom';
 
 import * as listReducer from '../modules/list';
 
@@ -49,6 +50,14 @@ class Organizer extends Component {
 		this.setState({
 			'showOrganizer': true,
 		});
+
+		setTimeout(() => {
+			const DOMNode = ReactDOM.findDOMNode(this); // component parent node
+			const element = DOMNode.querySelector('.organizer-list.selected');
+			if (element) {
+				element.scrollIntoView();
+			}
+		}, 100);
 	}
 
 	onClickCancel = () => {

@@ -179,7 +179,7 @@ class ListDetails extends Component {
 		if (this.props.parentList) {
 			parentListId = this.props.parentList.id;
 
-			breadcrumbs = <div className="breadcrumbs">Parent list: <Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
+			breadcrumbs = <div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
 		}
 		return (
 			<div>
@@ -227,7 +227,6 @@ class ListDetails extends Component {
 							</Row>
 							<Row>
 								<Col>
-									{breadcrumbs}
 									{this.state.canEdit &&
 									<Organizer
 										list={this.props.list}
@@ -235,6 +234,7 @@ class ListDetails extends Component {
 										listOrganizerData={this.props.listOrganizerData}
 										itemOrganizerData={this.props.itemOrganizerData}
 									/>}
+									{breadcrumbs}
 								</Col>
 							</Row>
 							{showPrivacyWarning && (

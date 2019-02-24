@@ -2,7 +2,6 @@ import { createSelector } from 'reselect';
 import { LIST_IS_PUBLIC_VALUES } from '../constants';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
-import findObjectByProperty from './findObjectByProperty';
 import { normalize, schema } from 'normalizr';
 import store from '../store';
 

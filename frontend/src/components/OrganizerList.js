@@ -31,10 +31,6 @@ class OrganizerList extends Component {
 		const selectedItemOrder = parseInt(this.props.selectedItemOrder); // element property is a string. Order should be a number.
 		const listId = this.props.list.id;
 		const selectedListId = this.props.selectedListId;
-		/*if (listId === selectedListId ) {
-			console.log('selected list ', this.props.list.name);
-			console.log('selected item order ', selectedItemOrder);
-		} */
 
 		return (
 			<div className="items">
@@ -68,6 +64,8 @@ class OrganizerList extends Component {
 	render() {
 		const name = this.props.list.name;
 
+		const isSelectedList = (this.props.list.id === this.props.selectedListId);
+
 		let showItemsButtonText = '+';
 
 		if (this.state.showItems) {
@@ -75,7 +73,7 @@ class OrganizerList extends Component {
 		}
 
 		return (
-			<Row className="organizer-list">
+			<Row className={`organizer-list ${isSelectedList ? 'selected' : ''}`}>
 				<Col>
 					<button className="btn btn-light show-items" onClick={this.onShowItems}>{showItemsButtonText}</button>
 					<div className="name">{name}</div>

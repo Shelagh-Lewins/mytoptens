@@ -1,7 +1,9 @@
 @import "../variables";
 
 .organizer {
-	margin-bottom: 8px;
+	float: left;
+	margin: 0 8px 8px 0;
+
 	&.open {
 		clear: both;
 	}

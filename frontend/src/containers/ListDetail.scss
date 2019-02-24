@@ -14,8 +14,23 @@
 }
 
 .list-detail {
+	display: flex;
+	justify-content: center;
+
+	> div {
+		@media (min-width: 992px) {
+			max-width: 720px;
+		}
+
+		width: 100%;
+	}
+
 	.breadcrumbs {
 		float: left;
+	}
+
+	.hint {
+		color: $color-hint;
 	}
 
 	.list-organizer {
