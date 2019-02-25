@@ -142,6 +142,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'assets/static'),
+    os.path.join(BASE_DIR, 'assets'),
 ]
 
 # Django rest framework
