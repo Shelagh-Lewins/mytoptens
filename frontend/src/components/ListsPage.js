@@ -123,17 +123,6 @@ class ListsPage extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col sm="12" md="9">
-							{/*<Search
-								onChange={this.onSearch}
-								placeholder="Search lists and items..."
-								searchComplete={this.props.searchComplete}
-								searchResults={this.props.searchResults}
-								searchTerm={this.props.searchTerm}
-							/>*/}
-						</Col>
-					</Row>
-					<Row>
 						<Col>
 							{createList}
 						</Col>

@@ -1,0 +1,18 @@
+@import "../variables";
+
+.search {
+	position: relative;
+
+	.results {
+		background: $color-search-background;
+		border: 1px solid $color-search-border;
+		position: absolute;
+		z-index: 10;
+	}
+
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+}
