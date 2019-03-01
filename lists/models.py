@@ -46,7 +46,9 @@ class List(models.Model):
 class Item(models.Model):
     """Models for list items
     """
-    slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False)
+    #slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False) # old, from when I thought items would be linkable
+    # slug will be added as the parent list slug, so a link to the item can go to the list
+    slug = models.CharField(max_length=ID_LENGTH, default='', editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     modified_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, blank=True, default='')

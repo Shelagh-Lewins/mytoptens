@@ -4,8 +4,13 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { logoutUser } from '../modules/auth';
+//import { logoutUser } from '../modules/auth';
 import { withRouter } from 'react-router-dom';
+
+import * as authReducer from '../modules/auth';
+import * as pageReducer from '../modules/page';
+
+import Search from '../components/Search';
 
 class Navbar extends Component {
 	constructor(props) {
@@ -25,7 +30,27 @@ class Navbar extends Component {
 
 	onLogout(e) {
 		e.preventDefault();
-		this.props.logoutUser(this.props.history);
+		//this.props.logoutUser(authReducer.props.history);
+		this.props.dispatch(authReducer.logoutUser(this.props.history));
+	}
+
+	/*onSearch = searchTerm => {
+		console.log('event ', searchTerm);
+		// wait until the user pauses in typing before searching
+		clearTimeout(this.searchTimeout);
+		this.searchTimeout = setTimeout(() => {
+			this.props.dispatch(pageReducer.searchHome(searchTerm));
+		}, 500);
+	} */
+
+	onSearch = e => {
+		console.log('event ', e.target.value);
+		const searchTerm = e.target.value;
+		clearTimeout(this.searchTimeout);
+		this.searchTimeout = setTimeout(() => {
+			this.props.dispatch(pageReducer.searchHome(searchTerm));
+		}, 500);
+		//this.props.onSearch(e.target.value);
 	}
 
 	render() {
@@ -56,10 +81,13 @@ class Navbar extends Component {
 				</button>
 				<div className={`collapse navbar-collapse ${this.state.showDropdown ? 'show' : ''}`} id="navbarSupportedContent">
 					{isAuthenticated ? authLinks : guestLinks}
-					<form className="form-inline my-2 my-lg-0">
-						<input className="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
-						<button className="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-					</form>
+					<Search
+						onChange={this.onSearch}
+						placeholder="Search lists and items..."
+						searchComplete={this.props.searchComplete}
+						searchResults={this.props.searchResults}
+						searchTerm={this.props.searchTerm}
+					/>
 				</div>
 				
 			</nav>
@@ -67,12 +95,19 @@ class Navbar extends Component {
 	}
 }
 Navbar.propTypes = {
-	'logoutUser': PropTypes.func.isRequired,
-	'auth': PropTypes.object.isRequired
+	//'logoutUser': PropTypes.func.isRequired,
+	'auth': PropTypes.object.isRequired,
+	'searchTerm': PropTypes.string.isRequired,
+	'searchComplete': PropTypes.bool.isRequired,
+	'searchResults': PropTypes.array.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-	'auth': state.auth
+	'auth': state.auth,
+	'searchTerm': state.page.searchTerm,
+	'searchComplete': state.page.searchComplete,
+	'searchResults': state.page.searchResults,
 });
 
-export default connect(mapStateToProps, { logoutUser })(withRouter(Navbar));
+export default connect(mapStateToProps)(withRouter(Navbar));
+// export default connect(mapStateToProps, { logoutUser })(withRouter(Navbar));

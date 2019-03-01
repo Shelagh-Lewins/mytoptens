@@ -65,6 +65,8 @@ class ListSerializer(FlexFieldsModelSerializer):
         newlist = List.objects.create(**validated_data)
 
         for item_data in items_data:
+            item_data['slug'] = newlist.slug # links will go to the parent list
             Item.objects.create(list=newlist, **item_data)
+
         return newlist
 

@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import detail_route
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework import filters
 from rest_framework.exceptions import APIException
 
 from .models import List, Item
@@ -14,6 +15,7 @@ from rest_framework.pagination import LimitOffsetPagination
 # search against multiple models
 from drf_multiple_model.viewsets import FlatMultipleModelAPIViewSet
 from drf_multiple_model.pagination import MultipleModelLimitOffsetPagination
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -162,6 +164,9 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
 
 
 class ItemViewSet(viewsets.ModelViewSet):
+    """
+    Although items are retrieved as part of a list request, they are edited through this viewset
+    """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = Item
     serializer_class = ItemSerializer
@@ -217,13 +222,44 @@ class ItemViewSet(viewsets.ModelViewSet):
 
 
 class LimitPagination(MultipleModelLimitOffsetPagination):
+    """
+    Set the number of results to be returned for each model
+    """
     default_limit = 10
 
-class SearchAPIView(FlatMultipleModelAPIViewSet):
-    permission_classes = [IsOwnerOrReadOnly]
+class SearchAPIView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
+    """
+    Search for lists and items by name
+    """
     pagination_class = LimitPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
-    querylist = [
-        {'queryset': List.objects.all(), 'serializer_class': ListSerializer},
-        {'queryset': Item.objects.all(), 'serializer_class': ItemSerializer},
-    ]
+    def get_querylist(self):
+        list_query_set = {'queryset': List.objects.all(), 'serializer_class': ListSerializer}
+        item_query_set = {'queryset': Item.objects.all().exclude(name=''), 'serializer_class': ItemSerializer}
+
+        # authenticated user can view public lists and lists the user created
+        # and items belonging to those lists
+        if self.request.user.is_authenticated:
+            list_query_set['queryset'] = list_query_set['queryset'].filter(
+                Q(created_by=self.request.user) |
+                Q(is_public=True)
+            )
+            item_query_set['queryset'] = item_query_set['queryset'].filter(
+                Q(list__created_by=self.request.user) |
+                Q(list__is_public=True)
+            )
+
+        # unauthenticated user can view public lists
+        # and items belonging to those lists
+        else:
+            list_query_set['queryset'] = list_query_set['queryset'].filter(is_public=True)
+            item_query_set['queryset'] = item_query_set['queryset'].filter(list__is_public=True)
+
+        querylist = [
+            list_query_set,
+            item_query_set,
+        ]
+
+        return querylist

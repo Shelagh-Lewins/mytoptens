@@ -7,11 +7,12 @@ import ListsList from '../components/ListsList';
 import ListSummary from '../components/ListSummary';
 import './ListsPage.scss';
 import Pagination from '../components/Pagination';
+//import Search from '../components/Search';
 
 class ListsPage extends Component {
-	onSearch = e => {
+	/*onSearch = e => {
 		this.props.onSearch(e.target.value);
-	}
+	} */
 
 	onAddList = () => {
 		this.props.history.push('/newlist');
@@ -123,13 +124,13 @@ class ListsPage extends Component {
 					</Row>
 					<Row>
 						<Col sm="12" md="9">
-							<div className="search">
-								<Input className="form-control"
-									onChange={this.onSearch}
-									type="text"
-									placeholder="Search..."
-								/>
-							</div>
+							{/*<Search
+								onChange={this.onSearch}
+								placeholder="Search lists and items..."
+								searchComplete={this.props.searchComplete}
+								searchResults={this.props.searchResults}
+								searchTerm={this.props.searchTerm}
+							/>*/}
 						</Col>
 					</Row>
 					<Row>

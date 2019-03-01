@@ -68,7 +68,6 @@ class Home extends Component {
 
 	// refresh lists based on user choices
 	fetchLists({ listset = this.state.listset, topLevelListsOnly = this.state.topLevelListsOnly, currentPage = this.state.currentPage }) {
-
 		// use state values by default
 		// however these may be passed in by functions that set state because setState is not synchronous
 		this.props.dispatch(listReducer.fetchLists({
@@ -89,7 +88,11 @@ class Home extends Component {
 	}
 
 	onSearch = searchTerm => {
-		this.props.dispatch(pageReducer.searchHome(searchTerm));
+		// wait until the user pauses in typing before searching
+		clearTimeout(this.searchTimeout);
+		this.searchTimeout = setTimeout(() => {
+			this.props.dispatch(pageReducer.searchHome(searchTerm));
+		}, 500);
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
@@ -154,7 +157,6 @@ class Home extends Component {
 					myLists={this.props.myLists}
 					publicLists={this.props.publicLists}
 					canCreateList={permissions.canCreateList}
-					onSearch={this.onSearch}
 					onCreateList={this.onCreateList}
 					onChangeIsPublic={this.onChangeIsPublic}
 					onDeleteList={this.onDeleteList}
@@ -167,6 +169,9 @@ class Home extends Component {
 					pageSize={PAGE_SIZE}
 					currentPage={this.state.currentPage}
 					onChangePage={this.onChangePage}
+					//searchTerm={this.props.searchTerm}
+					//searchComplete={this.props.searchComplete}
+					//searchResults={this.props.searchResults}
 				/>
 			</div>
 		);
@@ -182,6 +187,9 @@ Home.propTypes = {
 	'count': PropTypes.number, // data may not yet be loaded
 	'next': PropTypes.string, // there may be no 'next' page
 	'previous': PropTypes.string, // there may be no 'previous' page
+	//'searchTerm': PropTypes.string.isRequired,
+	//'searchComplete': PropTypes.bool.isRequired,
+	//'searchResults': PropTypes.array.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -193,6 +201,9 @@ const mapStateToProps = (state) => ({
 	'count': state.list.count,
 	'next': state.list.next,
 	'previous': state.list.previous,
+	//'searchTerm': state.page.searchTerm,
+	//'searchComplete': state.page.searchComplete,
+	//'searchResults': state.page.searchResults,
 });
 
 export default connect(mapStateToProps)(withRouter(Home));
