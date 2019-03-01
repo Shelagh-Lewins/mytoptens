@@ -126,6 +126,9 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         my_list = List.objects.filter(slug=self.request.query_params.get('slug', None)).first()
 
+        if my_list is None:
+            return
+
         # we want the list itself
         pk_list = [my_list.id]
 

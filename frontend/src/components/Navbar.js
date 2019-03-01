@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-//import { logoutUser } from '../modules/auth';
 import { withRouter } from 'react-router-dom';
 
 import * as authReducer from '../modules/auth';
@@ -30,27 +29,18 @@ class Navbar extends Component {
 
 	onLogout(e) {
 		e.preventDefault();
-		//this.props.logoutUser(authReducer.props.history);
+
 		this.props.dispatch(authReducer.logoutUser(this.props.history));
 	}
 
-	/*onSearch = searchTerm => {
-		console.log('event ', searchTerm);
-		// wait until the user pauses in typing before searching
-		clearTimeout(this.searchTimeout);
-		this.searchTimeout = setTimeout(() => {
-			this.props.dispatch(pageReducer.searchHome(searchTerm));
-		}, 500);
-	} */
-
 	onSearch = e => {
-		console.log('event ', e.target.value);
+		// wait until the user stops typing before searching
 		const searchTerm = e.target.value;
 		clearTimeout(this.searchTimeout);
+
 		this.searchTimeout = setTimeout(() => {
 			this.props.dispatch(pageReducer.searchHome(searchTerm));
 		}, 500);
-		//this.props.onSearch(e.target.value);
 	}
 
 	render() {
@@ -95,7 +85,6 @@ class Navbar extends Component {
 	}
 }
 Navbar.propTypes = {
-	//'logoutUser': PropTypes.func.isRequired,
 	'auth': PropTypes.object.isRequired,
 	'searchTerm': PropTypes.string.isRequired,
 	'searchComplete': PropTypes.bool.isRequired,
@@ -110,4 +99,3 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps)(withRouter(Navbar));
-// export default connect(mapStateToProps, { logoutUser })(withRouter(Navbar));
