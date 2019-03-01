@@ -11,6 +11,10 @@ from django.db.models import Q
 from rest_flex_fields import FlexFieldsModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 
+# search against multiple models
+from drf_multiple_model.viewsets import FlatMultipleModelAPIViewSet
+from drf_multiple_model.pagination import MultipleModelLimitOffsetPagination
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # handle permissions based on method
@@ -210,3 +214,16 @@ class ItemViewSet(viewsets.ModelViewSet):
             raise APIException("Item order may not be changed. Use moveup instead.")
  
         serializer.save()
+
+
+class LimitPagination(MultipleModelLimitOffsetPagination):
+    default_limit = 10
+
+class SearchAPIView(FlatMultipleModelAPIViewSet):
+    permission_classes = [IsOwnerOrReadOnly]
+    pagination_class = LimitPagination
+
+    querylist = [
+        {'queryset': List.objects.all(), 'serializer_class': ListSerializer},
+        {'queryset': Item.objects.all(), 'serializer_class': ItemSerializer},
+    ]

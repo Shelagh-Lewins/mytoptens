@@ -6,7 +6,8 @@ import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import * as listReducer from '../modules/list';
-import { getFilteredPublicLists, getMyGroupedAndFilteredLists } from '../modules/list';
+import * as pageReducer from '../modules/page';
+import { getPublicLists, getMyGroupedLists } from '../modules/list';
 
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
@@ -88,7 +89,7 @@ class Home extends Component {
 	}
 
 	onSearch = searchTerm => {
-		this.props.dispatch(listReducer.filterLists(searchTerm));
+		this.props.dispatch(pageReducer.searchHome(searchTerm));
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
@@ -187,8 +188,8 @@ const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
 	'isLoading': state.list.isLoading,
-	'publicLists': getFilteredPublicLists(state),
-	'myLists': getMyGroupedAndFilteredLists(state),
+	'publicLists': getPublicLists(state),
+	'myLists': getMyGroupedLists(state),
 	'count': state.list.count,
 	'next': state.list.next,
 	'previous': state.list.previous,

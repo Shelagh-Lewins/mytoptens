@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'users',
     'lists',
     'rest_auth',
+    'drf_multiple_model',
     'allauth', # needs to be at the end so custom templates are found first
 ]
 

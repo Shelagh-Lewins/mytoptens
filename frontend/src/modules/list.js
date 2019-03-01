@@ -22,7 +22,6 @@ export const FETCH_LISTS_STARTED = 'FETCH_LISTS_STARTED';
 export const FETCH_LISTS_FAILED = 'FETCH_LISTS_FAILED';
 export const FETCH_LIST_BY_SLUG_STARTED = 'FETCH_LIST_BY_SLUG_STARTED';
 export const FETCH_LIST_BY_SLUG_FAILED = 'FETCH_LISTS_FAILED';
-export const FILTER_LISTS = 'FILTER_LISTS';
 export const CREATE_LIST_STARTED = 'CREATE_LIST_STARTED';
 export const CREATE_LIST_SUCCEEDED = 'CREATE_LIST_SUCCEEDED';
 export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
@@ -145,13 +144,6 @@ export function fetchListBySlug(slug) {
 
 			return dispatch(getErrors({ 'fetch lists': error.message }));
 		});
-	};
-}
-
-export function filterLists(searchTerm) {
-	return { 
-		'type': FILTER_LISTS,
-		'payload': { searchTerm },
 	};
 }
 
@@ -343,43 +335,17 @@ export const getLists = state => {
 
 const getItems = state => state.item.things;
 
-export const getFilteredLists = createSelector(
-	[getLists, getSearchTerm],
-	(lists, searchTerm) => {
-		return lists.filter(list => {
-			// if no search term, return every list
-			if (searchTerm === '') {
-				return list;
-			}
-			return list.name.match(new RegExp(searchTerm, 'i'));
-		});
-	}
-);
-
-export const getGroupedAndFilteredLists = createSelector(
-	[getFilteredLists],
-	lists => {
-		const grouped = {};
-
-		LIST_IS_PUBLIC_VALUES.forEach(is_public => {
-			grouped[is_public] = lists.filter(list => list.is_public === is_public);
-		});
-
-		return grouped;
-	}
-);
-
-export const getFilteredPublicLists = createSelector(
-	[getFilteredLists],
+export const getPublicLists = createSelector(
+	[getLists],
 	lists => {
 		return lists.filter(list => {
 			return list.is_public;
 		});
 	}
-);
+); 
 
-export const getMyGroupedAndFilteredLists = createSelector(
-	[getFilteredLists],
+export const getMyGroupedLists = createSelector(
+	[getLists],
 	lists => {
 		const grouped = {};
 
@@ -493,8 +459,6 @@ export default function list(state = initialListsState, action) {
 				'organizerData': updeep.constant({}), // new list data so clear out old organizer data, this must be loaded separately
 				'isLoading': false
 			}, state);
-
-			//return updeep({ 'isLoading': false }, state);
 		}
 
 		case FETCH_LISTS_STARTED: {
