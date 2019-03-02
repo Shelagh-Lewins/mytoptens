@@ -15,4 +15,25 @@
 		margin: 0;
 		padding: 0;
 	}
+
+	li {
+		border-bottom: 1px solid $color-search-border;
+			padding: 4px;
+
+		&:last-child {
+			border-bottom: 0;
+		}
+	}
+
+	a {
+		color: $color-text;
+		display: inline-block;
+		text-decoration: none;
+		width: 100%;
+
+		&:hover {
+			color: $color-text;
+			text-decoration: none;
+		}
+	}
 }

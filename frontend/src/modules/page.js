@@ -4,7 +4,7 @@ import { getErrors } from '../modules/errors';
 export const SEARCH_HOME_STARTED = 'SEARCH_HOME_STARTED';
 export const SEARCH_HOME_SUCCEEDED = 'SEARCH_HOME_SUCCEEDED';
 export const SEARCH_HOME_FAILED = 'SEARCH_HOME_FAILED';
-export const SEARCH_HOME_REJECTED = 'SEARCH_HOME_REJECTED';
+export const SEARCH_HOME_CLEAR = 'SEARCH_HOME_CLEAR';
 
 ///////////////////////////////////
 // Home page search function
@@ -30,18 +30,17 @@ function searchHomeFailed() {
 }
 
 // reset if there is no searchTerm
-function searchHomeRejected() {
+export function searchHomeClear() {
 	return {
-		'type': SEARCH_HOME_REJECTED,
+		'type': SEARCH_HOME_CLEAR,
 	};
 }
 
 export function searchHome(searchTerm) {
-	console.log('searchTerm ', searchTerm);
 	return (dispatch, getState) => {
 		// don't search on empty string
 		if(!searchTerm || searchTerm === '') {
-			return dispatch(searchHomeRejected());
+			return dispatch(searchHomeClear());
 		}
 
 		dispatch(searchHomeStarted(searchTerm));
@@ -58,8 +57,6 @@ export function searchHome(searchTerm) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			console.log('Response ', response);
-
 			return dispatch(searchHomeSucceeded(response.results));
 		}).catch(error => {
 			dispatch(searchHomeFailed());
@@ -102,7 +99,7 @@ export default function page(state = initialState, action) {
 			}, state);
 		}
 
-		case SEARCH_HOME_REJECTED	: {
+		case SEARCH_HOME_CLEAR	: {
 			return updeep({
 				'searchTerm': updeep.constant(''),
 				'searchComplete': false,

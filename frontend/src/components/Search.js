@@ -1,49 +1,74 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Input } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
 import './Search.scss';
 
-const Search = props => {
-	let searchResults;
-	
-	if (props.searchComplete) {
-		if (props.searchResults.length === 0) {
-			searchResults = <div className="hint">{`no results found for ${props.searchTerm}`}</div>;
-		} else {
-			searchResults = <div className="results">
-				<ul>
-					{props.searchResults.map((result) => {
-						let type = '';
-						const url = `/list/${result.slug}`;
+class Search extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			'showDropdown': false,
+		};
 
-						if (result.type === 'List') {
-							type = 'List';
-						} else if (result.type === 'Item') {
-							type = 'Item';
-						}
-						return (
-							<li className="result" key={result.id}>
-								<Link to={url}><span className="type">{type}: </span><span className="name">{result.name}</span>
-								</Link>
-							</li>
-						);
-					})}
-				</ul>
-			</div>;
-		}
+		this.closeDropdown = this.closeDropdown.bind(this);
+		this.onFocus = this.onFocus.bind(this);
 	}
 
-	return(
-		<div className="search">
-			<Input className="form-control"
-				onChange={props.onChange}
-				type="text"
-				placeholder={props.placeholder}
-			/>
-			{searchResults}
-		</div>
-	);
+	closeDropdown() {
+		this.setState({
+			'showDropdown': false,
+		});
+	}
+
+	onFocus() {
+		this.setState({
+			'showDropdown': true,
+		});
+	}
+
+	render() {
+		let searchResults;
+		
+		if (this.props.searchComplete) {
+			if (this.props.searchResults.length === 0) {
+				searchResults = <div className="hint">{`no results found for ${this.props.searchTerm}`}</div>;
+			} else {
+				searchResults = <div className="results">
+					<ul>
+						{this.props.searchResults.map((result) => {
+							let type = '';
+							const url = `/list/${result.slug}`;
+
+							if (result.type === 'List') {
+								type = 'List';
+							} else if (result.type === 'Item') {
+								type = 'Item';
+							}
+							return (
+								<li className="result" key={result.id}>
+									<Link to={url} onClick={this.closeDropdown}><span className="type">{type}: </span><span className="name">{result.name}</span>
+									</Link>
+								</li>
+							);
+						})}
+					</ul>
+				</div>;
+			}
+		}
+
+		return(
+			<div className="search">
+				<Input className="form-control"
+					onChange={this.props.onChange}
+					onFocus={this.onFocus}
+					type="text"
+					placeholder={this.props.placeholder}
+				/>
+				{this.state.showDropdown && searchResults}
+			</div>
+		);
+	}
 };
 
 export default Search;
