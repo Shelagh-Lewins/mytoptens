@@ -17,7 +17,8 @@ import * as listReducer from '../modules/list';
 import * as itemReducer from '../modules/item';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
-import formatErrorMessages from '../modules/formatErrorMessages';import isEmpty from '../modules/isEmpty';
+import formatErrorMessages from '../modules/formatErrorMessages';
+import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 
 import './ListDetail.scss';
@@ -27,12 +28,12 @@ class ListDetails extends Component {
 	constructor(props) {
 		super();
 
-		// to start with all we know is the slug. We have to find the list id, and then the list details and items can be loaded
+		// load the list and any parent / children
 		this.getListData = this.getListData.bind(this);
-		const slug = this.getListData(props);
+		const id = this.getListData(props);
 
 		this.state = {
-			slug,
+			id,
 			'showOrganizer': false,
 		};
 
@@ -41,10 +42,9 @@ class ListDetails extends Component {
 
 	componentDidUpdate(prevProps) {
 		if (prevProps.isLoading && !this.props.isLoading) {
-
 			// just finished loading; need to check if user should view this list
-			const canEditList = permissions.canEditList({ 'slug': this.state.slug });
-			const canViewList = permissions.canViewList({ 'slug': this.state.slug });
+			const canEditList = permissions.canEditList(this.state.id);
+			const canViewList = permissions.canViewList(this.state.id);
 
 			if (!canViewList) {
 				this.props.history.push('/');
@@ -66,27 +66,27 @@ class ListDetails extends Component {
 		}
 
 		// user has navigated to a different list
-		if (prevProps.match.params.slug !== this.props.match.params.slug) {
-			const slug = this.getListData(this.props);
+		if (prevProps.match.params.id !== this.props.match.params.id) {
+			const id = this.getListData(this.props);
 			this.setState({
-				slug,
+				id,
 			});
 		}
 
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			this.props.dispatch(listReducer.fetchListBySlug(this.state.slug));
+			this.props.dispatch(listReducer.fetchListDetail(this.state.id));
 			this.props.dispatch(clearErrors());
 		}
 	}
 
 	getListData = (props) => {
-		const slug = props.match.params.slug;
+		const id = props.match.params.id;
 
-		props.dispatch(listReducer.fetchListBySlug(slug));
+		props.dispatch(listReducer.fetchListDetail(id));
 		props.dispatch(clearErrors());
-		return slug;
+		return id;
 	}
 
 	getOrganizerData = () => {
@@ -100,7 +100,6 @@ class ListDetails extends Component {
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		console.log('onChangeIsPublic ', id);
 		this.props.dispatch(listReducer.setListIsPublic({ id, is_public }));
 	}
 
@@ -114,8 +113,8 @@ class ListDetails extends Component {
 
 		  // if there is a visible parent, navigate there
 		  if (this.props.parentList) {
-		  	if (permissions.canViewList({ 'id': this.props.parentList.id })) {
-		  		this.props.history.push(`/list/${this.props.parentList.slug}`);
+		  	if (permissions.canViewList(this.props.parentList.id)) {
+		  		this.props.history.push(`/list/${this.props.parentList.id}`);
 		  		return;
 		  	}
 		  }
@@ -144,7 +143,7 @@ class ListDetails extends Component {
 	}
 
 	onCreateChildList = (item) => {
-		this.props.history.push(`/newlist?parent-item-id=${item.id}&parent-item-name=${item.name}&parent-list-name=${this.props.list.name}&parent-list-slug=${this.props.list.slug}`);
+		this.props.history.push(`/newlist?parent-item-id=${item.id}&parent-item-name=${item.name}&parent-list-name=${this.props.list.name}&parent-list-id=${this.props.list.id}`);
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
@@ -179,7 +178,7 @@ class ListDetails extends Component {
 		if (this.props.parentList) {
 			parentListId = this.props.parentList.id;
 
-			breadcrumbs = <div className="breadcrumbs"><Link to={`/list/${this.props.parentList.slug}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
+			breadcrumbs = <div className="breadcrumbs"><Link to={`/list/${this.props.parentList.id}`}>{this.props.parentList.name}</Link> > {this.props.parentItem.name}</div>;
 		}
 		return (
 			<div>
@@ -311,7 +310,7 @@ const mapStateToProps = (state, ownProps) => {
 	const lists = state.list.things; // details of the current list, with parent and child lists if they exist
 
 	// first find the target list
-	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'slug', 'value': ownProps.match.params.slug });
+	const list = findObjectByProperty({ 'parentObject': lists, 'property': 'id', 'value': ownProps.match.params.id });
 
 	const parentItemAndList = listReducer.getParentItemAndList(state)(list);
 

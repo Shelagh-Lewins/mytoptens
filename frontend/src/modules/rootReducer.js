@@ -1,11 +1,7 @@
 // note that the reducers are called 'list', 'item' for consistency with the database and endpoints
 // this terminology is maintained in the store
-// however in the UI we use 'lists' and 'items' for the plural
+// in the UI components we use listReducer, itemReducer
 // this isn't ideal but absolute naming consistency seems to be required on the server for DRF FlexFields to work
-
-
-// server, store: list, listbyslug, item
-// React components: lists, items
 
 // import the partial reducers
 import { combineReducers } from 'redux';

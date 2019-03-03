@@ -18,7 +18,7 @@ const ListSummary = props => {
 	return (
 		<Col sm="12" md="6">
 			<div className="list-summary">
-				<Link to={`/list/${props.list.slug}`}>
+				<Link to={`/list/${props.list.id}`}>
 					<div className="list-name">
 						<div>{props.list.name}</div>
 					</div>
@@ -33,7 +33,7 @@ const ListSummary = props => {
 						<button className="btn btn-danger" title="Delete" onClick={onDeleteList}>X</button>
 					</div>
 				)}
-				<Link to={`/list/${props.list.slug}`}>
+				<Link to={`/list/${props.list.id}`}>
 					<div className="list-description">{props.list.description}</div>
 				</Link>
 				

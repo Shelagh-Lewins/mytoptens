@@ -12,17 +12,8 @@ class CustomUserManager(UserManager):
 
 ID_LENGTH = 12
 
-def pkgen():
-    from base64 import b32encode
-    from hashlib import sha1
-    from random import random
-
-    pk = int_to_base36(uuid.uuid4().int)[:ID_LENGTH]
-    return pk
-
 class CustomUser(AbstractUser):
     objects = CustomUserManager()
-    slug = models.CharField(max_length=ID_LENGTH, default=pkgen, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email_verified = models.BooleanField(default=False)
 

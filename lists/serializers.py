@@ -24,7 +24,7 @@ class ItemSerializer(FlexFieldsModelSerializer):
     """
     class Meta:
         model = Item
-        fields = ('id', 'name', 'description', 'list_id', 'modified_at', 'order', 'slug')
+        fields = ('id', 'name', 'description', 'list_id', 'modified_at', 'order')
         # note 'list_id' is the field that can be returned, even though 'list' is the actual foreign key in the model
 
 class ListSerializer(FlexFieldsModelSerializer):
@@ -53,8 +53,7 @@ class ListSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = List
-        fields = ('id', 'name', 'description', 'is_public',
-            'slug', 'created_by', 'created_by_username', 'created_at',
+        fields = ('id', 'name', 'description', 'is_public', 'created_by', 'created_by_username', 'created_at',
             'modified_by', 'modified_at', 'item', 'parent_item', 'parent_item_id')
 
     def create(self, validated_data):
@@ -65,7 +64,6 @@ class ListSerializer(FlexFieldsModelSerializer):
         newlist = List.objects.create(**validated_data)
 
         for item_data in items_data:
-            item_data['slug'] = newlist.slug # links will go to the parent list
             Item.objects.create(list=newlist, **item_data)
 
         return newlist

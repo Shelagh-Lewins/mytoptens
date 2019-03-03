@@ -9,7 +9,7 @@ import {
 
 import {
 	RECEIVE_ENTITIES,
-	FETCH_LIST_BY_SLUG_STARTED,
+	FETCH_LIST_DETAIL_STARTED,
 	RECEIVE_ORGANIZER_DATA,
 } from './list';
 
@@ -212,7 +212,7 @@ export default function item(state = initialItemsState, action) {
 				'isLoading': false }, state);
 		}
 
-		case FETCH_LIST_BY_SLUG_STARTED: {
+		case FETCH_LIST_DETAIL_STARTED: {
 			return updeep(state, state);
 		}
 

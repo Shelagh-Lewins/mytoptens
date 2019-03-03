@@ -56,7 +56,7 @@ class Search extends Component {
 					<ul>
 						{this.props.searchResults.map((result) => {
 							let type = '';
-							const url = `/list/${result.slug}`;
+							const url = `/list/${result.id}`;
 
 							if (result.type === 'List') {
 								type = 'List';

@@ -39,7 +39,7 @@ class CreateList extends Component {
 			this.state.parentItemId = urlParams.get('parent-item-id');
 			this.state.parentItemName = urlParams.get('parent-item-name');
 			this.state.parentListName = urlParams.get('parent-list-name');
-			this.state.parentListSlug = urlParams.get('parent-list-slug');
+			this.state.parentListId = urlParams.get('parent-list-id');
 		}
 	}
 
@@ -156,7 +156,7 @@ class CreateList extends Component {
 				</Container>)}
 				<h2>Create a new list</h2>
 				{this.state.parentItemName && (
-					<div className="parent-item"><Link to={`/list/${this.state.parentListSlug}`}>{this.state.parentListName}</Link> > {this.state.parentItemName}</div>
+					<div className="parent-item"><Link to={`/list/${this.state.parentListId}`}>{this.state.parentListName}</Link> > {this.state.parentItemName}</div>
 				)}
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">

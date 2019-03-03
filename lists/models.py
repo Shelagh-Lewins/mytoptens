@@ -7,26 +7,12 @@ from django.utils.http import int_to_base36
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 
-ID_LENGTH = 12
 USER = get_user_model()
-
-def slug_gen():
-    """Generates a probably unique string that can be used as a slug when routing
-
-    Starts with a uuid, encodes it to base 36 and shortens it
-    """
-
-    #from base64 import b32encode
-    #from hashlib import sha1
-    #from random import random
-
-    slug = int_to_base36(uuid.uuid4().int)[:ID_LENGTH]
-    return slug
 
 class List(models.Model):
     """Models for lists
     """
-    slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False)
+    #slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_by = models.ForeignKey(USER, on_delete=models.CASCADE, related_name='list_created_by_id')
     created_by_username = models.CharField(max_length=255) # this shold be OK given that the list will be deleted if the created_by_id user is deleted
@@ -46,9 +32,6 @@ class List(models.Model):
 class Item(models.Model):
     """Models for list items
     """
-    #slug = models.CharField(max_length=ID_LENGTH, default=slug_gen, editable=False) # old, from when I thought items would be linkable
-    # slug will be added as the parent list slug, so a link to the item can go to the list
-    slug = models.CharField(max_length=ID_LENGTH, default='', editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     modified_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, blank=True, default='')

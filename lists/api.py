@@ -114,9 +114,9 @@ class ListViewSet(FlexFieldsModelViewSet):
         serializer.save()
 
 
-class ListBySlugViewSet(viewsets.ModelViewSet):
+class ListDetailViewSet(viewsets.ModelViewSet):
     """
-    Find a list by slug.
+    Find a list by id with full details
     Return the list itself and associated child / parent lists for navigation
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
@@ -124,12 +124,16 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
     serializer_class = ListSerializer
 
     def get_queryset(self):
-        my_list = List.objects.filter(slug=self.request.query_params.get('slug', None)).first()
+       #  my_list = List.objects.filter(slug=self.request.query_params.get('slug', None)).first()
+       #list_id = self.request.query_params.get('id', None)
+        #my_list = List.objects.filter(id=list_id).first()
+        my_list = List.objects.filter(id=self.request.query_params.get('id', None)).first()
 
         if my_list is None:
             return
 
-        # we want the list itself
+        # create an array containing the id of every list to return
+        # we always want the list itself
         pk_list = [my_list.id]
 
         # then we want the parent list, if any
@@ -138,7 +142,7 @@ class ListBySlugViewSet(viewsets.ModelViewSet):
             pk_list.append(parent_item.list.id)
 
         except AttributeError:
-            pass # we don't mind no parent list
+            pass # no parent list is OK
 
         # and child lists, if any
         item_ids = [o.id for o in my_list.item.all()]

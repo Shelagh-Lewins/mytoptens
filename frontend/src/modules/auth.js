@@ -141,7 +141,6 @@ export const getUserInfo = () => (dispatch) => {
 			'username': user.username,
 			'email': user.email,
 			'id': user.id,
-			'slug': user.slug,
 			'emailVerified': user.email_verified,
 		}));
 	}).catch(error => {
@@ -253,6 +252,7 @@ export const confirmEmailAlreadyVerified = token => {
 
 export const sendConfirmationEmail = () => (dispatch) => {
 	dispatch(clearErrors());
+	dispatch(confirmEmailNotSent());
 
 	return fetchAPI({
 		'url': '/api/v1/sendconfirmationemail/',
@@ -265,7 +265,9 @@ export const sendConfirmationEmail = () => (dispatch) => {
 			return dispatch(confirmEmailAlreadyVerified());
 		}
 	}).catch(error => {
-		return dispatch(getErrors({ 'sendConfirmationEmail': error.message }));
+		console.log('sendConfirmationEmail error ', error);
+		const message = 'Unable to send confirmation email. This probably means that there is no user registered with that email address.';
+		return dispatch(getErrors({ 'sendConfirmationEmail': message }));
 	});
 };
 
@@ -298,7 +300,6 @@ export default function(state = initialState, action ) {
 				'user': {
 					'username': action.payload.username,
 					'email': action.payload.email,
-					'slug': action.payload.slug,
 					'id': action.payload.id,
 					'emailVerified': action.payload.emailVerified,
 				}

@@ -20,8 +20,8 @@ import {
 export const RECEIVE_ENTITIES = 'RECEIVE_ENTITIES';
 export const FETCH_LISTS_STARTED = 'FETCH_LISTS_STARTED';
 export const FETCH_LISTS_FAILED = 'FETCH_LISTS_FAILED';
-export const FETCH_LIST_BY_SLUG_STARTED = 'FETCH_LIST_BY_SLUG_STARTED';
-export const FETCH_LIST_BY_SLUG_FAILED = 'FETCH_LISTS_FAILED';
+export const FETCH_LIST_DETAIL_STARTED = 'FETCH_LIST_DETAIL_STARTED';
+export const FETCH_LIST_DETAIL_FAILED = 'FETCH_LIST_DETAIL_FAILED';
 export const CREATE_LIST_STARTED = 'CREATE_LIST_STARTED';
 export const CREATE_LIST_SUCCEEDED = 'CREATE_LIST_SUCCEEDED';
 export const DELETE_LIST_SUCCEEDED = 'DELETE_LIST_SUCCEEDED';
@@ -107,22 +107,22 @@ export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 }
 
 ///////////////////////////////
-// fetch a single list by slug
-export function fetchListBySlugStarted() {
+// fetch a single list with is parent and children, if any
+export function fetchListDetailStarted() {
 	return {
-		'type': FETCH_LIST_BY_SLUG_STARTED,
+		'type': FETCH_LIST_DETAIL_STARTED,
 	};
 }
 
-function fetchListBySlugFailed() {
+function fetchListDetailFailed() {
 	return {
-		'type': FETCH_LIST_BY_SLUG_FAILED
+		'type': FETCH_LIST_DETAIL_FAILED
 	};
 }
 
-export function fetchListBySlug(slug) {
+export function fetchListDetail(id) {
 	return (dispatch, getState) => {
-		dispatch(fetchListBySlugStarted());
+		dispatch(fetchListDetailStarted());
 
 		// if the user is not logged in, don't use auth. The server should return the list if a non-authenticated user should see it.
 		let useAuth = false;
@@ -132,7 +132,7 @@ export function fetchListBySlug(slug) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/listbyslug/?slug=${slug}`,
+			'url': `/api/v1/content/listdetail/?id=${id}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -140,7 +140,7 @@ export function fetchListBySlug(slug) {
 
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
-			dispatch(fetchListBySlugFailed());
+			dispatch(fetchListDetailFailed());
 
 			return dispatch(getErrors({ 'fetch lists': error.message }));
 		});
@@ -160,7 +160,7 @@ export const createList = (list, history) => dispatch => {
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
 		dispatch(createListSucceeded(response));
-		history.push(`/list/${response.slug}`);
+		history.push(`/list/${response.id}`);
 		return;
 	}).catch(error => {
 		return dispatch(getErrors({ 'create list': error.message }));
@@ -290,7 +290,7 @@ export function fetchOrganizerData(userId) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,is_public,order,parent_item,slug&created_by=${userId}`,
+			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,is_public,order,parent_item&created_by=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
@@ -469,11 +469,11 @@ export default function list(state = initialListsState, action) {
 			return updeep({ 'isLoading': false }, state);
 		}
 
-		case FETCH_LIST_BY_SLUG_STARTED: {
+		case FETCH_LIST_DETAIL_STARTED: {
 			return updeep({ 'isLoading': true	}, state);
 		}
 
-		case FETCH_LIST_BY_SLUG_FAILED: {
+		case FETCH_LIST_DETAIL_FAILED: {
 			return updeep({ 'isLoading': false }, state);
 		}
 

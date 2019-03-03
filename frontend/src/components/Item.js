@@ -17,7 +17,7 @@ class Item extends Component {
 		this.state = {
 			'isEditingName': false,
 		};
-
+		//console.log('item props, ', props);
 		this.onCreateChildList = this.onCreateChildList.bind(this);
 		this.setIsEditingName = this.setIsEditingName.bind(this);
 		this.onMoveUp = this.onMoveUp.bind(this);
@@ -49,7 +49,7 @@ class Item extends Component {
 		} else if (this.state.isEditingName && store.getState().item.things[this.props.item.id] && store.getState().item.things[this.props.item.id].name === '') {
 			showDescription = false;
 		}
-		//console.log('item render. props ', this.props);
+
 		let canCreateChildList = true; // should the "create child list" button be visible?
 
 		if (this.props.item.childList || // there is already a child list
@@ -62,7 +62,7 @@ class Item extends Component {
 		let canViewChildList = false;
 
 		// child list exists and user can view it
-		if (this.props.item.childList && permissions.canViewList({ 'slug': this.props.item.childList.slug })) {
+		if (this.props.item.childList && permissions.canViewList(this.props.item.childList.id)) {
 			canViewChildList = true;
 		}
 
@@ -73,7 +73,7 @@ class Item extends Component {
 		} else if (canViewChildList) {
 			childList = (
 				<div className="child-list">	
-					<Link to={`/list/${this.props.item.childList.slug}`}>{this.props.item.childList.name} ></Link>
+					<Link to={`/list/${this.props.item.childList.id}`}>{this.props.item.childList.name} ></Link>
 				</div>);
 		}
 
