@@ -24,12 +24,13 @@ class Search extends Component {
 	}
 
 	handleClick = e => {
+		// clicked inside component
 		if (this.node.contains(e.target)) {
-			console.log('clicked inside');
 			return;
 		}
 
-		console.log('clicked outside');
+		// clicked outside component
+		this.closeDropdown();
 	}
 
 	closeDropdown() {
