@@ -1,3 +1,45 @@
-.btn-primary {
-	margin-left: 8px;
+.create-list {
+	.list-name {
+		label {
+			font-weight: bold;
+		}
+	}
+
+	.item-name {
+		label {
+			font-weight: bold;
+		}
+	}
+
+	.btn-primary {
+		margin-left: 8px;
+	}
+
+	.list-description {
+		label {
+			border: 0;
+			clear: both;
+			clip: rect(0 0 0 0);
+			height: 1px;
+			margin: -1px;
+			padding: 0;
+			position: absolute;
+			width: 1px;
+		}
+	}
+
+	.item-description {
+		margin-top: 8px;
+		
+		label {
+			border: 0;
+			clear: both;
+			clip: rect(0 0 0 0);
+			height: 1px;
+			margin: -1px;
+			padding: 0;
+			position: absolute;
+			width: 1px;
+		}
+	}
 }

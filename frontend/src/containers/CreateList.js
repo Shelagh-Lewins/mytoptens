@@ -107,30 +107,29 @@ class CreateList extends Component {
 			elements.push(
 				<div className="form-group" key={`item${i}`}>
 					<Row>
-						<Col lg="9">
-							<h3>Item {i}</h3>
-							<Label for={`item${i}_name`}>Name</Label>
+						<Col lg="9" className="item-name">
+							<Label for={`item${i}_name`}>Item {i}</Label>
 							<Input
 								type="text"
 								name={`item${i}_name`}
 								id={`item${i}_name`}
 								onChange={ this.handleInputChange }
 								value={ this.state[`item${i}_name`] }
-								placeholder="Name"
+								placeholder="Enter the item name"
 							/>
 							<div className='invalid-feedback' />
 						</Col>
 					</Row>
 					<Row>
-						<Col lg="9">
-							<Label for={`item${i}_description`}>Description</Label>
+						<Col lg="9" className="item-description">
+							<Label for={`item${i}_description`}>Item {i} description</Label>
 							<Input
 								type="textarea"
 								name={`item${i}_description`}
 								id={`item${i}_description`}
 								onChange={ this.handleInputChange }
 								value={ this.state[`item${i}_description`] }
-								placeholder="Description"
+								placeholder="Enter the item description"
 							/>
 							<div className='invalid-feedback' />
 						</Col>
@@ -142,7 +141,7 @@ class CreateList extends Component {
 
 	render() {
 		return (
-			<Container>
+			<Container className="create-list">
 				{!isEmpty(this.props.errors) && (<Container>
 					<Row>
 						<Col>
@@ -161,8 +160,8 @@ class CreateList extends Component {
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">
 						<Row>
-							<Col lg="9">
-								<Label for="name">Name</Label>
+							<Col lg="9" className="list-name">
+								<Label for="name">List name</Label>
 								<Input
 									type="text"
 									name="name"
@@ -181,8 +180,8 @@ class CreateList extends Component {
 					</div>
 					<div className="form-group">
 						<Row>
-							<Col lg="9">
-								<Label for="username">Description</Label>
+							<Col lg="9" className="list-description">
+								<Label for="username">List description</Label>
 								<Input
 									type="textarea"
 									name="description"
