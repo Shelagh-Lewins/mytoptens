@@ -15,6 +15,23 @@ class Search extends Component {
 		this.onFocus = this.onFocus.bind(this);
 	}
 
+	componentDidMount() {
+		document.addEventListener('click', this.handleClick, false);
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('click', this.handleClick, false);
+	}
+
+	handleClick = e => {
+		if (this.node.contains(e.target)) {
+			console.log('clicked inside');
+			return;
+		}
+
+		console.log('clicked outside');
+	}
+
 	closeDropdown() {
 		this.setState({
 			'showDropdown': false,
@@ -58,7 +75,7 @@ class Search extends Component {
 		}
 
 		return(
-			<div className="search">
+			<div className="search" ref={node => this.node = node}>
 				<Input className="form-control"
 					onChange={this.props.onChange}
 					onFocus={this.onFocus}
