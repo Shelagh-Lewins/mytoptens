@@ -108,7 +108,6 @@ class ListViewSet(FlexFieldsModelViewSet):
 
             # set any Lists with this parent_item to null parent_item
             # an item can only have one child list
-            print(List.objects.filter(parent_item_id=parent_item_id))
             List.objects.filter(parent_item_id=parent_item_id).update(parent_item_id=None)
  
         serializer.save()
