@@ -123,9 +123,6 @@ class ListDetailViewSet(viewsets.ModelViewSet):
     serializer_class = ListSerializer
 
     def get_queryset(self):
-       #  my_list = List.objects.filter(slug=self.request.query_params.get('slug', None)).first()
-       #list_id = self.request.query_params.get('id', None)
-        #my_list = List.objects.filter(id=list_id).first()
         my_list = List.objects.filter(id=self.request.query_params.get('id', None)).first()
 
         if my_list is None:

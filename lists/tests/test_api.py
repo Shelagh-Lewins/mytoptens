@@ -1,15 +1,14 @@
+"""
+Test the API for lists and items
+"""
+
 import json
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
-from lists.models import List
-from lists.endpoints import ListViewSet
-
-from rest_framework.test import force_authenticate
-# from rest_framework.authtoken.models import Token
-# from rest_framework.test import APIRequestFactory
+from lists.models import List, Item
 
 class ListAPITest(APITestCase):
     @classmethod
@@ -18,8 +17,6 @@ class ListAPITest(APITestCase):
         # CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
 
     def setUp(self):
-        self.user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
-
         self.data = {'name': 'Test list', 'description':'A description', 'item': [
         {'name': 'Item 1 Name', 'description': 'Item 1 description', 'order': 1},
         {'name': 'Item 2 Name', 'description': 'Item 2 description', 'order': 2},
@@ -29,9 +26,12 @@ class ListAPITest(APITestCase):
         {'name': 'Item 6 Name', 'description': 'Item 6 description', 'order': 6},
         {'name': 'Item 7 Name', 'description': 'Item 7 description', 'order': 7},
         {'name': 'Item 8 Name', 'description': 'Item 8 description', 'order': 8},
-        {'name': 'Item 9 Name', 'description': 'Item 0 description', 'order': 9},
+        {'name': 'Item 9 Name', 'description': 'Item 9 description', 'order': 9},
         {'name': 'Item 10 Name', 'description': 'Item 10 description', 'order': 10}
         ]}
+        # 'lists' is the app_name set in endpoints.py
+        # 'Lists' is the base_name set for the list route in endpoints.py
+        # '-list' seems to be api magic unrelated to our list object name
         self.url = reverse('lists:Lists-list')
 
     def test_create_list_authenticated(self):
@@ -39,23 +39,11 @@ class ListAPITest(APITestCase):
         Ensure we can create a new list object.
         """
 
-        # 'lists' is the app_name set in endpoints.py
-        # 'Lists' is the base_name set for the list route in endpoints.py
-        # '-list' seems to be api magic unrelated to our list object name
-        url = reverse('lists:Lists-list')
+        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
 
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=user)
         response = self.client.post(self.url, self.data, format='json')
-        #new_list = json.loads(response.content)
-        #print(new_list)
-        #print('id')
-        #print(new_list['id'])
         list_id = json.loads(response.content)['id']
-
-        
-        #print('list from db')
-        #print(new_list)
-
 
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -68,17 +56,59 @@ class ListAPITest(APITestCase):
         # it should have the right name
         self.assertEqual(new_list.name, 'Test list')
 
+        # it should have the right description
+        self.assertEqual(new_list.description, 'A description')
+
+        # it should belong to this user
+        self.assertEqual(new_list.created_by, user)
+
+        # and the username should also be correct
+        self.assertEqual(new_list.created_by_username, 'Test user')
+
+        # it should be a top level list (no parent_item)
+        self.assertEqual(new_list.parent_item_id, None)
+
+        # find the nested item data
+        list_items_queryset = new_list.item.all()
+
         # the list should have 10 items
+        self.assertEqual(list_items_queryset.count(), 10)
 
         # there should be 10 Items in the database
+        self.assertEqual(Item.objects.all().count(), 10)
 
-        # those 10 items should belong to this list
+        # check order, name, description, list_id for each item
+        for index, item in enumerate(list_items_queryset):
+         self.assertEqual(item.order, index+1)
+         self.assertEqual(item.name, 'Item ' + str(index+1) + ' Name')
+         self.assertEqual(item.description, 'Item ' + str(index+1) + ' description')
+         self.assertEqual(item.list_id, new_list.id)
 
-        # TODO check name and description of items
-        # TODO check there are exactly 10 items
-        # check list is created_by this user
+
+    def test_create_list_not_verified(self):
+        """
+        create list should fail if user's email address is not verified
+        """
+        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=False)
+        self.client.force_authenticate(user=user)
+        response = self.client.post(self.url, self.data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-  # create list should fail if user not email verified
+    def test_create_list_not_authenticated(self):
+        """
+        create list should fail if user not logged in
+        """
+        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
+        response = self.client.post(self.url, self.data, format='json')
 
-  # create list should fail if user not logged in
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+    # delete list should succeed if user created list
+
+   # delete list should fail if user didn't create list
+
