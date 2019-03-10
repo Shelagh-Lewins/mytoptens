@@ -59,7 +59,6 @@ class ListViewSet(FlexFieldsModelViewSet):
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        print('queryset')
         # unauthenticated user can only view public lists
         queryset = List.objects.filter(is_public=True)
 
@@ -94,11 +93,9 @@ class ListViewSet(FlexFieldsModelViewSet):
         return queryset.order_by('name')
 
     def pre_save(self, obj):
-        print('list pre_save')
         obj.created_by = self.request.user
 
     def perform_update(self, serializer):
-        print('list update')
         # housekeeping if parent_item is changed
         parent_item_id = serializer.validated_data.get('parent_item_id', None)
 
