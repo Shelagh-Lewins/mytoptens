@@ -35,7 +35,6 @@ class ListSerializer(FlexFieldsModelSerializer):
     parent_item_id = serializers.UUIDField(write_only=True, required=False, allow_null=True)
     # parent_item_id entry allows parent_item to be updated, see api.py
     # allow_null allows an existing parent_item_id to be set to null
-    
     item = ItemSerializer(many=True)
 
     # automatically set created_by as the current user's id

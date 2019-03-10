@@ -2,6 +2,10 @@ from django.test import TestCase
 from users.models import CustomUser
 from lists.models import List
 
+# TODO
+# test items
+# test custom user
+
 
 class ListModelTest(TestCase):
     @classmethod
@@ -13,6 +17,8 @@ class ListModelTest(TestCase):
         # set up objects that may be modified by the test
         testuser = CustomUser.objects.first()
         List.objects.create(name='Test list', description='A description', created_by=testuser, created_by_username=testuser.username)
+
+    # TODO test the rest of the model
 
 
     """
@@ -30,6 +36,7 @@ class ListModelTest(TestCase):
 
     """
     Test that the list is created with the expected values
+    This test isn't going to fail, it's just an example
     """
 
     def test_name(self):
