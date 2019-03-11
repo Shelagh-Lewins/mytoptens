@@ -13,7 +13,7 @@ import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 
 class ForgotPassword extends Component {
-	constructor() {
+	constructor(props) {
 		super();
 		this.state = {
 			'email': '',
@@ -21,7 +21,7 @@ class ForgotPassword extends Component {
 		};
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.props.dispatch(clearErrors());
+		props.dispatch(clearErrors());
 	}
 
 	componentWillReceiveProps(nextProps) {
