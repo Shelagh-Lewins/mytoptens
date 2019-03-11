@@ -4,7 +4,8 @@ from django.contrib.auth import views
 #from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from .forms import SetPasswordFormCustom
-from .forms import PasswordResetFormCustom
+#from .forms import PasswordResetFormCustom
+from .serializers import PasswordResetView
 from allauth.account.views import confirm_email
 
 from users.views import EmailConfirmation
@@ -27,8 +28,11 @@ urlpatterns = [
     	name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(template_name='account/password_reset_complete.html'),
     	name='password_reset_complete'),
-    path('password/reset/', views.PasswordResetView.as_view()),
+    #path('password/reset/', views.PasswordResetView.as_view()),
+    path('password/reset/', PasswordResetView.as_view()),
     #path('password/reset/', views.PasswordResetView.as_view(form_class=PasswordResetFormCustom),
+        #name='rest_password_reset'),
+    #path('password/reset/', views.PasswordResetView.as_view(form_class=#PasswordResetForm),
         #name='rest_password_reset'),
     path('content/', include('lists.endpoints')),
     # content is a path for lists, items etc found in the lists app

@@ -1,0 +1,24 @@
+from django.contrib.auth.forms import PasswordResetForm as DjangoPasswordResetForm
+from rest_auth.serializers import (
+    PasswordResetSerializer as RestAuthPasswordResetSerializer
+)
+from rest_auth.views import PasswordResetView as RestAuthPasswordResetView
+from rest_framework.exceptions import ValidationError
+
+
+class PasswordResetForm(DjangoPasswordResetForm):
+    def get_users(self, email):
+        users = tuple(super().get_users(email))
+        print('here')
+        if users:
+            return users
+        msg = ('"{email}" was not found in our system.')
+        raise ValidationError({'email': msg.format(email=email)})
+
+
+class PasswordResetSerializer(RestAuthPasswordResetSerializer):
+    password_reset_form_class = PasswordResetForm
+
+
+class PasswordResetView(RestAuthPasswordResetView):
+    serializer_class = PasswordResetSerializer

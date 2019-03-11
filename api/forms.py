@@ -24,24 +24,3 @@ class SetPasswordFormCustom(SetPasswordForm):
         help_text=password_validation.password_validators_help_text_html(),
     )
 
-
-class PasswordResetFormCustom(PasswordResetForm):
-    def get_users(self, email):
-        print('using custom form')
-        """This custom form doesn't work, because rest-auth starts with its own serializer and that doesn't pull in this form. Any attempt to use this form directly fails because it is then expecting cross-site tokens from Django front end. Changing this would probably involve rewriting the serializer and it's not worth it at this point.
-
-        Given an email, return matching user(s) who should receive a reset.
-
-        This allows subclasses to more easily customize the default policies
-        that prevent inactive users and users with unusable passwords from
-        resetting their password.
-        """
-        active_users = UserModel._default_manager.filter(**{
-            '%s__iexact' % UserModel.get_email_field_name(): email,
-            'is_active': True,
-        })
-
-        if not active_users:
-            raise forms.ValidationError(_("The e-mail address is not assigned to any user account"),
-                code='invalid')
-        return (u for u in active_users if u.has_usable_password())
