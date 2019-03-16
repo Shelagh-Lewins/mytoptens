@@ -35,7 +35,7 @@ class ListAPITest(APITestCase):
 
     def test_create_list_authenticated(self):
         """
-        Ensure we can create a new list object.
+        Logged in, verified user can create a new list object.
         """
 
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
@@ -78,10 +78,10 @@ class ListAPITest(APITestCase):
 
         # check order, name, description, list_id for each item
         for index, item in enumerate(list_items_queryset):
-         self.assertEqual(item.order, index+1)
-         self.assertEqual(item.name, 'Item ' + str(index+1) + ' Name')
-         self.assertEqual(item.description, 'Item ' + str(index+1) + ' description')
-         self.assertEqual(item.list_id, new_list.id)
+            self.assertEqual(item.order, index+1)
+            self.assertEqual(item.name, 'Item ' + str(index+1) + ' Name')
+            self.assertEqual(item.description, 'Item ' + str(index+1) + ' description')
+            self.assertEqual(item.list_id, new_list.id)
 
 
     def test_create_list_not_verified(self):
@@ -92,7 +92,6 @@ class ListAPITest(APITestCase):
         self.client.force_authenticate(user=user)
         response = self.client.post(self.url, self.data, format='json')
 
-        # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -103,7 +102,6 @@ class ListAPITest(APITestCase):
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
         response = self.client.post(self.url, self.data, format='json')
 
-        # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -114,15 +112,17 @@ class ListAPITest(APITestCase):
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
         new_list = List.objects.create(name='Test list', description='A description', created_by=user, created_by_username=user.username)
 
+        self.client.force_authenticate(user=user)
+
         url = reverse('lists:Lists-detail', kwargs={'pk': new_list.id})
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-    def test_delete_list_by_not_owner(self):
+    def test_delete_list_not_logged_in(self):
         """
-        delete list should fail if user didn't create list
+        delete list should fail if user isn't logged in
         """
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=False)
         new_list = List.objects.create(name='Test list', description='A description', created_by=user, created_by_username=user.username)
@@ -130,6 +130,21 @@ class ListAPITest(APITestCase):
         url = reverse('lists:Lists-detail', kwargs={'pk': new_list.id})
         response = self.client.delete(url)
 
-        # the request should fail
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+    def test_delete_list_by_not_owner(self):
+        """
+        delete list should fail if user didn't create list
+        """
+        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=False)
+        otherUser = CustomUser.objects.create(email='person@example.com', username='Other test user', email_verified=False)
+        new_list = List.objects.create(name='Test list', description='A description', created_by=user, created_by_username=user.username)
+
+        self.client.force_authenticate(user=otherUser)
+
+        url = reverse('lists:Lists-detail', kwargs={'pk': new_list.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
