@@ -1,3 +1,5 @@
+# this is all here to enable a message to be shown after password reset request if the email address was not found
+
 from django.contrib.auth.forms import PasswordResetForm as DjangoPasswordResetForm
 from rest_auth.serializers import (
     PasswordResetSerializer as RestAuthPasswordResetSerializer
@@ -9,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 class PasswordResetForm(DjangoPasswordResetForm):
     def get_users(self, email):
         users = tuple(super().get_users(email))
-        print('here')
+
         if users:
             return users
         msg = ('"{email}" was not found in our system.')
@@ -20,5 +22,6 @@ class PasswordResetSerializer(RestAuthPasswordResetSerializer):
     password_reset_form_class = PasswordResetForm
 
 
-class PasswordResetView(RestAuthPasswordResetView):
+
+class PasswordResetViewCustom(RestAuthPasswordResetView):
     serializer_class = PasswordResetSerializer

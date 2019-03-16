@@ -5,7 +5,7 @@ from django.contrib.auth import views
 from django.views.generic.base import RedirectView
 from .forms import SetPasswordFormCustom
 #from .forms import PasswordResetFormCustom
-from .serializers import PasswordResetView
+from .serializers import PasswordResetViewCustom
 from allauth.account.views import confirm_email
 
 from users.views import EmailConfirmation
@@ -20,6 +20,7 @@ urlpatterns = [
      name='account_confirm_email'),
     # seems to work but regex can apparently fail. However fails with the github recommended regex, invalid syntax
         # https://stackoverflow.com/questions/48390749/reverse-for-account-email-verification-sent-not-found-account-email-verifica
+    path('rest-auth/password/reset/', PasswordResetViewCustom.as_view()), # must come before rest-auth includes or custom view is not used
     path('rest-auth/', include('rest_auth.urls')),
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('users/', include('users.urls')),
@@ -28,12 +29,9 @@ urlpatterns = [
     	name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(template_name='account/password_reset_complete.html'),
     	name='password_reset_complete'),
-    #path('password/reset/', views.PasswordResetView.as_view()),
-    path('password/reset/', PasswordResetView.as_view()),
-    #path('password/reset/', views.PasswordResetView.as_view(form_class=PasswordResetFormCustom),
-        #name='rest_password_reset'),
-    #path('password/reset/', views.PasswordResetView.as_view(form_class=#PasswordResetForm),
-        #name='rest_password_reset'),
+
+#    path('rest-auth/password/reset/', PasswordResetView1.as_view()),
+
     path('content/', include('lists.endpoints')),
     # content is a path for lists, items etc found in the lists app
 
