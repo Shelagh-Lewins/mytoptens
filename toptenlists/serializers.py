@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-# dynamic rest extension enables nested data for lists, see chapter 8
+# dynamic rest extension enables nested data for toptenlists, see chapter 8
 from dynamic_rest.serializers import DynamicModelSerializer
 
 from rest_flex_fields import FlexFieldsModelSerializer
 
-from .models import List, Item
+from .models import TopTenList, Item
 
 from dynamic_rest.fields import (
     CountField,
@@ -20,17 +20,16 @@ from dynamic_rest.fields import (
 class ItemSerializer(FlexFieldsModelSerializer):
     # class ItemSerializer(serializers.ModelSerializer):
     """
-    An item must belong to a list
+    An item must belong to a toptenlist
     """
     class Meta:
         model = Item
-        fields = ('id', 'name', 'description', 'list_id', 'modified_at', 'order')
-        # note 'list_id' is the field that can be returned, even though 'list' is the actual foreign key in the model
+        fields = ('id', 'name', 'description', 'toptenlist_id', 'modified_at', 'order')
+        # note 'toptenlist_id' is the field that can be returned, even though 'toptenlist' is the actual foreign key in the model
 
-class ListSerializer(FlexFieldsModelSerializer):
-#class ListSerializer(serializers.ModelSerializer):
+class TopTenListSerializer(FlexFieldsModelSerializer):
     """
-    A list may be created with items
+    A toptenlist may be created with items
     """
     parent_item_id = serializers.UUIDField(write_only=True, required=False, allow_null=True)
     # parent_item_id entry allows parent_item to be updated, see api.py
@@ -47,11 +46,11 @@ class ListSerializer(FlexFieldsModelSerializer):
     )
 
     expandable_fields = {
-        'item': (ItemSerializer, {'source': 'item', 'many': True, 'fields': ['name', 'id', 'list_id', 'order']})
+        'item': (ItemSerializer, {'source': 'item', 'many': True, 'fields': ['name', 'id', 'toptenlist_id', 'order']})
     }
 
     class Meta:
-        model = List
+        model = TopTenList
         fields = ('id', 'name', 'description', 'is_public', 'created_by', 'created_by_username', 'created_at',
             'modified_by', 'modified_at', 'item', 'parent_item', 'parent_item_id')
 
@@ -60,10 +59,10 @@ class ListSerializer(FlexFieldsModelSerializer):
         validated_data['created_by'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username
 
-        newlist = List.objects.create(**validated_data)
+        newtoptenlist = TopTenList.objects.create(**validated_data)
 
         for item_data in items_data:
-            Item.objects.create(list=newlist, **item_data)
+            Item.objects.create(toptenlist=newtoptenlist, **item_data)
 
-        return newlist
+        return newtoptenlist
 

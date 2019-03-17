@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'rest_auth.registration',
     'users',
-    'lists',
+    'toptenlists',
     'rest_auth',
     'drf_multiple_model',
     'allauth', # needs to be at the end so custom templates are found first

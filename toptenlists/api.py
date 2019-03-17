@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import filters
 from rest_framework.exceptions import APIException
 
-from .models import List, Item
-from .serializers import ListSerializer, ItemSerializer
+from .models import TopTenList, Item
+from .serializers import TopTenListSerializer, ItemSerializer
 from django.db.models import Q
 
 from rest_flex_fields import FlexFieldsModelViewSet
@@ -29,9 +29,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if hasattr(obj, 'created_by'):
             return obj.created_by == request.user
 
-        if hasattr(obj, 'list'):
-            if hasattr(obj.list, 'created_by'):
-                return obj.list.created_by == request.user
+        if hasattr(obj, 'toptenlist'):
+            if hasattr(obj.toptenlist, 'created_by'):
+                return obj.toptenlist.created_by == request.user
 
 class HasVerifiedEmail(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -47,34 +47,33 @@ class HasVerifiedEmail(permissions.BasePermission):
         return False
 
 
-# class ListViewSet(viewsets.ModelViewSet):
-class ListViewSet(FlexFieldsModelViewSet):
+class TopTenListViewSet(FlexFieldsModelViewSet):
     """
-    ViewSet for lists.
+    ViewSet for toptenlists.
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
-    model = List
-    serializer_class = ListSerializer
+    model = TopTenList
+    serializer_class = TopTenListSerializer
     permit_list_expands = ['item']
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        # unauthenticated user can only view public lists
-        queryset = List.objects.filter(is_public=True)
+        # unauthenticated user can only view public toptenlists
+        queryset = TopTenList.objects.filter(is_public=True)
 
-        # authenticated user can view public lists and lists the user created
+        # authenticated user can view public toptenlists and toptenlists the user created
         # listset in query parameters can be additional filter
         if self.request.user.is_authenticated:
             listset = self.request.query_params.get('listset', None)
 
-            if listset == 'my-lists':
-                queryset = List.objects.filter(created_by=self.request.user)
+            if listset == 'my-toptenlists':
+                queryset = TopTenList.objects.filter(created_by=self.request.user)
 
-            elif listset == 'public-lists':
-                queryset = List.objects.filter(is_public=True)
+            elif listset == 'public-toptenlists':
+                queryset = TopTenList.objects.filter(is_public=True)
 
             else:
-                queryset = List.objects.filter(
+                queryset = TopTenList.objects.filter(
                     Q(created_by=self.request.user) | 
                     Q(is_public=True)
                 )
@@ -85,7 +84,7 @@ class ListViewSet(FlexFieldsModelViewSet):
         if created_by is not None:
             queryset = queryset.filter(created_by=created_by)
 
-        # return only lists that have no parent item
+        # return only toptenlists that have no parent item
         toplevel = self.request.query_params.get('toplevel')
         if toplevel is not None:
             queryset = queryset.filter(parent_item=None)
@@ -106,83 +105,83 @@ class ListViewSet(FlexFieldsModelViewSet):
             if not item: # if the item isn't found, don't save the new value
                 raise APIException("Unable to set parent_item. No item found with id: " + parent_item_id)
 
-            # set any Lists with this parent_item to null parent_item
-            # an item can only have one child list
-            List.objects.filter(parent_item_id=parent_item_id).update(parent_item_id=None)
+            # set any TopTenLists with this parent_item to null parent_item
+            # an item can only have one child toptenlist
+            TopTenList.objects.filter(parent_item_id=parent_item_id).update(parent_item_id=None)
  
         serializer.save()
 
 
-class ListDetailViewSet(viewsets.ModelViewSet):
+class TopTenListDetailViewSet(viewsets.ModelViewSet):
     """
-    Find a list by id with full details
-    Return the list itself and associated child / parent lists for navigation
+    Find a toptenlist by id with full details
+    Return the toptenlist itself and associated child / parent toptenlists for navigation
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
-    model = List
-    serializer_class = ListSerializer
+    model = TopTenList
+    serializer_class = TopTenListSerializer
 
     def get_queryset(self):
-        my_list = List.objects.filter(id=self.request.query_params.get('id', None)).first()
+        my_toptenlist = TopTenList.objects.filter(id=self.request.query_params.get('id', None)).first()
 
-        if my_list is None:
+        if my_toptenlist is None:
             return
 
-        # create an array containing the id of every list to return
-        # we always want the list itself
-        pk_list = [my_list.id]
+        # create an array containing the id of every toptenlist to return
+        # we always want the toptenlist itself
+        pk_toptenlist = [my_toptenlist.id]
 
-        # then we want the parent list, if any
+        # then we want the parent toptenlist, if any
         try:
-            parent_item = Item.objects.filter(id=my_list.parent_item.id).first()
-            pk_list.append(parent_item.list.id)
+            parent_item = Item.objects.filter(id=my_toptenlist.parent_item.id).first()
+            pk_toptenlist.append(parent_item.toptenlist.id)
 
         except AttributeError:
-            pass # no parent list is OK
+            pass # no parent toptenlist is OK
 
-        # and child lists, if any
-        item_ids = [o.id for o in my_list.item.all()]
+        # and child toptenlists, if any
+        item_ids = [o.id for o in my_toptenlist.item.all()]
 
         try:
-            child_lists = List.objects.filter(parent_item__in=item_ids)
+            child_toptenlists = TopTenList.objects.filter(parent_item__in=item_ids)
 
         except AttributeError:
             pass
 
         try:
-            child_list_ids = [o.id for o in child_lists]
-            pk_list += child_list_ids
+            child_toptenlist_ids = [o.id for o in child_toptenlists]
+            pk_toptenlist += child_toptenlist_ids
 
         except AttributeError:
-            pass # we don't mind no child lists
+            pass # we don't mind no child toptenlists
 
-        # can view public lists and lists the user created
+        # can view public toptenlists and toptenlists the user created
         if self.request.user.is_authenticated:
-            return List.objects.filter(pk__in=pk_list).filter(
+            return TopTenList.objects.filter(pk__in=pk_toptenlist).filter(
                 Q(created_by=self.request.user) | 
                 Q(is_public=True)
             )
 
-        return List.objects.filter(pk__in=pk_list).filter(is_public=True)
+        return TopTenList.objects.filter(pk__in=pk_toptenlist).filter(is_public=True)
 
 
 class ItemViewSet(viewsets.ModelViewSet):
     """
-    Although items are retrieved as part of a list request, they are edited through this viewset
+    Although items are retrieved as part of a toptenlist request, they are edited through this viewset
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = Item
     serializer_class = ItemSerializer
 
     def get_queryset(self):
-        # can view items belonging to public lists and lists the user created
+        # can view items belonging to public toptenlists and toptenlists the user created
         if self.request.user.is_authenticated:
             return Item.objects.filter(
-                Q(list__created_by=self.request.user) | 
-                Q(list__is_public=True)
+                Q(toptenlist__created_by=self.request.user) | 
+                Q(toptenlist__is_public=True)
             )
 
-        return Item.objects.filter(list__is_public=True)
+        return Item.objects.filter(toptenlist__is_public=True)
 
     @detail_route(methods=['patch'])
     def moveup(self, request, pk=None):
@@ -191,16 +190,16 @@ class ItemViewSet(viewsets.ModelViewSet):
             # find the item to move up
             item = Item.objects.get(pk=pk)       
             item_order = item.order
-            parent_list = item.list_id # note 'list_id' not 'list'
+            parent_toptenlist = item.toptenlist_id # note 'toptenlist_id' not 'toptenlist'
 
             if item.order == 1:
-                return Response({'message': 'Item is already at top of list'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'message': 'Item is already at top of toptenlist'}, status=status.HTTP_403_FORBIDDEN)
 
             # change the item order up one
             item.order = item.order - 1
 
             # find the existing item above
-            item_above = Item.objects.get(list=parent_list, order=item_order-1)
+            item_above = Item.objects.get(toptenlist=parent_toptenlist, order=item_order-1)
             # and change its order down one
             item_above.order = item_order
 
@@ -232,37 +231,37 @@ class LimitPagination(MultipleModelLimitOffsetPagination):
 
 class SearchAPIView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
     """
-    Search for lists and items by name
+    Search for toptenlists and items by name
     """
     pagination_class = LimitPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
     def get_querylist(self):
-        list_query_set = {'queryset': List.objects.all(), 'serializer_class': ListSerializer}
+        toptenlist_query_set = {'queryset': TopTenList.objects.all(), 'serializer_class': TopTenListSerializer}
         item_query_set = {'queryset': Item.objects.all().exclude(name=''), 'serializer_class': ItemSerializer}
 
-        # authenticated user can view public lists and lists the user created
-        # and items belonging to those lists
+        # authenticated user can view public toptenlists and toptenlists the user created
+        # and items belonging to those toptenlists
         if self.request.user.is_authenticated:
-            list_query_set['queryset'] = list_query_set['queryset'].filter(
+            toptenlist_query_set['queryset'] = toptenlist_query_set['queryset'].filter(
                 Q(created_by=self.request.user) |
                 Q(is_public=True)
             )
             item_query_set['queryset'] = item_query_set['queryset'].filter(
-                Q(list__created_by=self.request.user) |
-                Q(list__is_public=True)
+                Q(toptenlist__created_by=self.request.user) |
+                Q(toptenlist__is_public=True)
             )
 
-        # unauthenticated user can view public lists
-        # and items belonging to those lists
+        # unauthenticated user can view public toptenlists
+        # and items belonging to those toptenlists
         else:
-            list_query_set['queryset'] = list_query_set['queryset'].filter(is_public=True)
-            item_query_set['queryset'] = item_query_set['queryset'].filter(list__is_public=True)
+            toptenlist_query_set['queryset'] = toptenlist_query_set['queryset'].filter(is_public=True)
+            item_query_set['queryset'] = item_query_set['queryset'].filter(toptenlist__is_public=True)
 
         querylist = [
-            list_query_set,
+            toptenlist_query_set,
             item_query_set,
         ]
 
-        return querylist
+        return querytoptenlist

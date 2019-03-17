@@ -68,7 +68,7 @@ export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 			useAuth = true;
 		}
 
-		let url = `/api/v1/content/list/?`;
+		let url = `/api/v1/content/toptenlist/?`;
 
 		if (topLevelListsOnly) {
 			url += '&toplevel=1';
@@ -90,6 +90,7 @@ export function fetchLists({ listset, topLevelListsOnly, limit, offset } = {}) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
+			console.log('response ', response);
 			let data = {
 				'count': response.count,
 				'next': response.next,
@@ -153,14 +154,14 @@ export const createList = (list, history) => dispatch => {
 	dispatch(createListStarted());
 
 	return fetchAPI({
-		'url': '/api/v1/content/list/',
+		'url': '/api/v1/content/toptenlist/',
 		'data': JSON.stringify(list),
 		'method': 'POST',
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
 		dispatch(createListSucceeded(response));
-		history.push(`/list/${response.id}`);
+		history.push(`/toptenlist/${response.id}`);
 		return;
 	}).catch(error => {
 		return dispatch(getErrors({ 'create list': error.message }));
@@ -187,7 +188,7 @@ export function createListSucceeded(list) {
 export const updateList = (listId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
 	return fetchAPI({
-		'url': `/api/v1/content/list/${listId}/`,
+		'url': `/api/v1/content/toptenlist/${listId}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ [propertyName]: value }),
 		'method': 'PATCH',
@@ -210,7 +211,7 @@ export function updateListSucceeded(response) {
 // delete list
 export const deleteList = id => (dispatch, getState) => {
 	return fetchAPI({
-		'url': `/api/v1/content/list/${id}/`,
+		'url': `/api/v1/content/toptenlist/${id}/`,
 		'method': 'DELETE',
 		'useAuth': true,
 	}).then(response => {
@@ -231,7 +232,7 @@ export function deleteListSucceeded(id) {
 
 export const setListIsPublic = ({ id, is_public }) => dispatch => {
 	return fetchAPI({
-		'url': `/api/v1/content/list/${id}/`,
+		'url': `/api/v1/content/toptenlist/${id}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ is_public }),
 		'method': 'PATCH',
@@ -290,7 +291,7 @@ export function fetchOrganizerData(userId) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/list/?expand=item&fields=id,name,item,is_public,order,parent_item&created_by=${userId}`,
+			'url': `/api/v1/content/toptenlist/?expand=item&fields=id,name,item,is_public,order,parent_item&created_by=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {

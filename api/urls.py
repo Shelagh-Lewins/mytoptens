@@ -32,8 +32,8 @@ urlpatterns = [
 
 #    path('rest-auth/password/reset/', PasswordResetView1.as_view()),
 
-    path('content/', include('lists.endpoints')),
-    # content is a path for lists, items etc found in the lists app
+    path('content/', include('toptenlists.endpoints')),
+    # content is a path for toptenlists, items etc found in the toptenlists app
 
 
     path('sendconfirmationemail/', EmailConfirmation.as_view(), name='send-email-confirmation')

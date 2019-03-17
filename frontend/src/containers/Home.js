@@ -26,11 +26,11 @@ class Home extends Component {
 
 		// which set of lists to view
 		// if logged in, default my-lists
-		// if not logged in, only show public-lists
-		let listset = 'public-lists';
+		// if not logged in, only show publictoptens
+		let listset = 'publictoptens';
 		if (props.auth.isAuthenticated) {
 			const urlParams = new URLSearchParams(props.location.search);
-			listset = urlParams.get('listset') || 'my-lists';
+			listset = urlParams.get('listset') || 'mytoptens';
 		}
 
 		this.setListSetURL(listset);
@@ -59,10 +59,10 @@ class Home extends Component {
 		// user has just logged out
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
 			this.setState({
-				'selectedTab': 'public-lists',
+				'selectedTab': 'publictoptens',
 			});
 
-			this.setListSetURL('public-lists');
+			this.setListSetURL('publictoptens');
 		}
 	}
 

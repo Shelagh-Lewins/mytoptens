@@ -66,13 +66,13 @@ class ListsPage extends Component {
 		return (
 			<ul><li>
 				<span
-					className={this.props.selectedTab === 'my-lists'? 'selected' : ''}
-					id='my-lists'
+					className={this.props.selectedTab === 'mytoptens'? 'selected' : ''}
+					id='mytoptens'
 					onClick={this.props.handleTabClick}>My lists
 				</span>
 				<span
-					className={this.props.selectedTab === 'public-lists'? 'selected' : ''}
-					id='public-lists'
+					className={this.props.selectedTab === 'publictoptens'? 'selected' : ''}
+					id='publictoptens'
 					onClick={this.props.handleTabClick}>Public lists
 				</span>
 			</li></ul>
@@ -82,9 +82,9 @@ class ListsPage extends Component {
 	render() {
 		let listsList;
 
-		if (this.props.selectedTab === 'my-lists') {
+		if (this.props.selectedTab === 'mytoptens') {
 			listsList = this.renderMyLists();
-		} else if (this.props.selectedTab === 'public-lists') {
+		} else if (this.props.selectedTab === 'publictoptens') {
 			listsList = this.renderPublicLists();
 		}
 
