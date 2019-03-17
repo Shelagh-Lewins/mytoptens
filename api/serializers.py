@@ -14,7 +14,7 @@ class PasswordResetForm(DjangoPasswordResetForm):
 
         if users:
             return users
-        msg = ('"{email}" was not found in our system.')
+        msg = ('The email address "{email}" is not associated with a registered user.')
         raise ValidationError({'email': msg.format(email=email)})
 
 

@@ -164,6 +164,7 @@ export const forgotPasswordEmailSent = () => {
 
 export const forgotPassword = (email) => dispatch => {
 	dispatch(clearErrors());
+	dispatch(forgotPasswordEmailNotSent());
 
 	var formData  = new FormData();
 
@@ -179,7 +180,7 @@ export const forgotPassword = (email) => dispatch => {
 	}).then(response => {
 		 return dispatch(forgotPasswordEmailSent());
 	}).catch(error => {
-		return dispatch(getErrors({ 'request password reset email': `Unable to send a password reset email. It is likely that the email address ${email} is not associated with a registered user` }));
+		return dispatch(getErrors({ 'sendPasswordResetEmail': error.message }));
 	});
 };
 

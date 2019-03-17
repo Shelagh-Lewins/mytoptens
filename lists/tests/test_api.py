@@ -123,8 +123,7 @@ class DeleteListAPITest(APITestCase):
         """
         self.client.force_authenticate(user=self.user)
 
-        url = reverse('lists:Lists-detail', kwargs={'pk': self.list.id})
-        response = self.client.delete(url)
+        response = self.client.delete(self.url)
 
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -134,8 +133,7 @@ class DeleteListAPITest(APITestCase):
         """
         delete list should fail if user isn't logged in
         """
-        url = reverse('lists:Lists-detail', kwargs={'pk': self.list.id})
-        response = self.client.delete(url)
+        response = self.client.delete(self.url)
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -149,8 +147,7 @@ class DeleteListAPITest(APITestCase):
 
         self.client.force_authenticate(user=otherUser)
 
-        url = reverse('lists:Lists-detail', kwargs={'pk': self.list.id})
-        response = self.client.delete(url)
+        response = self.client.delete(self.url)
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
