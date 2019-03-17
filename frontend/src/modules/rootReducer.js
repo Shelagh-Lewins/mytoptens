@@ -1,6 +1,6 @@
-// note that the reducers are called 'toptenlist', 'item' for consistency with the database and endpoints
+// note that the reducers are called 'toptenlist', 'toptenitem' for consistency with the database and endpoints
 // this terminology is maintained in the store
-// in the UI components we use toptenlistReducer, itemReducer
+// in the UI components we use toptenlistReducer, toptenitemReducer
 // this isn't ideal but absolute naming consistency seems to be required on the server for DRF FlexFields to work
 
 // import the partial reducers
@@ -9,7 +9,7 @@ import errors from './errors';
 import auth from './auth';
 import page from './page';
 import toptenlist from './toptenlist';
-import item from './toptenitem';
+import toptenitem from './toptenitem';
 // by importing the actual reducer as the default, the state of each is initialised
 
 export default combineReducers({
@@ -17,5 +17,5 @@ export default combineReducers({
 	'auth': auth,
 	'page': page,
 	'toptenlist': toptenlist,
-	'item': item,
+	'toptenitem': toptenitem,
 });

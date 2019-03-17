@@ -12,7 +12,7 @@ import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm.js';
-import { MAX_ITEMS_IN_TOPTENLIST } from '../constants';
+import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
 
 import './CreateTopTenList.scss';
 
@@ -24,9 +24,9 @@ class CreateTopTenList extends Component {
 			'name': '',
 			'description': '',
 		};
-		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
-			this.state[`item${i}_name`] = '';
-			this.state[`item${i}_description`] = '';
+		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+			this.state[`toptenitem${i}_name`] = '';
+			this.state[`toptenitem${i}_description`] = '';
 		}
 		this.handleInputChange = this.handleInputChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
@@ -36,8 +36,8 @@ class CreateTopTenList extends Component {
 
 		if (props.auth.isAuthenticated) {
 			const urlParams = new URLSearchParams(props.location.search);
-			this.state.parentItemId = urlParams.get('parent-item-id');
-			this.state.parentItemName = urlParams.get('parent-item-name');
+			this.state.parentTopTenItemId = urlParams.get('parent-toptenitem-id');
+			this.state.parentTopTenItemName = urlParams.get('parent-toptenitem-name');
 			this.state.parentTopTenListName = urlParams.get('parent-toptenlist-name');
 			this.state.parentTopTenListId = urlParams.get('parent-toptenlist-id');
 		}
@@ -62,19 +62,19 @@ class CreateTopTenList extends Component {
 			'toptenitem': [],
 		};
 		
-		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
-			if (this.state[`item${i}`] !== '') {
-				const newItem = {
-					'name': this.state[`item${i}_name`],
-					'description': this.state[`item${i}_description`],
+		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+			if (this.state[`toptenitem${i}`] !== '') {
+				const newTopTenItem = {
+					'name': this.state[`toptenitem${i}_name`],
+					'description': this.state[`toptenitem${i}_description`],
 					'order': i,
 				};
-				newTopTenList.toptenitem.push(newItem);
+				newTopTenList.toptenitem.push(newTopTenItem);
 			}
 		}
 
-		if (this.state.parentItemId) {
-			newTopTenList.parent_toptenitem = this.state.parentItemId;
+		if (this.state.parentTopTenItemId) {
+			newTopTenList.parent_toptenitem = this.state.parentTopTenItemId;
 		}
 
 		this.onCreateTopTenList(newTopTenList);
@@ -100,36 +100,36 @@ class CreateTopTenList extends Component {
 		this.props.dispatch(clearErrors());
 	}
 
-	renderItemInputs() {
+	renderTopTenItemInputs() {
 		let elements = [];
 
-		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
+		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			elements.push(
-				<div className="form-group" key={`item${i}`}>
+				<div className="form-group" key={`toptenitem${i}`}>
 					<Row>
-						<Col lg="9" className="item-name">
-							<Label for={`item${i}_name`}>Item {i}</Label>
+						<Col lg="9" className="toptenitem-name">
+							<Label for={`toptenitem${i}_name`}>Top Ten item {i}</Label>
 							<Input
 								type="text"
-								name={`item${i}_name`}
-								id={`item${i}_name`}
+								name={`toptenitem${i}_name`}
+								id={`toptenitem${i}_name`}
 								onChange={ this.handleInputChange }
-								value={ this.state[`item${i}_name`] }
-								placeholder="Enter the item name"
+								value={ this.state[`toptenitem${i}_name`] }
+								placeholder="Enter the Top Ten item name"
 							/>
 							<div className='invalid-feedback' />
 						</Col>
 					</Row>
 					<Row>
-						<Col lg="9" className="item-description">
-							<Label for={`item${i}_description`}>Item {i} description</Label>
+						<Col lg="9" className="toptenitem-description">
+							<Label for={`toptenitem${i}_description`}>Top Ten item {i} description</Label>
 							<Input
 								type="textarea"
-								name={`item${i}_description`}
-								id={`item${i}_description`}
+								name={`toptenitem${i}_description`}
+								id={`toptenitem${i}_description`}
 								onChange={ this.handleInputChange }
-								value={ this.state[`item${i}_description`] }
-								placeholder="Enter the item description"
+								value={ this.state[`toptenitem${i}_description`] }
+								placeholder="Enter the description"
 							/>
 							<div className='invalid-feedback' />
 						</Col>
@@ -154,8 +154,8 @@ class CreateTopTenList extends Component {
 					</Row>
 				</Container>)}
 				<h2>Create a new toptenlist</h2>
-				{this.state.parentItemName && (
-					<div className="parent-item"><Link to={`/toptenlist/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentItemName}</div>
+				{this.state.parentTopTenItemName && (
+					<div className="parent-toptenitem"><Link to={`/toptenlist/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentTopTenItemName}</div>
 				)}
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">
@@ -194,7 +194,7 @@ class CreateTopTenList extends Component {
 							</Col>
 						</Row>
 					</div>
-					{this.renderItemInputs()}
+					{this.renderTopTenItemInputs()}
 					<Row>
 						<Col lg="9">
 							<button type="button" className="btn btn-secondary"onClick={this.cancel}>

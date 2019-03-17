@@ -18,106 +18,106 @@ import {
 
 // define action types so they are visible
 // and export them so other reducers can use them
-export const CREATE_ITEM_REQUESTED = 'CREATE_ITEM_REQUESTED';
-export const CREATE_ITEM_SUCCEEDED = 'CREATE_ITEM_SUCCEEDED';
-export const UPDATE_ITEM_SUCCEEDED = 'UPDATE_ITEM_SUCCEEDED';
-export const MOVE_ITEM_UP_SUCCEEDED = 'MOVE_ITEM_UP_SUCCEEDED';
+export const CREATE_TOPTENITEM_REQUESTED = 'CREATE_TOPTENITEM_REQUESTED';
+export const CREATE_TOPTENITEM_SUCCEEDED = 'CREATE_TOPTENITEM_SUCCEEDED';
+export const UPDATE_TOPTENITEM_SUCCEEDED = 'UPDATE_TOPTENITEM_SUCCEEDED';
+export const MOVE_TOPTENITEM_UP_SUCCEEDED = 'MOVE_TOPTENITEM_UP_SUCCEEDED';
 
 ////////////////////////////////////
-// create item
-export const createItem = item => dispatch => {
-	dispatch(createItemRequested());
+// create toptenitem
+export const createTopTenItem = toptenitem => dispatch => {
+	dispatch(createTopTenItemRequested());
 
 	return fetchAPI({
 		'url': '/api/v1/content/toptenitem/',
-		'data': JSON.stringify(item),
+		'data': JSON.stringify(toptenitem),
 		'method': 'POST',
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
 	}).then(response => {
-		return dispatch(createItemSucceeded(response));
+		return dispatch(createTopTenItemSucceeded(response));
 	}).catch(error => {
-		return dispatch(getErrors({ 'create item': error.message }));
+		return dispatch(getErrors({ 'create toptenitem': error.message }));
 	});
 };
 
-export function createItemRequested() {
+export function createTopTenItemRequested() {
 	return {
-		'type': 'CREATE_ITEM_REQUESTED',
+		'type': 'CREATE_TOPTENITEM_REQUESTED',
 	};
 }
 
-export function createItemSucceeded(item) {
+export function createTopTenItemSucceeded(toptenitem) {
 	return {
-		'type': 'CREATE_ITEM_SUCCEEDED',
+		'type': 'CREATE_TOPTENITEM_SUCCEEDED',
 		'payload': {
-			item
+			toptenitem
 		}
 	};
 }
 
 ////////////////////////////////////
-// update item
-export const updateItem = (itemId, propertyName, value) => dispatch => {
+// update toptenitem
+export const updateTopTenItem = (toptenitemId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
 
 	return fetchAPI({
-		'url': `/api/v1/content/toptenitem/${itemId}/`,
+		'url': `/api/v1/content/toptenitem/${toptenitemId}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ [propertyName]: value }),
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
-		return dispatch(updateItemSucceeded(response));
+		return dispatch(updateTopTenItemSucceeded(response));
 	}).catch(error => {
-		return dispatch(getErrors({ 'update item': error.message }));
+		return dispatch(getErrors({ 'update toptenitem': error.message }));
 	});
 };
 
-export function updateItemSucceeded(response) {
+export function updateTopTenItemSucceeded(response) {
 	return {
-		'type': UPDATE_ITEM_SUCCEEDED,
+		'type': UPDATE_TOPTENITEM_SUCCEEDED,
 		'payload': response,
 	};
 }
 
 //////////////////////////////////
-// move item up
-export const moveItemUp = ({ itemId }) => dispatch => {
+// move toptenitem up
+export const moveTopTenItemUp = ({ toptenitemId }) => dispatch => {
 	return fetchAPI({
-		'url': `/api/v1/content/toptenitem/${itemId}/moveup/`,
+		'url': `/api/v1/content/toptenitem/${toptenitemId}/moveup/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
-		return dispatch(moveItemUpSucceeded(response));
+		return dispatch(moveTopTenItemUpSucceeded(response));
 	}).catch(error => {
-		return dispatch(getErrors({ 'move item up error ': error.message }));
+		return dispatch(getErrors({ 'move toptenitem up error ': error.message }));
 	});
 };
 
-export const moveItemDown = ({ itemId }) => dispatch => {
-	// to move an item down, we move the item below up
-	// find the item
-	const item = store.getState().item.things[itemId];
+export const moveTopTenItemDown = ({ toptenitemId }) => dispatch => {
+	// to move an toptenitem down, we move the toptenitem below up
+	// find the toptenitem
+	const toptenitem = store.getState().toptenitem.things[toptenitemId];
 
 	// find its parent toptenlist
-	const toptenlistId = item.toptenlist_id;
+	const toptenlistId = toptenitem.toptenlist_id;
 
-	// find the item's order
-	const order = item.order;
+	// find the toptenitem's order
+	const order = toptenitem.order;
 
-	// find the item below it in the parent toptenlist
-	const item_below_id = store.getState().toptenlist.things[toptenlistId].toptenitem[order];
+	// find the toptenitem below it in the parent toptenlist
+	const toptenitem_below_id = store.getState().toptenlist.things[toptenlistId].toptenitem[order];
 
-	dispatch(moveItemUp({ 'itemId': item_below_id }));
+	dispatch(moveTopTenItemUp({ 'toptenitemId': toptenitem_below_id }));
 };
 
-export function moveItemUpSucceeded(items) {
+export function moveTopTenItemUpSucceeded(toptenitems) {
 	return {
-		'type': 'MOVE_ITEM_UP_SUCCEEDED',
+		'type': 'MOVE_TOPTENITEM_UP_SUCCEEDED',
 		'payload': {
-			items,
+			toptenitems,
 		}
 	};
 }
@@ -126,7 +126,7 @@ export function moveItemUpSucceeded(items) {
 // Reducer
 var updeep = require('updeep');
 
-const initialItemsState = {
+const initialTopTenItemsState = {
 	'isLoading': false,
 	'error': null,
 	'count': null,
@@ -138,51 +138,51 @@ const initialItemsState = {
 
 /////////////////////////////
 // organizer data
-// all items and toptenlists, for selector to use
-export const getOrganizerItems = state => state.item.organizerData;
+// all toptenitems and toptenlists, for selector to use
+export const getOrganizerTopTenItems = state => state.toptenitem.organizerData;
 const getOrganizerTopTenLists = state => state.toptenlist.organizerData;
 
-export const groupedItems = createSelector(
-	[getOrganizerItems, getOrganizerTopTenLists],
-	(items, toptenlists) => {
-		let itemsByTopTenList = {};
+export const groupedTopTenItems = createSelector(
+	[getOrganizerTopTenItems, getOrganizerTopTenLists],
+	(toptenitems, toptenlists) => {
+		let toptenitemsByTopTenList = {};
 
-		// find the items for each toptenlist
+		// find the toptenitems for each toptenlist
 		Object.keys(toptenlists).map(toptenlistId => { // eslint-disable-line array-callback-return
 			const toptenlist = toptenlists[toptenlistId];
 
-			let itemsArray = [];
+			let toptenitemsArray = [];
 
 			for (let i=0; i<toptenlist.toptenitem.length; i++) {
-				let item = { ...items[toptenlist.toptenitem[i]] };
+				let toptenitem = { ...toptenitems[toptenlist.toptenitem[i]] };
 
-				if (item.name !== '') {
-					itemsArray.push(item);
+				if (toptenitem.name !== '') {
+					toptenitemsArray.push(toptenitem);
 				}
 			}
 
-			itemsByTopTenList[toptenlist.id] = itemsArray;
+			toptenitemsByTopTenList[toptenlist.id] = toptenitemsArray;
 		});
 		// note the parent_toptenitem, if any, of each toptenlist
-		// add the toptenlist's id to the item as childTopTenListId
+		// add the toptenlist's id to the toptenitem as childTopTenListId
 		Object.keys(toptenlists).map(toptenlistId => { // eslint-disable-line array-callback-return
 			const toptenlist = toptenlists[toptenlistId];
 
 			if (toptenlist.parent_toptenitem) {
-				const parentItem = items[toptenlist.parent_toptenitem];
+				const parentTopTenItem = toptenitems[toptenlist.parent_toptenitem];
 
-				if (parentItem) {
-					// can't use array order to pull out item, because items with no name have been removed
-					// instead, explicitly find the item object in the array by its 'order' property
+				if (parentTopTenItem) {
+					// can't use array order to pull out toptenitem, because toptenitems with no name have been removed
+					// instead, explicitly find the toptenitem object in the array by its 'order' property
 
-					let itemsArray2 = itemsByTopTenList[parentItem.toptenlist_id];
-					let item = itemsArray2.find(item => item.order === parentItem.order);
-					item.childTopTenListId = toptenlist.id;
+					let toptenitemsArray2 = toptenitemsByTopTenList[parentTopTenItem.toptenlist_id];
+					let toptenitem = toptenitemsArray2.find(toptenitem => toptenitem.order === parentTopTenItem.order);
+					toptenitem.childTopTenListId = toptenlist.id;
 				}
 			}
 		});
 
-		return itemsByTopTenList;
+		return toptenitemsByTopTenList;
 	}
 
 );
@@ -190,10 +190,10 @@ export const groupedItems = createSelector(
 /////////////////////////////
 // state updates
 
-export default function item(state = initialItemsState, action) {
+export default function toptenitem(state = initialTopTenItemsState, action) {
 	switch (action.type) {
 		case LOGOUT_USER_COMPLETE: {
-			return updeep(initialItemsState, {}); // constant provides placement instead of update, so all previous entries are removed
+			return updeep(initialTopTenItemsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
 		
 		case RECEIVE_ENTITIES: {
@@ -201,8 +201,8 @@ export default function item(state = initialItemsState, action) {
 
 			let things = {};
 
-			if (entities && entities.item) {
-				things = entities.item;
+			if (entities && entities.toptenitem) {
+				things = entities.toptenitem;
 			}
 
 			return updeep({
@@ -215,12 +215,12 @@ export default function item(state = initialItemsState, action) {
 			return updeep(state, state);
 		}
 
-		case CREATE_ITEM_SUCCEEDED: {
-			const item = action.payload.item;
-			return updeep({ 'things': { [item.id]: item } }, state);
+		case CREATE_TOPTENITEM_SUCCEEDED: {
+			const toptenitem = action.payload.toptenitem;
+			return updeep({ 'things': { [toptenitem.id]: toptenitem } }, state);
 		}
 
-		case UPDATE_ITEM_SUCCEEDED: {
+		case UPDATE_TOPTENITEM_SUCCEEDED: {
 			// update editable properties
 			const update = {
 				'name': action.payload.name,
@@ -232,21 +232,21 @@ export default function item(state = initialItemsState, action) {
 			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
-		case MOVE_ITEM_UP_SUCCEEDED: {
-			const itemsArray = action.payload.items; // array containing the two items that have been swapped
+		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
+			const toptenitemsArray = action.payload.toptenitems; // array containing the two toptenitems that have been swapped
 
-			let itemsObject = {};
-			itemsArray.map((item) => { // eslint-disable-line array-callback-return
-				itemsObject[item.id] = item;
+			let toptenitemsObject = {};
+			toptenitemsArray.map((toptenitem) => { // eslint-disable-line array-callback-return
+				toptenitemsObject[toptenitem.id] = toptenitem;
 			});
-			return updeep({ 'things': itemsObject }, state);
+			return updeep({ 'things': toptenitemsObject }, state);
 		}
 
 		case RECEIVE_ORGANIZER_DATA: {
 			const { entities } = action.payload;
 
-			if (entities && entities.item) {
-				return updeep({ 'organizerData': updeep.constant(entities.item), 'isLoading': false }, state);
+			if (entities && entities.toptenitem) {
+				return updeep({ 'organizerData': updeep.constant(entities.toptenitem), 'isLoading': false }, state);
 			}
 
 			return state;
@@ -256,22 +256,4 @@ export default function item(state = initialItemsState, action) {
 			return state;
 	}
 }
-
-// all items, for selector to use
-// export const getItems = state => state.item.things;
-
-//// not currently used but left in as an example of sorting toptenlist items by order
-// items belonging to the current toptenlist
-/* export const sortedItems = createSelector(
-	[getItems],
-	(items) => {
-		let toptenlistItems = (Object.keys(items).map(id => {
-			return items[id];
-		})).sort(function(a, b){
-			return a.order - b.order; // sort to index order
-		});
-
-		return toptenlistItems;
-	}
-); */
 

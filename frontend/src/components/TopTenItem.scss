@@ -1,6 +1,6 @@
 @import "../variables";
 
-.item-header {
+.toptenitem-header {
 	font-weight: bold;
 
 	.editable-text-field {
@@ -18,11 +18,11 @@
 	}
 }
 
-.item-body {
+.toptenitem-body {
 	clear: both;
 }
 
-.item-container {
+.toptenitem-container {
 	border: 1px solid $color-panel-border;
 	border-radius: 8px;
 	margin: 0 8px 8px 0;

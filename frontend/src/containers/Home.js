@@ -62,7 +62,7 @@ class Home extends Component {
 				'selectedTab': 'publictoptens',
 			});
 
-			this.setTopTenListSetURL('publictoptens');
+			this.setListSetURL('publictoptens');
 		}
 	}
 
@@ -79,7 +79,7 @@ class Home extends Component {
 	}
 
 	onChangePage(currentPage) {
-		// update state with new page of items
+		// update state with new page of toptenlists
 		this.setState({ 'currentPage': currentPage });
 
 		if (currentPage !== this.state.currentPage) {

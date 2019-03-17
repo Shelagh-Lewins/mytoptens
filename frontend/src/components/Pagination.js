@@ -21,7 +21,7 @@ class Pagination extends React.Component {
 	}
  
 	componentDidUpdate(prevProps, prevState) {
-		// reset page if items array has changed
+		// reset page if toptenitems array has changed
 		if (this.props.count !== prevProps.count) {
 			this.setPage(this.props.defaultPage);
 		}
@@ -46,7 +46,7 @@ class Pagination extends React.Component {
 		this.props.onChangePage(pageNumber);
 	}
  
-	getPager(totalItems, currentPage, pageSize) {
+	getPager(totalTopTenItems, currentPage, pageSize) {
 		// default to first page
 		currentPage = currentPage || 1;
  
@@ -54,7 +54,7 @@ class Pagination extends React.Component {
 		pageSize = pageSize || 10;
  
 		// calculate total pages
-		var totalPages = Math.ceil(totalItems / pageSize);
+		var totalPages = Math.ceil(totalTopTenItems / pageSize);
  
 		var startPage, endPage;
 		if (totalPages <= 10) {
@@ -75,16 +75,16 @@ class Pagination extends React.Component {
 			}
 		}
  
-		// calculate start and end item indexes
+		// calculate start and end toptenitem indexes
 		var startIndex = (currentPage - 1) * pageSize;
-		var endIndex = Math.min(startIndex + pageSize - 1, totalItems - 1);
+		var endIndex = Math.min(startIndex + pageSize - 1, totalTopTenItems - 1);
  
 		// create an array of pages to ng-repeat in the pager control
 		var pages = [...Array((endPage + 1) - startPage).keys()].map(i => startPage + i);
  
 		// return object with all pager properties required by the view
 		return {
-			'totalItems': totalItems,
+			'totalTopTenItems': totalTopTenItems,
 			'currentPage': currentPage,
 			'pageSize': pageSize,
 			'totalPages': totalPages,

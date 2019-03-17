@@ -1,5 +1,5 @@
-// check whether the user can perform actions on toptenlists, items
-// items inherit permissions from their toptenlist
+// check whether the user can perform actions on toptenlists, toptenitems
+// toptenitems inherit permissions from their toptenlist
 
 // result depends on whether they are logged in:
 // whether they own the toptenlist:

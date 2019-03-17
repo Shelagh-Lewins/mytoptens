@@ -2,72 +2,72 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 
-import * as itemsReducer from '../modules/toptenitem';
+import * as toptenitemsReducer from '../modules/toptenitem';
 
-import { MAX_ITEMS_IN_TOPTENLIST } from '../constants';
-import Item from './TopTenItem';
+import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
+import TopTenItem from './TopTenItem';
 
-class ItemsPage extends Component {
+class TopTenItemsPage extends Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {};
 
-		// set up the state to hold each item's name and description
+		// set up the state to hold each toptenitem's name and description
 		// coded by order
 		// this is not elegant but keeps state flat
-		for (let i=1; i<= MAX_ITEMS_IN_TOPTENLIST; i++) {
+		for (let i=1; i<= MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			this.state[`${i}_name`] = '';
 			this.state[`${i}_description`] = '';
 		}
 
-		// build the items
-		// each item's order and the field to update are coded in the 'state' data e.g. '1_name'
-		const items = this.props.items;
+		// build the toptenitems
+		// each toptenitem's order and the field to update are coded in the 'state' data e.g. '1_name'
+		const toptenitems = this.props.toptenitems;
 
-		Object.keys(items).forEach((key) => {
-			if (items[key].order && items[key].order <= MAX_ITEMS_IN_TOPTENLIST) {
-				const order = items[key].order;
+		Object.keys(toptenitems).forEach((key) => {
+			if (toptenitems[key].order && toptenitems[key].order <= MAX_TOPTENITEMS_IN_TOPTENLIST) {
+				const order = toptenitems[key].order;
 
-				this.state[`${order}_id`] = items[key].id;
-				this.state[`${order}_name`] = items[key].name;
-				this.state[`${order}_description`] = items[key].description;
+				this.state[`${order}_id`] = toptenitems[key].id;
+				this.state[`${order}_name`] = toptenitems[key].name;
+				this.state[`${order}_description`] = toptenitems[key].description;
 
 				// child toptenlists
-				if (items[key].childTopTenList) {
-					this.state[`${order}_childTopTenList`] = items[key].childTopTenList;
+				if (toptenitems[key].childTopTenList) {
+					this.state[`${order}_childTopTenList`] = toptenitems[key].childTopTenList;
 				}
 			}
 		});
 	}
 
-	onMoveItemUp = (itemId) => {
-		this.props.dispatch(itemsReducer.moveItemUp({ itemId }));
+	onMoveTopTenItemUp = (toptenitemId) => {
+		this.props.dispatch(toptenitemsReducer.moveTopTenItemUp({ toptenitemId }));
 	}
 
-	onMoveItemDown = (itemId) => {
-		this.props.dispatch(itemsReducer.moveItemDown({ itemId }));
+	onMoveTopTenItemDown = (toptenitemId) => {
+		this.props.dispatch(toptenitemsReducer.moveTopTenItemDown({ toptenitemId }));
 	}
 
 	componentDidUpdate(prevProps) {
 		let update = {};
-		for (let i=0; i<this.props.items.length; i++) {
-			const item = this.props.items[i];
+		for (let i=0; i<this.props.toptenitems.length; i++) {
+			const toptenitem = this.props.toptenitems[i];
 
 			// first the toptenlist is loaded and this just gives ids
-			// only when the full data are loaded and getItemsForTopTenList recalculated do we find the childTopTenList
-			if (prevProps.items[i].id !== this.props.items[i].id ||
-				prevProps.items[i].childTopTenList !== this.props.items[i].childTopTenList) {
-				const order = item.order;
+			// only when the full data are loaded and getTopTenItemsForTopTenList recalculated do we find the childTopTenList
+			if (prevProps.toptenitems[i].id !== this.props.toptenitems[i].id ||
+				prevProps.toptenitems[i].childTopTenList !== this.props.toptenitems[i].childTopTenList) {
+				const order = toptenitem.order;
 
-				// update item properties
-				update[`${order}_id`] = item.id;
-				update[`${order}_name`] = item.name;
-				update[`${order}_description`] = item.description;
+				// update toptenitem properties
+				update[`${order}_id`] = toptenitem.id;
+				update[`${order}_name`] = toptenitem.name;
+				update[`${order}_description`] = toptenitem.description;
 
 				// set child toptenlist if exists
 				// or set to null if it does not
-				update[`${order}_childTopTenList`] = item.childTopTenList;
+				update[`${order}_childTopTenList`] = toptenitem.childTopTenList;
 			}
 		}
 		// only setState if there is a change to make
@@ -84,32 +84,32 @@ class ItemsPage extends Component {
 	}
 
 	handleNewValue = (element) => {
-		const itemId = element.dataset.entityid;
+		const toptenitemId = element.dataset.entityid;
 
-		// the item's order and the field to update are coded in the 'state' data e.g. '1_name'
+		// the toptenitem's order and the field to update are coded in the 'state' data e.g. '1_name'
 		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
 		const value = element.value;
 
-		this.props.dispatch(itemsReducer.updateItem(itemId, propertyName, value));
+		this.props.dispatch(toptenitemsReducer.updateTopTenItem(toptenitemId, propertyName, value));
 	}
 
 	toggleForm = () => {
-		this.setState({ 'showNewItemForm': !this.state.showNewItemForm });
+		this.setState({ 'showNewTopTenItemForm': !this.state.showNewTopTenItemForm });
 	}
 
-	renderItemsList() {
+	renderTopTenItemsList() {
 		let elements = [];
-		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
+		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			const name = this.state[`${i}_name`];
 			const canEdit = this.props.canEdit;
 			if (name || canEdit) {
 				elements.push(
-					<Row key={`item${i}`}>
+					<Row key={`toptenitem${i}`}>
 						<Col>
-							<Item
-								key={`item${i}`}
-								item={{
+							<TopTenItem
+								key={`toptenitem${i}`}
+								toptenitem={{
 									'id': this.state[`${i}_id`],
 									'order': i,
 									'name': name,
@@ -121,8 +121,8 @@ class ItemsPage extends Component {
 								toptenlist={this.props.toptenlist}
 								canEdit={canEdit}
 								onCreateChildTopTenList={this.props.onCreateChildTopTenList}
-								onMoveItemUp={this.onMoveItemUp}
-								onMoveItemDown={this.onMoveItemDown}
+								onMoveTopTenItemUp={this.onMoveTopTenItemUp}
+								onMoveTopTenItemDown={this.onMoveTopTenItemDown}
 							/>
 						</Col>
 					</Row>
@@ -134,11 +134,11 @@ class ItemsPage extends Component {
 
 	render() {
 		return (
-			<div className="items-list">
-				{this.renderItemsList()}
+			<div className="toptenitems-list">
+				{this.renderTopTenItemsList()}
 			</div>
 		);
 	}
 }
 
-export default connect()(ItemsPage);
+export default connect()(TopTenItemsPage);

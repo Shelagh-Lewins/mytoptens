@@ -1,6 +1,6 @@
 @import "../variables";
 
-.toptenlists-toptenlist {
+.toptenlists-list {
 	.tabs {
 		display: flex;
 		justify-content: center;
@@ -10,7 +10,7 @@
 			border: 1px solid $color-selector-border;
 			border-radius: 12px;
 			float: left;
-			toptenlist-style-type: none;
+			list-style-type: none;
 			margin: 0;
 			overflow: hidden;
 			padding: 0;

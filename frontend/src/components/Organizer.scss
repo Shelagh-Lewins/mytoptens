@@ -31,7 +31,7 @@
 		margin: 4px 0;
 	}
 
-	.show-items {
+	.show-toptenitems {
 		float: left;
 		width: 36px;
 	}
@@ -43,18 +43,18 @@
 		padding: 6px 0;
 	}
 
-	.items {
+	.toptenitems {
 		margin-left: 56px;
 	}
 
-	.item {
+	.toptenitem {
 		display: inline-block;
 		width: 100%;
 
 		& > span {
-			background: $color-organizer-item-background;
+			background: $color-organizer-toptenitem-background;
 			border: 1px solid transparent;
-			color: $color-organizer-item-text;
+			color: $color-organizer-toptenitem-text;
 			float: left;
 			padding: 6px 12px 6px 8px;
 
@@ -72,8 +72,8 @@
 
 		&.selected {
 			& > span {
-				background: $color-organizer-item-selected-bg;
-				border: 1px solid $color-organizer-item-selected;
+				background: $color-organizer-toptenitem-selected-bg;
+				border: 1px solid $color-organizer-toptenitem-selected;
 				border-radius: 1rem;
 			}
 

@@ -9,12 +9,12 @@ import { Container, Row, Col } from 'reactstrap';
 import FlashMessage from '../components/FlashMessage';
 import SetTopTenListIsPublic from '../components/SetTopTenListIsPublic';
 import EditableTextField from '../components/EditableTextField.js';
-import ItemsPage from '../components/TopTenItemsPage';
+import TopTenItemsPage from '../components/TopTenItemsPage';
 import Organizer from '../components/Organizer';
 import Loading from '../components/Loading';
 
 import * as toptenlistReducer from '../modules/toptenlist';
-import * as itemReducer from '../modules/toptenitem';
+import * as toptenitemReducer from '../modules/toptenitem';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -90,7 +90,7 @@ class TopTenListDetails extends Component {
 	}
 
 	getOrganizerData = () => {
-		// minimal data for all my toptenlists and items to allow parent toptenlist to be changed.
+		// minimal data for all my toptenlists and toptenitems to allow parent toptenlist to be changed.
 		// can't do this until the toptenlist has been loaded, to find the owner
 		if (!this.props.toptenlist) { // probably the user does not have permission to view this toptenlist
 			return;
@@ -134,7 +134,7 @@ class TopTenListDetails extends Component {
 		const toptenlistId = element.dataset.entityid;
 
 		// the toptenlist field to update is coded in the 'state' data e.g. 'toptenlist_name'
-		// we want to keep item name and toptenlist name clearly separate
+		// we want to keep toptenitem name and toptenlist name clearly separate
 		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
 		const value = element.value;
@@ -142,8 +142,8 @@ class TopTenListDetails extends Component {
 		this.props.dispatch(toptenlistReducer.updateTopTenList(toptenlistId, propertyName, value));
 	}
 
-	onCreateChildTopTenList = (item) => {
-		this.props.history.push(`/newtoptenlist?parent-item-id=${item.id}&parent-item-name=${item.name}&parent-toptenlist-name=${this.props.toptenlist.name}&parent-toptenlist-id=${this.props.toptenlist.id}`);
+	onCreateChildTopTenList = (toptenitem) => {
+		this.props.history.push(`/newtoptenlist?parent-toptenitem-id=${toptenitem.id}&parent-toptenitem-name=${toptenitem.name}&parent-toptenlist-name=${this.props.toptenlist.name}&parent-toptenlist-id=${this.props.toptenlist.id}`);
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
@@ -178,7 +178,7 @@ class TopTenListDetails extends Component {
 		if (this.props.parentTopTenList) {
 			parentTopTenListId = this.props.parentTopTenList.id;
 
-			breadcrumbs = <div className="breadcrumbs"><Link to={`/toptenlist/${this.props.parentTopTenList.id}`}>{this.props.parentTopTenList.name}</Link> > {this.props.parentItem.name}</div>;
+			breadcrumbs = <div className="breadcrumbs"><Link to={`/toptenlist/${this.props.parentTopTenList.id}`}>{this.props.parentTopTenList.name}</Link> > {this.props.parentTopTenItem.name}</div>;
 		}
 		return (
 			<div>
@@ -204,9 +204,9 @@ class TopTenListDetails extends Component {
 										required={true}
 										name={'toptenlist_name'}
 										placeholder="Click here to add a name for the list"
-										label="Item name"
+										label="Top Ten item name"
 										data-state={'toptenlist_name'} // this.state property
-										data-entityid={this.props.toptenlist.id} // database id of the item
+										data-entityid={this.props.toptenlist.id} // database id of the toptenitem
 										id='toptenlist_name' // id of the html element
 										handleInputChange={this.handleInputChange}
 										handleNewValue={this.handleNewValue}
@@ -231,7 +231,7 @@ class TopTenListDetails extends Component {
 										toptenlist={this.props.toptenlist}
 										parentTopTenListId={parentTopTenListId}
 										toptenlistOrganizerData={this.props.toptenlistOrganizerData}
-										itemOrganizerData={this.props.itemOrganizerData}
+										toptenitemOrganizerData={this.props.toptenitemOrganizerData}
 									/>}
 									{breadcrumbs}
 								</Col>
@@ -250,9 +250,9 @@ class TopTenListDetails extends Component {
 										canEdit={this.state.canEdit}
 										name={'toptenlist_description'}
 										placeholder="Click here to add a description for the toptenlist"
-										label="Item description"
+										label="Description"
 										data-state={'toptenlist_description'} // this.state property
-										data-entityid={this.props.toptenlist.id} // database id of the item
+										data-entityid={this.props.toptenlist.id} // database id of the toptenitem
 										id='toptenlist_description' // id of the html element
 										handleInputChange={this.handleInputChange}
 										handleNewValue={this.handleNewValue}
@@ -262,14 +262,14 @@ class TopTenListDetails extends Component {
 							</Row>
 						</Container>
 						<Container>
-							{this.props.thisTopTenListItems && (
-								<ItemsPage
-									items={this.props.thisTopTenListItems}
+							{this.props.thisTopTenListTopTenItems && (
+								<TopTenItemsPage
+									toptenitems={this.props.thisTopTenListTopTenItems}
 									toptenlist={this.props.toptenlist.id}
 									canEdit={this.state.canEdit}
 									onCreateChildTopTenList={this.onCreateChildTopTenList}
-									onMoveItemUp={this.onMoveItemUp}
-									onMoveItemDown={this.onMoveItemDown}
+									onMoveTopTenItemUp={this.onMoveTopTenItemUp}
+									onMoveTopTenItemDown={this.onMoveTopTenItemDown}
 								/>
 							)}
 						</Container>
@@ -301,9 +301,9 @@ TopTenListDetails.propTypes = {
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'thisTopTenListItems': PropTypes.array.isRequired, // items belonging to this toptenlist
+	'thisTopTenListTopTenItems': PropTypes.array.isRequired, // toptenitems belonging to this toptenlist
 	'toptenlistOrganizerData': PropTypes.array.isRequired, // minimal data for all toptenlists owned by the same user.
-	'itemOrganizerData': PropTypes.object.isRequired, // minimal data for all toptenlists owned by the same user
+	'toptenitemOrganizerData': PropTypes.object.isRequired, // minimal data for all toptenlists owned by the same user
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -312,18 +312,18 @@ const mapStateToProps = (state, ownProps) => {
 	// first find the target toptenlist
 	const toptenlist = findObjectByProperty({ 'parentObject': toptenlists, 'property': 'id', 'value': ownProps.match.params.id });
 
-	const parentItemAndTopTenList = toptenlistReducer.getParentItemAndTopTenList(state)(toptenlist);
+	const parentTopTenItemAndTopTenList = toptenlistReducer.getParentTopTenItemAndTopTenList(state)(toptenlist);
 
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
 		'isLoading': state.toptenlist.isLoading,
 		'toptenlist': toptenlist,
-		'thisTopTenListItems': toptenlistReducer.getItemsForTopTenList(state)(toptenlist),
-		'parentTopTenList': parentItemAndTopTenList.parentTopTenList,
-		'parentItem': parentItemAndTopTenList.parentItem,
-		'toptenlistOrganizerData': toptenlistReducer.getSortedOrganizerTopTenLists(state), // array containing limited toptenlist info: id, name, item (array of child items), parent_toptenitem
-		'itemOrganizerData': itemReducer.groupedItems(state), // object. limited item info: id, name, toptenlist_id
+		'thisTopTenListTopTenItems': toptenlistReducer.getTopTenItemsForTopTenList(state)(toptenlist),
+		'parentTopTenList': parentTopTenItemAndTopTenList.parentTopTenList,
+		'parentTopTenItem': parentTopTenItemAndTopTenList.parentTopTenItem,
+		'toptenlistOrganizerData': toptenlistReducer.getSortedOrganizerTopTenLists(state), // array containing limited toptenlist info: id, name, toptenitem (array of child toptenitems), parent_toptenitem
+		'toptenitemOrganizerData': toptenitemReducer.groupedTopTenItems(state), // object. limited toptenitem info: id, name, toptenlist_id
 	});
 };
 

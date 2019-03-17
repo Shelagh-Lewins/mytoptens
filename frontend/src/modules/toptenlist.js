@@ -10,8 +10,8 @@ import {
 } from './auth';
 
 import {
-	CREATE_ITEM_SUCCEEDED,
-	MOVE_ITEM_UP_SUCCEEDED,
+	CREATE_TOPTENITEM_SUCCEEDED,
+	MOVE_TOPTENITEM_UP_SUCCEEDED,
 } from './toptenitem';
 
 // define action types so they are visible
@@ -31,11 +31,11 @@ export const RECEIVE_ORGANIZER_DATA = 'RECEIVE_ORGANIZER_DATA';
 export const FETCH_ORGANIZER_DATA_STARTED = 'FETCH_ORGANIZER_DATA_STARTED';
 export const FETCH_ORGANIZER_DATA_FAILED = 'FETCH_ORGANIZER_DATA_FAILED';
 
-const itemSchema = new schema.Entity('item', {
+const toptenitemSchema = new schema.Entity('toptenitem', {
 	'toptenlist': ['toptenlistSchema'],
 });
 const toptenlistSchema = new schema.Entity('toptenlist', {
-	'toptenitem': [itemSchema],
+	'toptenitem': [toptenitemSchema],
 });
 
 function receiveEntities(entities) {
@@ -195,7 +195,7 @@ export const updateTopTenList = (toptenlistId, propertyName, value) => dispatch 
 	}).then(response => {
 		return dispatch(updateTopTenListSucceeded(response));
 	}).catch(error => {
-		return dispatch(getErrors({ 'update item': error.message }));
+		return dispatch(getErrors({ 'update toptenitem': error.message }));
 	});
 };
 
@@ -254,7 +254,7 @@ export function setTopTenListIsPublicSucceeded({ id, is_public }) {
 }
 
 //////////////////////////////////
-// fetch the names of my toptenlists and their items
+// fetch the names of my toptenlists and their toptenitems
 // for displaying and managing toptenlist hierarchy i.e. toptenlist parent_toptenitem
 // returns only the fields that are required for this function
 function receiveOrganizerData(entities) {
@@ -310,7 +310,7 @@ export function fetchOrganizerData(userId) {
 var updeep = require('updeep');
 
 // this is initial state of toptenlists and the toptenlist loading states
-// note that the toptenlists's list of items is called 'item' for consistency with the database.
+// note that the toptenlists's list of toptenitems is called 'toptenitem' for consistency with the database.
 const initialTopTenListsState = {
 	'isLoading': false,
 	'error': null,
@@ -333,7 +333,7 @@ export const getTopTenLists = state => {
 	});
 };
 
-const getItems = state => state.item.things;
+const getTopTenItems = state => state.toptenitem.things;
 
 export const getPublicTopTenLists = createSelector(
 	[getTopTenLists],
@@ -360,7 +360,7 @@ export const getMyGroupedTopTenLists = createSelector(
 /////////////////////////////
 // organizer data
 export const getOrganizerTopTenLists = state => state.toptenlist.organizerData;
-const getOrganizerItems = state => state.item.organizerData;
+const getOrganizerTopTenItems = state => state.toptenitem.organizerData;
 
 // returns toptenlists in an array, sorted by name
 // instead of the state.toptenlist.organizerData object, keyed by id
@@ -379,50 +379,50 @@ export const getSortedOrganizerTopTenLists = createSelector(
 	}
 );
 
-// toptenlists, items should be memoized
+// toptenlists, toptenitems should be memoized
 // even though the rest of the selector will be rerun, it's still a gain
-export const getItemsForTopTenList = createSelector(
-	[getTopTenLists, getItems],
-	(toptenlists, items) => (toptenlist) => {
-		let toptenlistItems = [];
+export const getTopTenItemsForTopTenList = createSelector(
+	[getTopTenLists, getTopTenItems],
+	(toptenlists, toptenitems) => (toptenlist) => {
+		let toptenlistTopTenItems = [];
 
 		if (toptenlist) {
-			toptenlist.toptenitem.map((itemId) => { // eslint-disable-line array-callback-return
-				let item = { ...items[itemId] }; // shallow copy is extensible
+			toptenlist.toptenitem.map((toptenitemId) => { // eslint-disable-line array-callback-return
+				let toptenitem = { ...toptenitems[toptenitemId] }; // shallow copy is extensible
 
-				const childTopTenList = toptenlists.find(toptenlist => toptenlist.parent_toptenitem === itemId);
+				const childTopTenList = toptenlists.find(toptenlist => toptenlist.parent_toptenitem === toptenitemId);
 
 				if (childTopTenList) {
-					item.childTopTenList = { ...childTopTenList };
+					toptenitem.childTopTenList = { ...childTopTenList };
 				}
 
-				toptenlistItems.push(item);
+				toptenlistTopTenItems.push(toptenitem);
 			});
 		}
-		return toptenlistItems;
+		return toptenlistTopTenItems;
 	}
 );
 
-// toptenlists, items should be memoized
+// toptenlists, toptenitems should be memoized
 // even though the rest of the selector will be rerun, it's still a gain
-export const getParentItemAndTopTenList = createSelector(
-	[getOrganizerTopTenLists, getOrganizerItems],
-	// find a toptenlists's parent item and the parent toptenlist, if any
+export const getParentTopTenItemAndTopTenList = createSelector(
+	[getOrganizerTopTenLists, getOrganizerTopTenItems],
+	// find a toptenlists's parent toptenitem and the parent toptenlist, if any
 	// uses the organizer data which has minimal data for all toptenlists belonging to that user
-	(toptenlists, items) => (toptenlist) => {
-		let parentItem;
+	(toptenlists, toptenitems) => (toptenlist) => {
+		let parentTopTenItem;
 		let parentTopTenList;
 
 		if (toptenlist && toptenlist.parent_toptenitem) {
-			if (items) {
-				parentItem = items[toptenlist.parent_toptenitem];
+			if (toptenitems) {
+				parentTopTenItem = toptenitems[toptenlist.parent_toptenitem];
 
-				if (parentItem) {
-					parentTopTenList = toptenlists[parentItem.toptenlist_id];
+				if (parentTopTenItem) {
+					parentTopTenList = toptenlists[parentTopTenItem.toptenlist_id];
 				}
 			}
 		}
-		return { parentItem, parentTopTenList };
+		return { parentTopTenItem, parentTopTenList };
 	}
 );
 
@@ -430,8 +430,8 @@ export const getParentItemAndTopTenList = createSelector(
 // state updates
 
 // state here is the substate state.toptenlists
-// the book uses 'items' for the list of things i.e. toptenlists. items
-// as 'items' for us is a specific thing, we need another name for the set of entities to be displayed i.e. the toptenlists themselves
+// the book uses 'toptenitems' for the list of things i.e. toptenlists. toptenitems
+// as 'toptenitems' for us is a specific thing, we need another name for the set of entities to be displayed i.e. the toptenlists themselves
 // so those are globalState.toptenlists.things
 // i.e. state.things here
 export default function toptenlist(state = initialTopTenListsState, action) {
@@ -505,14 +505,14 @@ export default function toptenlist(state = initialTopTenListsState, action) {
 			*/
 		}
 
-		case CREATE_ITEM_SUCCEEDED: {
-			const item = action.payload.item;
+		case CREATE_TOPTENITEM_SUCCEEDED: {
+			const toptenitem = action.payload.toptenitem;
 
-			function addItem(items) {
-				return [].concat(items, item.id);
+			function addTopTenItem(toptenitems) {
+				return [].concat(toptenitems, toptenitem.id);
 			}
 
-			return updeep.updateIn(`things.${item.toptenlist}.item`, addItem, state);
+			return updeep.updateIn(`things.${toptenitem.toptenlist}.toptenitem`, addTopTenItem, state);
 		}
 
 		case UPDATE_TOPTENLIST_SUCCEEDED: {
@@ -529,21 +529,21 @@ export default function toptenlist(state = initialTopTenListsState, action) {
 			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
-		case MOVE_ITEM_UP_SUCCEEDED: {
-			const itemsArray = action.payload.items; // array containing the two items that have been swapped
-			// update the Items array in their parent toptenlist, change order
-			const toptenlistId = itemsArray[0].toptenlist_id;
+		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
+			const toptenitemsArray = action.payload.toptenitems; // array containing the two toptenitems that have been swapped
+			// update the TopTenItems array in their parent toptenlist, change order
+			const toptenlistId = toptenitemsArray[0].toptenlist_id;
 
-			function replaceItems(items) {
-				let newItems = [].concat(state.things[toptenlistId].toptenitem);
-				itemsArray.map((item) => { // eslint-disable-line array-callback-return
-					newItems[item.order-1] = item.id;
+			function replaceTopTenItems(toptenitems) {
+				let newTopTenItems = [].concat(state.things[toptenlistId].toptenitem);
+				toptenitemsArray.map((toptenitem) => { // eslint-disable-line array-callback-return
+					newTopTenItems[toptenitem.order-1] = toptenitem.id;
 				});
 
-				return newItems;
+				return newTopTenItems;
 			}
 
-			return updeep.updateIn(`things.${toptenlistId}.toptenitem`, replaceItems, state);
+			return updeep.updateIn(`things.${toptenlistId}.toptenitem`, replaceTopTenItems, state);
 		}
 
 		case RECEIVE_ORGANIZER_DATA: {
