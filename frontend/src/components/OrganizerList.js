@@ -1,11 +1,11 @@
-// a single list to be displayed in the Organizer
+// a single toptenlist to be displayed in the Organizer
 // can be expanded to show items
 // an item can be selected
 
 import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
 
-class OrganizerList extends Component {
+class OrganizerTopTenList extends Component {
 	constructor(props) {
 		super();
 		//console.log('item props ', props);
@@ -24,25 +24,25 @@ class OrganizerList extends Component {
 	}
 
 	onSelectItem (e) {
-		this.props.onSelectItem({ 'list': this.props.list, 'order': e.target.dataset.order, 'childListId': e.target.dataset.childlistid });
+		this.props.onSelectItem({ 'toptenlist': this.props.toptenlist, 'order': e.target.dataset.order, 'childTopTenListId': e.target.dataset.childtoptenlistid });
 	}
 
 	renderItems() {
 		const selectedItemOrder = parseInt(this.props.selectedItemOrder); // element property is a string. Order should be a number.
-		const listId = this.props.list.id;
-		const selectedListId = this.props.selectedListId;
+		const toptenlistId = this.props.toptenlist.id;
+		const selectedTopTenListId = this.props.selectedTopTenListId;
 
 		return (
 			<div className="items">
-				{this.props.itemOrganizerData[listId].map((item) => { // eslint-disable-line array-callback-return
-					const isSelectedItem = ((listId === selectedListId) && (item.order === selectedItemOrder));
+				{this.props.itemOrganizerData[toptenlistId].map((item) => { // eslint-disable-line array-callback-return
+					const isSelectedItem = ((toptenlistId === selectedTopTenListId) && (item.order === selectedItemOrder));
 
-					let childListElm;
+					let childTopTenListElm;
 
-					if (item.childListId) {
-						const childList = this.props.listOrganizerData.find((list) => list.id === item.childListId);
-						childListElm = (
-							<span className="child-list">> {childList.name}</span>
+					if (item.childTopTenListId) {
+						const childTopTenList = this.props.toptenlistOrganizerData.find((toptenlist) => toptenlist.id === item.childTopTenListId);
+						childTopTenListElm = (
+							<span className="child-toptenlist">> {childTopTenList.name}</span>
 						);
 					}
 
@@ -51,8 +51,8 @@ class OrganizerList extends Component {
 							<span
 								onClick={this.onSelectItem}
 								data-order={item.order}
-								data-childlistid={item.childListId}
-							><span className="order">{item.order}:</span>{item.name}</span>{childListElm}
+								data-childtoptenlistid={item.childTopTenListId}
+							><span className="order">{item.order}:</span>{item.name}</span>{childTopTenListElm}
 						</div>);
 					}
 				}
@@ -62,9 +62,9 @@ class OrganizerList extends Component {
 	}
 
 	render() {
-		const name = this.props.list.name;
+		const name = this.props.toptenlist.name;
 
-		const isSelectedList = (this.props.list.id === this.props.selectedListId);
+		const isSelectedTopTenList = (this.props.toptenlist.id === this.props.selectedTopTenListId);
 
 		let showItemsButtonText = '+';
 
@@ -73,7 +73,7 @@ class OrganizerList extends Component {
 		}
 
 		return (
-			<Row className={`organizer-list ${isSelectedList ? 'selected' : ''}`}>
+			<Row className={`organizer-list ${isSelectedTopTenList ? 'selected' : ''}`}>
 				<Col>
 					<button className="btn btn-light show-items" onClick={this.onShowItems}>{showItemsButtonText}</button>
 					<div className="name">{name}</div>
@@ -84,4 +84,4 @@ class OrganizerList extends Component {
 	}
 }
 
-export default OrganizerList;
+export default OrganizerTopTenList;

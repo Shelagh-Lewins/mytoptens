@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework import filters
 from rest_framework.exceptions import APIException
 
-from .models import TopTenList, Item
-from .serializers import TopTenListSerializer, ItemSerializer
+from .models import TopTenList, TopTenItem
+from .serializers import TopTenListSerializer, TopTenItemSerializer
 from django.db.models import Q
 
 from rest_flex_fields import FlexFieldsModelViewSet
@@ -54,7 +54,7 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
     model = TopTenList
     serializer_class = TopTenListSerializer
-    permit_list_expands = ['item']
+    permit_list_expands = ['toptenitem']
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
@@ -84,10 +84,10 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
         if created_by is not None:
             queryset = queryset.filter(created_by=created_by)
 
-        # return only toptenlists that have no parent item
+        # return only toptenlists that have no parent toptenitem
         toplevel = self.request.query_params.get('toplevel')
         if toplevel is not None:
-            queryset = queryset.filter(parent_item=None)
+            queryset = queryset.filter(parent_toptenitem=None)
 
         return queryset.order_by('name')
 
@@ -95,19 +95,19 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
         obj.created_by = self.request.user
 
     def perform_update(self, serializer):
-        # housekeeping if parent_item is changed
-        parent_item_id = serializer.validated_data.get('parent_item_id', None)
+        # housekeeping if parent_toptenitem is changed
+        parent_toptenitem_id = serializer.validated_data.get('parent_toptenitem_id', None)
 
-        # check parent item exists
-        if parent_item_id is not None:
-            item = Item.objects.get(pk=parent_item_id)
+        # check parent toptenitem exists
+        if parent_toptenitem_id is not None:
+            toptenitem = TopTenItem.objects.get(pk=parent_toptenitem_id)
 
-            if not item: # if the item isn't found, don't save the new value
-                raise APIException("Unable to set parent_item. No item found with id: " + parent_item_id)
+            if not toptenitem: # if the toptenitem isn't found, don't save the new value
+                raise APIException("Unable to set parent_toptenitem. No toptenitem found with id: " + parent_toptenitem_id)
 
-            # set any TopTenLists with this parent_item to null parent_item
-            # an item can only have one child toptenlist
-            TopTenList.objects.filter(parent_item_id=parent_item_id).update(parent_item_id=None)
+            # set any TopTenLists with this parent_toptenitem to null parent_toptenitem
+            # an toptenitem can only have one child toptenlist
+            TopTenList.objects.filter(parent_toptenitem_id=parent_toptenitem_id).update(parent_toptenitem_id=None)
  
         serializer.save()
 
@@ -133,17 +133,17 @@ class TopTenListDetailViewSet(viewsets.ModelViewSet):
 
         # then we want the parent toptenlist, if any
         try:
-            parent_item = Item.objects.filter(id=my_toptenlist.parent_item.id).first()
-            pk_toptenlist.append(parent_item.toptenlist.id)
+            parent_toptenitem = TopTenItem.objects.filter(id=my_toptenlist.parent_toptenitem.id).first()
+            pk_toptenlist.append(parent_toptenitem.toptenlist.id)
 
         except AttributeError:
             pass # no parent toptenlist is OK
 
         # and child toptenlists, if any
-        item_ids = [o.id for o in my_toptenlist.item.all()]
+        toptenitem_ids = [o.id for o in my_toptenlist.toptenitem.all()]
 
         try:
-            child_toptenlists = TopTenList.objects.filter(parent_item__in=item_ids)
+            child_toptenlists = TopTenList.objects.filter(parent_toptenitem__in=toptenitem_ids)
 
         except AttributeError:
             pass
@@ -165,51 +165,51 @@ class TopTenListDetailViewSet(viewsets.ModelViewSet):
         return TopTenList.objects.filter(pk__in=pk_toptenlist).filter(is_public=True)
 
 
-class ItemViewSet(viewsets.ModelViewSet):
+class TopTenItemViewSet(viewsets.ModelViewSet):
     """
-    Although items are retrieved as part of a toptenlist request, they are edited through this viewset
+    Although toptenitems are retrieved as part of a toptenlist request, they are edited through this viewset
     """
     permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
-    model = Item
-    serializer_class = ItemSerializer
+    model = TopTenItem
+    serializer_class = TopTenItemSerializer
 
     def get_queryset(self):
-        # can view items belonging to public toptenlists and toptenlists the user created
+        # can view toptenitems belonging to public toptenlists and toptenlists the user created
         if self.request.user.is_authenticated:
-            return Item.objects.filter(
+            return TopTenItem.objects.filter(
                 Q(toptenlist__created_by=self.request.user) | 
                 Q(toptenlist__is_public=True)
             )
 
-        return Item.objects.filter(toptenlist__is_public=True)
+        return TopTenItem.objects.filter(toptenlist__is_public=True)
 
     @detail_route(methods=['patch'])
     def moveup(self, request, pk=None):
 
         if self.request.user.is_authenticated:
-            # find the item to move up
-            item = Item.objects.get(pk=pk)       
-            item_order = item.order
-            parent_toptenlist = item.toptenlist_id # note 'toptenlist_id' not 'toptenlist'
+            # find the toptenitem to move up
+            toptenitem = TopTenItem.objects.get(pk=pk)       
+            toptenitem_order = toptenitem.order
+            parent_toptenlist = toptenitem.toptenlist_id # note 'toptenlist_id' not 'toptenlist'
 
-            if item.order == 1:
-                return Response({'message': 'Item is already at top of toptenlist'}, status=status.HTTP_403_FORBIDDEN)
+            if toptenitem.order == 1:
+                return Response({'message': 'TopTenItem is already at top of TopTenList'}, status=status.HTTP_403_FORBIDDEN)
 
-            # change the item order up one
-            item.order = item.order - 1
+            # change the toptenitem order up one
+            toptenitem.order = toptenitem.order - 1
 
-            # find the existing item above
-            item_above = Item.objects.get(toptenlist=parent_toptenlist, order=item_order-1)
+            # find the existing toptenitem above
+            toptenitem_above = TopTenItem.objects.get(toptenlist=parent_toptenlist, order=toptenitem_order-1)
             # and change its order down one
-            item_above.order = item_order
+            toptenitem_above.order = toptenitem_order
 
-            item.save()
-            item_above.save()
+            toptenitem.save()
+            toptenitem_above.save()
 
-            # return the new items so the UI can update
-            items = [item, item_above]
+            # return the new toptenitems so the UI can update
+            toptenitems = [toptenitem, toptenitem_above]
 
-            serializer = ItemSerializer(items, many=True)
+            serializer = TopTenItemSerializer(toptenitems, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -218,7 +218,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         # do not allow order to be changed
         if serializer.validated_data.get('order', None) is not None:
-            raise APIException("Item order may not be changed. Use moveup instead.")
+            raise APIException("TopTenItem order may not be changed. Use moveup instead.")
  
         serializer.save()
 
@@ -231,7 +231,7 @@ class LimitPagination(MultipleModelLimitOffsetPagination):
 
 class SearchAPIView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
     """
-    Search for toptenlists and items by name
+    Search for toptenlists and toptenitems by name
     """
     pagination_class = LimitPagination
     filter_backends = (filters.SearchFilter,)
@@ -239,29 +239,29 @@ class SearchAPIView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-anc
 
     def get_querylist(self):
         toptenlist_query_set = {'queryset': TopTenList.objects.all(), 'serializer_class': TopTenListSerializer}
-        item_query_set = {'queryset': Item.objects.all().exclude(name=''), 'serializer_class': ItemSerializer}
+        toptenitem_query_set = {'queryset': TopTenItem.objects.all().exclude(name=''), 'serializer_class': TopTenItemSerializer}
 
         # authenticated user can view public toptenlists and toptenlists the user created
-        # and items belonging to those toptenlists
+        # and toptenitems belonging to those toptenlists
         if self.request.user.is_authenticated:
             toptenlist_query_set['queryset'] = toptenlist_query_set['queryset'].filter(
                 Q(created_by=self.request.user) |
                 Q(is_public=True)
             )
-            item_query_set['queryset'] = item_query_set['queryset'].filter(
+            toptenitem_query_set['queryset'] = toptenitem_query_set['queryset'].filter(
                 Q(toptenlist__created_by=self.request.user) |
                 Q(toptenlist__is_public=True)
             )
 
         # unauthenticated user can view public toptenlists
-        # and items belonging to those toptenlists
+        # and toptenitems belonging to those toptenlists
         else:
             toptenlist_query_set['queryset'] = toptenlist_query_set['queryset'].filter(is_public=True)
-            item_query_set['queryset'] = item_query_set['queryset'].filter(toptenlist__is_public=True)
+            toptenitem_query_set['queryset'] = toptenitem_query_set['queryset'].filter(toptenlist__is_public=True)
 
         querylist = [
             toptenlist_query_set,
-            item_query_set,
+            toptenitem_query_set,
         ]
 
-        return querytoptenlist
+        return querylist

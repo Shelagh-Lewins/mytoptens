@@ -1,15 +1,15 @@
-// List of all lists
+// List of all toptenlists
 
 import React from 'react';
 import { Container, Row, Col } from 'reactstrap';
 
-const ListsList = ({ children, is_public, headerText }) => {
+const TopTenListsList = ({ children, is_public, headerText }) => {
 	return (
-		<Container className="lists-list">
+		<Container className="toptenlists-list">
 			{headerText &&
 			<Row>
 				<Col>
-					<h3 className="lists-list-name">
+					<h3 className="toptenlists-list-name">
 						{headerText}
 					</h3>
 				</Col>
@@ -21,4 +21,4 @@ const ListsList = ({ children, is_public, headerText }) => {
 	);
 };
 
-export default ListsList;
+export default TopTenListsList;

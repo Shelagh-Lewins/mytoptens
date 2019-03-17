@@ -31,7 +31,7 @@ class Welcome extends Component {
 			<Container>
 				<h2>Welcome to My Top Tens</h2>
 				<p>Your account has been created.</p>
-				<p>To create lists, you will need to verify your email address. An email containing a verification link has been sent to the email address with which you registered. Please click the link to verify your email address.</p>
+				<p>To create Top Ten lists, you will need to verify your email address. An email containing a verification link has been sent to the email address with which you registered. Please click the link to verify your email address.</p>
 				<p>If you do not receive the email within a few minutes, please check your Junk or Spam folder.</p>
 				<Row>
 					<Col>

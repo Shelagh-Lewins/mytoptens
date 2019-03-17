@@ -1,10 +1,8 @@
 # api/urls.py
 from django.urls import include, path, re_path
 from django.contrib.auth import views
-#from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from .forms import SetPasswordFormCustom
-#from .forms import PasswordResetFormCustom
 from .serializers import PasswordResetViewCustom
 from allauth.account.views import confirm_email
 
@@ -30,10 +28,8 @@ urlpatterns = [
     path('reset/done/', views.PasswordResetCompleteView.as_view(template_name='account/password_reset_complete.html'),
     	name='password_reset_complete'),
 
-#    path('rest-auth/password/reset/', PasswordResetView1.as_view()),
-
     path('content/', include('toptenlists.endpoints')),
-    # content is a path for toptenlists, items etc found in the toptenlists app
+    # content is a path for toptenlists, toptenitems etc found in the toptenlists app
 
 
     path('sendconfirmationemail/', EmailConfirmation.as_view(), name='send-email-confirmation')

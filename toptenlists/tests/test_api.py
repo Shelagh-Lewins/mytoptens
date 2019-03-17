@@ -1,5 +1,5 @@
 """
-Test the API for toptenlists and items
+Test the API for toptenlists and toptenitems
 """
 
 import json
@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
-from toptenlists.models import TopTenList, Item
+from toptenlists.models import TopTenList, TopTenItem
 
 class CreateTopTenListAPITest(APITestCase):
     @classmethod
@@ -16,7 +16,7 @@ class CreateTopTenListAPITest(APITestCase):
         # Set up non-modified objects used by all test methods
 
     def setUp(self):
-        self.data = {'name': 'Test toptenlist', 'description':'A description', 'item': [
+        self.data = {'name': 'Test toptenlist', 'description':'A description', 'toptenitem': [
         {'name': 'Item 1 Name', 'description': 'Item 1 description', 'order': 1},
         {'name': 'Item 2 Name', 'description': 'Item 2 description', 'order': 2},
         {'name': 'Item 3 Name', 'description': 'Item 3 description', 'order': 3},
@@ -64,24 +64,24 @@ class CreateTopTenListAPITest(APITestCase):
         # and the username should also be correct
         self.assertEqual(new_toptenlist.created_by_username, 'Test user')
 
-        # it should be a top level toptenlist (no parent_item)
-        self.assertEqual(new_toptenlist.parent_item_id, None)
+        # it should be a top level toptenlist (no parent_toptenitem)
+        self.assertEqual(new_toptenlist.parent_toptenitem_id, None)
 
-        # find the nested item data
-        toptenlist_items_queryset = new_toptenlist.item.all()
+        # find the nested toptenitem data
+        toptenlist_toptenitems_queryset = new_toptenlist.toptenitem.all()
 
-        # the toptenlist should have 10 items
-        self.assertEqual(toptenlist_items_queryset.count(), 10)
+        # the toptenlist should have 10 toptenitems
+        self.assertEqual(toptenlist_toptenitems_queryset.count(), 10)
 
-        # there should be 10 Items in the database
-        self.assertEqual(Item.objects.all().count(), 10)
+        # there should be 10 TopTenItemss in the database
+        self.assertEqual(TopTenItem.objects.all().count(), 10)
 
-        # check order, name, description, toptenlist_id for each item
-        for index, item in enumerate(toptenlist_items_queryset):
-            self.assertEqual(item.order, index+1)
-            self.assertEqual(item.name, 'Item ' + str(index+1) + ' Name')
-            self.assertEqual(item.description, 'Item ' + str(index+1) + ' description')
-            self.assertEqual(item.toptenlist_id, new_toptenlist.id)
+        # check order, name, description, toptenlist_id for each toptenitem
+        for index, toptenitem in enumerate(toptenlist_toptenitems_queryset):
+            self.assertEqual(toptenitem.order, index+1)
+            self.assertEqual(toptenitem.name, 'TopTenItems ' + str(index+1) + ' Name')
+            self.assertEqual(toptenitem.description, 'TopTenItems ' + str(index+1) + ' description')
+            self.assertEqual(toptenitem.toptenlist_id, new_toptenlist.id)
 
 
     def test_create_toptenlist_not_verified(self):

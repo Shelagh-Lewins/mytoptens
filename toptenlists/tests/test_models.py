@@ -3,7 +3,7 @@ from users.models import CustomUser
 from toptenlists.models import TopTenList
 
 # TODO
-# test items
+# test toptenitems
 # test custom user
 
 

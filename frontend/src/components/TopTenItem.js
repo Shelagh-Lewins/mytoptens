@@ -7,8 +7,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import EditableTextField from './EditableTextField.js';
 import * as permissions from '../modules/permissions';
-import './Item.scss';
-import { MAX_ITEMS_IN_LIST } from '../constants';
+import './TopTenItem.scss';
+import { MAX_ITEMS_IN_TOPTENLIST } from '../constants';
 
 class Item extends Component {
 	constructor(props) {
@@ -18,7 +18,7 @@ class Item extends Component {
 			'isEditingName': false,
 		};
 		//console.log('item props, ', props);
-		this.onCreateChildList = this.onCreateChildList.bind(this);
+		this.onCreateChildTopTenList = this.onCreateChildTopTenList.bind(this);
 		this.setIsEditingName = this.setIsEditingName.bind(this);
 		this.onMoveUp = this.onMoveUp.bind(this);
 		this.onMoveDown = this.onMoveDown.bind(this);
@@ -30,8 +30,8 @@ class Item extends Component {
 		});
 	}
 
-	onCreateChildList = () => {
-		this.props.onCreateChildList(this.props.item);
+	onCreateChildTopTenList = () => {
+		this.props.onCreateChildTopTenList(this.props.item);
 	}
 
 	onMoveUp = () => {
@@ -50,30 +50,30 @@ class Item extends Component {
 			showDescription = false;
 		}
 
-		let canCreateChildList = true; // should the "create child list" button be visible?
+		let canCreateChildTopTenList = true; // should the "create child toptenlist" button be visible?
 
-		if (this.props.item.childList || // there is already a child list
+		if (this.props.item.childTopTenList || // there is already a child toptenlist
 			this.props.item.name === '' || // there is no item
 			this.state.isEditingName || // the item name is being edited
-			!this.props.canEdit) { // the user can't edit this list
-			canCreateChildList = false;
+			!this.props.canEdit) { // the user can't edit this toptenlist
+			canCreateChildTopTenList = false;
 		}
 
-		let canViewChildList = false;
+		let canViewChildTopTenList = false;
 
-		// child list exists and user can view it
-		if (this.props.item.childList && permissions.canViewList(this.props.item.childList.id)) {
-			canViewChildList = true;
+		// child toptenlist exists and user can view it
+		if (this.props.item.childTopTenList && permissions.canViewTopTenList(this.props.item.childTopTenList.id)) {
+			canViewChildTopTenList = true;
 		}
 
-		let childList;
+		let childTopTenList;
 
-		if (canCreateChildList) {
-			childList = (<button className="btn btn-primary create-childlist" onClick={this.onCreateChildList}>Create child list</button>);	
-		} else if (canViewChildList) {
-			childList = (
-				<div className="child-list">	
-					<Link to={`/list/${this.props.item.childList.id}`}>{this.props.item.childList.name} ></Link>
+		if (canCreateChildTopTenList) {
+			childTopTenList = (<button className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);	
+		} else if (canViewChildTopTenList) {
+			childTopTenList = (
+				<div className="child-toptenlist">	
+					<Link to={`/toptenlist/${this.props.item.childTopTenList.id}`}>{this.props.item.childTopTenList.name} ></Link>
 				</div>);
 		}
 
@@ -87,7 +87,7 @@ class Item extends Component {
 			showDown = false;
 		} else if (this.props.item.order === 1) {
 			showUp = false;
-		} else if (this.props.item.order === MAX_ITEMS_IN_LIST) {
+		} else if (this.props.item.order === MAX_ITEMS_IN_TOPTENLIST) {
 			showDown = false;
 		}
 
@@ -108,7 +108,7 @@ class Item extends Component {
 						value={this.props.item.name}
 					/>
 				</div>
-				{childList}
+				{childTopTenList}
 				{showDescription &&
 					<div className="item-body">
 						<EditableTextField

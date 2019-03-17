@@ -11,8 +11,8 @@ import Register from '../components/Register';
 import Welcome from '../components/Welcome';
 import Login from '../components/Login';
 import Home from '../containers/Home';
-import CreateList from '../containers/CreateList';
-import ListDetails from '../containers/ListDetail';
+import CreateTopTenList from '../containers/CreateTopTenList';
+import TopTenListDetails from '../containers/TopTenListDetail';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';
@@ -42,8 +42,8 @@ class App extends Component {
 						<Navbar />	
 						<div className="container">
 							<Route exact path="/" component={ Home } />
-							<Route exact path="/newlist" component={ CreateList } />
-							<Route exact path="/list/:id" component={ ListDetails } />
+							<Route exact path="/newtoptenlist" component={ CreateTopTenList } />
+							<Route exact path="/toptenlist/:id" component={ TopTenListDetails } />
 							<Route exact path="/register" component={ Register } />
 							<Route exact path="/welcome" component={ Welcome } />
 							<Route exact path="/login" component={ Login } />

@@ -43,11 +43,6 @@ class Register extends Component {
 		if(nextProps.auth.isAuthenticated) {
 			this.props.history.push('/');
 		}
-		/* if(nextProps.errors) {
-			this.setState({
-				'errors': nextProps.errors
-			});
-		} */
 	}
 
 	componentDidMount() {

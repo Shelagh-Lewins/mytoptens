@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withRouter, Link } from 'react-router-dom';
-import { createList } from '../modules/list';
+import { createTopTenList } from '../modules/toptenlist';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';
@@ -12,11 +12,11 @@ import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm.js';
-import { MAX_ITEMS_IN_LIST } from '../constants';
+import { MAX_ITEMS_IN_TOPTENLIST } from '../constants';
 
-import './CreateList.scss';
+import './CreateTopTenList.scss';
 
-class CreateList extends Component {
+class CreateTopTenList extends Component {
 	constructor(props) {
 		super(props);
 
@@ -24,7 +24,7 @@ class CreateList extends Component {
 			'name': '',
 			'description': '',
 		};
-		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
+		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
 			this.state[`item${i}_name`] = '';
 			this.state[`item${i}_description`] = '';
 		}
@@ -38,8 +38,8 @@ class CreateList extends Component {
 			const urlParams = new URLSearchParams(props.location.search);
 			this.state.parentItemId = urlParams.get('parent-item-id');
 			this.state.parentItemName = urlParams.get('parent-item-name');
-			this.state.parentListName = urlParams.get('parent-list-name');
-			this.state.parentListId = urlParams.get('parent-list-id');
+			this.state.parentTopTenListName = urlParams.get('parent-toptenlist-name');
+			this.state.parentTopTenListId = urlParams.get('parent-toptenlist-id');
 		}
 	}
 
@@ -56,32 +56,32 @@ class CreateList extends Component {
 	handleSubmit(e) {
 		e.preventDefault();
 
-		let newList = {
+		let newTopTenList = {
 			'name': this.state.name,
 			'description': this.state.description,
-			'item': [],
+			'toptenitem': [],
 		};
 		
-		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
+		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
 			if (this.state[`item${i}`] !== '') {
 				const newItem = {
 					'name': this.state[`item${i}_name`],
 					'description': this.state[`item${i}_description`],
 					'order': i,
 				};
-				newList.item.push(newItem);
+				newTopTenList.toptenitem.push(newItem);
 			}
 		}
 
 		if (this.state.parentItemId) {
-			newList.parent_item = this.state.parentItemId;
+			newTopTenList.parent_toptenitem = this.state.parentItemId;
 		}
 
-		this.onCreateList(newList);
+		this.onCreateTopTenList(newTopTenList);
 	}
 
-	onCreateList = (newList) => {
-		this.props.dispatch(createList(newList, this.props.history));
+	onCreateTopTenList = (newTopTenList) => {
+		this.props.dispatch(createTopTenList(newTopTenList, this.props.history));
 	}
 
 
@@ -90,8 +90,8 @@ class CreateList extends Component {
 	}
 
 	componentDidUpdate(prevProps){
-		// If the user cannot create a list, redirect to Home
-		if(!permissions.canCreateList() && !this.props.auth.isLoading){
+		// If the user cannot create a toptenlist, redirect to Home
+		if(!permissions.canCreateTopTenList() && !this.props.auth.isLoading){
 			this.props.history.push('/');
 		}
 	}
@@ -103,7 +103,7 @@ class CreateList extends Component {
 	renderItemInputs() {
 		let elements = [];
 
-		for (let i=1; i<=MAX_ITEMS_IN_LIST; i++) {
+		for (let i=1; i<=MAX_ITEMS_IN_TOPTENLIST; i++) {
 			elements.push(
 				<div className="form-group" key={`item${i}`}>
 					<Row>
@@ -141,7 +141,7 @@ class CreateList extends Component {
 
 	render() {
 		return (
-			<Container className="create-list">
+			<Container className="create-toptenlist">
 				{!isEmpty(this.props.errors) && (<Container>
 					<Row>
 						<Col>
@@ -153,15 +153,15 @@ class CreateList extends Component {
 						</Col>
 					</Row>
 				</Container>)}
-				<h2>Create a new list</h2>
+				<h2>Create a new toptenlist</h2>
 				{this.state.parentItemName && (
-					<div className="parent-item"><Link to={`/list/${this.state.parentListId}`}>{this.state.parentListName}</Link> > {this.state.parentItemName}</div>
+					<div className="parent-item"><Link to={`/toptenlist/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentItemName}</div>
 				)}
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">
 						<Row>
-							<Col lg="9" className="list-name">
-								<Label for="name">List name</Label>
+							<Col lg="9" className="toptenlist-name">
+								<Label for="name">Top Ten List name</Label>
 								<Input
 									type="text"
 									name="name"
@@ -169,7 +169,7 @@ class CreateList extends Component {
 									id="name"
 									onChange={ this.handleInputChange }
 									value={ this.state.name }
-									placeholder="Enter the list name"
+									placeholder="Enter the toptenlist name"
 								/>
 								<div className='invalid-feedback' />
 								<small className='form-text text-muted'>
@@ -180,15 +180,15 @@ class CreateList extends Component {
 					</div>
 					<div className="form-group">
 						<Row>
-							<Col lg="9" className="list-description">
-								<Label for="username">List description</Label>
+							<Col lg="9" className="toptenlist-description">
+								<Label for="username">Description</Label>
 								<Input
 									type="textarea"
 									name="description"
 									id="description"
 									onChange={ this.handleInputChange }
 									value={ this.state.description }
-									placeholder="Enter the list description"
+									placeholder="Enter the toptenlist description"
 								/>
 								<div className='invalid-feedback' />
 							</Col>
@@ -207,7 +207,7 @@ class CreateList extends Component {
 					</Row>
 	        <Row>
 						<Col lg="9">
-							{this.props.errors.lists && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.lists}</div>}
+							{this.props.errors.toptenlists && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.toptenlists}</div>}
 						</Col>
 					</Row>
 	      </ValidatedForm>
@@ -216,8 +216,7 @@ class CreateList extends Component {
 	}
 }
 
-CreateList.propTypes = {
-	//'createList': PropTypes.func.isRequired,
+CreateTopTenList.propTypes = {
 	'auth': PropTypes.object.isRequired,
 	'errors': PropTypes.object.isRequired
 };
@@ -227,4 +226,4 @@ const mapStateToProps = state => ({
 	'errors': state.errors,
 });
 
-export default connect(mapStateToProps)(withRouter(CreateList));
+export default connect(mapStateToProps)(withRouter(CreateTopTenList));

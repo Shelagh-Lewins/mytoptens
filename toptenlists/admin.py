@@ -5,6 +5,6 @@ from . models import TopTenList
 
 admin.site.register(TopTenList)
 
-from . models import Item
+from . models import TopTenItem
 
-admin.site.register(Item)
+admin.site.register(TopTenItem)

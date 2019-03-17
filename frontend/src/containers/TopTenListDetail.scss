@@ -1,6 +1,6 @@
 @import "../variables";
 
-.list-detail-controls {
+.toptenlist-detail-controls {
 	float: right;
 
 	.is-public {
@@ -13,7 +13,7 @@
 	}
 }
 
-.list-detail {
+.toptenlist-detail {
 	display: flex;
 	justify-content: center;
 
@@ -33,12 +33,12 @@
 		color: $color-hint;
 	}
 
-	.list-organizer {
+	.toptenlist-organizer {
 		float: left;
 		margin-left: 8px;
 	}
 
-	.list-name {
+	.toptenlist-name {
 		// hide label but leave contents visible and entire label still readable
 		label {
 			border: 0;
@@ -65,7 +65,7 @@
 		}
 	}
 
-	.list-description {
+	.toptenlist-description {
 		max-height: none;
 
 		// hide label but leave contents visible and entire label still readable

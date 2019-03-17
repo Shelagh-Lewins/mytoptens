@@ -1,12 +1,12 @@
-// check whether the user can perform actions on lists, items
-// items inherit permissions from their list
+// check whether the user can perform actions on toptenlists, items
+// items inherit permissions from their toptenlist
 
 // result depends on whether they are logged in:
-// whether they own the list:
-// whether the list is public
+// whether they own the toptenlist:
+// whether the toptenlist is public
 
-// list is identified by id (primary key)
-// for viewing, we could trust the server that if a list is returned, it can be viewed.
+// toptenlist is identified by id (primary key)
+// for viewing, we could trust the server that if a toptenlist is returned, it can be viewed.
 // but for editing, we need to check if the user created it
 
 // identifier should be like { 'id': 'efg' } i.e. an object with one property
@@ -14,50 +14,50 @@
 import store from '../store';
 import findObjectByProperty from './findObjectByProperty';
 
-export function canViewList(id) {
-	// a list can be viewed if public or if created by user
+export function canViewTopTenList(id) {
+	// a toptenlist can be viewed if public or if created by user
 	//const property = Object.keys(identifier)[0];
 	//const value = identifier[property];
 	const state = store.getState();
-	const lists = state.list.things;
+	const toptenlists = state.toptenlist.things;
 	const userId = state.auth.user.id;
 
-	let canViewList = false;
+	let canViewTopTenList = false;
 
-	if (Object.keys(lists).length > 0) {
-		let list = findObjectByProperty({ 'parentObject': lists, 'property': 'id', 'value': id });
+	if (Object.keys(toptenlists).length > 0) {
+		let toptenlist = findObjectByProperty({ 'parentObject': toptenlists, 'property': 'id', 'value': id });
 
-		if (list && (list.is_public || (list.created_by === userId))) {
-			canViewList = true;
+		if (toptenlist && (toptenlist.is_public || (toptenlist.created_by === userId))) {
+			canViewTopTenList = true;
 		}
 	}
 
-	return canViewList;
+	return canViewTopTenList;
 }
 
-export function canEditList(id) {
-	// a list can be edited if created by user
+export function canEditTopTenList(id) {
+	// a toptenlist can be edited if created by user
 	//const property = Object.keys(identifier)[0];
 	//const value = identifier[property];
 	const state = store.getState();
-	const lists = state.list.things;
+	const toptenlists = state.toptenlist.things;
 	const userId = state.auth.user.id;
 
-	let canEditList = false;
+	let canEditTopTenList = false;
 
-	if (Object.keys(lists).length > 0) {
-		let list = findObjectByProperty({ 'parentObject': lists, 'property': 'id', 'value': id });
+	if (Object.keys(toptenlists).length > 0) {
+		let toptenlist = findObjectByProperty({ 'parentObject': toptenlists, 'property': 'id', 'value': id });
 
-		if (list && (list.created_by === userId)) {
-			canEditList = true;
+		if (toptenlist && (toptenlist.created_by === userId)) {
+			canEditTopTenList = true;
 		}
 	}
 
-	return canEditList;
+	return canEditTopTenList;
 }
 
-export function canCreateList() {
-	// the user can create a list if they are logged in
+export function canCreateTopTenList() {
+	// the user can create a toptenlist if they are logged in
 	// and have verified their email address
 	const state = store.getState();
 
