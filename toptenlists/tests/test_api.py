@@ -79,8 +79,8 @@ class CreateTopTenListAPITest(APITestCase):
         # check order, name, description, toptenlist_id for each toptenitem
         for index, toptenitem in enumerate(toptenlist_toptenitems_queryset):
             self.assertEqual(toptenitem.order, index+1)
-            self.assertEqual(toptenitem.name, 'TopTenItems ' + str(index+1) + ' Name')
-            self.assertEqual(toptenitem.description, 'TopTenItems ' + str(index+1) + ' description')
+            self.assertEqual(toptenitem.name, 'Item ' + str(index+1) + ' Name')
+            self.assertEqual(toptenitem.description, 'Item ' + str(index+1) + ' description')
             self.assertEqual(toptenitem.toptenlist_id, new_toptenlist.id)
 
 
