@@ -44,6 +44,7 @@ class Organizer extends Component {
 				'parentTopTenListId': this.props.parentTopTenListId,
 			});
 		}
+		console.log('didupdate state ', this.state);
 	}
 
 	onClickOrganize = () => {
@@ -208,7 +209,7 @@ class Organizer extends Component {
 		return (
 			<div className={`organizer ${this.state.showOrganizer ? 'open' : ''}`}>
 				{controls}
-				{this.state.showOrganizer && this.renderLists()}
+				{this.state.showOrganizer && this.renderTopTenLists()}
 			</div>
 		);
 	}
