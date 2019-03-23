@@ -313,7 +313,7 @@ const mapStateToProps = (state, ownProps) => {
 	const toptenlist = findObjectByProperty({ 'parentObject': toptenlists, 'property': 'id', 'value': ownProps.match.params.id });
 
 	const parentTopTenItemAndTopTenList = toptenlistReducer.getParentTopTenItemAndTopTenList(state)(toptenlist);
-	console.log('detail map state to props ', parentTopTenItemAndTopTenList);
+
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,

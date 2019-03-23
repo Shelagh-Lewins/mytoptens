@@ -44,7 +44,6 @@ class Organizer extends Component {
 				'parentTopTenListId': this.props.parentTopTenListId,
 			});
 		}
-		console.log('didupdate state ', this.state);
 	}
 
 	onClickOrganize = () => {
@@ -160,14 +159,14 @@ class Organizer extends Component {
 						// only show toptenlists with at least one toptenitem
 						// and don't show the page toptenlist - it can't be its own parent
 						if (numberOfTopTenItems > 0 && (toptenlist.id !== this.props.toptenlist.id)) {
-							const showTopTenItems = (toptenlist.id === this.state.parentListId);
+							const showTopTenItems = (toptenlist.id === this.state.parentTopTenListId);
 
 							return (<OrganizerList
 								toptenlist={toptenlist}
 								toptenlistOrganizerData={this.props.toptenlistOrganizerData}
 								toptenitemOrganizerData={this.props.toptenitemOrganizerData}
 								key={toptenlist.id}
-								selectedListId={this.state.parentListId}
+								selectedTopTenListId={this.state.parentTopTenListId}
 								selectedTopTenItemOrder={this.state.selectedTopTenItemOrder}
 								onSelectTopTenItem={this.onSelectParentTopTenItem}
 								showTopTenItems={showTopTenItems}

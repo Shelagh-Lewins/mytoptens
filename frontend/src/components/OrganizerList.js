@@ -5,10 +5,10 @@
 import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
 
-class OrganizerTopTenList extends Component {
+class OrganizerList extends Component {
 	constructor(props) {
 		super();
-		//console.log('toptenitem props ', props);
+
 		this.state = {
 			'showTopTenItems': props.showTopTenItems,
 		};
@@ -84,4 +84,4 @@ class OrganizerTopTenList extends Component {
 	}
 }
 
-export default OrganizerTopTenList;
+export default OrganizerList;
