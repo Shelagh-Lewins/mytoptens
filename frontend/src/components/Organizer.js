@@ -1,12 +1,12 @@
-// Displays the user's toptenlists and toptenitems
-// Allows the parent toptenitem of a toptenlist to be changed
+// Displays the user's topTenLists and topTenItems
+// Allows the parent topTenItem of a topTenList to be changed
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
 import ReactDOM from 'react-dom';
 
-import * as toptenlistReducer from '../modules/toptenlist';
+import * as topTenListReducer from '../modules/topTenList';
 
 import OrganizerList from './OrganizerList';
 import './Organizer.scss';
@@ -17,8 +17,8 @@ class Organizer extends Component {
 
 		this.state = {
 			'showOrganizer': false,
-			'parentTopTenItemId': props.toptenlist.parent_toptenitem,
-			'parentTopTenListId': props.parentTopTenListId, // parent toptenlist and toptenitem are stored in state so a new value can be selected, with the old value still present in props if the user cancels
+			'parentTopTenItemId': props.topTenList.parent_topTenItem,
+			'parentTopTenListId': props.parentTopTenListId, // parent topTenList and topTenItem are stored in state so a new value can be selected, with the old value still present in props if the user cancels
 			'selectedTopTenItemChildTopTenListId': null,
 			'selectedTopTenItemOrder': null,
 		};
@@ -33,14 +33,14 @@ class Organizer extends Component {
 	}
 
 	componentDidUpdate = (prevProps) => {
-		// data for new toptenlist have loaded
-		if ((prevProps.toptenlist.parent_toptenitem !== this.props.toptenlist.parent_toptenitem) ||
-		// navigated to new toptenlist
-		(prevProps.toptenlistOrganizerData.length === 0 && this.props.toptenlistOrganizerData.length !== 0)) {
+		// data for new topTenList have loaded
+		if ((prevProps.topTenList.parent_topTenItem !== this.props.topTenList.parent_topTenItem) ||
+		// navigated to new topTenList
+		(prevProps.topTenListOrganizerData.length === 0 && this.props.topTenListOrganizerData.length !== 0)) {
 			this.setState({ // reset component
 				'showOrganizer': false,
 				'selectedTopTenItemOrder': this.selectedTopTenItemOrder(),
-				'parentTopTenItemId': this.props.toptenlist.parent_toptenitem,
+				'parentTopTenItemId': this.props.topTenList.parent_topTenItem,
 				'parentTopTenListId': this.props.parentTopTenListId,
 			});
 		}
@@ -53,7 +53,7 @@ class Organizer extends Component {
 
 		setTimeout(() => {
 			const DOMNode = ReactDOM.findDOMNode(this); // component parent node
-			const element = DOMNode.querySelector('.organizer-toptenlist.selected');
+			const element = DOMNode.querySelector('.organizer-topTenList.selected');
 			if (element) {
 				element.scrollIntoView();
 			}
@@ -71,27 +71,27 @@ class Organizer extends Component {
 			'showOrganizer': false,
 		});
 
-		// Don't allow the user to select a toptenitem from the current toptenlist.
-		// this shouldn't happen as the current toptenlist is not displayed in the organizer.
-		if (this.state.parentTopTenListId === this.props.toptenlist.id) {
+		// Don't allow the user to select a topTenItem from the current topTenList.
+		// this shouldn't happen as the current topTenList is not displayed in the organizer.
+		if (this.state.parentTopTenListId === this.props.topTenList.id) {
 			return;
 		}
 
 		if (!this.state.parentTopTenItemId) {
-			if (confirm(`'${this.props.toptenlist.name}' will become a top level toptenlist. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
+			if (confirm(`'${this.props.topTenList.name}' will become a top level topTenList. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
 				this.setParentTopTenItem();
 			}
 			return;
 		}
 
-		// if the new parent toptenitem already has a child toptenlist
+		// if the new parent topTenItem already has a child topTenList
 		if (this.state.selectedTopTenItemChildTopTenListId) {
-			const childTopTenList = this.props.toptenlistOrganizerData.find((toptenlist) => toptenlist.id === this.state.selectedTopTenItemChildTopTenListId);
+			const childTopTenList = this.props.topTenListOrganizerData.find((topTenList) => topTenList.id === this.state.selectedTopTenItemChildTopTenListId);
 
 			// no change
-			if (this.state.parentTopTenItemId === this.props.toptenlist.parent_toptenitem) {
+			if (this.state.parentTopTenItemId === this.props.topTenList.parent_topTenItem) {
 				return;
-			} else { // will disconnect the existing child toptenlist
+			} else { // will disconnect the existing child topTenList
 				if (confirm(`The child Top Ten list '${childTopTenList.name}' will become a top level list. Are you sure you want to continue?`)) { // eslint-disable-line no-restricted-globals
 					this.setParentTopTenItem();
 				}
@@ -103,16 +103,16 @@ class Organizer extends Component {
 	}
 
 	setParentTopTenItem() {
-		this.props.dispatch(toptenlistReducer.updateTopTenList(
-			this.props.toptenlist.id,
-			'parent_toptenitem_id',
+		this.props.dispatch(topTenListReducer.updateTopTenList(
+			this.props.topTenList.id,
+			'parent_topTenItem_id',
 			this.state.parentTopTenItemId));
 	}
 
-	onSelectParentTopTenItem = ({ toptenlist, order, childTopTenListId }) => {
-		// if the user clicks the selected toptenitem, deselect it
-		// i.e. make this a top-level toptenlist
-		if (toptenlist.id === this.state.parentTopTenListId && toptenlist.toptenitem[order-1] === this.state.parentTopTenItemId) {
+	onSelectParentTopTenItem = ({ topTenList, order, childTopTenListId }) => {
+		// if the user clicks the selected topTenItem, deselect it
+		// i.e. make this a top-level topTenList
+		if (topTenList.id === this.state.parentTopTenListId && topTenList.topTenItem[order-1] === this.state.parentTopTenItemId) {
 			this.setState({
 				'parentTopTenItemId': null,
 				'parentTopTenListId': null,
@@ -121,8 +121,8 @@ class Organizer extends Component {
 			});
 		} else {
 			this.setState({
-				'parentTopTenItemId': toptenlist.toptenitem[order-1],
-				'parentTopTenListId': toptenlist.id,
+				'parentTopTenItemId': topTenList.topTenItem[order-1],
+				'parentTopTenListId': topTenList.id,
 				'selectedTopTenItemChildTopTenListId': childTopTenListId,
 				'selectedTopTenItemOrder': order,
 			});
@@ -130,17 +130,17 @@ class Organizer extends Component {
 	}
 
 	selectedTopTenItemOrder() {
-		// find the order of the parent toptenitem
-		let order; // there may not be a parent toptenitem, so there may not be a default selection
+		// find the order of the parent topTenItem
+		let order; // there may not be a parent topTenItem, so there may not be a default selection
 		if (this.props.parentTopTenListId) {
-			let parentTopTenItemId = this.props.toptenlist.parent_toptenitem;
-			const parentTopTenList = this.props.toptenlistOrganizerData.find(toptenlist => toptenlist.id === this.props.parentTopTenListId);
+			let parentTopTenItemId = this.props.topTenList.parent_topTenItem;
+			const parentTopTenList = this.props.topTenListOrganizerData.find(topTenList => topTenList.id === this.props.parentTopTenListId);
 
-			let parentTopTenListTopTenItems = parentTopTenList.toptenitem;
+			let parentTopTenListTopTenItems = parentTopTenList.topTenItem;
 
 			order = parentTopTenListTopTenItems.indexOf(parentTopTenItemId);
 
-			if (order !== -1) { // toptenitem is found
+			if (order !== -1) { // topTenItem is found
 				order += 1;
 			}
 		}
@@ -150,22 +150,22 @@ class Organizer extends Component {
 
 	renderTopTenLists() {
 		return (
-			<div className="toptenlists">
+			<div className="topTenLists">
 				<div className="inner-tube">
 					<span>Select a new parent Top Ten item for this Top Ten list: </span>
-					{this.props.toptenlistOrganizerData.map(toptenlist => {
-						const numberOfTopTenItems = this.props.toptenitemOrganizerData[toptenlist.id].length;
+					{this.props.topTenListOrganizerData.map(topTenList => {
+						const numberOfTopTenItems = this.props.topTenItemOrganizerData[topTenList.id].length;
 						
-						// only show toptenlists with at least one toptenitem
-						// and don't show the page toptenlist - it can't be its own parent
-						if (numberOfTopTenItems > 0 && (toptenlist.id !== this.props.toptenlist.id)) {
-							const showTopTenItems = (toptenlist.id === this.state.parentTopTenListId);
+						// only show topTenLists with at least one topTenItem
+						// and don't show the page topTenList - it can't be its own parent
+						if (numberOfTopTenItems > 0 && (topTenList.id !== this.props.topTenList.id)) {
+							const showTopTenItems = (topTenList.id === this.state.parentTopTenListId);
 
 							return (<OrganizerList
-								toptenlist={toptenlist}
-								toptenlistOrganizerData={this.props.toptenlistOrganizerData}
-								toptenitemOrganizerData={this.props.toptenitemOrganizerData}
-								key={toptenlist.id}
+								topTenList={topTenList}
+								topTenListOrganizerData={this.props.topTenListOrganizerData}
+								topTenItemOrganizerData={this.props.topTenItemOrganizerData}
+								key={topTenList.id}
 								selectedTopTenListId={this.state.parentTopTenListId}
 								selectedTopTenItemOrder={this.state.selectedTopTenItemOrder}
 								onSelectTopTenItem={this.onSelectParentTopTenItem}

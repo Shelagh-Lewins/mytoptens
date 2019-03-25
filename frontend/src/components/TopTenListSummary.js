@@ -1,4 +1,4 @@
-// Top-level summary of a toptenlist
+// Top-level summary of a topTenList
 
 import React from 'react';
 import { Col } from 'reactstrap';
@@ -13,32 +13,32 @@ import * as permissions from '../modules/permissions';
 import './TopTenListSummary.scss';
 
 const TopTenListSummary = props => {
-	let canEdit = permissions.canEditTopTenList({ 'id': props.toptenlist.id });
+	let canEdit = permissions.canEditTopTenList({ 'id': props.topTenList.id });
 
 	return (
 		<Col sm="12" md="6">
-			<div className="toptenlist-summary">
-				<Link to={`/toptenlist/${props.toptenlist.id}`}>
-					<div className="toptenlist-name">
-						<div>{props.toptenlist.name}</div>
+			<div className="topTenList-summary">
+				<Link to={`/topTenList/${props.topTenList.id}`}>
+					<div className="topTenList-name">
+						<div>{props.topTenList.name}</div>
 					</div>
 				</Link>
 				{canEdit && (
-					<div className="toptenlist-summary-controls">
+					<div className="topTenList-summary-controls">
 						<SetTopTenListIsPublic
-							toptenlistId={props.toptenlist.id}
-							isPublic={props.toptenlist.is_public}
+							topTenListId={props.topTenList.id}
+							isPublic={props.topTenList.is_public}
 							onChangeIsPublic={props.onChangeIsPublic}
 						/>
 						<button className="btn btn-danger" title="Delete" onClick={onDeleteTopTenList}>X</button>
 					</div>
 				)}
-				<Link to={`/toptenlist/${props.toptenlist.id}`}>
-					<div className="toptenlist-description">{props.toptenlist.description}</div>
+				<Link to={`/topTenList/${props.topTenList.id}`}>
+					<div className="topTenList-description">{props.topTenList.description}</div>
 				</Link>
 				
 				{props.showCreatedBy && 
-					<div className="toptenlist-created-by">{props.toptenlist.created_by_username}</div>
+					<div className="topTenList-created-by">{props.topTenList.created_by_username}</div>
 
 				}
 			</div>
@@ -46,7 +46,7 @@ const TopTenListSummary = props => {
 	);
 
 	function onDeleteTopTenList(e) {
-		props.onDeleteTopTenList({ 'id': props.toptenlist.id, 'name': props.toptenlist.name });
+		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });
 	}
 };
 

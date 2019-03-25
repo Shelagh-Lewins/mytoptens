@@ -5,9 +5,9 @@ import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
-import * as toptenlistReducer from '../modules/toptenlist';
+import * as topTenListReducer from '../modules/topTenList';
 import * as pageReducer from '../modules/page';
-import { getPublicTopTenLists, getMyGroupedTopTenLists } from '../modules/toptenlist';
+import { getPublicTopTenLists, getMyGroupedTopTenLists } from '../modules/topTenList';
 
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
@@ -24,8 +24,8 @@ class Home extends Component {
 
 		props.dispatch(clearErrors());
 
-		// which set of toptenlists to view
-		// if logged in, default my-toptenlists
+		// which set of topTenLists to view
+		// if logged in, default my-topTenLists
 		// if not logged in, only show publictoptens
 		let listset = 'publictoptens';
 		if (props.auth.isAuthenticated) {
@@ -66,11 +66,11 @@ class Home extends Component {
 		}
 	}
 
-	// refresh toptenlists based on user choices
-	fetchTopTenLists({ listset = this.state.toptenlistset, topLevelTopTenListsOnly = this.state.topLevelTopTenListsOnly, currentPage = this.state.currentPage }) {
+	// refresh topTenLists based on user choices
+	fetchTopTenLists({ listset = this.state.topTenListset, topLevelTopTenListsOnly = this.state.topLevelTopTenListsOnly, currentPage = this.state.currentPage }) {
 		// use state values by default
 		// however these may be passed in by functions that set state because setState is not synchronous
-		this.props.dispatch(toptenlistReducer.fetchTopTenLists({
+		this.props.dispatch(topTenListReducer.fetchTopTenLists({
 			listset,
 			topLevelTopTenListsOnly,
 			'limit': PAGE_SIZE,
@@ -79,7 +79,7 @@ class Home extends Component {
 	}
 
 	onChangePage(currentPage) {
-		// update state with new page of toptenlists
+		// update state with new page of topTenLists
 		this.setState({ 'currentPage': currentPage });
 
 		if (currentPage !== this.state.currentPage) {
@@ -96,13 +96,13 @@ class Home extends Component {
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		this.props.dispatch(toptenlistReducer.setTopTenListIsPublic({ id, is_public }));
+		this.props.dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
 	}
 
 	onDeleteTopTenList = ({ id, name }) => {
-		if (confirm(`Are you sure you want to delete the toptenlist ${name}`)) // eslint-disable-line no-restricted-globals
+		if (confirm(`Are you sure you want to delete the topTenList ${name}`)) // eslint-disable-line no-restricted-globals
 		{
-			this.props.dispatch(toptenlistReducer.deleteTopTenList(id));
+			this.props.dispatch(topTenListReducer.deleteTopTenList(id));
 		}
 	}
 
@@ -115,7 +115,7 @@ class Home extends Component {
 		this.fetchTopTenLists({ topLevelTopTenListsOnly });
 	}
 
-	setListSetURL(listset) { // indicate current toptenlist set in URL; depends on selected tab
+	setListSetURL(listset) { // indicate current topTenList set in URL; depends on selected tab
 		let URL = `${this.props.location.pathname}?listset=${listset}`;
 		this.props.history.push(URL);
 	}
@@ -195,12 +195,12 @@ Home.propTypes = {
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
-	'isLoading': state.toptenlist.isLoading,
+	'isLoading': state.topTenList.isLoading,
 	'publicTopTenLists': getPublicTopTenLists(state),
 	'myTopTenLists': getMyGroupedTopTenLists(state),
-	'count': state.toptenlist.count,
-	'next': state.toptenlist.next,
-	'previous': state.toptenlist.previous,
+	'count': state.topTenList.count,
+	'next': state.topTenList.next,
+	'previous': state.topTenList.previous,
 	//'searchTerm': state.page.searchTerm,
 	//'searchComplete': state.page.searchComplete,
 	//'searchResults': state.page.searchResults,

@@ -12,7 +12,7 @@ router.register('toptenlistdetail', TopTenListDetailViewSet, base_name='TopTenLi
 router.register('toptenitem', TopTenItemViewSet, base_name='TopTenItems')
 router.register('searchhome', SearchAPIView, base_name='searchhome')
 
-app_name = 'toptenlists' # namespace for reverse
+app_name = 'topTenLists' # namespace for reverse
 urlpatterns = [
     path('', include(router.urls), name='thing'),
 ]

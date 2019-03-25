@@ -42,8 +42,8 @@ class App extends Component {
 						<Navbar />	
 						<div className="container">
 							<Route exact path="/" component={ Home } />
-							<Route exact path="/newtoptenlist" component={ CreateTopTenList } />
-							<Route exact path="/toptenlist/:id" component={ TopTenListDetails } />
+							<Route exact path="/newtopTenList" component={ CreateTopTenList } />
+							<Route exact path="/topTenList/:id" component={ TopTenListDetails } />
 							<Route exact path="/register" component={ Register } />
 							<Route exact path="/welcome" component={ Welcome } />
 							<Route exact path="/login" component={ Login } />

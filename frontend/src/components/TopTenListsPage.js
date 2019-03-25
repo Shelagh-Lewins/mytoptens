@@ -1,4 +1,4 @@
-// Page to display list of toptenlists
+// Page to display list of topTenLists
 
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
@@ -15,7 +15,7 @@ class TopTenListsPage extends Component {
 	} */
 
 	onAddTopTenList = () => {
-		this.props.history.push('/newtoptenlist');
+		this.props.history.push('/newtopTenList');
 	}
 
 	renderPublicTopTenLists() {
@@ -23,10 +23,10 @@ class TopTenListsPage extends Component {
 
 		return (
 			<TopTenListsList headerText="All public Top Ten lists">
-				{publicTopTenLists.map(toptenlist => 
+				{publicTopTenLists.map(topTenList => 
 					<TopTenListSummary
-						key={toptenlist.id}
-						toptenlist={toptenlist}
+						key={topTenList.id}
+						topTenList={topTenList}
 						onChangeIsPublic={onChangeIsPublic}
 						onDeleteTopTenList={onDeleteTopTenList}
 						showCreatedBy={true}
@@ -40,17 +40,17 @@ class TopTenListsPage extends Component {
 		const { myTopTenLists, onChangeIsPublic, onDeleteTopTenList } = this.props;
 
 		return Object.keys(myTopTenLists).map((is_public, index) => {
-			const toptenlistsByIsPublic = myTopTenLists[is_public];
+			const topTenListsByIsPublic = myTopTenLists[is_public];
 			let headerText = is_public === 'true' ? 'My public Top Ten lists' : 'My private Top Ten lists';
 
 			return (
 				<div key={index}>
-					{(toptenlistsByIsPublic.length > 0) && (
+					{(topTenListsByIsPublic.length > 0) && (
 						<TopTenListsList is_public={is_public} headerText={headerText}>
-							{toptenlistsByIsPublic.map(toptenlist => 
+							{topTenListsByIsPublic.map(topTenList => 
 								<TopTenListSummary
-									key={toptenlist.id}
-									toptenlist={toptenlist}
+									key={topTenList.id}
+									topTenList={topTenList}
 									onChangeIsPublic={onChangeIsPublic}
 									onDeleteTopTenList={onDeleteTopTenList}
 								/>
@@ -90,7 +90,7 @@ class TopTenListsPage extends Component {
 
 		if (this.props.isLoading) {
 			return (
-				<div className="toptenlists-loading">
+				<div className="topTenLists-loading">
 					Loading...
 				</div>
 			);
@@ -99,7 +99,7 @@ class TopTenListsPage extends Component {
 		let createTopTenList;
 		if (this.props.canCreateTopTenList()) {
 			createTopTenList = (<button
-				className="btn btn-primary create-toptenlist"
+				className="btn btn-primary create-topTenList"
 				onClick={this.onAddTopTenList}
 			>+ New Top Ten list</button>);
 		} else if (this.props.auth.isAuthenticated) {
@@ -109,10 +109,10 @@ class TopTenListsPage extends Component {
 		}
 
 		return (
-			<div className="toptenlists-list">
+			<div className="topTenLists-list">
 				<Container>
 					<Row>
-						<Col  className="top-level-toptenlists-control">
+						<Col  className="top-level-topTenLists-control">
 							<Label check>
 								<Input
 									type="checkbox"
@@ -132,7 +132,7 @@ class TopTenListsPage extends Component {
 					{this.renderTabs()}
 					<div className="clearing"></div>
 				</div>}
-				<div className="toptenlists">
+				<div className="topTenLists">
 					{TopTenListsList}
 				</div>
 				<div className="container">

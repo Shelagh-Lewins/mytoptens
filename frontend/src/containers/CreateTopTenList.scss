@@ -1,11 +1,11 @@
-.create-toptenlist {
-	.toptenlist-name {
+.create-topTenList {
+	.topTenList-name {
 		label {
 			font-weight: bold;
 		}
 	}
 
-	.toptenitem-name {
+	.topTenItem-name {
 		label {
 			font-weight: bold;
 		}
@@ -15,7 +15,7 @@
 		margin-left: 8px;
 	}
 
-	.toptenlist-description {
+	.topTenList-description {
 		label {
 			border: 0;
 			clear: both;
@@ -28,7 +28,7 @@
 		}
 	}
 
-	.toptenitem-description {
+	.topTenItem-description {
 		margin-top: 8px;
 
 		label {

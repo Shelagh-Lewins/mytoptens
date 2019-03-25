@@ -45,7 +45,7 @@ export function searchHome(searchTerm) {
 
 		dispatch(searchHomeStarted(searchTerm));
 
-		// if the user is not logged in, don't use auth. The server should return the toptenlist if a non-authenticated user should see it.
+		// if the user is not logged in, don't use auth. The server should return the topTenList if a non-authenticated user should see it.
 		let useAuth = false;
 
 		if (getState().auth.user.token) {
@@ -61,7 +61,7 @@ export function searchHome(searchTerm) {
 		}).catch(error => {
 			dispatch(searchHomeFailed());
 
-			return dispatch(getErrors({ 'fetch toptenlists': error.message }));
+			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
 		});
 	};
 }

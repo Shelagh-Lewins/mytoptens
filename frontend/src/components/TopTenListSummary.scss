@@ -1,6 +1,6 @@
 @import "../variables";
 
-.toptenlist-summary {
+.topTenList-summary {
 	border: 1px solid $color-panel-border;
 	border-radius: 8px;
 	margin: 0 8px 8px 0;
@@ -15,12 +15,12 @@
 		}
 	}
 
-	.toptenlist-name {
+	.topTenList-name {
 		float: left;
 		font-weight: bold;
 	}
 
-	.toptenlist-summary-controls {
+	.topTenList-summary-controls {
 		float: right;
 
 		.is-public {
@@ -33,8 +33,8 @@
 		}
 	}
 
-	.toptenlist-description {
-		background: $color-toptenlist-summary-bg;
+	.topTenList-description {
+		background: $color-topTenList-summary-bg;
 		clear: both;
 		display: block;
 		line-height: 1.5em;
@@ -43,7 +43,7 @@
 		position: relative;
 
 		&::before {
-			background: linear-gradient(to right, $color-toptenlist-fadeout 0%, $color-toptenlist-summary-bg 80%);
+			background: linear-gradient(to right, $color-topTenList-fadeout 0%, $color-topTenList-summary-bg 80%);
 			content: "\200C";
 			display: block;
 			position: absolute;
@@ -54,7 +54,7 @@
 		}
 	}
 
-	.toptenlist-created-by {
+	.topTenList-created-by {
 		float: left;
 		margin: 6px 0;
 	}

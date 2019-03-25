@@ -1,5 +1,5 @@
 """
-Test the API for toptenlists and toptenitems
+Test the API for topTenLists and topTenItems
 """
 
 import json
@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
-from toptenlists.models import TopTenList, TopTenItem
+from topTenLists.models import TopTenList, TopTenItem
 
 class CreateTopTenListAPITest(APITestCase):
     @classmethod
@@ -16,7 +16,7 @@ class CreateTopTenListAPITest(APITestCase):
         # Set up non-modified objects used by all test methods
 
     def setUp(self):
-        self.data = {'name': 'Test toptenlist', 'description':'A description', 'toptenitem': [
+        self.data = {'name': 'Test topTenList', 'description':'A description', 'topTenItem': [
         {'name': 'Item 1 Name', 'description': 'Item 1 description', 'order': 1},
         {'name': 'Item 2 Name', 'description': 'Item 2 description', 'order': 2},
         {'name': 'Item 3 Name', 'description': 'Item 3 description', 'order': 3},
@@ -28,21 +28,21 @@ class CreateTopTenListAPITest(APITestCase):
         {'name': 'Item 9 Name', 'description': 'Item 9 description', 'order': 9},
         {'name': 'Item 10 Name', 'description': 'Item 10 description', 'order': 10}
         ]}
-        # 'toptenlists' is the app_name set in endpoints.py
-        # 'TopTenLists' is the base_name set for the toptenlist route in endpoints.py
-        # '-list' seems to be api magic unrelated to our toptenlist object name
-        self.url = reverse('toptenlists:TopTenLists-list')
+        # 'topTenLists' is the app_name set in endpoints.py
+        # 'TopTenLists' is the base_name set for the topTenList route in endpoints.py
+        # '-list' seems to be api magic unrelated to our topTenList object name
+        self.url = reverse('topTenLists:TopTenLists-list')
 
-    def test_create_toptenlist_authenticated(self):
+    def test_create_topTenList_authenticated(self):
         """
-        Logged in, verified user can create a new toptenlist object.
+        Logged in, verified user can create a new topTenList object.
         """
 
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
 
         self.client.force_authenticate(user=user)
         response = self.client.post(self.url, self.data, format='json')
-        toptenlist_id = json.loads(response.content)['id']
+        topTenList_id = json.loads(response.content)['id']
 
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -50,43 +50,43 @@ class CreateTopTenListAPITest(APITestCase):
         # there should now be 1 TopTenList in the database
         self.assertEqual(TopTenList.objects.count(), 1)
 
-        new_toptenlist = TopTenList.objects.get(pk=toptenlist_id)
+        new_topTenList = TopTenList.objects.get(pk=topTenList_id)
 
         # it should have the right name
-        self.assertEqual(new_toptenlist.name, 'Test toptenlist')
+        self.assertEqual(new_topTenList.name, 'Test topTenList')
 
         # it should have the right description
-        self.assertEqual(new_toptenlist.description, 'A description')
+        self.assertEqual(new_topTenList.description, 'A description')
 
         # it should belong to this user
-        self.assertEqual(new_toptenlist.created_by, user)
+        self.assertEqual(new_topTenList.created_by, user)
 
         # and the username should also be correct
-        self.assertEqual(new_toptenlist.created_by_username, 'Test user')
+        self.assertEqual(new_topTenList.created_by_username, 'Test user')
 
-        # it should be a top level toptenlist (no parent_toptenitem)
-        self.assertEqual(new_toptenlist.parent_toptenitem_id, None)
+        # it should be a top level topTenList (no parent_topTenItem)
+        self.assertEqual(new_topTenList.parent_topTenItem_id, None)
 
-        # find the nested toptenitem data
-        toptenlist_toptenitems_queryset = new_toptenlist.toptenitem.all()
+        # find the nested topTenItem data
+        topTenList_topTenItems_queryset = new_topTenList.topTenItem.all()
 
-        # the toptenlist should have 10 toptenitems
-        self.assertEqual(toptenlist_toptenitems_queryset.count(), 10)
+        # the topTenList should have 10 topTenItems
+        self.assertEqual(topTenList_topTenItems_queryset.count(), 10)
 
         # there should be 10 TopTenItemss in the database
         self.assertEqual(TopTenItem.objects.all().count(), 10)
 
-        # check order, name, description, toptenlist_id for each toptenitem
-        for index, toptenitem in enumerate(toptenlist_toptenitems_queryset):
-            self.assertEqual(toptenitem.order, index+1)
-            self.assertEqual(toptenitem.name, 'Item ' + str(index+1) + ' Name')
-            self.assertEqual(toptenitem.description, 'Item ' + str(index+1) + ' description')
-            self.assertEqual(toptenitem.toptenlist_id, new_toptenlist.id)
+        # check order, name, description, topTenList_id for each topTenItem
+        for index, topTenItem in enumerate(topTenList_topTenItems_queryset):
+            self.assertEqual(topTenItem.order, index+1)
+            self.assertEqual(topTenItem.name, 'Item ' + str(index+1) + ' Name')
+            self.assertEqual(topTenItem.description, 'Item ' + str(index+1) + ' description')
+            self.assertEqual(topTenItem.topTenList_id, new_topTenList.id)
 
 
-    def test_create_toptenlist_not_verified(self):
+    def test_create_topTenList_not_verified(self):
         """
-        create toptenlist should fail if user's email address is not verified
+        create topTenList should fail if user's email address is not verified
         """
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=False)
         self.client.force_authenticate(user=user)
@@ -96,9 +96,9 @@ class CreateTopTenListAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-    def test_create_toptenlist_not_authenticated(self):
+    def test_create_topTenList_not_authenticated(self):
         """
-        create toptenlist should fail if user not logged in
+        create topTenList should fail if user not logged in
         """
         user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
         response = self.client.post(self.url, self.data, format='json')
@@ -114,12 +114,12 @@ class DeleteTopTenListAPITest(APITestCase):
         cls.user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
 
     def setUp(self):
-        self.toptenlist = TopTenList.objects.create(name='Test toptenlist', description='A description', created_by=self.user, created_by_username=self.user.username)
-        self.url = reverse('toptenlists:TopTenLists-detail', kwargs={'pk': self.toptenlist.id})
+        self.topTenList = TopTenList.objects.create(name='Test topTenList', description='A description', created_by=self.user, created_by_username=self.user.username)
+        self.url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': self.topTenList.id})
 
-    def test_delete_toptenlist_by_owner(self):
+    def test_delete_topTenList_by_owner(self):
         """
-        delete toptenlist should succeed if user created toptenlist
+        delete topTenList should succeed if user created topTenList
         """
         self.client.force_authenticate(user=self.user)
 
@@ -129,9 +129,9 @@ class DeleteTopTenListAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
-    def test_delete_toptenlist_not_logged_in(self):
+    def test_delete_topTenList_not_logged_in(self):
         """
-        delete toptenlist should fail if user isn't logged in
+        delete topTenList should fail if user isn't logged in
         """
         response = self.client.delete(self.url)
 
@@ -139,9 +139,9 @@ class DeleteTopTenListAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-    def test_delete_toptenlist_by_not_owner(self):
+    def test_delete_topTenList_by_not_owner(self):
         """
-        delete toptenlist should fail if user didn't create toptenlist
+        delete topTenList should fail if user didn't create topTenList
         """
         otherUser = CustomUser.objects.create(email='person@example.com', username='Other test user', email_verified=False)
 

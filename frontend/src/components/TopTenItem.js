@@ -17,7 +17,7 @@ class Item extends Component {
 		this.state = {
 			'isEditingName': false,
 		};
-		//console.log('toptenitem props, ', props);
+		//console.log('topTenItem props, ', props);
 		this.onCreateChildTopTenList = this.onCreateChildTopTenList.bind(this);
 		this.setIsEditingName = this.setIsEditingName.bind(this);
 		this.onMoveUp = this.onMoveUp.bind(this);
@@ -31,49 +31,49 @@ class Item extends Component {
 	}
 
 	onCreateChildTopTenList = () => {
-		this.props.onCreateChildTopTenList(this.props.toptenitem);
+		this.props.onCreateChildTopTenList(this.props.topTenItem);
 	}
 
 	onMoveUp = () => {
-		this.props.onMoveItemUp(this.props.toptenitem.id);
+		this.props.onMoveItemUp(this.props.topTenItem.id);
 	}
 
 	onMoveDown = () => {
-		this.props.onMoveItemDown(this.props.toptenitem.id);
+		this.props.onMoveItemDown(this.props.topTenItem.id);
 	}
 
 	render() {
 		let showDescription = true;
-		if (this.props.toptenitem.name === '') {
+		if (this.props.topTenItem.name === '') {
 			showDescription = false;
-		} else if (this.state.isEditingName && store.getState().toptenitem.things[this.props.toptenitem.id] && store.getState().toptenitem.things[this.props.toptenitem.id].name === '') {
+		} else if (this.state.isEditingName && store.getState().topTenItem.things[this.props.topTenItem.id] && store.getState().topTenItem.things[this.props.topTenItem.id].name === '') {
 			showDescription = false;
 		}
 
-		let canCreateChildTopTenList = true; // should the "create child toptenlist" button be visible?
+		let canCreateChildTopTenList = true; // should the "create child topTenList" button be visible?
 
-		if (this.props.toptenitem.childTopTenList || // there is already a child toptenlist
-			this.props.toptenitem.name === '' || // there is no toptenitem
-			this.state.isEditingName || // the toptenitem name is being edited
-			!this.props.canEdit) { // the user can't edit this toptenlist
+		if (this.props.topTenItem.childTopTenList || // there is already a child topTenList
+			this.props.topTenItem.name === '' || // there is no topTenItem
+			this.state.isEditingName || // the topTenItem name is being edited
+			!this.props.canEdit) { // the user can't edit this topTenList
 			canCreateChildTopTenList = false;
 		}
 
 		let canViewChildTopTenList = false;
 
-		// child toptenlist exists and user can view it
-		if (this.props.toptenitem.childTopTenList && permissions.canViewTopTenList(this.props.toptenitem.childTopTenList.id)) {
+		// child topTenList exists and user can view it
+		if (this.props.topTenItem.childTopTenList && permissions.canViewTopTenList(this.props.topTenItem.childTopTenList.id)) {
 			canViewChildTopTenList = true;
 		}
 
 		let childTopTenList;
 
 		if (canCreateChildTopTenList) {
-			childTopTenList = (<button className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);	
+			childTopTenList = (<button className="btn btn-primary create-childtopTenList" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);	
 		} else if (canViewChildTopTenList) {
 			childTopTenList = (
-				<div className="child-toptenlist">	
-					<Link to={`/toptenlist/${this.props.toptenitem.childTopTenList.id}`}>{this.props.toptenitem.childTopTenList.name} ></Link>
+				<div className="child-topTenList">	
+					<Link to={`/topTenList/${this.props.topTenItem.childTopTenList.id}`}>{this.props.topTenItem.childTopTenList.name} ></Link>
 				</div>);
 		}
 
@@ -81,48 +81,48 @@ class Item extends Component {
 		let showDown = true;
 
 		if (!this.props.canEdit ||
-			this.props.toptenitem.name === '' ||
-			!showDescription) { // assume that showDescription means there is a saved name i.e. the toptenitem exists
+			this.props.topTenItem.name === '' ||
+			!showDescription) { // assume that showDescription means there is a saved name i.e. the topTenItem exists
 			showUp = false;
 			showDown = false;
-		} else if (this.props.toptenitem.order === 1) {
+		} else if (this.props.topTenItem.order === 1) {
 			showUp = false;
-		} else if (this.props.toptenitem.order === MAX_TOPTENITEMS_IN_TOPTENLIST) {
+		} else if (this.props.topTenItem.order === MAX_TOPTENITEMS_IN_TOPTENLIST) {
 			showDown = false;
 		}
 
 		return (
-			<div className="toptenitem-container">
-				<div className="toptenitem-header">
-					<span className="order">{this.props.toptenitem.order}:</span><EditableTextField
+			<div className="topTenItem-container">
+				<div className="topTenItem-header">
+					<span className="order">{this.props.topTenItem.order}:</span><EditableTextField
 						canEdit={this.props.canEdit}
-						name={`${this.props.toptenitem.order}_name`}
+						name={`${this.props.topTenItem.order}_name`}
 						label="Item name"
-						placeholder="Click here to add an toptenitem"
-						data-state={`${this.props.toptenitem.order}_name`}
-						data-entityid={this.props.toptenitem.id} // database id of the toptenitem
-						id={`${this.props.toptenitem.order}_name`} // id of the html element
+						placeholder="Click here to add an topTenItem"
+						data-state={`${this.props.topTenItem.order}_name`}
+						data-entityid={this.props.topTenItem.id} // database id of the topTenItem
+						id={`${this.props.topTenItem.order}_name`} // id of the html element
 						handleInputChange={this.props.handleInputChange}
 						handleNewValue={this.props.handleNewValue}
 						isEditing={this.setIsEditingName}
-						value={this.props.toptenitem.name}
+						value={this.props.topTenItem.name}
 					/>
 				</div>
 				{childTopTenList}
 				{showDescription &&
-					<div className="toptenitem-body">
+					<div className="topTenItem-body">
 						<EditableTextField
 							textarea={true}
 							canEdit={this.props.canEdit}
-							name={`${this.props.toptenitem.order}_description`}
+							name={`${this.props.topTenItem.order}_description`}
 							placeholder="Click here to add a description"
 							label="Item description"
-							data-state={`${this.props.toptenitem.order}_description`}
-							data-entityid={this.props.toptenitem.id} // database id of the toptenitem
-							id={`${this.props.toptenitem.order}_description`} // id of the html element
+							data-state={`${this.props.topTenItem.order}_description`}
+							data-entityid={this.props.topTenItem.id} // database id of the topTenItem
+							id={`${this.props.topTenItem.order}_description`} // id of the html element
 							handleInputChange={this.props.handleInputChange}
 							handleNewValue={this.props.handleNewValue}
-							value={this.props.toptenitem.description}
+							value={this.props.topTenItem.description}
 						/>
 					</div>
 				}

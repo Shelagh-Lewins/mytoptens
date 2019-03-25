@@ -1,6 +1,6 @@
-// a single toptenlist to be displayed in the Organizer
-// can be expanded to show toptenitems
-// an toptenitem can be selected
+// a single topTenList to be displayed in the Organizer
+// can be expanded to show topTenItems
+// an topTenItem can be selected
 
 import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
@@ -24,35 +24,35 @@ class OrganizerList extends Component {
 	}
 
 	onSelectTopTenItem (e) {
-		this.props.onSelectTopTenItem({ 'toptenlist': this.props.toptenlist, 'order': e.target.dataset.order, 'childTopTenListId': e.target.dataset.childtoptenlistid });
+		this.props.onSelectTopTenItem({ 'topTenList': this.props.topTenList, 'order': e.target.dataset.order, 'childTopTenListId': e.target.dataset.childtopTenListid });
 	}
 
 	renderTopTenItems() {
 		const selectedTopTenItemOrder = parseInt(this.props.selectedTopTenItemOrder); // element property is a string. Order should be a number.
-		const toptenlistId = this.props.toptenlist.id;
+		const topTenListId = this.props.topTenList.id;
 		const selectedTopTenListId = this.props.selectedTopTenListId;
 
 		return (
-			<div className="toptenitems">
-				{this.props.toptenitemOrganizerData[toptenlistId].map((toptenitem) => { // eslint-disable-line array-callback-return
-					const isSelectedTopTenItem = ((toptenlistId === selectedTopTenListId) && (toptenitem.order === selectedTopTenItemOrder));
+			<div className="topTenItems">
+				{this.props.topTenItemOrganizerData[topTenListId].map((topTenItem) => { // eslint-disable-line array-callback-return
+					const isSelectedTopTenItem = ((topTenListId === selectedTopTenListId) && (topTenItem.order === selectedTopTenItemOrder));
 
 					let childTopTenListElm;
 
-					if (toptenitem.childTopTenListId) {
-						const childTopTenList = this.props.toptenlistOrganizerData.find((toptenlist) => toptenlist.id === toptenitem.childTopTenListId);
+					if (topTenItem.childTopTenListId) {
+						const childTopTenList = this.props.topTenListOrganizerData.find((topTenList) => topTenList.id === topTenItem.childTopTenListId);
 						childTopTenListElm = (
-							<span className="child-toptenlist">> {childTopTenList.name}</span>
+							<span className="child-topTenList">> {childTopTenList.name}</span>
 						);
 					}
 
-					if (toptenitem.name) {
-						return (<div key={toptenitem.id} className={`toptenitem ${isSelectedTopTenItem ? 'selected' : ''}`}>
+					if (topTenItem.name) {
+						return (<div key={topTenItem.id} className={`topTenItem ${isSelectedTopTenItem ? 'selected' : ''}`}>
 							<span
 								onClick={this.onSelectTopTenItem}
-								data-order={toptenitem.order}
-								data-childtoptenlistid={toptenitem.childTopTenListId}
-							><span className="order">{toptenitem.order}:</span>{toptenitem.name}</span>{childTopTenListElm}
+								data-order={topTenItem.order}
+								data-childtopTenListid={topTenItem.childTopTenListId}
+							><span className="order">{topTenItem.order}:</span>{topTenItem.name}</span>{childTopTenListElm}
 						</div>);
 					}
 				}
@@ -62,9 +62,9 @@ class OrganizerList extends Component {
 	}
 
 	render() {
-		const name = this.props.toptenlist.name;
+		const name = this.props.topTenList.name;
 
-		const isSelectedTopTenList = (this.props.toptenlist.id === this.props.selectedTopTenListId);
+		const isSelectedTopTenList = (this.props.topTenList.id === this.props.selectedTopTenListId);
 
 		let showTopTenItemsButtonText = '+';
 
@@ -75,7 +75,7 @@ class OrganizerList extends Component {
 		return (
 			<Row className={`organizer-list ${isSelectedTopTenList ? 'selected' : ''}`}>
 				<Col>
-					<button className="btn btn-light show-toptenitems" onClick={this.onShowTopTenItems}>{showTopTenItemsButtonText}</button>
+					<button className="btn btn-light show-topTenItems" onClick={this.onShowTopTenItems}>{showTopTenItemsButtonText}</button>
 					<div className="name">{name}</div>
 					{this.state.showTopTenItems && this.renderTopTenItems()}
 				</Col>

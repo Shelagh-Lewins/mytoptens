@@ -1,6 +1,6 @@
 @import "../variables";
 
-.toptenlists-list {
+.topTenLists-list {
 	.tabs {
 		display: flex;
 		justify-content: center;
@@ -28,11 +28,11 @@
 		}
 	}
 
-	.create-toptenlist {
+	.create-topTenList {
 		margin: 8px 0;
 	}
 
-	.top-level-toptenlists-control {
+	.top-level-topTenLists-control {
 		.form-check-input {
 			margin: 8px 0;
 			position: relative;

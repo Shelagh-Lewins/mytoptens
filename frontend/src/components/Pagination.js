@@ -21,7 +21,7 @@ class Pagination extends React.Component {
 	}
  
 	componentDidUpdate(prevProps, prevState) {
-		// reset page if toptenitems array has changed
+		// reset page if topTenItems array has changed
 		if (this.props.count !== prevProps.count) {
 			this.setPage(this.props.defaultPage);
 		}
@@ -75,7 +75,7 @@ class Pagination extends React.Component {
 			}
 		}
  
-		// calculate start and end toptenitem indexes
+		// calculate start and end topTenItem indexes
 		var startIndex = (currentPage - 1) * pageSize;
 		var endIndex = Math.min(startIndex + pageSize - 1, totalTopTenItems - 1);
  
