@@ -387,7 +387,6 @@ export const getTopTenItemsForTopTenList = createSelector(
 		let topTenListTopTenItems = [];
 
 		if (topTenList) {
-			console.log('list ', topTenList);
 			topTenList.topTenItem.map((topTenItemId) => { // eslint-disable-line array-callback-return
 				let topTenItem = { ...topTenItems[topTenItemId] }; // shallow copy is extensible
 
@@ -411,7 +410,6 @@ export const getParentTopTenItemAndTopTenList = createSelector(
 	// find a topTenLists's parent topTenItem and the parent topTenList, if any
 	// uses the organizer data which has minimal data for all topTenLists belonging to that user
 	(topTenLists, topTenItems) => (topTenList) => {
-		console.log('here');
 		let parentTopTenItem;
 		let parentTopTenList;
 
@@ -424,7 +422,6 @@ export const getParentTopTenItemAndTopTenList = createSelector(
 				}
 			}
 		}
-		console.log('reducer says ', parentTopTenList);
 		return { parentTopTenItem, parentTopTenList };
 	}
 );

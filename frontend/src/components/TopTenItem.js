@@ -35,11 +35,11 @@ class Item extends Component {
 	}
 
 	onMoveUp = () => {
-		this.props.onMoveItemUp(this.props.topTenItem.id);
+		this.props.onMoveTopTenItemUp(this.props.topTenItem.id);
 	}
 
 	onMoveDown = () => {
-		this.props.onMoveItemDown(this.props.topTenItem.id);
+		this.props.onMoveTopTenItemDown(this.props.topTenItem.id);
 	}
 
 	render() {

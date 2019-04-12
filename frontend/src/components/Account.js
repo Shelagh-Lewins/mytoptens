@@ -97,7 +97,7 @@ Account.propTypes = {
 const mapStateToProps = (state) => ({
 	'auth': state.auth,
 	'errors': state.errors,
-	'isLoading': state.list.isLoading,
+	'isLoading': state.topTenList.isLoading,
 	'sendConfirmationEmail': auth.sendConfirmationEmail,
 	'confirmEmailNotSent': auth.confirmEmailNotSent,
 });

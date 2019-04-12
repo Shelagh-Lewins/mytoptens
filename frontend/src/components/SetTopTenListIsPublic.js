@@ -15,14 +15,14 @@ const SetTopTenListIsPublic = props => {
 	function onChangeIsPublic(e) {
 		// map from button data to true / false
 		const value = e.target.dataset.ispublic === 'public' ? true : false;
-		props.onChangeIsPublic({ 'id': e.target.dataset.topTenListid, 'is_public': !value });
+		props.onChangeIsPublic({ 'id': e.target.dataset.toptenlistid, 'is_public': !value });
 	}
 
 	return (
 		<div className="is-public">
 			<button
 				onClick={onChangeIsPublic}
-				data-topTenListid={topTenListId}
+				data-toptenlistid={topTenListId}
 				data-ispublic={isPublic}
 				className={`${isPublic} btn btn-default`}
 				title={tooltip}

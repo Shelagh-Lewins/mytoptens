@@ -24,7 +24,7 @@ class OrganizerList extends Component {
 	}
 
 	onSelectTopTenItem (e) {
-		this.props.onSelectTopTenItem({ 'topTenList': this.props.topTenList, 'order': e.target.dataset.order, 'childTopTenListId': e.target.dataset.childtopTenListid });
+		this.props.onSelectTopTenItem({ 'topTenList': this.props.topTenList, 'order': e.target.dataset.order, 'childTopTenListId': e.target.dataset.childtoptenlistid });
 	}
 
 	renderTopTenItems() {
@@ -51,7 +51,7 @@ class OrganizerList extends Component {
 							<span
 								onClick={this.onSelectTopTenItem}
 								data-order={topTenItem.order}
-								data-childtopTenListid={topTenItem.childTopTenListId}
+								data-childtoptenlistid={topTenItem.childTopTenListId}
 							><span className="order">{topTenItem.order}:</span>{topTenItem.name}</span>{childTopTenListElm}
 						</div>);
 					}
