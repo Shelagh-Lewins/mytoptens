@@ -143,11 +143,11 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'assets/static'),
-    os.path.join(BASE_DIR, 'assets'),
+    # os.path.join(BASE_DIR, 'assets'),
 ]
 
 # used by admin site
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Django rest framework
 REST_FRAMEWORK = {
