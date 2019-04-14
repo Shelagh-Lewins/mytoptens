@@ -147,7 +147,7 @@ STATICFILES_DIRS = [
 ]
 
 # used by admin site
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Django rest framework
 REST_FRAMEWORK = {
