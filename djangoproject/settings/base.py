@@ -143,7 +143,7 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'assets/static'),
-    # os.path.join(BASE_DIR, 'assets'),
+    os.path.join(BASE_DIR, 'assets'),
 ]
 
 # used by admin site
