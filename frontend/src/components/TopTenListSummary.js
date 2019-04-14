@@ -13,7 +13,7 @@ import * as permissions from '../modules/permissions';
 import './TopTenListSummary.scss';
 
 const TopTenListSummary = props => {
-	let canEdit = permissions.canEditTopTenList({ 'id': props.topTenList.id });
+	let canEdit = permissions.canEditTopTenList(props.topTenList.id);
 
 	return (
 		<Col sm="12" md="6">

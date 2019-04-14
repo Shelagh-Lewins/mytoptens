@@ -37,8 +37,6 @@ export function canViewTopTenList(id) {
 
 export function canEditTopTenList(id) {
 	// a topTenList can be edited if created by user
-	//const property = Object.keys(identifier)[0];
-	//const value = identifier[property];
 	const state = store.getState();
 	const topTenLists = state.topTenList.things;
 	const userId = state.auth.user.id;

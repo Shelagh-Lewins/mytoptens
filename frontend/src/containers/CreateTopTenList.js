@@ -41,6 +41,11 @@ class CreateTopTenList extends Component {
 			this.state.parentTopTenListName = urlParams.get('parent-topTenList-name');
 			this.state.parentTopTenListId = urlParams.get('parent-topTenList-id');
 		}
+
+		// use parent item name as default list name
+		if (this.state.parentTopTenItemName) {
+			this.state.name = this.state.parentTopTenItemName;
+		}
 	}
 
 	handleInputChange(e) {
@@ -153,7 +158,7 @@ class CreateTopTenList extends Component {
 						</Col>
 					</Row>
 				</Container>)}
-				<h2>Create a new topTenList</h2>
+				<h2>Create a new Top Ten list</h2>
 				{this.state.parentTopTenItemName && (
 					<div className="parent-topTenItem"><Link to={`/topTenList/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentTopTenItemName}</div>
 				)}

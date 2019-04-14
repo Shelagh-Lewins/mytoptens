@@ -226,7 +226,7 @@ class TopTenListDetails extends Component {
 							</Row>
 							<Row>
 								<Col>
-									{this.state.canEdit &&
+									{this.state.canEdit && this.props.topTenListOrganizerData.length > 1 &&
 									<Organizer
 										topTenList={this.props.topTenList}
 										parentTopTenListId={parentTopTenListId}
