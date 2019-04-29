@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import filters
 from rest_framework.exceptions import APIException
+from allauth.account.models import EmailAddress 
 
 from .models import TopTenList, TopTenItem
 from .serializers import TopTenListSerializer, TopTenItemSerializer
@@ -41,10 +42,12 @@ class HasVerifiedEmail(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        if request.user.email_verified:
-            return True
+        try:
+            email_address = EmailAddress.objects.get(user_id=request.user.id)
+            return email_address.verified
 
-        return False
+        except EmailAddress.DoesNotExist:
+            return False
 
 
 class TopTenListViewSet(FlexFieldsModelViewSet):

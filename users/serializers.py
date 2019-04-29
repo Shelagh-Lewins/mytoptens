@@ -17,5 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
         try:
             email_address = EmailAddress.objects.get(user_id=obj.id)
             return email_address.verified
+            
         except EmailAddress.DoesNotExist:
             return None
