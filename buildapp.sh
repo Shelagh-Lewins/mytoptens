@@ -5,4 +5,6 @@ rm -rf ./assets
 mv ./frontend/build ./assets
 
 . .env
-./manage.py collectstatic --settings=djangoproject.settings.development
+yes yes | ./manage.py collectstatic --settings=djangoproject.settings.development
+
+pip freeze > requirements.txt
