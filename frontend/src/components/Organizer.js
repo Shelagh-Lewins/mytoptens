@@ -66,10 +66,6 @@ class Organizer extends Component {
 	}
 
 	onClickDone = () => {
-		this.setState({
-			'showOrganizer': false,
-		});
-
 		// Don't allow the user to select a topTenItem from the current topTenList.
 		// this shouldn't happen as the current topTenList is not displayed in the organizer.
 		if (this.state.parentTopTenListId === this.props.topTenList.id) {
@@ -106,6 +102,7 @@ class Organizer extends Component {
 			this.props.topTenList.id,
 			'parent_topTenItem_id',
 			this.state.parentTopTenItemId));
+		this.resetOrganizer();
 	}
 
 	onSelectParentTopTenItem = ({ topTenList, order, childTopTenListId }) => {
