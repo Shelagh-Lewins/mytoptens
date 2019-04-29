@@ -20,14 +20,17 @@ class UserListView(generics.ListCreateAPIView):
     serializer_class = serializers.UserSerializer
     authentication_classes = (TokenAuthentication,)
 
+# this has been replaced by a live check on the email status in serializers.py
+# for now I'm leaving it in as reference for receiving signals
+# and in case the new method doesn't work and needs to be removed
 # when the email is confirmed, set a field on the user
 # so the UI can check whether to show the "Resend confirmation email" button
-@receiver(email_confirmed)
-def email_confirmed_(request, email_address, **kwargs):
-    user = email_address.user
-    user.email_verified = True
+#@receiver(email_confirmed)
+#def email_confirmed_(request, email_address, **kwargs):
+    #user = email_address.user
+    #user.email_verified = True
 
-    user.save()
+    #user.save()
 
 # request a new confirmation email
 class EmailConfirmation(APIView):
