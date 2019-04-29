@@ -21,7 +21,7 @@ pip install -r requirements.txt
 . .env
 
 ### make and run migrations ###
-./manage.py makemigrations --settings=djangoproject.settings.production
+# ./manage.py makemigrations --settings=djangoproject.settings.production
 ./manage.py migrate --settings=djangoproject.settings.production
 
 ### update node packages ###
