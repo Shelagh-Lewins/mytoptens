@@ -63,8 +63,10 @@ class OrganizerList extends Component {
 
 	render() {
 		const name = this.props.topTenList.name;
+		//console.log('render. Props', this.props);
 
 		const isSelectedTopTenList = (this.props.topTenList.id === this.props.selectedTopTenListId);
+		//console.log('render isSelectedTopTenList', isSelectedTopTenList);
 
 		let showTopTenItemsButtonText = '+';
 

@@ -16,11 +16,7 @@ class Organizer extends Component {
 		super(props);
 
 		this.state = {
-			'showOrganizer': false,
-			'parentTopTenItemId': props.topTenList.parent_topTenItem,
-			'parentTopTenListId': props.parentTopTenListId, // parent topTenList and topTenItem are stored in state so a new value can be selected, with the old value still present in props if the user cancels
 			'selectedTopTenItemChildTopTenListId': null,
-			'selectedTopTenItemOrder': null,
 		};
 
 		this.onSelectParentTopTenItem = this.onSelectParentTopTenItem.bind(this);
@@ -30,6 +26,7 @@ class Organizer extends Component {
 	}
 
 	componentDidMount() {
+		this.resetOrganizer();
 	}
 
 	componentDidUpdate = (prevProps) => {
@@ -37,13 +34,17 @@ class Organizer extends Component {
 		if ((prevProps.topTenList.parent_topTenItem !== this.props.topTenList.parent_topTenItem) ||
 		// navigated to new topTenList
 		(prevProps.topTenListOrganizerData.length === 0 && this.props.topTenListOrganizerData.length !== 0)) {
-			this.setState({ // reset component
-				'showOrganizer': false,
-				'selectedTopTenItemOrder': this.selectedTopTenItemOrder(),
-				'parentTopTenItemId': this.props.topTenList.parent_topTenItem,
-				'parentTopTenListId': this.props.parentTopTenListId,
-			});
+			this.resetOrganizer();
 		}
+	}
+
+	resetOrganizer() {
+		this.setState({ // reset component
+			'showOrganizer': false,
+			'selectedTopTenItemOrder': this.selectedTopTenItemOrder(),
+			'parentTopTenItemId': this.props.topTenList.parent_topTenItem,
+			'parentTopTenListId': this.props.parentTopTenListId,
+		});
 	}
 
 	onClickOrganize = () => {
@@ -61,9 +62,7 @@ class Organizer extends Component {
 	}
 
 	onClickCancel = () => {
-		this.setState({
-			'showOrganizer': false,
-		});
+		this.resetOrganizer();
 	}
 
 	onClickDone = () => {

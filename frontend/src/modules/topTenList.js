@@ -193,6 +193,7 @@ export const updateTopTenList = (topTenListId, propertyName, value) => dispatch 
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
+		dispatch(fetchOrganizerData(response.created_by));
 		return dispatch(updateTopTenListSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'update topTenItem': error.message }));
