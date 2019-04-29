@@ -27,7 +27,6 @@ class Organizer extends Component {
 
 	componentDidMount() {
 		this.resetOrganizer();
-		console.log('organizer mounted');
 	}
 
 	componentDidUpdate = (prevProps) => {
