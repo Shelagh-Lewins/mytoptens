@@ -8,12 +8,18 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
-from topTenLists.models import TopTenList, TopTenItem
+from allauth.account.models import EmailAddress 
+from toptenlists.models import TopTenList, TopTenItem
 
 class CreateTopTenListAPITest(APITestCase):
     @classmethod
-    # def setUpTestData(cls):
-        # Set up non-modified objects used by all test methods
+    def setUpTestData(cls):
+        # Set up objects used by all test methods
+        cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
+        EmailAddress.objects.create(user=cls.user, 
+            email='person@example.com',
+            primary=True,
+            verified=True)
 
     def setUp(self):
         self.data = {'name': 'Test topTenList', 'description':'A description', 'topTenItem': [
@@ -30,7 +36,7 @@ class CreateTopTenListAPITest(APITestCase):
         ]}
         # 'topTenLists' is the app_name set in endpoints.py
         # 'TopTenLists' is the base_name set for the topTenList route in endpoints.py
-        # '-list' seems to be api magic unrelated to our topTenList object name
+        # '-list' is a standard api command to list a model. It is unrelated to our topTenList object name
         self.url = reverse('topTenLists:TopTenLists-list')
 
     def test_create_topTenList_authenticated(self):
@@ -38,9 +44,7 @@ class CreateTopTenListAPITest(APITestCase):
         Logged in, verified user can create a new topTenList object.
         """
 
-        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
-
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, self.data, format='json')
         topTenList_id = json.loads(response.content)['id']
 
@@ -59,7 +63,7 @@ class CreateTopTenListAPITest(APITestCase):
         self.assertEqual(new_topTenList.description, 'A description')
 
         # it should belong to this user
-        self.assertEqual(new_topTenList.created_by, user)
+        self.assertEqual(new_topTenList.created_by, self.user)
 
         # and the username should also be correct
         self.assertEqual(new_topTenList.created_by_username, 'Test user')
@@ -88,8 +92,12 @@ class CreateTopTenListAPITest(APITestCase):
         """
         create topTenList should fail if user's email address is not verified
         """
-        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=False)
-        self.client.force_authenticate(user=user)
+
+        email_address = EmailAddress.objects.get(user_id=self.user.id)
+        email_address.verified = False
+        email_address.save()
+
+        self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, self.data, format='json')
 
         # the request should fail
@@ -100,7 +108,7 @@ class CreateTopTenListAPITest(APITestCase):
         """
         create topTenList should fail if user not logged in
         """
-        user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
+
         response = self.client.post(self.url, self.data, format='json')
 
         # the request should fail
@@ -111,7 +119,11 @@ class DeleteTopTenListAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        cls.user = CustomUser.objects.create(email='person@example.com', username='Test user', email_verified=True)
+        cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
+        EmailAddress.objects.create(user=cls.user, 
+            email='person@example.com',
+            primary=True,
+            verified=True)
 
     def setUp(self):
         self.topTenList = TopTenList.objects.create(name='Test topTenList', description='A description', created_by=self.user, created_by_username=self.user.username)
@@ -143,7 +155,11 @@ class DeleteTopTenListAPITest(APITestCase):
         """
         delete topTenList should fail if user didn't create topTenList
         """
-        otherUser = CustomUser.objects.create(email='person@example.com', username='Other test user', email_verified=False)
+        otherUser = CustomUser.objects.create_user('Other test user', 'otherperson@example.com', '12345')
+        EmailAddress.objects.create(user=otherUser, 
+            email='otherperson@example.com',
+            primary=True,
+            verified=False)
 
         self.client.force_authenticate(user=otherUser)
 
