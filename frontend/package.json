@@ -13,7 +13,7 @@
     "react-markdown": "^4.0.6",
     "react-redux": "^6.0.0",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^2.1.5",
+    "react-scripts": "3.0.0",
     "reactstrap": "^7.1.0",
     "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.8",
@@ -87,7 +87,9 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "ajv": "^6.10.0",
     "node-sass": "^4.12.0",
-    "sass-loader": "^7.1.0"
+    "sass-loader": "^7.1.0",
+    "typescript": "^3.4.5"
   }
 }
