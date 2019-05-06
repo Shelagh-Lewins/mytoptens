@@ -8,12 +8,12 @@ DESTINATION="mytoptens@178.62.85.245:~/"
 echo "building app..."
 ./buildapp.sh
 
-# remove any old app update files from the server
-# force a complete refresh of all files instead of relying on rsync to detect changes
+# remove old app update files from the server
+# this forces a complete refresh of all files instead of relying on rsync to detect changes
 echo "deleting old update files from server..."
 ssh mytoptens@178.62.85.245 rm -f -r mytoptens
 
-# copy the new app update files onto the server
+# copy new app update files onto the server
 echo "copying new update files onto server..."
 rsync -arv  --filter=":- .gitignore" "$SOURCE" "$DESTINATION"
 
