@@ -1,6 +1,8 @@
 db.sqlite3
 /.env
 /database.cnf
+
+# note that at present, migrations are created on the dev machine and copied to the live server. The lines below are there for reference in case we need to revert.
 # /api/migrations
 # /toptenlists/migrations
 # /users/migrations

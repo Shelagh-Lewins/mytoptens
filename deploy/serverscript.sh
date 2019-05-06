@@ -1,18 +1,23 @@
 #!/bin/bash
 
 ### Configuration ###
-APP_DIR=/var/www/mytoptens/
-PROJECT_DIR=mytoptens
-FRONTEND_DIR=frontend
+# temporary location of app update files
+UPDATE_DIR=$HOME/"mytoptens"
+
+# app location
+APP_DIR="/var/www/mytoptens/"
+PROJECT_DIR="mytoptens"
+FRONTEND_DIR="frontend"
+
+# copy app update files to where Passenger needs them
+echo "copying new app files into /var/www/mytoptens..."
+rsync -arv  --delete --filter=":- .gitignore" "$UPDATE_DIR" "$APP_DIR"/
 
 ### Activate Python virtual environment ###
 cd $APP_DIR
 source venv35/bin/activate
 
-### get new code from GitHub ###
 cd $PROJECT_DIR
-git fetch origin
-git reset --hard origin/master
 
 ### update Python requirements ###
 pip install -r requirements.txt
@@ -21,6 +26,7 @@ pip install -r requirements.txt
 . .env
 
 ### make and run migrations ###
+# note that at present, migrations are created on the dev machine and copied to the live server. The line below is there for reference in case we need to revert.
 # ./manage.py makemigrations --settings=djangoproject.settings.production
 ./manage.py migrate --settings=djangoproject.settings.production
 
