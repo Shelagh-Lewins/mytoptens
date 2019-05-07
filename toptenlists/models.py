@@ -35,7 +35,7 @@ class TopTenItem(models.Model):
     modified_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, blank=True, default='')
     description = models.CharField(max_length=5000, blank=True, default='')
-    topTenList = models.ForeignKey(TopTenList, on_delete=models.CASCADE, related_name='topTenItem')
+    topTenList = models.ForeignKey(TopTenList, on_delete=models.CASCADE, related_name='topTenItem', editable=False)
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     class Meta:
