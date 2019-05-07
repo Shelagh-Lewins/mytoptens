@@ -24,6 +24,19 @@ new_list_data = {'name': 'Tasty food', 'description':'My favourite foods', 'topT
     {'name': 'Hummus', 'description': 'Another staple', 'order': 10}
     ]}
 
+second_list_data = {'name': 'Drinks', 'description':'Things to driink', 'topTenItem': [
+    {'name': 'Coffee', 'description': 'Caffeiated', 'order': 1},
+    {'name': 'Tea', 'description': 'Yorkshire', 'order': 2},
+    {'name': 'Red wine', 'description': 'Chilean', 'order': 3},
+    {'name': '', 'description': '', 'order': 4},
+    {'name': '', 'description': '', 'order': 5},
+    {'name': '', 'description': '', 'order': 6},
+    {'name': '', 'description': '', 'order': 7},
+    {'name': '', 'description': '', 'order': 8},
+    {'name': '', 'description': '', 'order': 9},
+    {'name': '', 'description': '', 'order': 10},
+    ]}
+
 # 'topTenLists' is the app_name set in endpoints.py
 # 'TopTenLists' is the base_name set for the topTenList route in endpoints.py
 # '-list' is a standard api command to list a model. It is unrelated to our topTenList object name
@@ -139,7 +152,6 @@ class EditTopTenListAPITest(APITestCase):
         edit topTenList should succeed if user created topTenList
         """
 
-        # edit the list name and description
         list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': self.topTenList_id})
 
         response = self.client.patch(list_detail_url, self.edit_data, format='json')
@@ -155,12 +167,208 @@ class EditTopTenListAPITest(APITestCase):
         # it should have the new description
         self.assertEqual(edited_topTenList.description, self.edit_data.get('description', None))
 
-    def test_move_item_up(self):
+    def test_set_parent_topTenItem(self):
+        """
+        Set a parent item for the list, i.e. make it a child list
+        """
+       
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': self.topTenList_id})
+
+        data = {'parent_topTenItem_id': item_1_id}
+
+        response = self.client.patch(list_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        edited_topTenList = TopTenList.objects.get(pk=self.topTenList_id)
+
+        # the list should have the parent_topTenItem assigned
+        self.assertEqual(edited_topTenList.parent_topTenItem.id, item_1_id)
+
+    def test_edit_topTenList_not_authenticated(self):
+        """
+        edit topTenList should fail if user not logged in
+        """
+
+        self.client.logout()
+
+        list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': self.topTenList_id})
+
+        response = self.client.patch(list_detail_url, self.edit_data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_edit_topTenList_by_not_owner(self):
+        """
+        edit topTenList should fail if user didn't create topTenList
+        """
+
+        self.client.logout()
+
+        otherUser = CustomUser.objects.create_user('Other test user', 'otherperson@example.com', '12345')
+        EmailAddress.objects.create(user=otherUser, 
+            email='otherperson@example.com',
+            primary=True,
+            verified=False)
+
+        self.client.force_authenticate(user=otherUser)
+
+        list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': self.topTenList_id})
+
+        response = self.client.patch(list_detail_url, self.edit_data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+class EditTopTenItemAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Set up objects used by all test methods
+        cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
+        EmailAddress.objects.create(user=cls.user, 
+            email='person@example.com',
+            primary=True,
+            verified=True)
+        cls.edit_data = {'name': 'Food, glorious food!', 'description':'This is a list of things'}
+
+    def setUp(self):
+        # create a new toptenlist
+        self.client.force_authenticate(user=self.user)
+        self.response = self.client.post(create_list_url, new_list_data, format='json')
+        self.topTenList_id = json.loads(self.response.content)['id']
+        self.topTenList = TopTenList.objects.get(pk=self.topTenList_id)
+
+    def test_edit_topTenItem_by_owner(self):
+        """
+        edit topTenItem should succeed if user created topTenList
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_4_id = topTenItems[3].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_4_id})
+
+        data = {'name': 'Cauliflower curry', 'description': 'with lots of ginger'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the name and description should have changed
+        self.assertEqual(topTenItems[3].name, data.get('name', None))
+        self.assertEqual(topTenItems[3].description, data.get('description', None))
+
+    def test_edit_topTenItem_order(self):
+        """
+        edit topTenItem order should fail
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_4_id = topTenItems[3].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_4_id})
+
+        data = {'order': '1'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # def test_edit_topTenItem_topTenList(self):
+        """
+        edit topTenItem parent topTenList should fail
+        """
+
+        # the request does not fail, but the topTenList_id is not updated
+        # It is likely that the test is not correctly setting new value
+        # though, I cannot see how else it would work and have not found documentation with other information
+        # For now, this will have to remain untested
+        """
+        topTenItems = self.topTenList.topTenItem.all()
+        item_4_id = topTenItems[3].id
+        print('original list')
+        print(topTenItems[3].topTenList_id)
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_4_id})
+
+        # create a second topTenList
+        response1 = self.client.post(create_list_url, second_list_data, format='json')
+        second_topTenList_id = json.loads(response1.content)['id']
+        print('id')
+        print(second_topTenList_id)
+        data = {'topTenList_id': second_topTenList_id}
+        print('about to set topTenList_id')
+        response2 = self.client.patch(item_detail_url, data, format='json')
+
+        updated_item = TopTenItem.objects.get(pk=item_4_id)
+        print('updated item')
+        print(updated_item)
+        print(updated_item.name)
+        print(updated_item.topTenList_id)
+
+        # the request should fail
+        self.assertEqual(response2.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)"""
+
+
+
+    def test_edit_topTenItem_not_authenticated(self):
+        """
+        edit topTenItem should fail if user not logged in
+        """
+
+        self.client.logout()
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_4_id = topTenItems[3].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_4_id})
+
+        data = {'name': 'Cauliflower curry', 'description': 'with lots of ginger'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_edit_topTenItem_by_not_owner(self):
+        """
+        edit topTenItem should fail if user didn't create topTenList
+        """
+
+        self.client.logout()
+
+        otherUser = CustomUser.objects.create_user('Other test user', 'otherperson@example.com', '12345')
+        EmailAddress.objects.create(user=otherUser, 
+            email='otherperson@example.com',
+            primary=True,
+            verified=False)
+
+        self.client.force_authenticate(user=otherUser)
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_4_id = topTenItems[3].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_4_id})
+
+        data = {'name': 'Cauliflower curry', 'description': 'with lots of ginger'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_move_topTenItem_up(self):
         """
         Move item up should swap two topTenItems
         """
 
-        # find the nested topTenItem data
         # this seems to be a reference, and always gives the latest data
         topTenItems = self.topTenList.topTenItem.all()
 
@@ -204,83 +412,6 @@ class EditTopTenListAPITest(APITestCase):
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-    def test_set_parent_item(self):
-        """
-        Set a parent item for the list, i.e. make it a child list
-        """
-       
-        topTenItems = self.topTenList.topTenItem.all()
-        item_1_id = topTenItems[0].id
-
-        list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': self.topTenList_id})
-
-        data = {'parent_topTenItem_id': item_1_id}
-
-        response = self.client.patch(list_detail_url, data, format='json')
-
-        # the request should succeed
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        edited_topTenList = TopTenList.objects.get(pk=self.topTenList_id)
-
-        # the list should have the parent_topTenItem assigned
-        self.assertEqual(edited_topTenList.parent_topTenItem.id, item_1_id)
-
-    def test_edit_topTenList_not_authenticated(self):
-        """
-        edit topTenList should fail if user not logged in
-        """
-
-        # create a new toptenlist
-        self.client.force_authenticate(user=self.user)
-        response = self.client.post(create_list_url, new_list_data, format='json')
-        topTenList_id = json.loads(response.content)['id']
-
-        # creating the list should succeed
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        self.client.logout()
-
-        # now edit the list
-        detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': topTenList_id})
-
-        response2 = self.client.patch(detail_url, self.edit_data, format='json')
-
-        # the request should fail
-        self.assertEqual(response2.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_edit_topTenList_by_not_owner(self):
-        """
-        edit topTenList should fail if user didn't create topTenList
-        """
-
-        # create a new toptenlist
-        self.client.force_authenticate(user=self.user)
-        response = self.client.post(create_list_url, new_list_data, format='json')
-        topTenList_id = json.loads(response.content)['id']
-
-        # creating the list should succeed
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        self.client.logout()
-
-        otherUser = CustomUser.objects.create_user('Other test user', 'otherperson@example.com', '12345')
-        EmailAddress.objects.create(user=otherUser, 
-            email='otherperson@example.com',
-            primary=True,
-            verified=False)
-
-        self.client.force_authenticate(user=otherUser)
-
-        # now edit the list
-        detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': topTenList_id})
-
-        response2 = self.client.patch(detail_url, self.edit_data, format='json')
-
-        # the request should fail
-        self.assertEqual(response2.status_code, status.HTTP_403_FORBIDDEN)
-
 
 class DeleteTopTenListAPITest(APITestCase):
     @classmethod
