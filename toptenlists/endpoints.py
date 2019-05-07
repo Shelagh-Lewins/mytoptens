@@ -9,7 +9,7 @@ from .api import SearchAPIView
 router = routers.DefaultRouter()
 router.register('toptenlist', TopTenListViewSet, base_name='TopTenLists') # 'TopTenLists' is used in reverse
 router.register('toptenlistdetail', TopTenListDetailViewSet, base_name='TopTenListDetail')
-router.register('toptenitem', TopTenItemViewSet, base_name='TopTenItems')
+router.register('toptenitem', TopTenItemViewSet, base_name='TopTenItems') # 'TopTenItems' is used in reverse
 router.register('searchhome', SearchAPIView, base_name='searchhome')
 
 app_name = 'topTenLists' # namespace for reverse
