@@ -1,6 +1,7 @@
 db.sqlite3
 /.env
 /database.cnf
+/deploy/.env
 # /api/migrations
 # /toptenlists/migrations
 # /users/migrations
