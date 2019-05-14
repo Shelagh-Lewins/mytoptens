@@ -22,7 +22,8 @@ ssh $DESTINATION rm -f -r mytoptens
 
 # copy new app update files onto the server
 echo "copying new update files onto server..."
-rsync -arv  --filter=":- .gitignore" "$SOURCE" "$DESTINATION"":~/"
+rsync -arv --filter=":- .rsyncignore" "$SOURCE" "$DESTINATION"":~/"
+# rsync -arv  --filter=":- .gitignore" "$SOURCE" "$DESTINATION"":~/"
 
 # run the deployment script on the server
 echo "deploying app on server..."

@@ -5,6 +5,7 @@ deploy/.env
 
 # Byte-compiled / optimized / DLL files
 api/__pycache__/
+djangoproject/__pycache__/
 djangoproject/settings/__pycache__/
 toptenlists/__pycache__/
 toptenlists/migrations/__pycache__/

@@ -11,7 +11,8 @@ FRONTEND_DIR="frontend"
 
 # copy app update files to where Passenger needs them
 echo "copying new app files into /var/www/mytoptens..."
-rsync -arv  --delete --filter=":- .gitignore" "$UPDATE_DIR" "$APP_DIR"/
+# rsync -arv  --delete --filter=":- .gitignore" "$UPDATE_DIR" "$APP_DIR"/
+rsync -arv  --delete --filter=":- .rsyncignore" "$UPDATE_DIR" "$APP_DIR"/
 
 ### Activate Python virtual environment ###
 cd $APP_DIR
