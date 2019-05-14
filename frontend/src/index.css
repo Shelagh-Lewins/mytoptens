@@ -11,3 +11,10 @@ body {
 .clearing {
 	clear: both;
 }
+
+/* this is a bootstrap reset which seems not to be correctly built by webpack */
+*,
+::after,
+::before {
+	box-sizing: border-box;
+}
