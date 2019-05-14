@@ -3,7 +3,19 @@ db.sqlite3
 /database.cnf
 deploy/.env
 
-# note that at present, migrations are created on the dev machine and copied to the live server. The lines below are there for reference in case we need to revert.
+# Byte-compiled / optimized / DLL files
+api/__pycache__/
+djangoproject/settings/__pycache__/
+toptenlists/__pycache__/
+toptenlists/migrations/__pycache__/
+users/__pycache__/
+users/migrations/__pycache__/
+
+# build output files
+assets/
+static/
+
+# note that at present, migrations are created on the dev machine and copied to the live server, so they are tracked. The lines below are there for reference in case we need to revert.
 # /api/migrations
 # /toptenlists/migrations
 # /users/migrations
