@@ -1,9 +1,14 @@
+## files that should also be in .rsyncignore because they should not be copied over by the build process
+# files that Django creates but we don't use
 db.sqlite3
+
+# secure files that should not be in the repository
 /.env
 /database.cnf
 deploy/.env
 
-# Byte-compiled / optimized / DLL files
+##files that should NOT be in .rsyncignore because the SHOULD be copied over by the build process
+# Byte-compiled / optimized / DLL files, part of the build process
 api/__pycache__/
 djangoproject/__pycache__/
 djangoproject/settings/__pycache__/
