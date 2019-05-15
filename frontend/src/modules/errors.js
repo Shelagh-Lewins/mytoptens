@@ -24,7 +24,7 @@ const initialState = {};
 export default function(state = initialState, action ) {
 	switch(action.type) {
 		case GET_ERRORS: {
-			// ensure we have an array of strings to allow multiple errors to be displayed
+			// ensure we have a key-value object to allow multiple errors to be displayed
 			let errors = {};
 
 			Object.keys(action.payload).forEach((key) => {
