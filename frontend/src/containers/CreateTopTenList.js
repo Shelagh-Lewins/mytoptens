@@ -16,6 +16,12 @@ import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
 
 import './CreateTopTenList.scss';
 
+import * as topTenListReducer from '../modules/topTenList';
+import * as reusableItemReducer from '../modules/reusableItem';
+import Combobox from 'react-widgets/lib/Combobox';
+import 'react-widgets/dist/css/react-widgets.css';
+
+
 class CreateTopTenList extends Component {
 	constructor(props) {
 		super(props);
@@ -29,6 +35,7 @@ class CreateTopTenList extends Component {
 			this.state[`topTenItem${i}_description`] = '';
 		}
 		this.handleInputChange = this.handleInputChange.bind(this);
+		this.onSelectItem = this.onSelectItem.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.cancel = this.cancel.bind(this);
 
@@ -48,10 +55,22 @@ class CreateTopTenList extends Component {
 		}
 	}
 
+	getOrganizerData = (userId) => {
+		// minimal data for all my topTenLists and topTenItems, used for reusableItem
+		this.props.dispatch(topTenListReducer.fetchOrganizerData(userId));
+		this.props.dispatch(clearErrors());
+	}
+
 	handleInputChange(e) {
 		this.setState({
 			[e.target.name]: e.target.value
 		});
+	}
+
+	// user selects an item from the dropdown list. This will be to either use or create a ReusableItem
+	onSelectItem(e) {
+		console.log('onSelectItem', e);
+		console.log('selected item ', e.name, e.id);
 	}
 
 	cancel(e) {
@@ -89,15 +108,14 @@ class CreateTopTenList extends Component {
 		this.props.dispatch(createTopTenList(newTopTenList, this.props.history));
 	}
 
-
-	componentDidMount() {
-
-	}
-
 	componentDidUpdate(prevProps){
 		// If the user cannot create a topTenList, redirect to Home
 		if(!permissions.canCreateTopTenList() && !this.props.auth.isLoading){
 			this.props.history.push('/');
+		}
+
+		if (!prevProps.auth.user.id && this.props.auth.user.id) {
+			this.getOrganizerData(this.props.auth.user.id);
 		}
 	}
 
@@ -108,10 +126,24 @@ class CreateTopTenList extends Component {
 	renderTopTenItemInputs() {
 		let elements = [];
 
+		let GroupHeading = ({ item }) => {
+			switch(item) {
+				case 'reusableItem':
+					return <span>Reusable Items</span>;
+
+
+				case 'topTenItem':
+					return <span>Top Ten Items</span>;
+
+				default:
+					return null;
+			}
+		};
+
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
-					<Row>
+					{/*<Row>
 						<Col lg="9" className="topTenItem-name">
 							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
 							<Input
@@ -121,6 +153,25 @@ class CreateTopTenList extends Component {
 								onChange={ this.handleInputChange }
 								value={ this.state[`topTenItem${i}_name`] }
 								placeholder="Enter the Top Ten item name"
+							/>
+							<div className='invalid-feedback' />
+						</Col>
+					</Row> */}
+					<Row>
+						<Col lg="9" className="topTenItem-name">
+							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
+							<Combobox
+								name={`topTenItem${i}_name`}
+								id={`topTenItem${i}_name`}
+								data={this.props.reusableItemData}
+								minLength={2}
+      					filter='contains'
+      					groupComponent={GroupHeading}
+      					groupBy={item => item.type}
+								valueField='id'
+    						textField='name'
+								placeholder="Enter the Top Ten item name"
+								onSelect={this.onSelectItem}
 							/>
 							<div className='invalid-feedback' />
 						</Col>
@@ -229,6 +280,7 @@ CreateTopTenList.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'errors': state.errors,
+	'reusableItemData': reusableItemReducer.getSortedReusableItemSuggestions(state),
 });
 
 export default connect(mapStateToProps)(withRouter(CreateTopTenList));

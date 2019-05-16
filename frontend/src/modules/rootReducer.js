@@ -10,6 +10,7 @@ import auth from './auth';
 import page from './page';
 import topTenList from './topTenList';
 import topTenItem from './topTenItem';
+import reusableItem from './reusableItem';
 // by importing the actual reducer as the default, the state of each is initialised
 
 export default combineReducers({
@@ -18,4 +19,5 @@ export default combineReducers({
 	'page': page,
 	'topTenList': topTenList,
 	'topTenItem': topTenItem,
+	'reusableItem': reusableItem,
 });
