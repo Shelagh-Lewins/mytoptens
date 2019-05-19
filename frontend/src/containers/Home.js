@@ -169,9 +169,6 @@ class Home extends Component {
 					pageSize={PAGE_SIZE}
 					currentPage={this.state.currentPage}
 					onChangePage={this.onChangePage}
-					//searchTerm={this.props.searchTerm}
-					//searchComplete={this.props.searchComplete}
-					//searchResults={this.props.searchResults}
 				/>
 			</div>
 		);
@@ -187,9 +184,6 @@ Home.propTypes = {
 	'count': PropTypes.number, // data may not yet be loaded
 	'next': PropTypes.string, // there may be no 'next' page
 	'previous': PropTypes.string, // there may be no 'previous' page
-	//'searchTerm': PropTypes.string.isRequired,
-	//'searchComplete': PropTypes.bool.isRequired,
-	//'searchResults': PropTypes.array.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -201,9 +195,6 @@ const mapStateToProps = (state) => ({
 	'count': state.topTenList.count,
 	'next': state.topTenList.next,
 	'previous': state.topTenList.previous,
-	//'searchTerm': state.page.searchTerm,
-	//'searchComplete': state.page.searchComplete,
-	//'searchResults': state.page.searchResults,
 });
 
 export default connect(mapStateToProps)(withRouter(Home));
