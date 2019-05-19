@@ -98,7 +98,7 @@ class Item extends Component {
 						canEdit={this.props.canEdit}
 						name={`${this.props.topTenItem.order}_name`}
 						label="Item name"
-						placeholder="Click here to add an topTenItem"
+						placeholder="Click here to add a topTenItem"
 						data-state={`${this.props.topTenItem.order}_name`}
 						data-entityid={this.props.topTenItem.id} // database id of the topTenItem
 						id={`${this.props.topTenItem.order}_name`} // id of the html element
