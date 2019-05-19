@@ -16,6 +16,73 @@ import {
 export const CREATE_REUSABLEITEM_REQUESTED = 'CREATE_REUSABLEITEM_REQUESTED';
 export const RECEIVE_REUSABLEITEMS = 'RECEIVE_REUSABLEITEMS';
 
+export const SEARCH_REUSABLEITEMS_STARTED = 'SEARCH_REUSABLEITEMS_STARTED';
+export const SEARCH_REUSABLEITEMS_SUCCEEDED = 'SEARCH_REUSABLEITEMS_SUCCEEDED';
+export const SEARCH_REUSABLEITEMS_FAILED = 'SEARCH_REUSABLEITEMS_FAILED';
+export const SEARCH_REUSABLEITEMS_CLEAR = 'SEARCH_REUSABLEITEMS_CLEAR';
+
+//////////////////////////////////
+// Search for reusableItems
+export function searchReusableItemsStarted(searchTerm) {
+	return {
+		'type': SEARCH_REUSABLEITEMS_STARTED,
+		'payload': { searchTerm },
+	};
+}
+
+function searchReusableItemsSucceeded(results) {
+	// TODO notify if no results
+	return {
+		'type': SEARCH_REUSABLEITEMS_SUCCEEDED,
+		'payload': { results },
+	};
+}
+
+function searchReusableItemsFailed() {
+	return {
+		'type': SEARCH_REUSABLEITEMS_FAILED,
+	};
+}
+
+// reset if there is no searchTerm
+export function searchReusableItemsClear() {
+	return {
+		'type': SEARCH_REUSABLEITEMS_CLEAR,
+	};
+}
+
+export function searchReusableItems(searchTerm) {
+	return (dispatch, getState) => {
+		// don't search on empty string
+		if(!searchTerm || searchTerm === '') {
+			return dispatch(searchReusableItemsClear());
+		}
+
+		dispatch(searchReusableItemsStarted(searchTerm));
+		/*
+		// todo replace with call to reusableItems API
+		// if the user is not logged in, don't use auth. The server should return the topTenList if a non-authenticated user should see it.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
+
+		return fetchAPI({
+			'url': `/api/v1/content/searchhome/?search=${searchTerm}`,
+			'method': 'GET',
+			'useAuth': useAuth,
+		}).then(response => {
+			return dispatch(searchHomeSucceeded(response.results));
+		}).catch(error => {
+			dispatch(searchHomeFailed());
+
+			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
+		}); */
+	};
+}
+
+
 //////////////////////////////////
 // Reducer
 var updeep = require('updeep');
@@ -81,6 +148,9 @@ const initialResuableItemsState = {
 	'count': null,
 	'next': null,
 	'previous': null,
+	'searchTerm': '',
+	'searchComplete': false,
+	'searchResults': [],
 	// 'things': {},
 	'things': fakeResuableItems,
 	'organizerData': {},
@@ -97,7 +167,7 @@ export const getReusableItems = state => {
 
 		return {
 			'type': 'reusableItem',
-			'id': reusableItem.id,
+			'id': id,
 			'name': reusableItem.name,
 		};
 	});
@@ -130,9 +200,15 @@ export const getSortedReusableItemSuggestions = createSelector(
 		topTenItems.sort(function (a, b) {
 			return a.name.localeCompare(b.name);
 		});
+
 		return reusableItems.concat(topTenItems);
 	}
 );
+
+export const getReusableItemList = state => {
+	console.log('here', state.reusableItem.searchTerm);
+	return getSortedReusableItemSuggestions(state);
+};
 
 
 // construct list of suggested item names
@@ -164,6 +240,36 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 				'things': updeep.constant(things),
 				'isLoading': false }, state);
 		}
+
+		case SEARCH_REUSABLEITEMS_STARTED	: {
+			return updeep({
+				'searchTerm': action.payload.searchTerm,
+				'searchComplete': false,
+				'searchResults': updeep.constant([]),
+			}, state);
+		}
+
+		case SEARCH_REUSABLEITEMS_SUCCEEDED	: {
+			return updeep({
+				'searchComplete': true,
+				'searchResults': updeep.constant(action.payload.results),
+			}, state);
+		}
+
+		case SEARCH_REUSABLEITEMS_FAILED	: {
+			return updeep({
+				'searchComplete': true,
+			}, state);
+		}
+
+		case SEARCH_REUSABLEITEMS_CLEAR	: {
+			return updeep({
+				'searchTerm': updeep.constant(''),
+				'searchComplete': false,
+				'searchResults': updeep.constant([]),
+			}, state);
+		}
+
 		default:
 			return state;
 	}

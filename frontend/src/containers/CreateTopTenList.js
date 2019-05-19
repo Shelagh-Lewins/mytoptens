@@ -35,7 +35,8 @@ class CreateTopTenList extends Component {
 			this.state[`topTenItem${i}_description`] = '';
 		}
 		this.handleInputChange = this.handleInputChange.bind(this);
-		this.onSelectItem = this.onSelectItem.bind(this);
+		this.onSelectItemName = this.onSelectItemName.bind(this);
+		this.onChangeItemName = this.onChangeItemName.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.cancel = this.cancel.bind(this);
 
@@ -67,9 +68,19 @@ class CreateTopTenList extends Component {
 		});
 	}
 
-	// user selects an item from the dropdown list. This will be to either use or create a ReusableItem
-	onSelectItem(e) {
-		console.log('onSelectItem', e);
+	// user types in an item name combobox.
+	onChangeItemName(searchTerm) {
+		clearTimeout(this.itemNameTimeout);
+		this.itemNameTimeout = setTimeout(() => {
+			console.log('onChangeItemName', searchTerm);
+			console.log('entered ', searchTerm);
+			this.props.dispatch(reusableItemReducer.searchReusableItems(searchTerm));
+		}, 500);
+	}
+
+	// user selects an item name from a dropdown list. This will be to either use or create a ReusableItem
+	onSelectItemName(e) {
+		console.log('onSelectItemName', e);
 		console.log('selected item ', e.name, e.id);
 	}
 
@@ -171,7 +182,8 @@ class CreateTopTenList extends Component {
 								valueField='id'
     						textField='name'
 								placeholder="Enter the Top Ten item name"
-								onSelect={this.onSelectItem}
+								onChange={this.onChangeItemName}
+								onSelect={this.onSelectItemName}
 							/>
 							<div className='invalid-feedback' />
 						</Col>
@@ -280,7 +292,7 @@ CreateTopTenList.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'errors': state.errors,
-	'reusableItemData': reusableItemReducer.getSortedReusableItemSuggestions(state),
+	'reusableItemData': reusableItemReducer.getReusableItemList(state),
 });
 
 export default connect(mapStateToProps)(withRouter(CreateTopTenList));
