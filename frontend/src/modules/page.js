@@ -53,7 +53,7 @@ export function searchHome(searchTerm) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/searchhome/?search=${searchTerm}`,
+			'url': `/api/v1/content/searchlistsitems/?search=${searchTerm}`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {

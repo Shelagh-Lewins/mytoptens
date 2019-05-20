@@ -33,7 +33,6 @@ export function suggestReusableItems(searchTerm) {
 		// TODO also search topTenItems
 
 		dispatch(searchReusableItems(searchTerm));
-		console.log('1');
 		dispatch(searchTopTenItems(searchTerm));
 	};
 }
@@ -125,7 +124,6 @@ function searchTopTenItemsFailed() {
 }
 
 export function searchTopTenItems(searchTerm) {
-	console.log('2');
 	return (dispatch, getState) => {
 		// clear is handled by reusableItem reducer
 		// don't search on empty string
@@ -141,13 +139,13 @@ export function searchTopTenItems(searchTerm) {
 		if (getState().auth.user.token) {
 			useAuth = true;
 		}
-console.log('about to search');
+
 		return fetchAPI({
-			'url': `/api/v1/content/searchtoptenitem/?search=${searchTerm}`,
+			'url': `/api/v1/content/searchlistsitems/?search=${searchTerm}&includetoptenlists=false&excludereusableitems=true`,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			console.log('search api says ', response);
+			console.log('search api says ', response.results);
 			return dispatch(searchTopTenItemsSucceeded(response.results));
 		}).catch(error => {
 			dispatch(searchTopTenItemsFailed());
@@ -311,7 +309,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep(initialResuableItemsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
 		
-		case RECEIVE_REUSABLEITEMS: {
+		/* case RECEIVE_REUSABLEITEMS: {
 			const { entities } = action.payload;
 
 			let things = {};
@@ -323,21 +321,18 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep({
 				'things': updeep.constant(things),
 				'isLoading': false }, state);
-		}
+		} */
 
 		case SEARCH_REUSABLEITEMS_STARTED	: {
 			return updeep({
 				'searchTerm': action.payload.searchTerm,
 				'searchComplete': false,
-				'searchResults': updeep.constant({
-					'reusableItems': [], // todo search for reusableItems
-					'topTenItems': [], // todo search for topTenItems
-				}),
+				'searchResults': { 'reusableItems': updeep.constant([]) },
 			}, state);
 		}
 
 		case SEARCH_REUSABLEITEMS_SUCCEEDED	: {
-			console.log('search succeeded', action.payload);
+			console.log('search reusable items succeeded', action.payload);
 			return updeep({
 				'searchComplete': true,
 				'searchResults': { 'reusableItems': updeep.constant(action.payload.results) },
@@ -355,6 +350,29 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 				'searchTerm': updeep.constant(''),
 				'searchComplete': false,
 				'searchResults': { 'reusableItems': updeep.constant([]) },
+				'searchResults': { 'topTenItems': updeep.constant([]) },
+			}, state);
+		}
+
+		case SEARCH_TOPTENITEMS_STARTED	: {
+			return updeep({
+				'searchTerm': action.payload.searchTerm,
+				'searchComplete': false,
+				'searchResults': { 'topTenItems': updeep.constant([]) },
+			}, state);
+		}
+
+		case SEARCH_TOPTENITEMS_SUCCEEDED	: {
+			console.log('search toptenitems succeeded', action.payload);
+			return updeep({
+				'searchComplete': true,
+				'searchResults': { 'topTenItems': updeep.constant(action.payload.results) },
+			}, state);
+		}
+
+		case SEARCH_TOPTENITEMS_FAILED	: {
+			return updeep({
+				'searchComplete': true,
 			}, state);
 		}
 
