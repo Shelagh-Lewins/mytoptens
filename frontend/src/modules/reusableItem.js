@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import store from '../store';
 
@@ -20,6 +21,22 @@ export const SEARCH_REUSABLEITEMS_STARTED = 'SEARCH_REUSABLEITEMS_STARTED';
 export const SEARCH_REUSABLEITEMS_SUCCEEDED = 'SEARCH_REUSABLEITEMS_SUCCEEDED';
 export const SEARCH_REUSABLEITEMS_FAILED = 'SEARCH_REUSABLEITEMS_FAILED';
 export const SEARCH_REUSABLEITEMS_CLEAR = 'SEARCH_REUSABLEITEMS_CLEAR';
+
+export const SEARCH_TOPTENITEMS_STARTED = 'SEARCH_TOPTENITEMS_STARTED';
+export const SEARCH_TOPTENITEMS_SUCCEEDED = 'SEARCH_TOPTENITEMS_SUCCEEDED';
+export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
+
+//////////////////////////////////
+// Suggest names for topTenItems based on reusableItems and topTenItems that have no reusable item
+export function suggestReusableItems(searchTerm) {
+	return (dispatch) => {
+		// TODO also search topTenItems
+
+		dispatch(searchReusableItems(searchTerm));
+		console.log('1');
+		dispatch(searchTopTenItems(searchTerm));
+	};
+}
 
 //////////////////////////////////
 // Search for reusableItems
@@ -59,6 +76,8 @@ export function searchReusableItems(searchTerm) {
 		}
 
 		dispatch(searchReusableItemsStarted(searchTerm));
+
+		return dispatch(searchReusableItemsSucceeded(fakeResuableItems));
 		/*
 		// todo replace with call to reusableItems API
 		// if the user is not logged in, don't use auth. The server should return the topTenList if a non-authenticated user should see it.
@@ -82,16 +101,72 @@ export function searchReusableItems(searchTerm) {
 	};
 }
 
+//////////////////////////////////
+// Search for Top Ten Items by name, but only those which have no reusableItem
+export function searchTopTenItemsStarted(searchTerm) {
+	return {
+		'type': SEARCH_TOPTENITEMS_STARTED,
+		'payload': { searchTerm },
+	};
+}
+
+function searchTopTenItemsSucceeded(results) {
+	// TODO notify if no results
+	return {
+		'type': SEARCH_TOPTENITEMS_SUCCEEDED,
+		'payload': { results },
+	};
+}
+
+function searchTopTenItemsFailed() {
+	return {
+		'type': SEARCH_TOPTENITEMS_FAILED,
+	};
+}
+
+export function searchTopTenItems(searchTerm) {
+	console.log('2');
+	return (dispatch, getState) => {
+		// clear is handled by reusableItem reducer
+		// don't search on empty string
+		/*if(!searchTerm || searchTerm === '') {
+			return dispatch(searchReusableItemsClear());
+		} */
+
+		dispatch(searchTopTenItemsStarted(searchTerm));
+
+		// if the user is not logged in, don't use auth. The server should return the topTenItem if a non-authenticated user should see it.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
+console.log('about to search');
+		return fetchAPI({
+			'url': `/api/v1/content/searchtoptenitem/?search=${searchTerm}`,
+			'method': 'GET',
+			'useAuth': useAuth,
+		}).then(response => {
+			console.log('search api says ', response);
+			return dispatch(searchTopTenItemsSucceeded(response.results));
+		}).catch(error => {
+			dispatch(searchTopTenItemsFailed());
+
+			return dispatch(getErrors({ 'search topTenItems': error.message }));
+		});
+	};
+}
+
 
 //////////////////////////////////
 // Reducer
 var updeep = require('updeep');
 
-const fakeResuableItems = {
-	'1001': { // uuid
+const fakeResuableItems = [
+	{
+		'id': '1001',
 		'created_by': 'Shelagh',
 		'created_at': new Date(),
-		'is_public': false,
 		'name': 'Jane austen', // name, definition, link need to be easily accessible and searchable. This is the third version.
 		'definition': 'English novelist (16 December 1775 – 18 July 1817)',
 		'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
@@ -139,8 +214,8 @@ const fakeResuableItems = {
 				'votes_no': [],
 			}
 		]
-	},
-};
+	}
+];
 
 const initialResuableItemsState = {
 	'isLoading': false,
@@ -150,10 +225,10 @@ const initialResuableItemsState = {
 	'previous': null,
 	'searchTerm': '',
 	'searchComplete': false,
-	'searchResults': [],
-	// 'things': {},
-	'things': fakeResuableItems,
-	'organizerData': {},
+	'searchResults': {
+		'reusableItems': [], // todo search for reusableItems
+		'topTenItems': [], // todo search for topTenItems
+	},
 };
 
 /////////////////////////////
@@ -162,12 +237,13 @@ const initialResuableItemsState = {
 // data for suggesting reusableItems to select
 // returns reusableItems as an array not an object
 export const getReusableItems = state => {
-	return Object.keys(state.reusableItem.things).map(id => {
-		const reusableItem = state.reusableItem.things[id];
+	console.log('state', state.reusableItem.searchResults);
+	return state.reusableItem.searchResults.reusableItems.map(reusableItem => {
+		// const reusableItem = state.reusableItem.searchResults.reusableItems[id];
 
 		return {
 			'type': 'reusableItem',
-			'id': id,
+			'id': reusableItem.id,
 			'name': reusableItem.name,
 		};
 	});
@@ -176,13 +252,14 @@ export const getReusableItems = state => {
 // data for suggesting reusableItems to create
 // returns topTenItems with no reusableItem as an array
 export const getTopTenItems = state => {
-	return Object.keys(state.topTenItem.organizerData).map(id => {
-		const topTenItem = state.topTenItem.organizerData[id];
+	return state.reusableItem.searchResults.topTenItems.map(topTenItem => {
+		//const topTenItem = state.reusableItem.searchResults.topTenitems[id];
 		if (!topTenItem.reusableItem) {
 			return {
 				'type': 'topTenItem',
 				'id': topTenItem.id,
 				'name': topTenItem.name,
+				'value': topTenItem.name,
 			};
 		}
 	});
@@ -207,7 +284,14 @@ export const getSortedReusableItemSuggestions = createSelector(
 
 export const getReusableItemList = state => {
 	console.log('here', state.reusableItem.searchTerm);
-	return getSortedReusableItemSuggestions(state);
+	const optionText = state.reusableItem.searchTerm;
+	const option = {
+		'type': 'text',
+		'id': '',
+		'name': optionText,
+		'value': optionText,
+	};
+	return [option].concat(getSortedReusableItemSuggestions(state));
 };
 
 
@@ -245,14 +329,18 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep({
 				'searchTerm': action.payload.searchTerm,
 				'searchComplete': false,
-				'searchResults': updeep.constant([]),
+				'searchResults': updeep.constant({
+					'reusableItems': [], // todo search for reusableItems
+					'topTenItems': [], // todo search for topTenItems
+				}),
 			}, state);
 		}
 
 		case SEARCH_REUSABLEITEMS_SUCCEEDED	: {
+			console.log('search succeeded', action.payload);
 			return updeep({
 				'searchComplete': true,
-				'searchResults': updeep.constant(action.payload.results),
+				'searchResults': { 'reusableItems': updeep.constant(action.payload.results) },
 			}, state);
 		}
 
@@ -266,7 +354,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep({
 				'searchTerm': updeep.constant(''),
 				'searchComplete': false,
-				'searchResults': updeep.constant([]),
+				'searchResults': { 'reusableItems': updeep.constant([]) },
 			}, state);
 		}
 

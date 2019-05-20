@@ -232,7 +232,7 @@ class LimitPagination(MultipleModelLimitOffsetPagination):
     """
     default_limit = 10
 
-class SearchAPIView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
+class SearchHomeView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
     """
     Search for topTenLists and topTenItems by name
     """
@@ -264,6 +264,44 @@ class SearchAPIView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-anc
 
         querylist = [
             topTenList_query_set,
+            topTenItem_query_set,
+        ]
+
+        return querylist
+
+class SearchTopTenItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
+    """
+    Search for topTenItems by name
+    the multiplemodel viewset shouldn't be required here but this is the only way I could get search to work!
+    """
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    def get_querylist(self):
+        itemName = self.request.query_params.get('name', None)
+
+        topTenItem_query_set = {'queryset': TopTenItem.objects.all().exclude(name=''), 'serializer_class': TopTenItemSerializer}
+
+        queryset = TopTenItem.objects.all()
+        
+        print('***')
+        print(itemName)
+        if itemName is not None:
+            print('filtering')
+
+        # authenticated user can view public topTenItems and topTenItems the user created
+        if self.request.user.is_authenticated:
+            topTenItem_query_set['queryset'] = topTenItem_query_set['queryset'].filter(
+                Q(topTenList__created_by=self.request.user) |
+                Q(topTenList__is_public=True)
+            )
+
+        # unauthenticated user can view public topTenItems
+        else:
+            topTenItem_query_set['queryset'] = topTenItem_query_set['queryset'].filter(topTenList__is_public=True)
+
+        querylist = [
             topTenItem_query_set,
         ]
 

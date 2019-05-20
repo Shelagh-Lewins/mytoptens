@@ -56,12 +56,6 @@ class CreateTopTenList extends Component {
 		}
 	}
 
-	getOrganizerData = (userId) => {
-		// minimal data for all my topTenLists and topTenItems, used for reusableItem
-		this.props.dispatch(topTenListReducer.fetchOrganizerData(userId));
-		this.props.dispatch(clearErrors());
-	}
-
 	handleInputChange(e) {
 		this.setState({
 			[e.target.name]: e.target.value
@@ -69,12 +63,16 @@ class CreateTopTenList extends Component {
 	}
 
 	// user types in an item name combobox.
-	onChangeItemName(searchTerm) {
+	onChangeItemName(e) {
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
-			console.log('onChangeItemName', searchTerm);
-			console.log('entered ', searchTerm);
-			this.props.dispatch(reusableItemReducer.searchReusableItems(searchTerm));
+			if (typeof e === 'string') {
+				// the change function fires when an item is selected from the dropdown
+				// and then the passed event is the selected item - an object - not the entered text
+				// so only update the search string if the user has typed text
+				// not if they have made a selection
+				this.props.dispatch(reusableItemReducer.suggestReusableItems(e));
+			}
 		}, 500);
 	}
 
@@ -124,10 +122,6 @@ class CreateTopTenList extends Component {
 		if(!permissions.canCreateTopTenList() && !this.props.auth.isLoading){
 			this.props.history.push('/');
 		}
-
-		if (!prevProps.auth.user.id && this.props.auth.user.id) {
-			this.getOrganizerData(this.props.auth.user.id);
-		}
 	}
 
 	onCloseFlashMessage = () => {
@@ -139,6 +133,9 @@ class CreateTopTenList extends Component {
 
 		let GroupHeading = ({ item }) => {
 			switch(item) {
+				case 'text':
+					return <span>Use text</span>;
+
 				case 'reusableItem':
 					return <span>Reusable Items</span>;
 
