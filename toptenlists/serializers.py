@@ -5,7 +5,7 @@ from dynamic_rest.serializers import DynamicModelSerializer
 
 from rest_flex_fields import FlexFieldsModelSerializer
 
-from .models import TopTenList, TopTenItem
+from .models import TopTenList, TopTenItem, ReusableItem
 
 from dynamic_rest.fields import (
     CountField,
@@ -14,8 +14,6 @@ from dynamic_rest.fields import (
     DynamicMethodField,
     DynamicRelationField
 )
-
-#from users.models import CustomUser
 
 class TopTenItemSerializer(FlexFieldsModelSerializer):
     """
@@ -65,3 +63,11 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
         return newtopTenList
 
+class ReusableItemSerializer(FlexFieldsModelSerializer):
+    """
+    A topTenItem may be associated with a reusableItem
+    """
+    class Meta:
+        model = ReusableItem
+        fields = ('id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by','history')
+        # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model

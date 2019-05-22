@@ -6,11 +6,13 @@ from django.db import models
 from django.utils.http import int_to_base36
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
+from django_mysql.models import JSONField
 
 USER = get_user_model()
 
 class TopTenList(models.Model):
-    """Models for topTenLists
+    """
+    Model for topTenLists
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_by = models.ForeignKey(USER, on_delete=models.CASCADE, related_name='topTenList_created_by_id')
@@ -29,13 +31,15 @@ class TopTenList(models.Model):
 
 
 class TopTenItem(models.Model):
-    """Models for topTenList topTenItems
+    """
+    Model for topTenList topTenItems
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     modified_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255, blank=True, default='')
     description = models.CharField(max_length=5000, blank=True, default='')
-    topTenList = models.ForeignKey(TopTenList, on_delete=models.CASCADE, related_name='topTenItem', editable=False)
+    topTenList = models.ForeignKey(TopTenList, on_delete=models.CASCADE, related_name='topTenItem', editable=False) # topTenItem must belong to a list
+    reusableItem = models.ForeignKey('ReusableItem', on_delete=models.SET_NULL, null=True, related_name='reusableItem') # topTenItem may reference a reusableItem
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     class Meta:
@@ -44,3 +48,25 @@ class TopTenItem(models.Model):
 
     def __unicode__(self):
         return '%d: %s' % (self.order, self.name)
+
+class ReusableItem(models.Model):
+    """
+    Model for reusableItem
+    This may be referenced by many topTenItems
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,related_name='reusableItem_created_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=255)
+    definition = models.CharField(max_length=255, blank=True, default='')
+    link = models.CharField(max_length=255, blank=True, default='')
+    modified_at = models.DateTimeField(auto_now_add=True)
+    users_when_modified = models.IntegerField(default=0)
+    votes_yes = JSONField() # array of usernames.
+    votes_no = JSONField() # array of usernames.
+    proposed_modification = JSONField() # array of modification objects
+    proposed_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
+        related_name='reusableItem_proposed_by') # user who proposed the modification
+    history = JSONField() # array of version objects
+
+

@@ -6,8 +6,8 @@ from rest_framework import filters
 from rest_framework.exceptions import APIException
 from allauth.account.models import EmailAddress 
 
-from .models import TopTenList, TopTenItem
-from .serializers import TopTenListSerializer, TopTenItemSerializer
+from .models import TopTenList, TopTenItem, ReusableItem
+from .serializers import TopTenListSerializer, TopTenItemSerializer, ReusableItemSerializer
 from django.db.models import Q
 
 from rest_flex_fields import FlexFieldsModelViewSet
@@ -286,4 +286,17 @@ class SearchListsItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-m
             print('warning: SearchListsItemsView has no queryset and will return no results')
 
         return querylist
+
+class ReusableItemViewSet(FlexFieldsModelViewSet):
+    """
+    ViewSet for reusableItems.
+    ReusableItems are public.
+    """
+    permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
+    model = ReusableItem
+    serializer_class = ReusableItemSerializer
+
+
+    def pre_save(self, obj):
+        obj.created_by = self.request.user
 

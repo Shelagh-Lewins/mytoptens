@@ -163,17 +163,16 @@ var updeep = require('updeep');
 const fakeResuableItems = [
 	{
 		'id': '1001',
-		'created_by': 'Shelagh',
+		'created_by': '1234', // UUID
 		'created_at': new Date(),
 		'name': 'Jane austen', // name, definition, link need to be easily accessible and searchable. This is the third version.
 		'definition': 'English novelist (16 December 1775 – 18 July 1817)',
 		'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-		'modified_by': 'Shelagh',
 		'modified_at': new Date(),
 		'users_when_modified': 403, // number of different users referencing this resuableItem in their own lists at the time when the last update was accepted. This is for tracking the approval process.
 		'votes_yes': [], // votes cast for the most recent modification
 		'votes_no': [],
-		'suggested_modification': [ // may need to allow multiple proposed edits
+		'proposed_modification': [ // may need to allow multiple proposed edits
 		// prevent same user voting more than once
 		// allow them to change their vote
 		// only allow votes by people using the item? And remove the vote if they stop using the item. Time delay?
@@ -183,12 +182,13 @@ const fakeResuableItems = [
 				'name': 'Jane Austen',
 				'definition': 'English novelist (16 December 1775 – 18 July 1817)',
 				'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-				'created_by': 'Shelagh',
-				'created_at': new Date(),
+				'proposed_by': '1234',
+				'proposed_at': new Date(),
 				'votes_yes': [], // list of usernames
 				'votes_no': [], // list of usernames
 			},
 		],
+		'proposed_by': '1234',
 		'history': [ // not sure this will be used but safer to keep it from the start
 		// when a new version is accepted, add current version to history
 		// remove version from suggested_edits
@@ -197,8 +197,9 @@ const fakeResuableItems = [
 				'name': 'Jane austin',
 				'definition': 'Writer',
 				'link': '',
-				'modified_by': 'Shelagh',
+				'proposed_by': '1234',
 				'modified_at': new Date(),
+				'users_when_modified': 403,
 				'votes_yes': [],
 				'votes_no': [],
 			},
@@ -206,8 +207,9 @@ const fakeResuableItems = [
 				'name': 'Jane austen',
 				'definition': 'Novelist',
 				'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-				'modified_by': 'Shelagh',
+				'proposed_by': '1234',
 				'modified_at': new Date(),
+				'users_when_modified': 403,
 				'votes_yes': [],
 				'votes_no': [],
 			}
