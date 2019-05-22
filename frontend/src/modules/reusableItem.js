@@ -145,7 +145,7 @@ export function searchTopTenItems(searchTerm) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			console.log('search api says ', response.results);
+			// console.log('search api says ', response.results);
 			return dispatch(searchTopTenItemsSucceeded(response.results));
 		}).catch(error => {
 			dispatch(searchTopTenItemsFailed());
@@ -235,7 +235,7 @@ const initialResuableItemsState = {
 // data for suggesting reusableItems to select
 // returns reusableItems as an array not an object
 export const getReusableItems = state => {
-	console.log('state', state.reusableItem.searchResults);
+	// console.log('state', state.reusableItem.searchResults);
 	return state.reusableItem.searchResults.reusableItems.map(reusableItem => {
 		// const reusableItem = state.reusableItem.searchResults.reusableItems[id];
 
@@ -281,7 +281,7 @@ export const getSortedReusableItemSuggestions = createSelector(
 );
 
 export const getReusableItemList = state => {
-	console.log('here', state.reusableItem.searchTerm);
+	// console.log('here', state.reusableItem.searchTerm);
 	const optionText = state.reusableItem.searchTerm;
 	const option = {
 		'type': 'text',
@@ -332,7 +332,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 		}
 
 		case SEARCH_REUSABLEITEMS_SUCCEEDED	: {
-			console.log('search reusable items succeeded', action.payload);
+			// console.log('search reusable items succeeded', action.payload);
 			return updeep({
 				'searchComplete': true,
 				'searchResults': { 'reusableItems': updeep.constant(action.payload.results) },
@@ -363,7 +363,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 		}
 
 		case SEARCH_TOPTENITEMS_SUCCEEDED	: {
-			console.log('search toptenitems succeeded', action.payload);
+			// console.log('search toptenitems succeeded', action.payload);
 			return updeep({
 				'searchComplete': true,
 				'searchResults': { 'topTenItems': updeep.constant(action.payload.results) },

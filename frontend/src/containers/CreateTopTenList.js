@@ -29,6 +29,7 @@ class CreateTopTenList extends Component {
 		this.state = {
 			'name': '',
 			'description': '',
+			'activeItemNameId': '',
 		};
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			this.state[`topTenItem${i}_name`] = '';
@@ -63,7 +64,11 @@ class CreateTopTenList extends Component {
 	}
 
 	// user types in an item name combobox.
-	onChangeItemName(e) {
+	onChangeItemName(e, widgetId) {
+		//console.log('onChangeItemName ', e, widgetId);
+		this.setState({
+			'activeItemNameId': widgetId,
+		});
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
 			if (typeof e === 'string') {
@@ -71,9 +76,10 @@ class CreateTopTenList extends Component {
 				// and then the passed event is the selected item - an object - not the entered text
 				// so only update the search string if the user has typed text
 				// not if they have made a selection
+				//console.log('suggest for ', e);
 				this.props.dispatch(reusableItemReducer.suggestReusableItems(e));
 			}
-		}, 500);
+		}, 300);
 	}
 
 	// user selects an item name from a dropdown list. This will be to either use or create a ReusableItem
@@ -129,19 +135,19 @@ class CreateTopTenList extends Component {
 	}
 
 	renderTopTenItemInputs() {
-		let elements = [];
+		const elements = [];
 
-		let GroupHeading = ({ item }) => {
+		const GroupHeading = ({ item }) => {
 			switch(item) {
 				case 'text':
-					return <span>Use text</span>;
+					return <span>Use this text:</span>;
 
 				case 'reusableItem':
-					return <span>Reusable Items</span>;
+					return <span>Reusable Items:</span>;
 
 
 				case 'topTenItem':
-					return <span>Top Ten Items</span>;
+					return <span>Top Ten Items:</span>;
 
 				default:
 					return null;
@@ -149,6 +155,7 @@ class CreateTopTenList extends Component {
 		};
 
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+			const widgetId = `topTenItem${i}_name`;
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
 					{/*<Row>
@@ -169,9 +176,9 @@ class CreateTopTenList extends Component {
 						<Col lg="9" className="topTenItem-name">
 							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
 							<Combobox
-								name={`topTenItem${i}_name`}
-								id={`topTenItem${i}_name`}
-								data={this.props.reusableItemData}
+								name={widgetId}
+								id={widgetId}
+								data={widgetId === this.state.activeItemNameId ? this.props.reusableItemData : []}
 								minLength={2}
       					filter='contains'
       					groupComponent={GroupHeading}
@@ -179,7 +186,7 @@ class CreateTopTenList extends Component {
 								valueField='id'
     						textField='name'
 								placeholder="Enter the Top Ten item name"
-								onChange={this.onChangeItemName}
+								onChange={(param) => this.onChangeItemName(param, widgetId)}
 								onSelect={this.onSelectItemName}
 							/>
 							<div className='invalid-feedback' />
