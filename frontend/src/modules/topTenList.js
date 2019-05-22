@@ -34,9 +34,11 @@ export const FETCH_ORGANIZER_DATA_FAILED = 'FETCH_ORGANIZER_DATA_FAILED';
 const topTenItemSchema = new schema.Entity('topTenItem', {
 	'topTenList': ['topTenListSchema'],
 });
+
 const topTenListSchema = new schema.Entity('topTenList', {
 	'topTenItem': [topTenItemSchema],
 });
+
 
 function receiveEntities(entities) {
 	return {
@@ -135,8 +137,9 @@ export function fetchTopTenListDetail(id) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
+			console.log('got response ', response);
 			const normalizedData = normalize(response, [topTenListSchema]);
-
+console.log('normalizedData ', normalizedData);
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
 			dispatch(fetchTopTenListDetailFailed());
@@ -150,7 +153,7 @@ export function fetchTopTenListDetail(id) {
 // create topTenList
 export const createTopTenList = (topTenList, history) => dispatch => {
 	dispatch(createTopTenListStarted());
-
+console.log('createTopTenList data', topTenList);
 	return fetchAPI({
 		'url': '/api/v1/content/toptenlist/',
 		'data': JSON.stringify(topTenList),

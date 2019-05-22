@@ -31,7 +31,7 @@ export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 export function suggestReusableItems(searchTerm) {
 	return (dispatch) => {
 		// TODO also search topTenItems
-
+		console.log('searchTerm 1 ', searchTerm);
 		dispatch(searchReusableItems(searchTerm));
 		dispatch(searchTopTenItems(searchTerm));
 	};
@@ -76,27 +76,18 @@ export function searchReusableItems(searchTerm) {
 
 		dispatch(searchReusableItemsStarted(searchTerm));
 
-		return dispatch(searchReusableItemsSucceeded(fakeResuableItems));
-		/*
-		// todo replace with call to reusableItems API
-		// if the user is not logged in, don't use auth. The server should return the topTenList if a non-authenticated user should see it.
-		let useAuth = false;
-
-		if (getState().auth.user.token) {
-			useAuth = true;
-		}
+		// all reusableItems are public, so do not use auth
 
 		return fetchAPI({
-			'url': `/api/v1/content/searchhome/?search=${searchTerm}`,
+			'url': `/api/v1/content/searchreusableitems/?search=${searchTerm}`,
 			'method': 'GET',
-			'useAuth': useAuth,
 		}).then(response => {
-			return dispatch(searchHomeSucceeded(response.results));
+			return dispatch(searchReusableItemsSucceeded(response.results));
 		}).catch(error => {
-			dispatch(searchHomeFailed());
+			dispatch(searchReusableItems());
 
-			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
-		}); */
+			return dispatch(getErrors({ 'fetch reusableItems': error.message }));
+		});
 	};
 }
 
@@ -351,8 +342,10 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep({
 				'searchTerm': updeep.constant(''),
 				'searchComplete': false,
-				'searchResults': { 'reusableItems': updeep.constant([]) },
-				'searchResults': { 'topTenItems': updeep.constant([]) },
+				'searchResults': { 
+					'reusableItems': updeep.constant([]),
+					'topTenItems': updeep.constant([]),
+				},
 			}, state);
 		}
 

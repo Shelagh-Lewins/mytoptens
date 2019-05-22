@@ -251,7 +251,7 @@ class SearchListsItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-m
         # only show topTenItems that do not have an associated reusableItem
         if self.request.query_params.get('excludereusableitems', None) == 'true':
             print('excludereusableitems')
-            # topTenItem_query_set['queryset'] = topTenItem_query_set['queryset'].filter(reusableItem__isNull=True)
+            topTenItem_query_set['queryset'] = topTenItem_query_set['queryset'].filter(reusableItem__isnull=True)
             # TODO uncomment as soon as topTenItems have reusableItem field
 
         # authenticated user can view public topTenLists and topTenLists the user created
@@ -300,3 +300,21 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
     def pre_save(self, obj):
         obj.created_by = self.request.user
 
+    def get_queryset(self):
+        return ReusableItem.objects.all()
+
+
+class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
+    """
+    Search for ReusableItems by name
+    """
+    pagination_class = LimitPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    def get_querylist(self):
+        reusableItem_query_set = {'queryset': ReusableItem.objects.all(), 'serializer_class': ReusableItemSerializer}
+
+        querylist = [reusableItem_query_set]
+
+        return querylist

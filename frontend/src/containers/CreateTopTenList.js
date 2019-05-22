@@ -83,9 +83,18 @@ class CreateTopTenList extends Component {
 	}
 
 	// user selects an item name from a dropdown list. This will be to either use or create a ReusableItem
-	onSelectItemName(e) {
+	onSelectItemName(e, widgetId) {
 		console.log('onSelectItemName', e);
 		console.log('selected item ', e.name, e.id);
+		this.setState({
+			[`${widgetId}`]: e.name,
+		});
+
+		if (e.type === 'reusableItem') {
+			this.setState({
+				[`${widgetId}_reusableItemId`]: e.id,
+			});
+		}
 	}
 
 	cancel(e) {
@@ -106,6 +115,7 @@ class CreateTopTenList extends Component {
 				const newTopTenItem = {
 					'name': this.state[`topTenItem${i}_name`],
 					'description': this.state[`topTenItem${i}_description`],
+					'reusableItem_id': this.state[`topTenItem${i}_name_reusableItemId`],
 					'order': i,
 				};
 				newTopTenList.topTenItem.push(newTopTenItem);
@@ -120,6 +130,7 @@ class CreateTopTenList extends Component {
 	}
 
 	onCreateTopTenList = (newTopTenList) => {
+		console.log('new list data', newTopTenList);
 		this.props.dispatch(createTopTenList(newTopTenList, this.props.history));
 	}
 
@@ -187,7 +198,8 @@ class CreateTopTenList extends Component {
     						textField='name'
 								placeholder="Enter the Top Ten item name"
 								onChange={(param) => this.onChangeItemName(param, widgetId)}
-								onSelect={this.onSelectItemName}
+								onSelect={(param) => this.onSelectItemName(param, widgetId)}
+								required={true}
 							/>
 							<div className='invalid-feedback' />
 						</Col>
