@@ -17,14 +17,14 @@ const TopTenListSummary = props => {
 
 	return (
 		<Col sm="12" md="6">
-			<div className="topTenList-summary">
+			<div className="toptenlist-summary">
 				<Link to={`/topTenList/${props.topTenList.id}`}>
-					<div className="topTenList-name">
+					<div className="toptenlist-name">
 						<div>{props.topTenList.name}</div>
 					</div>
 				</Link>
 				{canEdit && (
-					<div className="topTenList-summary-controls">
+					<div className="toptenlist-summary-controls">
 						<SetTopTenListIsPublic
 							topTenListId={props.topTenList.id}
 							isPublic={props.topTenList.is_public}
@@ -34,11 +34,11 @@ const TopTenListSummary = props => {
 					</div>
 				)}
 				<Link to={`/topTenList/${props.topTenList.id}`}>
-					<div className="topTenList-description">{props.topTenList.description}</div>
+					<div className="toptenlist-description">{props.topTenList.description}</div>
 				</Link>
 				
 				{props.showCreatedBy && 
-					<div className="topTenList-created-by">{props.topTenList.created_by_username}</div>
+					<div className="toptenlist-created-by">{props.topTenList.created_by_username}</div>
 
 				}
 			</div>

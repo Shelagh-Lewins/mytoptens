@@ -1,6 +1,6 @@
 @import "../variables";
 
-.topTenItem-header {
+.toptenitem-header {
 	font-weight: bold;
 
 	.editable-text-field {
@@ -17,11 +17,11 @@
 	}
 }
 
-.topTenItem-body {
+.toptenitem-body {
 	clear: both;
 }
 
-.topTenItem-container {
+.toptenitem-container {
 	border: 1px solid $color-panel-border;
 	border-radius: 8px;
 	margin: 0 8px 8px 0;
@@ -46,7 +46,7 @@
 	}
 
 	button {
-		&.create-childtopTenList {
+		&.create-childtoptenlist {
 			float: right;
 			margin-bottom: 10px;
 		}
@@ -56,7 +56,7 @@
 		}
 	}
 
-	.child-topTenList {
+	.child-toptenlist {
 		float: right;
 		padding: 6px 0;
 	}

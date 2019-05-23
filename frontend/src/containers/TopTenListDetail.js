@@ -198,7 +198,7 @@ class TopTenListDetails extends Component {
 					<div>
 						<Container>
 							<Row>
-								<Col className="topTenList-name">
+								<Col className="toptenlist-name">
 									<EditableTextField
 										canEdit={this.state.canEdit}
 										required={true}
@@ -213,7 +213,7 @@ class TopTenListDetails extends Component {
 										value={this.state.topTenList_name}
 									/>
 									{this.state.canEdit && (
-										<div className="topTenList-detail-controls">
+										<div className="toptenlist-detail-controls">
 											<SetTopTenListIsPublic
 												topTenListId={this.props.topTenList.id}
 												isPublic={this.props.topTenList.is_public}
@@ -244,7 +244,7 @@ class TopTenListDetails extends Component {
 								</Row>
 							)}
 							<Row>
-								<Col className="topTenList-description">
+								<Col className="toptenlist-description">
 									<EditableTextField
 										textarea={true}
 										canEdit={this.state.canEdit}
@@ -290,7 +290,7 @@ class TopTenListDetails extends Component {
 			content = <p>Either this topTenList does not exist or you do not have permission to view it</p>;
 		}
 		return(
-			<div className="topTenList-detail">
+			<div className="toptenlist-detail">
 				{ content }
 			</div>
 		);

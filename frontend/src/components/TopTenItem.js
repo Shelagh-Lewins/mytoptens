@@ -69,10 +69,10 @@ class Item extends Component {
 		let childTopTenList;
 
 		if (canCreateChildTopTenList) {
-			childTopTenList = (<button className="btn btn-primary create-childtopTenList" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);	
+			childTopTenList = (<button className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);	
 		} else if (canViewChildTopTenList) {
 			childTopTenList = (
-				<div className="child-topTenList">	
+				<div className="child-toptenlist">	
 					<Link to={`/topTenList/${this.props.topTenItem.childTopTenList.id}`}>{this.props.topTenItem.childTopTenList.name} ></Link>
 				</div>);
 		}
@@ -92,8 +92,8 @@ class Item extends Component {
 		}
 
 		return (
-			<div className="topTenItem-container">
-				<div className="topTenItem-header">
+			<div className="toptenitem-container">
+				<div className="toptenitem-header">
 					<span className="order">{this.props.topTenItem.order}:</span><EditableTextField
 						canEdit={this.props.canEdit}
 						name={`${this.props.topTenItem.order}_name`}
@@ -110,7 +110,7 @@ class Item extends Component {
 				</div>
 				{childTopTenList}
 				{showDescription &&
-					<div className="topTenItem-body">
+					<div className="toptenitem-body">
 						<EditableTextField
 							textarea={true}
 							canEdit={this.props.canEdit}

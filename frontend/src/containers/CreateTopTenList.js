@@ -177,7 +177,7 @@ class CreateTopTenList extends Component {
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
 					<Row>
-						<Col lg="9" className="topTenItem-name">
+						<Col lg="9" className="toptenitem-name">
 							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
 							<Combobox
 								name={widgetId}
@@ -210,7 +210,7 @@ class CreateTopTenList extends Component {
 						</Row>
 					)}
 					<Row>
-						<Col lg="9" className="topTenItem-description">
+						<Col lg="9" className="toptenitem-description">
 							<Label for={`topTenItem${i}_description`}>Top Ten item {i} description</Label>
 							<Input
 								type="textarea"
@@ -230,7 +230,7 @@ class CreateTopTenList extends Component {
 
 	render() {
 		return (
-			<Container className="create-topTenList">
+			<Container className="create-toptenlist">
 				{!isEmpty(this.props.errors) && (<Container>
 					<Row>
 						<Col>
@@ -249,7 +249,7 @@ class CreateTopTenList extends Component {
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">
 						<Row>
-							<Col lg="9" className="topTenList-name">
+							<Col lg="9" className="toptenlist-name">
 								<Label for="name">Top Ten List name</Label>
 								<Input
 									type="text"
@@ -269,7 +269,7 @@ class CreateTopTenList extends Component {
 					</div>
 					<div className="form-group">
 						<Row>
-							<Col lg="9" className="topTenList-description">
+							<Col lg="9" className="toptenlist-description">
 								<Label for="username">Description</Label>
 								<Input
 									type="textarea"

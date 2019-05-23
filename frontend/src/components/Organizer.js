@@ -146,7 +146,7 @@ class Organizer extends Component {
 
 	renderTopTenLists() {
 		return (
-			<div className="topTenLists">
+			<div className="toptenlists">
 				<div className="inner-tube">
 					<span>Select a new parent Top Ten item for this Top Ten list: </span>
 					{this.props.topTenListOrganizerData.map(topTenList => {

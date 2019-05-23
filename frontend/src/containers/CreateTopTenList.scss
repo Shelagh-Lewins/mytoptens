@@ -1,13 +1,13 @@
 @import "../variables";
 
-.create-topTenList {
-	.topTenList-name {
+.create-toptenlist {
+	.toptenlist-name {
 		label {
 			font-weight: bold;
 		}
 	}
 
-	.topTenItem-name {
+	.toptenitem-name {
 		label {
 			font-weight: bold;
 		}
@@ -30,7 +30,7 @@
 		margin-left: 8px;
 	}
 
-	.topTenList-description {
+	.toptenlist-description {
 		label {
 			border: 0;
 			clear: both;
@@ -43,7 +43,7 @@
 		}
 	}
 
-	.topTenItem-description {
+	.toptenitem-description {
 		margin-top: 8px;
 
 		label {

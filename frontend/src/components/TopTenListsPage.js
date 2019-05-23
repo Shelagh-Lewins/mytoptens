@@ -99,7 +99,7 @@ class TopTenListsPage extends Component {
 		let createTopTenList;
 		if (this.props.canCreateTopTenList()) {
 			createTopTenList = (<button
-				className="btn btn-primary create-topTenList"
+				className="btn btn-primary create-toptenlist"
 				onClick={this.onAddTopTenList}
 			>+ New Top Ten list</button>);
 		} else if (this.props.auth.isAuthenticated) {
@@ -109,10 +109,10 @@ class TopTenListsPage extends Component {
 		}
 
 		return (
-			<div className="topTenLists-list">
+			<div className="toptenlists-list">
 				<Container>
 					<Row>
-						<Col  className="top-level-topTenLists-control">
+						<Col  className="top-level-toptenlists-control">
 							<Label check>
 								<Input
 									type="checkbox"

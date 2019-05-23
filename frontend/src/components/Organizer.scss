@@ -8,7 +8,7 @@
 		clear: both;
 	}
 
-	.topTenLists {
+	.toptenlists {
 		background: $color-organizer-background;
 		border: 1px solid $color-organizer-border;
 		border-radius: 8px;
@@ -35,7 +35,7 @@
 		margin: 4px 0;
 	}
 
-	.show-topTenItems {
+	.show-toptenitems {
 		float: left;
 		width: 36px;
 	}
@@ -47,11 +47,11 @@
 		padding: 6px 0;
 	}
 
-	.topTenItems {
+	.toptenitems {
 		margin-left: 56px;
 	}
 
-	.topTenItem {
+	.toptenitem {
 		display: inline-block;
 		width: 100%;
 
@@ -70,7 +70,7 @@
 			}
 		}
 
-		.child-topTenList {
+		.child-toptenlist {
 			color: $color-hint;
 		}
 
@@ -81,7 +81,7 @@
 				border-radius: 1rem;
 			}
 
-			.child-topTenList {
+			.child-toptenlist {
 				background: transparent;
 				border: 1px solid transparent;
 			}
