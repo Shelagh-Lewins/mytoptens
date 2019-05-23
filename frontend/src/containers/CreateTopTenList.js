@@ -67,7 +67,8 @@ class CreateTopTenList extends Component {
 
 	// user types in an item name combobox.
 	onChangeItemName(e, widgetId) {
-		//console.log('onChangeItemName ', e, widgetId);
+		console.log('onChangeItemName ', e, widgetId);
+		console.log('event type ', typeof e);
 		this.setState({
 			'activeItemNameId': widgetId,
 		});
@@ -79,6 +80,15 @@ class CreateTopTenList extends Component {
 				// so, only update the search string if the user has typed text
 				// not if they have made a selection
 				//console.log('suggest for ', e);
+
+				// the dropdown list will be rebuilt.
+				// We need to remove the selection from state to avoid confusion.
+				// value must be selected from list.
+				this.setState({
+					[`${widgetId}`]: '',
+					[`${widgetId}_reusableItemId`]: undefined,
+				});
+
 				this.props.dispatch(reusableItemReducer.suggestReusableItems(e));
 			}
 		}, 300);
@@ -86,7 +96,8 @@ class CreateTopTenList extends Component {
 
 	// user selects an item name from a dropdown list. This will be to either use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
-		//console.log('onSelectItemName', e);
+		console.log('onSelectItemName', e);
+		console.log('onSelectItemName typeof', typeof e);
 		//console.log('selected item ', e.name, e.id);
 		this.setState({
 			[`${widgetId}`]: e.name,
@@ -95,6 +106,10 @@ class CreateTopTenList extends Component {
 		if (e.type === 'reusableItem') {
 			this.setState({
 				[`${widgetId}_reusableItemId`]: e.id,
+			});
+		} else {
+			this.setState({
+				[`${widgetId}_reusableItemId`]: undefined,
 			});
 		}
 	}
