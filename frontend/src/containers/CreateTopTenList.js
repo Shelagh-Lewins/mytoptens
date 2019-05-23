@@ -57,6 +57,11 @@ class CreateTopTenList extends Component {
 		if (this.state.parentTopTenItemName) {
 			this.state.name = this.state.parentTopTenItemName;
 		}
+
+		// define colours for the svg icons
+		this.useTextColor = '#666';
+		this.reusableItemColor = '#6db65b';
+		this.topTenItemColor = '#028fcc';
 	}
 
 	handleInputChange(e) {
@@ -103,14 +108,26 @@ class CreateTopTenList extends Component {
 			[`${widgetId}`]: e.name,
 		});
 
-		if (e.type === 'reusableItem') {
-			this.setState({
-				[`${widgetId}_reusableItemId`]: e.id,
-			});
-		} else {
-			this.setState({
-				[`${widgetId}_reusableItemId`]: undefined,
-			});
+		switch (e.type) {
+			case 'reusableItem':
+				this.setState({
+					[`${widgetId}_reusableItemId`]: e.id,
+					[`${widgetId}_topTenItemId`]: undefined,
+				});
+				break;
+
+			case 'topTenItem':
+				this.setState({
+					[`${widgetId}_reusableItemId`]: undefined,
+					[`${widgetId}_topTenItemId`]: e.id,
+				});
+				break;
+
+			default:
+				this.setState({
+					[`${widgetId}_reusableItemId`]: undefined,
+					[`${widgetId}_topTenItemId`]: undefined,
+				});
 		}
 	}
 
@@ -182,13 +199,57 @@ class CreateTopTenList extends Component {
 			}
 		};
 
+		const that = this;
+
+		let ComboboxItem = ({ item }) => {
+			let icon;
+			let color;
+
+			switch(item.type) {
+				case 'text':
+					icon = 'pencil-alt';
+					color = that.useTextColor;
+					break;
+
+				case 'reusableItem':
+					icon = 'clone';
+					color = that.reusableItemColor;
+					break;
+
+				case 'topTenItem':
+					icon = 'plus';
+					color = that.topTenItemColor;
+					break;
+
+				default:
+					icon = '';
+					break;
+			}
+			return (<span className="combobox-dropdown"><span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
+		    {item.name}
+		  </span>);
+		};
+
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			const widgetId = `topTenItem${i}_name`;
+
+			
+			// has the user selected an existing topTenItem?
+			const topTenItemId = this.state[`topTenItem${i}_name_topTenItemId`];
+
+			let topTenItem;
+			if (topTenItemId) {
+				topTenItem = this.props.reusableItemSuggestions.find(item => item.id === topTenItemId);
+			}
+
+			// has the user selected an existing reusableItem?
 			const reusableItemId = this.state[`topTenItem${i}_name_reusableItemId`];
+
 			let reusableItem;
 			if (reusableItemId) {
 				reusableItem = this.props.reusableItemSuggestions.find(item => item.id === reusableItemId);
 			}
+
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
 					<Row>
@@ -204,6 +265,7 @@ class CreateTopTenList extends Component {
       					groupBy={item => item.type}
 								valueField='id'
     						textField='name'
+    						itemComponent={ComboboxItem}
 								placeholder="Enter the Top Ten item name"
 								onChange={(param) => this.onChangeItemName(param, widgetId)}
 								onSelect={(param) => this.onSelectItemName(param, widgetId)}
@@ -213,11 +275,24 @@ class CreateTopTenList extends Component {
 						</Col>
 					</Row>
 
+					{topTenItem && (
+						<Row>
+							<Col className="reusable-item">
+								<div>
+									<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': this.topTenItemColor }} size="1x" /></span>{topTenItem.name}</h3>
+									<p>A new reusable item will be created with this name</p>
+									<p>All reusable items are public and can be seen by anybody</p>
+									<p>However this list will be private unless you make it public</p>
+								</div>
+							</Col>
+						</Row>
+					)}
+
 					{reusableItem && (
 						<Row>
 							<Col className="reusable-item">
 								<div>
-									<h3><span className="icon" title="Reusable Item"><FontAwesomeIcon icon={['far', 'clone']} style={{ 'color': '#6DB65B' }} size="1x" /></span>{reusableItem.name}</h3>
+									<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': this.reusableItemColor }} size="1x" /></span>{reusableItem.name}</h3>
 									<p>{reusableItem.definition}</p>
 									<p>{reusableItem.link}</p>
 								</div>

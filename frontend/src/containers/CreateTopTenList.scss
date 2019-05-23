@@ -17,10 +17,16 @@
 		> div {
 			border: 1px solid $color-reusableitem-border;
 			border-radius: 10px;
-			margin: 10px 30px 10px 0;
+			margin: 10px 0 10px 0;
 			padding: 10px;
 		}
 
+		.icon {
+			margin-right: 10px;
+		}
+	}
+
+	.combobox-dropdown {
 		.icon {
 			margin-right: 10px;
 		}
