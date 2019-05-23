@@ -123,9 +123,9 @@ export function searchTopTenItems(searchTerm) {
 	return (dispatch, getState) => {
 		// clear is handled by reusableItem reducer
 		// don't search on empty string
-		/*if(!searchTerm || searchTerm === '') {
-			return dispatch(searchReusableItemsClear());
-		} */
+		if(!searchTerm || searchTerm === '') {
+			return;
+		}
 
 		dispatch(searchTopTenItemsStarted(searchTerm));
 
@@ -231,12 +231,9 @@ const initialResuableItemsState = {
 // data for props
 
 // data for suggesting reusableItems to select
-// returns reusableItems as an array not an object
+// returns reusableItems as an array
 export const getReusableItems = state => {
-	// console.log('state', state.reusableItem.searchResults);
 	return state.reusableItem.searchResults.reusableItems.map(reusableItem => {
-		// const reusableItem = state.reusableItem.searchResults.reusableItems[id];
-
 		return {
 			'type': 'reusableItem',
 			'id': reusableItem.id,
@@ -246,10 +243,9 @@ export const getReusableItems = state => {
 };
 
 // data for suggesting reusableItems to create
-// returns topTenItems with no reusableItem as an array
+// returns topTenItems with no reusableItem, as an array
 export const getTopTenItems = state => {
 	return state.reusableItem.searchResults.topTenItems.map(topTenItem => {
-		//const topTenItem = state.reusableItem.searchResults.topTenitems[id];
 		if (!topTenItem.reusableItem) {
 			return {
 				'type': 'topTenItem',
@@ -274,20 +270,23 @@ export const getSortedReusableItemSuggestions = createSelector(
 			return a.name.localeCompare(b.name);
 		});
 
-		return reusableItems.concat(topTenItems);
+		return [].concat(reusableItems.concat(topTenItems)); // ensure empty array if no results
 	}
 );
 
 export const getReusableItemList = state => {
-	// console.log('here', state.reusableItem.searchTerm);
-	const optionText = state.reusableItem.searchTerm;
-	const option = {
-		'type': 'text',
-		'id': '',
-		'name': optionText,
-		'value': optionText,
-	};
-	return [option].concat(getSortedReusableItemSuggestions(state));
+	if (state.reusableItem.searchTerm !== '') {
+		const optionText = state.reusableItem.searchTerm;
+		const option = {
+			'type': 'text',
+			'id': '',
+			'name': optionText,
+			'value': optionText,
+		};
+
+		return [option].concat(getSortedReusableItemSuggestions(state));
+	}
+	return getSortedReusableItemSuggestions(state);
 };
 
 

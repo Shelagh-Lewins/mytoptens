@@ -252,7 +252,7 @@ class SearchListsItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-m
         if self.request.query_params.get('excludereusableitems', None) == 'true':
             print('excludereusableitems')
             topTenItem_query_set['queryset'] = topTenItem_query_set['queryset'].filter(reusableItem__isnull=True)
-            # TODO uncomment as soon as topTenItems have reusableItem field
+
 
         # authenticated user can view public topTenLists and topTenLists the user created
         # and topTenItems belonging to those topTenLists
