@@ -15,31 +15,33 @@ from dynamic_rest.fields import (
     DynamicRelationField
 )
 
-
-
-class TopTenItemSerializer(FlexFieldsModelSerializer):
-    """
-    A topTenItem must belong to a topTenList
-    """
-    # reusableItem_id = serializers.UUIDField(write_only=True, required=False, allow_null=True)
-
-    # reusableItem = ReusableItemSerializer(many=True)
-
-    class Meta:
-        model = TopTenItem
-        fields = ('id', 'name', 'description', 'topTenList_id', 'modified_at', 'order', 'reusableItem_id')
-        # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model
-
 class ReusableItemSerializer(FlexFieldsModelSerializer):
     """
     A topTenItem may be associated with a reusableItem
     """
 
-    topTenItem = TopTenItemSerializer(many=True)
-
     class Meta:
         model = ReusableItem
-        fields = ('id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by','history')
+        fields = ('id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
+
+
+class TopTenItemSerializer(FlexFieldsModelSerializer):
+    """
+    A topTenItem must belong to a topTenList
+    A topTenItem may be associated with a reusableItem
+    """
+
+    reusableItem = ReusableItemSerializer() # must not set many=True here
+    # https://stackoverflow.com/questions/26702695/django-rest-framework-object-is-not-iterable
+    # reusableItem is a single object
+
+    expandable_fields = {
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history']})
+    }
+
+    class Meta:
+        model = TopTenItem
+        fields = ('id', 'name', 'description', 'topTenList_id', 'modified_at', 'order', 'reusableItem')
         # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model
 
 
@@ -51,7 +53,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
     parent_topTenItem_id = serializers.UUIDField(write_only=True, required=False, allow_null=True)
     # parent_topTenItem_id entry allows parent_topTenItem to be updated, see api.py
     # allow_null allows an existing parent_topTenItem_id to be set to null
-    topTenItem = TopTenItemSerializer(many=True)
+    topTenItem = TopTenItemSerializer(many=True) # many=True because topTenItem is a list of objects
 
     # automatically set created_by as the current user's id
     created_by = serializers.PrimaryKeyRelatedField(
@@ -86,8 +88,8 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
                 try:
                     # make sure the reusableItem exists
                     reusableItem = ReusableItem.objects.get(id=topTenItem_data['reusableItem_id'])
-                    print('got object')
-                    print(reusableItem)
+                    # print('got object')
+                    # print(reusableItem)
                     topTenItem_data.pop('reusableItem_id', None)
                     topTenItem_data['reusableItem'] = reusableItem
 
