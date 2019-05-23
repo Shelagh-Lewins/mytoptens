@@ -31,11 +31,26 @@ export const RECEIVE_ORGANIZER_DATA = 'RECEIVE_ORGANIZER_DATA';
 export const FETCH_ORGANIZER_DATA_STARTED = 'FETCH_ORGANIZER_DATA_STARTED';
 export const FETCH_ORGANIZER_DATA_FAILED = 'FETCH_ORGANIZER_DATA_FAILED';
 
-const topTenItemSchema = new schema.Entity('topTenItem', {
-	'topTenList': ['topTenListSchema'],
+// https://medium.com/overlander/normalizing-data-into-relational-redux-state-with-normalizr-47e7020dd3c1
+// define all schemas so they can be referenced
+const topTenItemSchema = new schema.Entity('topTenItem');
+const reusableItemSchema = new schema.Entity('reusableItem');
+const topTenListSchema = new schema.Entity('topTenList');
+
+// each data relationship must be defined in both directions
+// a topTenItem has one topTenList and one reusableItem
+topTenItemSchema.define({
+	'topTenList': topTenListSchema,
+	'reusableItem': reusableItemSchema,
 });
 
-const topTenListSchema = new schema.Entity('topTenList', {
+// a reusableItem has many topTenItems
+reusableItemSchema.define({
+	'topTenItem': [topTenItemSchema],
+});
+
+// a topTenList has many topTenItems
+topTenListSchema.define({
 	'topTenItem': [topTenItemSchema],
 });
 
