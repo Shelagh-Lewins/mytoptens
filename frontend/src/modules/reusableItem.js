@@ -9,6 +9,11 @@ import {
 
 // TODO clear store on logout
 
+import {
+	RECEIVE_ENTITIES,
+	FETCH_TOPTENLIST_DETAIL_STARTED,
+} from './topTenList';
+
 //////////////////////////////////
 // Action creators
 
@@ -301,8 +306,8 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 		case LOGOUT_USER_COMPLETE: {
 			return updeep(initialResuableItemsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
-		
-		/* case RECEIVE_REUSABLEITEMS: {
+
+		case RECEIVE_ENTITIES: {
 			const { entities } = action.payload;
 
 			let things = {};
@@ -314,8 +319,12 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep({
 				'things': updeep.constant(things),
 				'isLoading': false }, state);
-		} */
+		}
 
+		case FETCH_TOPTENLIST_DETAIL_STARTED: {
+			return updeep(state, state);
+		}
+		
 		case SEARCH_REUSABLEITEMS_STARTED	: {
 			return updeep({
 				'searchTerm': action.payload.searchTerm,
