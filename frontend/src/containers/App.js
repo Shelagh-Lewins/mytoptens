@@ -22,6 +22,17 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './App.scss';
 // note that the Django template pages reset password loads the bootstrap css from static/bootstrap
 
+// fontawesome
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faClone } from '@fortawesome/free-regular-svg-icons'; // import the icons you want
+library.add(faClone); // and add them to your library
+
+// usage: for regular icons, import the component and specify 'far' i.e. font awesome regular as below
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// <FontAwesomeIcon icon={['far', 'clone']} />
+
+
+
 // check if user is already logged in
 if(getAuthToken()) {
 	store.dispatch(setCurrentUser(localStorage.mytoptensJwtToken));

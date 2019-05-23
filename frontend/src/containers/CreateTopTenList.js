@@ -21,6 +21,8 @@ import * as reusableItemReducer from '../modules/reusableItem';
 import Combobox from 'react-widgets/lib/Combobox';
 import 'react-widgets/dist/css/react-widgets.css';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 class CreateTopTenList extends Component {
 	constructor(props) {
@@ -72,9 +74,9 @@ class CreateTopTenList extends Component {
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
 			if (typeof e === 'string') {
-				// the change function fires when an item is selected from the dropdown
-				// and then the passed event is the selected item - an object - not the entered text
-				// so only update the search string if the user has typed text
+				// the combobox change function fires when an item is selected from the dropdown
+				// and the passed event is the selected item - an object - not the entered text
+				// so, only update the search string if the user has typed text
 				// not if they have made a selection
 				//console.log('suggest for ', e);
 				this.props.dispatch(reusableItemReducer.suggestReusableItems(e));
@@ -84,8 +86,8 @@ class CreateTopTenList extends Component {
 
 	// user selects an item name from a dropdown list. This will be to either use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
-		console.log('onSelectItemName', e);
-		console.log('selected item ', e.name, e.id);
+		//console.log('onSelectItemName', e);
+		//console.log('selected item ', e.name, e.id);
 		this.setState({
 			[`${widgetId}`]: e.name,
 		});
@@ -130,7 +132,7 @@ class CreateTopTenList extends Component {
 	}
 
 	onCreateTopTenList = (newTopTenList) => {
-		console.log('new list data', newTopTenList);
+		//console.log('new list data', newTopTenList);
 		this.props.dispatch(createTopTenList(newTopTenList, this.props.history));
 	}
 
@@ -167,29 +169,20 @@ class CreateTopTenList extends Component {
 
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			const widgetId = `topTenItem${i}_name`;
+			const reusableItemId = this.state[`topTenItem${i}_name_reusableItemId`];
+			let reusableItem;
+			if (reusableItemId) {
+				reusableItem = this.props.reusableItemSuggestions.find(item => item.id === reusableItemId);
+			}
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
-					{/*<Row>
-						<Col lg="9" className="topTenItem-name">
-							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
-							<Input
-								type="text"
-								name={`topTenItem${i}_name`}
-								id={`topTenItem${i}_name`}
-								onChange={ this.handleInputChange }
-								value={ this.state[`topTenItem${i}_name`] }
-								placeholder="Enter the Top Ten item name"
-							/>
-							<div className='invalid-feedback' />
-						</Col>
-					</Row> */}
 					<Row>
 						<Col lg="9" className="topTenItem-name">
 							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
 							<Combobox
 								name={widgetId}
 								id={widgetId}
-								data={widgetId === this.state.activeItemNameId ? this.props.reusableItemData : []}
+								data={widgetId === this.state.activeItemNameId ? this.props.reusableItemSuggestions : []}
 								minLength={2}
       					filter='contains'
       					groupComponent={GroupHeading}
@@ -204,6 +197,18 @@ class CreateTopTenList extends Component {
 							<div className='invalid-feedback' />
 						</Col>
 					</Row>
+
+					{reusableItem && (
+						<Row>
+							<Col className="reusable-item">
+								<div>
+									<h3><span className="icon" title="Reusable Item"><FontAwesomeIcon icon={['far', 'clone']} style={{ 'color': '#6DB65B' }} size="1x" /></span>{reusableItem.name}</h3>
+									<p>{reusableItem.definition}</p>
+									<p>{reusableItem.link}</p>
+								</div>
+							</Col>
+						</Row>
+					)}
 					<Row>
 						<Col lg="9" className="topTenItem-description">
 							<Label for={`topTenItem${i}_description`}>Top Ten item {i} description</Label>
@@ -308,7 +313,7 @@ CreateTopTenList.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'errors': state.errors,
-	'reusableItemData': reusableItemReducer.getReusableItemList(state),
+	'reusableItemSuggestions': reusableItemReducer.getReusableItemList(state),
 });
 
 export default connect(mapStateToProps)(withRouter(CreateTopTenList));

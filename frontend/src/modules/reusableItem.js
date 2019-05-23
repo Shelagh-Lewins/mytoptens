@@ -234,11 +234,9 @@ const initialResuableItemsState = {
 // returns reusableItems as an array
 export const getReusableItems = state => {
 	return state.reusableItem.searchResults.reusableItems.map(reusableItem => {
-		return {
-			'type': 'reusableItem',
-			'id': reusableItem.id,
-			'name': reusableItem.name,
-		};
+		const extendedReusableItem = JSON.parse(JSON.stringify(reusableItem)); // copy all properties, including objects and arrays
+		extendedReusableItem.type = 'reusableItem';
+		return extendedReusableItem;
 	});
 };
 

@@ -1,3 +1,5 @@
+@import "../variables";
+
 .create-topTenList {
 	.topTenList-name {
 		label {
@@ -8,6 +10,19 @@
 	.topTenItem-name {
 		label {
 			font-weight: bold;
+		}
+	}
+
+	.reusable-item {
+		> div {
+			border: 1px solid $color-reusableitem-border;
+			border-radius: 10px;
+			margin: 10px 30px 10px 0;
+			padding: 10px;
+		}
+
+		.icon {
+			margin-right: 10px;
 		}
 	}
 
