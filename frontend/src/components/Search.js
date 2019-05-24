@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Input } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
+import { COLORS } from '../constants';
+
 import './Search.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -59,18 +61,20 @@ class Search extends Component {
 						{this.props.searchResults.map((result) => {
 							let icon;
 							let TopTenListId;
-							let color = '#028fcc';
+							let color;
 							let title;
 
 							switch(result.type) {
 								case 'TopTenList':
 									icon = 'list-ol';
+									color = COLORS.TOPTENLIST;
 									TopTenListId = result.id;
 									title = 'Top Ten List';
 									break;
 
 								case 'TopTenItem':
 									icon = 'sticky-note';
+									color = COLORS.TOPTENITEM;
 									TopTenListId = result.topTenList_id;
 									title = 'Top Ten Item';
 									break;

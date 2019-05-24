@@ -12,11 +12,10 @@ import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm.js';
-import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
+import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
 
 import './CreateTopTenList.scss';
 
-import * as topTenListReducer from '../modules/topTenList';
 import * as reusableItemReducer from '../modules/reusableItem';
 import Combobox from 'react-widgets/lib/Combobox';
 import 'react-widgets/dist/css/react-widgets.css';
@@ -57,11 +56,6 @@ class CreateTopTenList extends Component {
 		if (this.state.parentTopTenItemName) {
 			this.state.name = this.state.parentTopTenItemName;
 		}
-
-		// define colours for the svg icons
-		this.useTextColor = '#666';
-		this.reusableItemColor = '#6db65b';
-		this.topTenItemColor = '#028fcc';
 	}
 
 	handleInputChange(e) {
@@ -208,17 +202,17 @@ class CreateTopTenList extends Component {
 			switch(item.type) {
 				case 'text':
 					icon = 'pencil-alt';
-					color = that.useTextColor;
+					color = COLORS.USETEXT;
 					break;
 
 				case 'reusableItem':
 					icon = 'clone';
-					color = that.reusableItemColor;
+					color = COLORS.REUSABLEITEM;
 					break;
 
 				case 'topTenItem':
-					icon = 'plus';
-					color = that.topTenItemColor;
+					icon = 'sticky-note';
+					color = COLORS.TOPTENITEM;
 					break;
 
 				default:
