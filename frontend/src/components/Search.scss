@@ -18,7 +18,7 @@
 
 	li {
 		border-bottom: 1px solid $color-search-border;
-			padding: 4px;
+		padding: 4px;
 
 		&:last-child {
 			border-bottom: 0;
@@ -35,5 +35,9 @@
 			color: $color-text;
 			text-decoration: none;
 		}
+	}
+
+	.icon {
+		margin-right: 10px;
 	}
 }

@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 
 import './Search.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 class Search extends Component {
 	constructor(props) {
 		super(props);
@@ -55,17 +57,32 @@ class Search extends Component {
 				searchResults = <div className="results">
 					<ul>
 						{this.props.searchResults.map((result) => {
-							let type = '';
-							const url = `/topTenList/${result.id}`;
+							let icon;
+							let TopTenListId;
+							let color = '#028fcc';
+							let title;
 
-							if (result.type === 'List') {
-								type = 'List';
-							} else if (result.type === 'Item') {
-								type = 'Item';
+							switch(result.type) {
+								case 'TopTenList':
+									icon = 'list-ol';
+									TopTenListId = result.id;
+									title = 'Top Ten List';
+									break;
+
+								case 'TopTenItem':
+									icon = 'sticky-note';
+									TopTenListId = result.topTenList_id;
+									title = 'Top Ten Item';
+									break;
+
+								default:
+									break;
 							}
+							const url = `/topTenList/${TopTenListId}`;
+
 							return (
 								<li className="result" key={result.id}>
-									<Link to={url} onClick={this.closeDropdown}><span className="type">{type}: </span><span className="name">{result.name}</span>
+									<Link to={url} onClick={this.closeDropdown}><span className="icon" title={title}><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span><span className="name">{result.name}</span>
 									</Link>
 								</li>
 							);
