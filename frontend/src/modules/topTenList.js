@@ -152,9 +152,8 @@ export function fetchTopTenListDetail(id) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then(response => {
-			console.log('got response ', response);
 			const normalizedData = normalize(response, [topTenListSchema]);
-console.log('normalizedData ', normalizedData);
+
 			return dispatch(receiveEntities(normalizedData));
 		}).catch(error => {
 			dispatch(fetchTopTenListDetailFailed());
@@ -168,7 +167,8 @@ console.log('normalizedData ', normalizedData);
 // create topTenList
 export const createTopTenList = (topTenList, history) => dispatch => {
 	dispatch(createTopTenListStarted());
-console.log('createTopTenList data', topTenList);
+	console.log('createTopTenList data', topTenList);
+
 	return fetchAPI({
 		'url': '/api/v1/content/toptenlist/',
 		'data': JSON.stringify(topTenList),

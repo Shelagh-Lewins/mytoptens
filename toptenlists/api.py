@@ -250,7 +250,6 @@ class SearchListsItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-m
 
         # only show topTenItems that do not have an associated reusableItem
         if self.request.query_params.get('excludereusableitems', None) == 'true':
-            print('excludereusableitems')
             topTenItem_query_set['queryset'] = topTenItem_query_set['queryset'].filter(reusableItem__isnull=True)
 
 

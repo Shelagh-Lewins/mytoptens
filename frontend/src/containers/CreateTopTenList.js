@@ -144,6 +144,9 @@ class CreateTopTenList extends Component {
 					'name': this.state[`topTenItem${i}_name`],
 					'description': this.state[`topTenItem${i}_description`],
 					'reusableItem_id': this.state[`topTenItem${i}_name_reusableItemId`],
+					'topTenItem_id': this.state[`topTenItem${i}_name_topTenItemId`],
+					'definition': this.state[`topTenItem${i}_name_definition`],
+					'link': this.state[`topTenItem${i}_name_link`],
 					'order': i,
 				};
 				newTopTenList.topTenItem.push(newTopTenItem);
@@ -273,10 +276,29 @@ class CreateTopTenList extends Component {
 						<Row>
 							<Col className="reusable-item">
 								<div>
-									<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': this.topTenItemColor }} size="1x" /></span>{topTenItem.name}</h3>
-									<p>A new reusable item will be created with this name</p>
-									<p>All reusable items are public and can be seen by anybody</p>
-									<p>However this list will be private unless you make it public</p>
+									<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{topTenItem.name}</h3>
+									<p>A new Reusable Item will be created with this name</p>
+									<Label for={`topTenItem${i}_name_definition`}>Definition</Label>
+									<Input
+										type="text"
+										name={`topTenItem${i}_name_definition`}
+										id={`topTenItem${i}_name_definition`}
+										onChange={ this.handleInputChange }
+										value={ this.state[`topTenItem${i}_name_definition`] }
+										placeholder="Enter a brief definition of the Reusable Item"
+									/>
+									<div className='invalid-feedback' />
+									<Label for={`topTenItem${i}_name_link`}>Weblink</Label>
+									<Input
+										type="text"
+										name={`topTenItem${i}_name_link`}
+										id={`topTenItem${i}_name_link`}
+										onChange={ this.handleInputChange }
+										value={ this.state[`topTenItem${i}_name_link`] }
+										placeholder="Enter a weblink that defines the Reusable Item"
+									/>
+									<div className='invalid-feedback' />
+									<p className="hint">Reusable items are public and can be seen by anybody. However your list will be private unless you make it public</p>
 								</div>
 							</Col>
 						</Row>
@@ -286,7 +308,7 @@ class CreateTopTenList extends Component {
 						<Row>
 							<Col className="reusable-item">
 								<div>
-									<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': this.reusableItemColor }} size="1x" /></span>{reusableItem.name}</h3>
+									<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{reusableItem.name}</h3>
 									<p>{reusableItem.definition}</p>
 									<p>{reusableItem.link}</p>
 								</div>

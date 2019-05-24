@@ -63,7 +63,7 @@ class TopTenItem(models.Model):
     name = models.CharField(max_length=255, blank=True, default='')
     description = models.CharField(max_length=5000, blank=True, default='')
     topTenList = models.ForeignKey(TopTenList, on_delete=models.CASCADE, related_name='topTenItem', editable=False) # topTenItem must belong to a list
-    reusableItem = models.ForeignKey(ReusableItem, on_delete=models.SET_NULL, null=True, related_name='topTenItem') # topTenItem may reference a reusableItem
+    reusableItem = models.ForeignKey(ReusableItem, on_delete=models.SET_NULL,  blank=True, null=True, related_name='topTenItem') # topTenItem may reference a reusableItem
     order = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     class Meta:
