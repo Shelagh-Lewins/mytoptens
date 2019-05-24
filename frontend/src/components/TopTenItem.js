@@ -4,11 +4,14 @@
 import store from '../store';
 
 import React, { Component } from 'react';
+import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import EditableTextField from './EditableTextField.js';
 import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';
-import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
+import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 class Item extends Component {
 	constructor(props) {
@@ -16,6 +19,7 @@ class Item extends Component {
 
 		this.state = {
 			'isEditingName': false,
+			'popoverOpen': false,
 		};
 		//console.log('topTenItem props, ', props);
 		this.onCreateChildTopTenList = this.onCreateChildTopTenList.bind(this);
@@ -23,6 +27,14 @@ class Item extends Component {
 		this.setIsEditingDescription = this.setIsEditingDescription.bind(this);
 		this.onMoveUp = this.onMoveUp.bind(this);
 		this.onMoveDown = this.onMoveDown.bind(this);
+
+		this.togglePopover = this.togglePopover.bind(this);
+	}
+
+	togglePopover() {
+		this.setState({
+			'popoverOpen': !this.state.popoverOpen
+		});
 	}
 
 	setIsEditingName(showInput) {
@@ -76,10 +88,10 @@ class Item extends Component {
 		let childTopTenList;
 
 		if (canCreateChildTopTenList) {
-			childTopTenList = (<button className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);	
+			childTopTenList = (<button className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>); 
 		} else if (canViewChildTopTenList) {
 			childTopTenList = (
-				<div className="child-toptenlist">	
+				<div className="child-toptenlist">  
 					<Link to={`/topTenList/${this.props.topTenItem.childTopTenList.id}`}>{this.props.topTenItem.childTopTenList.name} ></Link>
 				</div>);
 		}
@@ -101,10 +113,33 @@ class Item extends Component {
 			showDown = false;
 		}
 
+		let reusableItem;
+
+		if (this.props.topTenItem.reusableItem) {
+			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem];
+			console.log('reusableItem ', reusableItem);
+			reusableItem = (
+				<div>
+					<Button id="Popover1" type="button" className="name-icon btn bg-transparent">
+						<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />
+					</Button>
+					<Popover placement="bottom" isOpen={this.state.popoverOpen} target="Popover1" toggle={this.togglePopover}>
+						<PopoverHeader>{reusableItem.name}</PopoverHeader>
+						<PopoverBody>{reusableItem.definition}<br />
+							{reusableItem.link}</PopoverBody>
+					</Popover>
+				</div>
+			);
+			// TODO make this work for multiple popovers
+			// make link work
+		}
+
+		console.log('item ', this.props.topTenItem);
+
 		return (
 			<div className="toptenitem-container">
 				<div className="toptenitem-header">
-					<span className="order">{this.props.topTenItem.order}:</span><EditableTextField
+					<span className="order">{this.props.topTenItem.order}:</span>{reusableItem}<EditableTextField
 						canEdit={this.props.canEdit}
 						name={`${this.props.topTenItem.order}_name`}
 						label="Item name"

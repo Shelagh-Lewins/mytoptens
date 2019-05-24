@@ -37,6 +37,11 @@ class TopTenItemsPage extends Component {
 				if (topTenItems[key].childTopTenList) {
 					this.state[`${order}_childTopTenList`] = topTenItems[key].childTopTenList;
 				}
+
+				// reusableItem
+				if (topTenItems[key].reusableItem) {
+					this.state[`${order}_reusableItem`] = topTenItems[key].reusableItem;
+				}
 			}
 		});
 	}
@@ -130,6 +135,7 @@ class TopTenItemsPage extends Component {
 									'name': name,
 									'description': this.state[`${i}_description`],
 									'childTopTenList': this.state[`${i}_childTopTenList`],
+									'reusableItem': this.state[`${i}_reusableItem`],
 									 }}
 								handleInputChange={this.handleInputChange}
 								handleNewValue={this.handleNewValue}
