@@ -20,6 +20,7 @@ class Item extends Component {
 		//console.log('topTenItem props, ', props);
 		this.onCreateChildTopTenList = this.onCreateChildTopTenList.bind(this);
 		this.setIsEditingName = this.setIsEditingName.bind(this);
+		this.setIsEditingDescription = this.setIsEditingDescription.bind(this);
 		this.onMoveUp = this.onMoveUp.bind(this);
 		this.onMoveDown = this.onMoveDown.bind(this);
 	}
@@ -27,6 +28,12 @@ class Item extends Component {
 	setIsEditingName(showInput) {
 		this.setState({
 			'isEditingName': showInput,
+		});
+	}
+
+	setIsEditingDescription(showInput) {
+		this.setState({
+			'setIsEditingDescription': showInput,
 		});
 	}
 
@@ -44,7 +51,7 @@ class Item extends Component {
 
 	render() {
 		let showDescription = true;
-		if (this.props.topTenItem.name === '') {
+		if (this.props.topTenItem.name === '' && !this.state.isEditingName) {
 			showDescription = false;
 		} else if (this.state.isEditingName && store.getState().topTenItem.things[this.props.topTenItem.id] && store.getState().topTenItem.things[this.props.topTenItem.id].name === '') {
 			showDescription = false;
@@ -80,7 +87,10 @@ class Item extends Component {
 		let showUp = true;
 		let showDown = true;
 
-		if (!this.props.canEdit ||
+		if (this.state.isEditingName || this.state.setIsEditingDescription) {
+			showUp = false;
+			showDown = false;
+		} else if (!this.props.canEdit ||
 			this.props.topTenItem.name === '' ||
 			!showDescription) { // assume that showDescription means there is a saved name i.e. the topTenItem exists
 			showUp = false;
@@ -122,6 +132,7 @@ class Item extends Component {
 							id={`${this.props.topTenItem.order}_description`} // id of the html element
 							handleInputChange={this.props.handleInputChange}
 							handleNewValue={this.props.handleNewValue}
+							isEditing={this.setIsEditingDescription}
 							value={this.props.topTenItem.description}
 						/>
 					</div>

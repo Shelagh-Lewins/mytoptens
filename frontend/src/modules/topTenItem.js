@@ -60,7 +60,7 @@ export function createTopTenItemSucceeded(topTenItem) {
 // update topTenItem
 export const updateTopTenItem = (topTenItemId, propertyName, value) => dispatch => {
 	// should be able to update any simple property e.g. name, description
-
+	console.log('updateTopTenItem ', topTenItemId, propertyName, value);
 	return fetchAPI({
 		'url': `/api/v1/content/toptenitem/${topTenItemId}/`,
 		'headers': { 'Content-Type': 'application/json' },
