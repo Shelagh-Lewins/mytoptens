@@ -84,7 +84,7 @@ class CreateTopTenList extends Component {
 				// We need to remove the selection from state to avoid confusion.
 				// value must be selected from list.
 				this.setState({
-					[`${widgetId}`]: '',
+					[`${widgetId}`]: e, // use the entered text directly if the user hasn't made a selection
 					[`${widgetId}_reusableItemId`]: undefined,
 				});
 
@@ -230,7 +230,6 @@ class CreateTopTenList extends Component {
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			const widgetId = `topTenItem${i}_name`;
 
-			
 			// has the user selected an existing topTenItem?
 			const topTenItemId = this.state[`topTenItem${i}_name_topTenItemId`];
 
