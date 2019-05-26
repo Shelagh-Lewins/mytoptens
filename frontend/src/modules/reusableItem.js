@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
+import { normalize, schema } from 'normalizr';
 import store from '../store';
 
 import {
@@ -13,6 +14,27 @@ import {
 	RECEIVE_ENTITIES,
 	FETCH_TOPTENLIST_DETAIL_STARTED,
 } from './topTenList';
+
+const topTenItemSchema = new schema.Entity('topTenItem');
+const reusableItemSchema = new schema.Entity('reusableItem');
+
+// each data relationship must be defined in both directions
+// a topTenItem has one topTenList and one reusableItem
+topTenItemSchema.define({
+	'reusableItem': reusableItemSchema,
+});
+
+// a reusableItem has many topTenItems
+reusableItemSchema.define({
+	'topTenItem': [topTenItemSchema],
+});
+
+function receiveEntities(entities) {
+	return {
+		'type': RECEIVE_ENTITIES,
+		'payload': entities,
+	};
+}
 
 //////////////////////////////////
 // Action creators
@@ -31,12 +53,13 @@ export const SEARCH_TOPTENITEMS_STARTED = 'SEARCH_TOPTENITEMS_STARTED';
 export const SEARCH_TOPTENITEMS_SUCCEEDED = 'SEARCH_TOPTENITEMS_SUCCEEDED';
 export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 
+export const FETCH_REUSABLEITEM_DETAIL_STARTED = 'FETCH_REUSABLEITEM_DETAIL_STARTED';
+export const FETCH_REUSABLEITEM_DETAIL_FAILED = 'FETCH_REUSABLEITEM_DETAIL_FAILED';
+
 //////////////////////////////////
 // Suggest names for topTenItems based on reusableItems and topTenItems that have no reusable item
 export function suggestReusableItems(searchTerm) {
 	return (dispatch) => {
-		// TODO also search topTenItems
-		console.log('searchTerm 1 ', searchTerm);
 		dispatch(searchReusableItems(searchTerm));
 		dispatch(searchTopTenItems(searchTerm));
 	};
@@ -92,6 +115,43 @@ export function searchReusableItems(searchTerm) {
 			dispatch(searchReusableItems());
 
 			return dispatch(getErrors({ 'fetch reusableItems': error.message }));
+		});
+	};
+}
+
+///////////////////////////////
+// fetch a single reusableItem
+export function fetchReusableItemDetailStarted() {
+	return {
+		'type': FETCH_REUSABLEITEM_DETAIL_STARTED,
+	};
+}
+
+function fetchReusableItemDetailFailed() {
+	return {
+		'type': FETCH_REUSABLEITEM_DETAIL_FAILED
+	};
+}
+
+export function fetchReusableItemDetail(id) {
+	return (dispatch, getState) => {
+		dispatch(fetchReusableItemDetailStarted());
+
+		// All ReusableItems are public
+		const useAuth = false;
+
+		return fetchAPI({
+			'url': `/api/v1/content/reusableitem/?id=${id}`,
+			'method': 'GET',
+			'useAuth': useAuth,
+		}).then(response => {
+			const normalizedData = normalize(response, [reusableItemSchema]);
+
+			return dispatch(receiveEntities(normalizedData));
+		}).catch(error => {
+			dispatch(fetchReusableItemDetailFailed());
+
+			return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
 		});
 	};
 }
@@ -316,6 +376,14 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			return updeep({
 				'things': updeep.constant(things),
 				'isLoading': false }, state);
+		}
+
+		case FETCH_REUSABLEITEM_DETAIL_STARTED: {
+			return updeep({ 'isLoading': true	}, state);
+		}
+
+		case FETCH_REUSABLEITEM_DETAIL_FAILED: {
+			return updeep({ 'isLoading': false }, state);
 		}
 
 		case FETCH_TOPTENLIST_DETAIL_STARTED: {

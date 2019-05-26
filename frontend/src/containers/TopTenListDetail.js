@@ -287,7 +287,7 @@ class TopTenListDetails extends Component {
 		if (this.state.canView) {
 			content = this.renderPage();
 		} else {
-			content = <p>Either this topTenList does not exist or you do not have permission to view it</p>;
+			content = <p>Either this Top Ten List does not exist or you do not have permission to view it</p>;
 		}
 		return(
 			<div className="toptenlist-detail">

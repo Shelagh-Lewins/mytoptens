@@ -126,7 +126,12 @@ class Item extends Component {
 					<Popover placement="bottom" isOpen={this.state.popoverOpen} target="Popover1" toggle={this.togglePopover}>
 						<PopoverHeader>{reusableItem.name}</PopoverHeader>
 						<PopoverBody>{reusableItem.definition}<br />
-							{reusableItem.link}</PopoverBody>
+							{reusableItem.link}<br />
+							<Link to={`/reusableItem/${reusableItem.id}`}>
+								<div className="toptenlist-description">{reusableItem.name.description}</div>
+							</Link>
+							Hey!
+						</PopoverBody>
 					</Popover>
 				</div>
 			);
