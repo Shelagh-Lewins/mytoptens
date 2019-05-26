@@ -102,6 +102,45 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
                     print(topTenItem_data['reusableItem_id'])
                     return False
 
+            elif 'topTenItem_id' in topTenItem_data:
+                print('new reusableItem from topTenItem:')
+                print(topTenItem_data['topTenItem_id'])
+
+                try:
+                    topTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
+                    print('got item')
+                    print(topTenItem)
+                    print('topTenItem_data')
+                    print(topTenItem_data)
+
+                    reusableItemData = {'name': topTenItem_data['name']}
+
+                    if 'definition' in topTenItem_data:
+                        reusableItemData['definition'] = topTenItem_data['definition']
+                    
+                    if 'link' in topTenItem_data:
+                        reusableItemData['link'] = topTenItem_data['link']
+
+                    newReusableItem = ReusableItem.objects.create( **reusableItemData)
+
+                    # assign this reusableItem to the topTenItem from which it was created
+                    parentTopTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
+                    parentTopTenItem.reusableItem = newReusableItem
+                    parentTopTenItem.save()
+
+                    internal_value['topTenItem'][index]['reusableItem'] = newReusableItem
+
+                except topTenItem.DoesNotExist:
+                    print('error attempting to use non-existent topTenItem for new reusableItem in new topTenList')
+                    print('username:')
+                    print(self.context['request'].user.username)
+                    print('new list name:')
+                    print(internal_value['name'])
+                    print('topTenItem_id:')
+                    print(topTenItem_data['topTenItem_id'])
+                    return False
+
+
         return internal_value
 
     def create(self, validated_data):
@@ -110,10 +149,10 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
         validated_data['created_by'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username
 
-        newtopTenList = TopTenList.objects.create(**validated_data)
+        newTopTenList = TopTenList.objects.create(**validated_data)
 
         for topTenItem_data in topTenItems_data:
 
-            TopTenItem.objects.create(topTenList=newtopTenList, **topTenItem_data)
+            TopTenItem.objects.create(topTenList=newTopTenList, **topTenItem_data)
 
-        return newtopTenList
+        return newTopTenList
