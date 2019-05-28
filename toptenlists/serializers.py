@@ -1,4 +1,7 @@
 from rest_framework import serializers
+import uuid
+
+from django.db import models
 
 # dynamic rest extension enables nested data for topTenLists, see chapter 8
 from dynamic_rest.serializers import DynamicModelSerializer
@@ -80,66 +83,87 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
         # to use fields like reusableItem_id which do not directly go into model
         internal_value = super(TopTenListSerializer, self).to_internal_value(data)
 
-        for index, topTenItem_data in enumerate(data.get('topTenItem')):
-            if 'reusableItem_id' in topTenItem_data:
+        # TODO handle edit separately from create
+        print('*** topTenList serializer, to_internal_value')
+        print(data)
 
-                try:
-                    # make sure the reusableItem exists
-                    reusableItem = ReusableItem.objects.get(id=topTenItem_data['reusableItem_id'])
-                    # remove the reference to the reusableItem_id
-                    internal_value['topTenItem'][index].pop('reusableItem_id', None)
-                    # and instead refer to the object
-                    # because that is what the model requires
-                    internal_value['topTenItem'][index]['reusableItem'] = reusableItem
+        if data.get('topTenItem') is not None:
+            # when creating a list, the items are also created
+            # note that if newReusableItem is False, the code will fail
+            # if the value exists, it must be True
+            for index, topTenItem_data in enumerate(data.get('topTenItem')):
+                if 'newReusableItem' in topTenItem_data:
+                    if topTenItem_data['newReusableItem'] == True:
+                    # create new reusableItem from raw data
 
-                except reusableItem.DoesNotExist:
-                    print('error attempting to use non-existent reusableItem in new topTenList')
-                    print('username:')
-                    print(self.context['request'].user.username)
-                    print('new list name:')
-                    print(internal_value['name'])
-                    print('reusableItem_id:')
-                    print(topTenItem_data['reusableItem_id'])
-                    return False
+                        reusableItemData = {'name': topTenItem_data['name']}
 
-            elif 'topTenItem_id' in topTenItem_data:
-                print('create new reusableItem from topTenItem:')
-                print(topTenItem_data['topTenItem_id'])
+                        if 'definition' in topTenItem_data:
+                            reusableItemData['definition'] = topTenItem_data['definition']
+                        
+                        if 'link' in topTenItem_data:
+                            reusableItemData['link'] = topTenItem_data['link']
 
-                try:
-                    topTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
-                    print('got item')
-                    print(topTenItem)
-                    print('topTenItem_data')
-                    print(topTenItem_data)
+                        newReusableItem = ReusableItem.objects.create( **reusableItemData)
 
-                    reusableItemData = {'name': topTenItem_data['name']}
-
-                    if 'definition' in topTenItem_data:
-                        reusableItemData['definition'] = topTenItem_data['definition']
+                        internal_value['topTenItem'][index]['reusableItem'] = newReusableItem
                     
-                    if 'link' in topTenItem_data:
-                        reusableItemData['link'] = topTenItem_data['link']
 
-                    newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                elif 'reusableItem_id' in topTenItem_data:
+                    # reference an existing reusableItem
+                    try:
+                        # make sure the reusableItem exists
+                        reusableItem = ReusableItem.objects.get(id=topTenItem_data['reusableItem_id'])
+                        # remove the reference to the reusableItem_id
+                        internal_value['topTenItem'][index].pop('reusableItem_id', None)
+                        # and instead refer to the object
+                        # because that is what the model requires
+                        internal_value['topTenItem'][index]['reusableItem'] = reusableItem
 
-                    # assign this reusableItem to the topTenItem from which it was created - so it will now be referenced twice
-                    parentTopTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
-                    parentTopTenItem.reusableItem = newReusableItem
-                    parentTopTenItem.save()
+                    except reusableItem.DoesNotExist:
+                        print('error attempting to use non-existent reusableItem in new topTenList')
+                        print('username:')
+                        print(self.context['request'].user.username)
+                        print('new list name:')
+                        print(internal_value['name'])
+                        print('reusableItem_id:')
+                        print(topTenItem_data['reusableItem_id'])
+                        return False
 
-                    internal_value['topTenItem'][index]['reusableItem'] = newReusableItem
-
-                except topTenItem.DoesNotExist:
-                    print('error attempting to use non-existent topTenItem for new reusableItem in new topTenList')
-                    print('username:')
-                    print(self.context['request'].user.username)
-                    print('new list name:')
-                    print(internal_value['name'])
-                    print('topTenItem_id:')
+                elif 'topTenItem_id' in topTenItem_data:
+                    # create new reusableItem from topTenItem
+                    print('topTenItem_id')
                     print(topTenItem_data['topTenItem_id'])
-                    return False
 
+                    try:
+                        topTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
+
+                        reusableItemData = {'name': topTenItem_data['name']}
+
+                        if 'definition' in topTenItem_data:
+                            reusableItemData['definition'] = topTenItem_data['definition']
+                        
+                        if 'link' in topTenItem_data:
+                            reusableItemData['link'] = topTenItem_data['link']
+
+                        newReusableItem = ReusableItem.objects.create( **reusableItemData)
+
+                        # assign this reusableItem to the topTenItem from which it was created - so it will now be referenced twice
+                        parentTopTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
+                        parentTopTenItem.reusableItem = newReusableItem
+                        parentTopTenItem.save()
+
+                        internal_value['topTenItem'][index]['reusableItem'] = newReusableItem
+
+                    except topTenItem.DoesNotExist:
+                        print('error attempting to use non-existent topTenItem for new reusableItem in new topTenList')
+                        print('username:')
+                        print(self.context['request'].user.username)
+                        print('new list name:')
+                        print(internal_value['name'])
+                        print('topTenItem_id:')
+                        print(topTenItem_data['topTenItem_id'])
+                        return False
 
         return internal_value
 
@@ -151,8 +175,24 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
         newTopTenList = TopTenList.objects.create(**validated_data)
 
-        for topTenItem_data in topTenItems_data:
+        # topTenItems must be created in bulk
+        # otherwise when the first one is created, all the reusableItems that whose topTenItem has not yet been created, will be deleted
+        # to use bulk_create, the data must be converted from Ordered Dict to an array of Objects
+        itemObjs = []
 
-            TopTenItem.objects.create(topTenList=newTopTenList, **topTenItem_data)
+        for topTenItem_data in topTenItems_data:
+            NewItemObj = TopTenItem(
+                name=topTenItem_data['name'],
+                order=topTenItem_data['order'],
+                description=topTenItem_data['description'],
+                topTenList=newTopTenList,
+            )
+
+            if 'reusableItem' in topTenItem_data:
+                NewItemObj.reusableItem = topTenItem_data['reusableItem']
+
+            itemObjs.append(NewItemObj)
+
+        TopTenItem.objects.bulk_create(itemObjs)
 
         return newTopTenList
