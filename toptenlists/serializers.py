@@ -103,7 +103,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
                     return False
 
             elif 'topTenItem_id' in topTenItem_data:
-                print('new reusableItem from topTenItem:')
+                print('create new reusableItem from topTenItem:')
                 print(topTenItem_data['topTenItem_id'])
 
                 try:
@@ -123,7 +123,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
                     newReusableItem = ReusableItem.objects.create( **reusableItemData)
 
-                    # assign this reusableItem to the topTenItem from which it was created
+                    # assign this reusableItem to the topTenItem from which it was created - so it will now be referenced twice
                     parentTopTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
                     parentTopTenItem.reusableItem = newReusableItem
                     parentTopTenItem.save()
