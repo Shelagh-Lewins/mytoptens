@@ -46,10 +46,6 @@ class TopTenListDetails extends Component {
 			const canEditTopTenList = permissions.canEditTopTenList(this.state.id);
 			const canViewTopTenList = permissions.canViewTopTenList(this.state.id);
 
-			if (!canViewTopTenList) {
-				this.props.history.push('/');
-			}
-
 			this.getOrganizerData();
 
 			this.setState({
@@ -76,8 +72,9 @@ class TopTenListDetails extends Component {
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			this.props.dispatch(topTenListReducer.fetchTopTenListDetail(this.state.id));
-			this.props.dispatch(clearErrors());
+			//this.props.dispatch(topTenListReducer.fetchTopTenListDetail(this.state.id));
+			//this.props.dispatch(clearErrors());
+			this.getTopTenListData(this.props);
 		}
 	}
 
@@ -193,8 +190,7 @@ class TopTenListDetails extends Component {
 						</Col>
 					</Row>
 				</Container>)}
-				{this.props.isLoading && <Loading />}
-				{this.props.topTenList && !this.props.isLoading && (
+				{this.props.topTenList && (
 					<div>
 						<Container>
 							<Row>
@@ -282,6 +278,10 @@ class TopTenListDetails extends Component {
 	///////////////
 
 	render() {
+		if (this.props.isLoading) {
+			return <Loading />;
+		}
+
 		let content;
 
 		if (this.state.canView) {

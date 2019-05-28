@@ -92,7 +92,7 @@ class Item extends Component {
 		} else if (canViewChildTopTenList) {
 			childTopTenList = (
 				<div className="child-toptenlist">  
-					<Link to={`/topTenList/${this.props.topTenItem.childTopTenList.id}`}>{this.props.topTenItem.childTopTenList.name} ></Link>
+					<Link to={`/toptenlist/${this.props.topTenItem.childTopTenList.id}`}>{this.props.topTenItem.childTopTenList.name} ></Link>
 				</div>);
 		}
 
@@ -117,20 +117,18 @@ class Item extends Component {
 
 		if (this.props.topTenItem.reusableItem) {
 			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem];
-			console.log('reusableItem ', reusableItem);
+
 			reusableItem = (
 				<div>
 					<Button id="Popover1" type="button" className="name-icon btn bg-transparent">
 						<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />
 					</Button>
-					<Popover placement="bottom" isOpen={this.state.popoverOpen} target="Popover1" toggle={this.togglePopover}>
+					<Popover placement="bottom" isOpen={this.state.popoverOpen} target="Popover1" toggle={this.togglePopover} html="true">
 						<PopoverHeader>{reusableItem.name}</PopoverHeader>
 						<PopoverBody>{reusableItem.definition}<br />
 							{reusableItem.link}<br />
-							<Link to={`/reusableItem/${reusableItem.id}`}>
-								<div className="toptenlist-description">{reusableItem.name.description}</div>
+							<Link to={`/reusableitem/${reusableItem.id}`}>More information...
 							</Link>
-							Hey!
 						</PopoverBody>
 					</Popover>
 				</div>
@@ -138,8 +136,6 @@ class Item extends Component {
 			// TODO make this work for multiple popovers
 			// make link work
 		}
-
-		console.log('item ', this.props.topTenItem);
 
 		return (
 			<div className="toptenitem-container">

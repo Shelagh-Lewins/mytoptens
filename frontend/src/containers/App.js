@@ -13,7 +13,7 @@ import Login from '../components/Login';
 import Home from '../containers/Home';
 import CreateTopTenList from '../containers/CreateTopTenList';
 import TopTenListDetails from '../containers/TopTenListDetail';
-import ReusableItemDetails from '../containers/TopTenListDetail';
+import ReusableItemDetails from '../containers/ReusableItemDetail';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';
@@ -55,9 +55,9 @@ class App extends Component {
 						<Navbar />	
 						<div className="container">
 							<Route exact path="/" component={ Home } />
-							<Route exact path="/newtopTenList" component={ CreateTopTenList } />
-							<Route exact path="/topTenList/:id" component={ TopTenListDetails } />
-							<Route exact path="/reusableItem/:id" component={ ReusableItemDetails } />
+							<Route exact path="/newtoptenlist" component={ CreateTopTenList } />
+							<Route exact path="/toptenlist/:id" component={ TopTenListDetails } />
+							<Route exact path="/reusableitem/:id" component={ ReusableItemDetails } />
 							<Route exact path="/register" component={ Register } />
 							<Route exact path="/welcome" component={ Welcome } />
 							<Route exact path="/login" component={ Login } />

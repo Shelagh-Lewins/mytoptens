@@ -179,10 +179,14 @@ class CreateTopTenList extends Component {
 	renderTopTenItemInputs() {
 		const elements = [];
 
+		// heading text for the combobox
 		const GroupHeading = ({ item }) => {
 			switch(item) {
 				case 'text':
 					return <span>Use this text:</span>;
+
+				case 'newReusableItem':
+					return <span>Create a new Reusable Item:</span>;
 
 				case 'reusableItem':
 					return <span>Reusable Items:</span>;
@@ -196,8 +200,6 @@ class CreateTopTenList extends Component {
 			}
 		};
 
-		const that = this;
-
 		let ComboboxItem = ({ item }) => {
 			let icon;
 			let color;
@@ -206,6 +208,11 @@ class CreateTopTenList extends Component {
 				case 'text':
 					icon = 'pencil-alt';
 					color = COLORS.USETEXT;
+					break;
+
+				case 'newReusableItem':
+					icon = 'plus';
+					color = COLORS.REUSABLEITEM;
 					break;
 
 				case 'reusableItem':
@@ -234,17 +241,66 @@ class CreateTopTenList extends Component {
 			const topTenItemId = this.state[`topTenItem${i}_name_topTenItemId`];
 
 			let topTenItem;
+			let reusableItem;
 			if (topTenItemId) {
 				topTenItem = this.props.reusableItemSuggestions.find(item => item.id === topTenItemId);
+			} else {
+				// has the user selected an existing reusableItem?
+				const reusableItemId = this.state[`topTenItem${i}_name_reusableItemId`];
+
+				if (reusableItemId) {
+					reusableItem = this.props.reusableItemSuggestions.find(item => item.id === reusableItemId);
+				}
 			}
 
-			// has the user selected an existing reusableItem?
-			const reusableItemId = this.state[`topTenItem${i}_name_reusableItemId`];
+			let reusableItemDetail;
+			let showReusableItemDetail = false;
 
-			let reusableItem;
-			if (reusableItemId) {
-				reusableItem = this.props.reusableItemSuggestions.find(item => item.id === reusableItemId);
+			if (reusableItem) {
+				reusableItemDetail = (<div>
+					<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{reusableItem.name}</h3>
+					<p>{reusableItem.definition}</p>
+					<p>{reusableItem.link}</p>
+				</div>);
+				showReusableItemDetail = true;
+			} else if (topTenItem) {
+				reusableItemDetail = (
+					<div>
+						<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{topTenItem.name}</h3>
+						<p>Create a new Reusable Item</p>
+						<Label for={`topTenItem${i}_name_definition`}>Definition</Label>
+						<Input
+							type="text"
+							name={`topTenItem${i}_name_definition`}
+							id={`topTenItem${i}_name_definition`}
+							onChange={ this.handleInputChange }
+							value={ this.state[`topTenItem${i}_name_definition`] }
+							placeholder="Enter a brief definition of the Reusable Item"
+						/>
+						<div className='invalid-feedback' />
+						<Label for={`topTenItem${i}_name_link`}>Weblink</Label>
+						<Input
+							type="text"
+							name={`topTenItem${i}_name_link`}
+							id={`topTenItem${i}_name_link`}
+							onChange={ this.handleInputChange }
+							value={ this.state[`topTenItem${i}_name_link`] }
+							placeholder="Enter a weblink that defines the Reusable Item"
+						/>
+						<div className='invalid-feedback' />
+						<p className="hint">Reusable items are public and can be seen by anybody. However your list will be private unless you make it public</p>
+					</div>
+				);
+				showReusableItemDetail = true;
 			}
+
+			const reusableItemForm = (
+				<Row>
+					<Col lg="9" className="reusable-item">
+						{reusableItemDetail}
+					</Col>
+				</Row>
+			);
 
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
@@ -271,49 +327,8 @@ class CreateTopTenList extends Component {
 						</Col>
 					</Row>
 
-					{topTenItem && (
-						<Row>
-							<Col className="reusable-item">
-								<div>
-									<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{topTenItem.name}</h3>
-									<p>A new Reusable Item will be created with this name</p>
-									<Label for={`topTenItem${i}_name_definition`}>Definition</Label>
-									<Input
-										type="text"
-										name={`topTenItem${i}_name_definition`}
-										id={`topTenItem${i}_name_definition`}
-										onChange={ this.handleInputChange }
-										value={ this.state[`topTenItem${i}_name_definition`] }
-										placeholder="Enter a brief definition of the Reusable Item"
-									/>
-									<div className='invalid-feedback' />
-									<Label for={`topTenItem${i}_name_link`}>Weblink</Label>
-									<Input
-										type="text"
-										name={`topTenItem${i}_name_link`}
-										id={`topTenItem${i}_name_link`}
-										onChange={ this.handleInputChange }
-										value={ this.state[`topTenItem${i}_name_link`] }
-										placeholder="Enter a weblink that defines the Reusable Item"
-									/>
-									<div className='invalid-feedback' />
-									<p className="hint">Reusable items are public and can be seen by anybody. However your list will be private unless you make it public</p>
-								</div>
-							</Col>
-						</Row>
-					)}
+					{showReusableItemDetail && reusableItemForm}
 
-					{reusableItem && (
-						<Row>
-							<Col className="reusable-item">
-								<div>
-									<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{reusableItem.name}</h3>
-									<p>{reusableItem.definition}</p>
-									<p>{reusableItem.link}</p>
-								</div>
-							</Col>
-						</Row>
-					)}
 					<Row>
 						<Col lg="9" className="toptenitem-description">
 							<Label for={`topTenItem${i}_description`}>Top Ten item {i} description</Label>
@@ -349,7 +364,7 @@ class CreateTopTenList extends Component {
 				</Container>)}
 				<h2>Create a new Top Ten list</h2>
 				{this.state.parentTopTenItemName && (
-					<div className="parent-topTenItem"><Link to={`/topTenList/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentTopTenItemName}</div>
+					<div className="parent-topTenItem"><Link to={`/toptenlist/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentTopTenItemName}</div>
 				)}
 				<ValidatedForm onSubmit={ this.handleSubmit }>
 					<div className="form-group">

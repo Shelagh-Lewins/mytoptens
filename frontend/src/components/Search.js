@@ -82,7 +82,7 @@ class Search extends Component {
 								default:
 									break;
 							}
-							const url = `/topTenList/${TopTenListId}`;
+							const url = `/toptenlist/${TopTenListId}`;
 
 							return (
 								<li className="result" key={result.id}>

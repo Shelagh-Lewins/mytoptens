@@ -33,7 +33,7 @@ const TopTenListSummary = props => {
 						<button className="btn btn-danger" title="Delete" onClick={onDeleteTopTenList}>X</button>
 					</div>
 				)}
-				<Link to={`/topTenList/${props.topTenList.id}`}>
+				<Link to={`/toptenlist/${props.topTenList.id}`}>
 					<div className="toptenlist-description">{props.topTenList.description}</div>
 				</Link>
 				

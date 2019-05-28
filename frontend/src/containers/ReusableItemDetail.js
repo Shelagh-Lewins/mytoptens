@@ -7,6 +7,8 @@ import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
 
 import * as reusableItemReducer from '../modules/reusableItem';
+import * as permissions from '../modules/permissions';
+import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
@@ -17,14 +19,38 @@ class ReusableItemDetails extends Component {
 
 		// load the topTenList and any parent / children
 		this.getReusableItemData = this.getReusableItemData.bind(this);
+		this.renderReusableItem = this.renderReusableItem.bind(this);
 		const id = this.getReusableItemData(props);
 
 		this.state = {
 			id,
 			'showOrganizer': false,
 		};
+	}
 
-		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
+	componentDidUpdate(prevProps) {
+		if (prevProps.isLoading && !this.props.isLoading) {
+			// just finished loading; need to check if user should view this reusableItem
+			const canViewReusableItem = permissions.canViewReusableItem(this.state.id);
+
+			this.setState({
+				'canView': canViewReusableItem,
+			});
+		}
+
+		// user has navigated to a different topTenList
+		if (prevProps.match.params.id !== this.props.match.params.id) {
+			const id = this.getTopTenListData(this.props);
+			this.setState({
+				id,
+			});
+		}
+
+		// user has just logged out
+		// store needs to be repopulated
+		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+			this.getReusableItemData(this.props);
+		}
 	}
 
 	getReusableItemData = (props) => {
@@ -33,6 +59,18 @@ class ReusableItemDetails extends Component {
 		props.dispatch(reusableItemReducer.fetchReusableItemDetail(id));
 		props.dispatch(clearErrors());
 		return id;
+	}
+
+	renderReusableItem() {
+		return (
+			<Row>
+				<Col>
+					<h2>{this.props.reusableItem.name}</h2>
+					{this.props.reusableItem.definition && (<p>{this.props.reusableItem.definition}</p>)}
+					{this.props.reusableItem.link && (<p><a href={this.props.reusableItem.link} target="_blank">{this.props.reusableItem.link}</a></p>)}
+				</Col>
+			</Row>
+		);
 	}
 
 	renderPage() {
@@ -53,17 +91,16 @@ class ReusableItemDetails extends Component {
 						</Col>
 					</Row>
 				</Container>)}
-				{this.props.isLoading && <Loading />}
-				<Row>
-					<Col>
-					I'm a reusable item
-					</Col>
-				</Row>
+				{this.renderReusableItem()}
 			</div>
 		);
 	}
 
 	render() {
+		if (this.props.isLoading) {
+			return <Loading />;
+		}
+
 		let content;
 
 		if (this.state.canView) {
@@ -87,10 +124,14 @@ ReusableItemDetails.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
+	// first find the target topTenList
+	//const reusableItem = findObjectByProperty({ 'property': 'id', 'value': ownProps.match.params.id });
+
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
-		'isLoading': state.topTenList.isLoading,
+		'isLoading': state.reusableItem.isLoading,
+		'reusableItem': state.reusableItem.things[ownProps.match.params.id],
 	});
 };
 

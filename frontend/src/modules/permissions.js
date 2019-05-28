@@ -65,3 +65,22 @@ export function canCreateTopTenList() {
 		return false;
 	}
 }
+
+export function canViewReusableItem(id) {
+	// all reusableItems are public
+	// so just check the reusableItem exists
+	const state = store.getState();
+	const reusableItems = state.reusableItem.things;
+
+	let canViewReusableItem = false;
+
+	if (Object.keys(reusableItems).length > 0) {
+		let topTenList = findObjectByProperty({ 'parentObject': reusableItems, 'property': 'id', 'value': id });
+
+		if (topTenList) {
+			canViewReusableItem = true;
+		}
+	}
+
+	return canViewReusableItem;
+}

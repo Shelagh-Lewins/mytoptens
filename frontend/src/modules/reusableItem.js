@@ -216,6 +216,7 @@ export function searchTopTenItems(searchTerm) {
 // Reducer
 var updeep = require('updeep');
 
+// this is no longer used but shows the data structure
 const fakeResuableItems = [
 	{
 		'id': '1001',
@@ -285,6 +286,7 @@ const initialResuableItemsState = {
 		'reusableItems': [], // todo search for reusableItems
 		'topTenItems': [], // todo search for topTenItems
 	},
+	'things': {},
 };
 
 /////////////////////////////
@@ -335,14 +337,24 @@ export const getSortedReusableItemSuggestions = createSelector(
 export const getReusableItemList = state => {
 	if (state.reusableItem.searchTerm !== '') {
 		const optionText = state.reusableItem.searchTerm;
-		const option = {
+
+		// option to use just this text, no reusableItem
+		const option1 = {
 			'type': 'text',
 			'id': '',
 			'name': optionText,
 			'value': optionText,
 		};
 
-		return [option].concat(getSortedReusableItemSuggestions(state));
+		// option to create a new reusableItem with this text
+		const option2 = {
+			'type': 'newReusableItem',
+			'id': '',
+			'name': optionText,
+			'value': optionText,
+		};
+
+		return [option1, option2].concat(getSortedReusableItemSuggestions(state));
 	}
 	return getSortedReusableItemSuggestions(state);
 };
