@@ -240,7 +240,8 @@ class CreateTopTenList extends Component {
 					break;
 			}
 			return (<span className="combobox-dropdown"><span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
-		    {item.name}
+		    <span className="name">{item.name}</span>
+		    {item.definition && (<span className="definition">{item.definition}</span>)}
 		  </span>);
 		};
 

@@ -13,7 +13,7 @@ function ReusableItemFormControls(props) {
 	const linkLabel = 'Weblink';
 	const definitionPlaceholder = 'Enter a brief definition of the Reusable Item';
 	const linkPlaceholder = 'Enter a weblink that defines the Reusable Item';
-	const reusableItemHint = 'Reusable items are public and can be seen by anybody. Note: your list will be private unless you make it public.';
+	const reusableItemHint = 'Reusable items are public and can be seen by anybody. Your list will be private unless you make it public.';
 	// console.log('props', props);
 	if (props.newReusableItem) {
 		reusableItemDetail = (<div>

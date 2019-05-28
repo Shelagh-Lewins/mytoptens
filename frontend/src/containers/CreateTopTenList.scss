@@ -28,7 +28,15 @@
 
 	.combobox-dropdown {
 		.icon {
-			margin-right: 10px;
+			margin-right: 0.5rem;
+		}
+
+		.definition {
+			color: $color-dropdown-definition;
+			display: block;
+			height: 1.5rem;
+			margin-left: 1.5rem;
+			overflow: hidden;
 		}
 	}
 
