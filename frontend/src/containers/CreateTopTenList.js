@@ -11,7 +11,8 @@ import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 
-import ValidatedForm from '../components/ValidatedForm.js';
+import ValidatedForm from '../components/ValidatedForm';
+import ReusableItemFormControls from '../components/ReusableItemFormControls';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
 
 import './CreateTopTenList.scss';
@@ -66,8 +67,6 @@ class CreateTopTenList extends Component {
 
 	// user types in an item name combobox.
 	onChangeItemName(e, widgetId) {
-		console.log('onChangeItemName ', e, widgetId);
-		console.log('event type ', typeof e);
 		this.setState({
 			'activeItemNameId': widgetId,
 		});
@@ -95,16 +94,24 @@ class CreateTopTenList extends Component {
 
 	// user selects an item name from a dropdown list. This will be to either use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
-		console.log('onSelectItemName', e);
-		console.log('onSelectItemName typeof', typeof e);
-		//console.log('selected item ', e.name, e.id);
+		// console.log('onSelectItemName', e);
+
 		this.setState({
 			[`${widgetId}`]: e.name,
 		});
 
 		switch (e.type) {
+			case 'newReusableItem':
+				this.setState({
+					[`${widgetId}_newReusableItem`]: true,
+					[`${widgetId}_reusableItemId`]: undefined,
+					[`${widgetId}_topTenItemId`]: undefined,
+				});
+				break;
+
 			case 'reusableItem':
 				this.setState({
+					[`${widgetId}_newReusableItem`]: undefined,
 					[`${widgetId}_reusableItemId`]: e.id,
 					[`${widgetId}_topTenItemId`]: undefined,
 				});
@@ -112,6 +119,7 @@ class CreateTopTenList extends Component {
 
 			case 'topTenItem':
 				this.setState({
+					[`${widgetId}_newReusableItem`]: undefined,
 					[`${widgetId}_reusableItemId`]: undefined,
 					[`${widgetId}_topTenItemId`]: e.id,
 				});
@@ -119,6 +127,7 @@ class CreateTopTenList extends Component {
 
 			default:
 				this.setState({
+					[`${widgetId}_newReusableItem`]: undefined,
 					[`${widgetId}_reusableItemId`]: undefined,
 					[`${widgetId}_topTenItemId`]: undefined,
 				});
@@ -143,6 +152,7 @@ class CreateTopTenList extends Component {
 				const newTopTenItem = {
 					'name': this.state[`topTenItem${i}_name`],
 					'description': this.state[`topTenItem${i}_description`],
+					'newReusableItem': this.state[`topTenItem${i}_name_newReusableItem`],
 					'reusableItem_id': this.state[`topTenItem${i}_name_reusableItemId`],
 					'topTenItem_id': this.state[`topTenItem${i}_name_topTenItemId`],
 					'definition': this.state[`topTenItem${i}_name_definition`],
@@ -240,67 +250,23 @@ class CreateTopTenList extends Component {
 			// has the user selected an existing topTenItem?
 			const topTenItemId = this.state[`topTenItem${i}_name_topTenItemId`];
 
+			let newReusableItem;
 			let topTenItem;
 			let reusableItem;
-			if (topTenItemId) {
+
+			// create a new reusableItem based on the name the user typed
+			if (this.state[`topTenItem${i}_name_newReusableItem`]) {
+				newReusableItem = { 'name': this.state[`topTenItem${i}_name`] };
+			} else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
 				topTenItem = this.props.reusableItemSuggestions.find(item => item.id === topTenItemId);
 			} else {
-				// has the user selected an existing reusableItem?
+				// use an existing reusableItem
 				const reusableItemId = this.state[`topTenItem${i}_name_reusableItemId`];
 
 				if (reusableItemId) {
 					reusableItem = this.props.reusableItemSuggestions.find(item => item.id === reusableItemId);
 				}
 			}
-
-			let reusableItemDetail;
-			let showReusableItemDetail = false;
-
-			if (reusableItem) {
-				reusableItemDetail = (<div>
-					<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{reusableItem.name}</h3>
-					<p>{reusableItem.definition}</p>
-					<p>{reusableItem.link}</p>
-				</div>);
-				showReusableItemDetail = true;
-			} else if (topTenItem) {
-				reusableItemDetail = (
-					<div>
-						<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{topTenItem.name}</h3>
-						<p>Create a new Reusable Item</p>
-						<Label for={`topTenItem${i}_name_definition`}>Definition</Label>
-						<Input
-							type="text"
-							name={`topTenItem${i}_name_definition`}
-							id={`topTenItem${i}_name_definition`}
-							onChange={ this.handleInputChange }
-							value={ this.state[`topTenItem${i}_name_definition`] }
-							placeholder="Enter a brief definition of the Reusable Item"
-						/>
-						<div className='invalid-feedback' />
-						<Label for={`topTenItem${i}_name_link`}>Weblink</Label>
-						<Input
-							type="text"
-							name={`topTenItem${i}_name_link`}
-							id={`topTenItem${i}_name_link`}
-							onChange={ this.handleInputChange }
-							value={ this.state[`topTenItem${i}_name_link`] }
-							placeholder="Enter a weblink that defines the Reusable Item"
-						/>
-						<div className='invalid-feedback' />
-						<p className="hint">Reusable items are public and can be seen by anybody. However your list will be private unless you make it public</p>
-					</div>
-				);
-				showReusableItemDetail = true;
-			}
-
-			const reusableItemForm = (
-				<Row>
-					<Col lg="9" className="reusable-item">
-						{reusableItemDetail}
-					</Col>
-				</Row>
-			);
 
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
@@ -327,7 +293,13 @@ class CreateTopTenList extends Component {
 						</Col>
 					</Row>
 
-					{showReusableItemDetail && reusableItemForm}
+					<ReusableItemFormControls
+						newReusableItem={newReusableItem}
+						reusableItem={reusableItem}
+						topTenItem={topTenItem}
+						identifier={`topTenItem${i}_name`}
+						onChange={this.handleInputChange}
+					/>
 
 					<Row>
 						<Col lg="9" className="toptenitem-description">
