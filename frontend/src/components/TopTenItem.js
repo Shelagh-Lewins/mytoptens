@@ -117,13 +117,14 @@ class Item extends Component {
 
 		if (this.props.topTenItem.reusableItem) {
 			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem];
+			const popoverId = `popover${this.props.topTenItem.order}`;
 
 			reusableItem = (
 				<div>
-					<Button id="Popover1" type="button" className="name-icon btn bg-transparent">
+					<Button id={popoverId} type="button" className="name-icon btn bg-transparent">
 						<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />
 					</Button>
-					<Popover placement="bottom" isOpen={this.state.popoverOpen} target="Popover1" toggle={this.togglePopover} html="true">
+					<Popover placement="bottom" isOpen={this.state.popoverOpen} target={popoverId} toggle={this.togglePopover} html="true">
 						<PopoverHeader>{reusableItem.name}</PopoverHeader>
 						<PopoverBody>{reusableItem.definition}<br />
 							{reusableItem.link}<br />
