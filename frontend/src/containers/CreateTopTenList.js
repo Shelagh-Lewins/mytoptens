@@ -190,62 +190,6 @@ class CreateTopTenList extends Component {
 	renderTopTenItemInputs() {
 		const elements = [];
 
-		// heading text for the combobox
-		/* const GroupHeading = ({ item }) => {
-			switch(item) {
-				case 'text':
-					return <span>Use this text:</span>;
-
-				case 'newReusableItem':
-					return <span>Create a new Reusable Item:</span>;
-
-				case 'reusableItem':
-					return <span>Reusable Items:</span>;
-
-
-				case 'topTenItem':
-					return <span>Top Ten Items:</span>;
-
-				default:
-					return null;
-			}
-		};
-
-		let ComboboxItem = ({ item }) => {
-			let icon;
-			let color;
-
-			switch(item.type) {
-				case 'text':
-					icon = 'pencil-alt';
-					color = COLORS.USETEXT;
-					break;
-
-				case 'newReusableItem':
-					icon = 'plus';
-					color = COLORS.REUSABLEITEM;
-					break;
-
-				case 'reusableItem':
-					icon = 'clone';
-					color = COLORS.REUSABLEITEM;
-					break;
-
-				case 'topTenItem':
-					icon = 'sticky-note';
-					color = COLORS.TOPTENITEM;
-					break;
-
-				default:
-					icon = '';
-					break;
-			}
-			return (<span className="combobox-dropdown"><span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
-		    <span className="name">{item.name}</span>
-		    {item.definition && (<span className="definition">{item.definition}</span>)}
-		  </span>);
-		}; */
-
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			const widgetId = `topTenItem${i}_name`;
 

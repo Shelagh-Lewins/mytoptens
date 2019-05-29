@@ -1,7 +1,7 @@
 import React from 'react';
 import { COLORS } from '../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Row, Col, Label, Input } from 'reactstrap';
+import { Row, Col, Label } from 'reactstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 import 'react-widgets/dist/css/react-widgets.css';

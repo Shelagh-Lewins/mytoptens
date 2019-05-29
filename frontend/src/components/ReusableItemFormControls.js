@@ -1,22 +1,22 @@
 import React from 'react';
 import { COLORS } from '../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Row, Col, Label, Input } from 'reactstrap';
+import { Label, Input } from 'reactstrap';
 
 // used by ReusableItemComboBox
 
 function ReusableItemFormControls(props) {
-	let reusableItemDetail;
-	let showReusableItemDetail = false;
+	let reusableItemInfo;
+	let showReusableItemInfo = false;
 
 	const definitionLabel = 'Definition';
 	const linkLabel = 'Weblink';
 	const definitionPlaceholder = 'Enter a brief definition of the Reusable Item';
 	const linkPlaceholder = 'Enter a weblink that defines the Reusable Item';
 	const reusableItemHint = 'Reusable items are public and can be seen by anybody. Your list will be private unless you make it public.';
-	// console.log('props', props);
+
 	if (props.newReusableItem) {
-		reusableItemDetail = (<div>
+		reusableItemInfo = (<div>
 			<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.newReusableItem.name}</h3>
 			<p>Create a new Reusable Item</p>
 			<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>
@@ -41,16 +41,16 @@ function ReusableItemFormControls(props) {
 			<div className='invalid-feedback' />
 			<p className="hint">{reusableItemHint}</p>
 		</div>);
-		showReusableItemDetail = true;
+		showReusableItemInfo = true;
 	} else if (props.reusableItem) {
-		reusableItemDetail = (<div className="reusable-item">
+		reusableItemInfo = (<div className="reusable-item">
 			<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.reusableItem.name}</h3>
 			{props.reusableItem.definition && <p>{props.reusableItem.definition}</p>}
 			{props.reusableItem.link && <p>{props.reusableItem.link}</p>}
 		</div>);
-		showReusableItemDetail = true;
+		showReusableItemInfo = true;
 	} else if (props.topTenItem) {
-		reusableItemDetail = (
+		reusableItemInfo = (
 			<div className="reusable-item">
 				<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{props.topTenItem.name}</h3>
 				<p>Create a Reusable Item from an existing Top Ten Item</p>
@@ -77,9 +77,9 @@ function ReusableItemFormControls(props) {
 				<p className="hint">{reusableItemHint}</p>
 			</div>
 		);
-		showReusableItemDetail = true;
+		showReusableItemInfo = true;
 	}
-	return (showReusableItemDetail && reusableItemDetail);
+	return (showReusableItemInfo && reusableItemInfo);
 }
 
 export default ReusableItemFormControls;
