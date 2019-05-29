@@ -87,7 +87,7 @@ class CreateTopTenList extends Component {
 					[`${widgetId}_reusableItemId`]: undefined,
 				});
 
-				this.props.dispatch(reusableItemReducer.suggestReusableItems(e));
+				this.props.dispatch(reusableItemReducer.suggestReusableItems(e, widgetId));
 			}
 		}, 300);
 	}
@@ -249,25 +249,33 @@ class CreateTopTenList extends Component {
 			const widgetId = `topTenItem${i}_name`;
 
 			// has the user selected an existing topTenItem?
-			const topTenItemId = this.state[`topTenItem${i}_name_topTenItemId`];
+			const topTenItemId = this.state[`${widgetId}_topTenItemId`];
 
 			let newReusableItem;
 			let topTenItem;
 			let reusableItem;
+			const reusableItemSuggestions = this.props.reusableItemSuggestions[widgetId];
 
 			// create a new reusableItem based on the name the user typed
-			if (this.state[`topTenItem${i}_name_newReusableItem`]) {
-				newReusableItem = { 'name': this.state[`topTenItem${i}_name`] };
+			if (this.state[`${widgetId}_newReusableItem`]) {
+				newReusableItem = { 'name': this.state[widgetId] };
 			} else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
-				topTenItem = this.props.reusableItemSuggestions.find(item => item.id === topTenItemId);
+				topTenItem = reusableItemSuggestions.find(item => item.id === topTenItemId);
 			} else {
 				// use an existing reusableItem
-				const reusableItemId = this.state[`topTenItem${i}_name_reusableItemId`];
+				const reusableItemId = this.state[`${widgetId}_reusableItemId`];
 
 				if (reusableItemId) {
-					reusableItem = this.props.reusableItemSuggestions.find(item => item.id === reusableItemId);
+					reusableItem = reusableItemSuggestions.find(item => item.id === reusableItemId);
 				}
 			}
+			//console.log('***');
+			//console.log('widgetId', widgetId);
+			//console.log('data ', this.props.reusableItemSuggestions);
+			//console.log('for widgetId ', this.props.reusableItemSuggestions[widgetId]);
+			//console.log('actual', widgetId === this.state.activeItemNameId ? this.props.reusableItemSuggestions[widgetId] : []);
+			const data = widgetId === this.state.activeItemNameId ? reusableItemSuggestions : [];
+			// const data = [];
 
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
@@ -277,7 +285,7 @@ class CreateTopTenList extends Component {
 							<Combobox
 								name={widgetId}
 								id={widgetId}
-								data={widgetId === this.state.activeItemNameId ? this.props.reusableItemSuggestions : []}
+								data={data}
 								minLength={2}
       					filter='contains'
       					groupComponent={GroupHeading}

@@ -167,7 +167,7 @@ export function fetchTopTenListDetail(id) {
 // create topTenList
 export const createTopTenList = (topTenList, history) => dispatch => {
 	dispatch(createTopTenListStarted());
-	console.log('createTopTenList data', topTenList);
+	// console.log('createTopTenList data', topTenList);
 
 	return fetchAPI({
 		'url': '/api/v1/content/toptenlist/',

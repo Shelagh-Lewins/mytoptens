@@ -8,7 +8,6 @@ import Loading from '../components/Loading';
 
 import * as reusableItemReducer from '../modules/reusableItem';
 import * as permissions from '../modules/permissions';
-import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
@@ -67,7 +66,7 @@ class ReusableItemDetails extends Component {
 				<Col>
 					<h2>{this.props.reusableItem.name}</h2>
 					{this.props.reusableItem.definition && (<p>{this.props.reusableItem.definition}</p>)}
-					{this.props.reusableItem.link && (<p><a href={this.props.reusableItem.link} target="_blank">{this.props.reusableItem.link}</a></p>)}
+					{this.props.reusableItem.link && (<p><a href={this.props.reusableItem.link} target="_blank" rel="noopener noreferrer">{this.props.reusableItem.link}</a></p>)}
 				</Col>
 			</Row>
 		);

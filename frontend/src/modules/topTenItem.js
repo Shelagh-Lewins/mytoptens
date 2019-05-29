@@ -13,6 +13,8 @@ import {
 	RECEIVE_ORGANIZER_DATA,
 } from './topTenList';
 
+/* eslint-disable array-callback-return */
+
 //////////////////////////////////
 // Action creators
 

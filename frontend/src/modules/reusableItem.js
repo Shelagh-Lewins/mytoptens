@@ -2,7 +2,6 @@ import { createSelector } from 'reselect';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
 import { normalize, schema } from 'normalizr';
-import store from '../store';
 
 import {
 	LOGOUT_USER_COMPLETE
@@ -14,6 +13,8 @@ import {
 	RECEIVE_ENTITIES,
 	FETCH_TOPTENLIST_DETAIL_STARTED,
 } from './topTenList';
+
+/* eslint-disable array-callback-return */
 
 const topTenItemSchema = new schema.Entity('topTenItem');
 const reusableItemSchema = new schema.Entity('reusableItem');
@@ -44,6 +45,7 @@ function receiveEntities(entities) {
 export const CREATE_REUSABLEITEM_REQUESTED = 'CREATE_REUSABLEITEM_REQUESTED';
 export const RECEIVE_REUSABLEITEMS = 'RECEIVE_REUSABLEITEMS';
 
+export const SUGGEST_REUSABLE_ITEMS_STARTED = 'SUGGEST_REUSABLE_ITEMS_STARTED';
 export const SEARCH_REUSABLEITEMS_STARTED = 'SEARCH_REUSABLEITEMS_STARTED';
 export const SEARCH_REUSABLEITEMS_SUCCEEDED = 'SEARCH_REUSABLEITEMS_SUCCEEDED';
 export const SEARCH_REUSABLEITEMS_FAILED = 'SEARCH_REUSABLEITEMS_FAILED';
@@ -58,51 +60,61 @@ export const FETCH_REUSABLEITEM_DETAIL_FAILED = 'FETCH_REUSABLEITEM_DETAIL_FAILE
 
 //////////////////////////////////
 // Suggest names for topTenItems based on reusableItems and topTenItems that have no reusable item
-export function suggestReusableItems(searchTerm) {
+export function suggestReusableItems(searchTerm, widgetId) {
 	return (dispatch) => {
-		dispatch(searchReusableItems(searchTerm));
-		dispatch(searchTopTenItems(searchTerm));
+		dispatch(suggestReusableItemsStarted(searchTerm, widgetId));
+		dispatch(searchReusableItems(searchTerm, widgetId));
+		dispatch(searchTopTenItems(searchTerm, widgetId));
+	};
+}
+
+export function suggestReusableItemsStarted(searchTerm, widgetId) {
+	return {
+		'type': SUGGEST_REUSABLE_ITEMS_STARTED,
+		'payload': { searchTerm, widgetId },
 	};
 }
 
 //////////////////////////////////
 // Search for reusableItems
-export function searchReusableItemsStarted(searchTerm) {
+export function searchReusableItemsStarted(searchTerm, widgetId) {
 	return {
 		'type': SEARCH_REUSABLEITEMS_STARTED,
-		'payload': { searchTerm },
+		'payload': { searchTerm, widgetId },
 	};
 }
 
-function searchReusableItemsSucceeded(results) {
+function searchReusableItemsSucceeded(results, widgetId) {
 	// TODO notify if no results
 	return {
 		'type': SEARCH_REUSABLEITEMS_SUCCEEDED,
-		'payload': { results },
+		'payload': { results, widgetId },
 	};
 }
 
-function searchReusableItemsFailed() {
+function searchReusableItemsFailed(widgetId) {
 	return {
 		'type': SEARCH_REUSABLEITEMS_FAILED,
+		'payload': { widgetId },
 	};
 }
 
 // reset if there is no searchTerm
-export function searchReusableItemsClear() {
+export function searchReusableItemsClear(widgetId) {
 	return {
 		'type': SEARCH_REUSABLEITEMS_CLEAR,
+		'payload': { widgetId },
 	};
 }
 
-export function searchReusableItems(searchTerm) {
+export function searchReusableItems(searchTerm, widgetId) {
 	return (dispatch, getState) => {
 		// don't search on empty string
 		if(!searchTerm || searchTerm === '') {
-			return dispatch(searchReusableItemsClear());
+			return dispatch(searchReusableItemsClear(widgetId));
 		}
 
-		dispatch(searchReusableItemsStarted(searchTerm));
+		dispatch(searchReusableItemsStarted(searchTerm, widgetId));
 
 		// all reusableItems are public, so do not use auth
 
@@ -110,7 +122,8 @@ export function searchReusableItems(searchTerm) {
 			'url': `/api/v1/content/searchreusableitems/?search=${searchTerm}`,
 			'method': 'GET',
 		}).then(response => {
-			return dispatch(searchReusableItemsSucceeded(response.results));
+			//console.log('searchApi says ', response);
+			return dispatch(searchReusableItemsSucceeded(response.results, widgetId));
 		}).catch(error => {
 			dispatch(searchReusableItems());
 
@@ -158,18 +171,18 @@ export function fetchReusableItemDetail(id) {
 
 //////////////////////////////////
 // Search for Top Ten Items by name, but only those which have no reusableItem
-export function searchTopTenItemsStarted(searchTerm) {
+export function searchTopTenItemsStarted(searchTerm, widgetId) {
 	return {
 		'type': SEARCH_TOPTENITEMS_STARTED,
-		'payload': { searchTerm },
+		'payload': { searchTerm, widgetId },
 	};
 }
 
-function searchTopTenItemsSucceeded(results) {
+function searchTopTenItemsSucceeded(results, widgetId) {
 	// TODO notify if no results
 	return {
 		'type': SEARCH_TOPTENITEMS_SUCCEEDED,
-		'payload': { results },
+		'payload': { results, widgetId },
 	};
 }
 
@@ -179,7 +192,7 @@ function searchTopTenItemsFailed() {
 	};
 }
 
-export function searchTopTenItems(searchTerm) {
+export function searchTopTenItems(searchTerm, widgetId) {
 	return (dispatch, getState) => {
 		// clear is handled by reusableItem reducer
 		// don't search on empty string
@@ -187,7 +200,7 @@ export function searchTopTenItems(searchTerm) {
 			return;
 		}
 
-		dispatch(searchTopTenItemsStarted(searchTerm));
+		dispatch(searchTopTenItemsStarted(searchTerm, widgetId));
 
 		// if the user is not logged in, don't use auth. The server should return the topTenItem if a non-authenticated user should see it.
 		let useAuth = false;
@@ -202,7 +215,7 @@ export function searchTopTenItems(searchTerm) {
 			'useAuth': useAuth,
 		}).then(response => {
 			// console.log('search api says ', response.results);
-			return dispatch(searchTopTenItemsSucceeded(response.results));
+			return dispatch(searchTopTenItemsSucceeded(response.results, widgetId));
 		}).catch(error => {
 			dispatch(searchTopTenItemsFailed());
 
@@ -280,12 +293,20 @@ const initialResuableItemsState = {
 	'count': null,
 	'next': null,
 	'previous': null,
-	'searchTerm': '',
-	'searchComplete': false,
-	'searchResults': {
-		'reusableItems': [], // todo search for reusableItems
-		'topTenItems': [], // todo search for topTenItems
-	},
+	//'searchTerm': {},
+	//'searchComplete': false,
+	/* 'searchResults': {
+		'reusableItems': {}, // todo search for reusableItems
+		'topTenItems': {}, // todo search for topTenItems
+	}, */
+	'search': {},
+	/*
+	search[widgetId] = {
+		searchTerm: '',
+		reusableItems: [],
+		topTenItems: [],
+	}
+	*/
 	'things': {},
 };
 
@@ -293,28 +314,56 @@ const initialResuableItemsState = {
 // data for props
 
 // data for suggesting reusableItems to select
+// for each widgetId in search
 // returns reusableItems as an array
 export const getReusableItems = state => {
-	return state.reusableItem.searchResults.reusableItems.map(reusableItem => {
-		const extendedReusableItem = JSON.parse(JSON.stringify(reusableItem)); // copy all properties, including objects and arrays
-		extendedReusableItem.type = 'reusableItem';
-		return extendedReusableItem;
+	const searchResults = state.reusableItem.search;
+	let results = {};
+
+	Object.keys(searchResults).map(widgetId => {
+		if (!searchResults[widgetId].reusableItems) {
+			return undefined;
+		}
+
+		const extendedReusableItems = searchResults[widgetId].reusableItems.map(reusableItem => {
+			const extendedReusableItem = JSON.parse(JSON.stringify(reusableItem)); 
+			extendedReusableItem.type = 'reusableItem';
+			return extendedReusableItem;
+		});
+
+		results[widgetId] = extendedReusableItems;
 	});
+
+	return results;
 };
 
 // data for suggesting reusableItems to create
+// for each widgetId in search
 // returns topTenItems with no reusableItem, as an array
 export const getTopTenItems = state => {
-	return state.reusableItem.searchResults.topTenItems.map(topTenItem => {
-		if (!topTenItem.reusableItem) {
-			return {
-				'type': 'topTenItem',
-				'id': topTenItem.id,
-				'name': topTenItem.name,
-				'value': topTenItem.name,
-			};
+	const searchResults = state.reusableItem.search;
+	let results = {};
+
+	Object.keys(searchResults).map(widgetId => {
+		if (!searchResults[widgetId].topTenItems) {
+			return undefined;
 		}
+
+		const extendedTopTenItems = searchResults[widgetId].topTenItems.map(topTenItem => {
+			if (!topTenItem.reusableItem) {
+				return {
+					'type': 'topTenItem',
+					'id': topTenItem.id,
+					'name': topTenItem.name,
+					'value': topTenItem.name,
+				};
+			}
+		});
+
+		results[widgetId] = extendedTopTenItems;
 	});
+
+	return results;
 };
 
 // combined data for suggesting reusableItems
@@ -322,41 +371,65 @@ export const getTopTenItems = state => {
 export const getSortedReusableItemSuggestions = createSelector(
 	[getReusableItems, getTopTenItems],
 	(reusableItems, topTenItems) => {
-		reusableItems.sort(function (a, b) {
-			return a.name.localeCompare(b.name);
+		const results = {};
+		Object.keys(reusableItems).map(widgetId => {
+			var sortedItems = reusableItems[widgetId].slice();
+
+			sortedItems.sort(function (a, b) {
+				return a.name.localeCompare(b.name);
+			});
+
+			results[widgetId] = sortedItems || [];
 		});
 
-		topTenItems.sort(function (a, b) {
-			return a.name.localeCompare(b.name);
+		Object.keys(topTenItems).map(widgetId => {
+			topTenItems[widgetId].sort(function (a, b) {
+				return a.name.localeCompare(b.name);
+			});
+
+			results[widgetId] = results[widgetId] || [];
+			results[widgetId] = results[widgetId].concat(topTenItems[widgetId]);
 		});
 
-		return [].concat(reusableItems.concat(topTenItems)); // ensure empty array if no results
+		return results;
 	}
 );
 
 export const getReusableItemList = state => {
-	if (state.reusableItem.searchTerm !== '') {
-		const optionText = state.reusableItem.searchTerm;
+	const sortedResults = getSortedReusableItemSuggestions(state);
+	const search = state.reusableItem.search;
+	const results = {};
 
-		// option to use just this text, no reusableItem
+	Object.keys(search).map(widgetId => {
+		const searchTerm = search[widgetId].searchTerm;
+		if (searchTerm === '') {
+			return [];
+		}
+
 		const option1 = {
 			'type': 'text',
 			'id': '',
-			'name': optionText,
-			'value': optionText,
+			'name': searchTerm,
+			'value': searchTerm,
 		};
 
 		// option to create a new reusableItem with this text
 		const option2 = {
 			'type': 'newReusableItem',
 			'id': '',
-			'name': optionText,
-			'value': optionText,
+			'name': searchTerm,
+			'value': searchTerm,
 		};
 
-		return [option1, option2].concat(getSortedReusableItemSuggestions(state));
-	}
-	return getSortedReusableItemSuggestions(state);
+		results[widgetId] = [option1, option2];
+
+		// if there are no results, there will be no entry for the widgetId
+		if (typeof sortedResults[widgetId] !== 'undefined') {
+			results[widgetId] = results[widgetId].concat(sortedResults[widgetId]);
+		}
+	});
+
+	return results;
 };
 
 
@@ -401,60 +474,54 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 		case FETCH_TOPTENLIST_DETAIL_STARTED: {
 			return updeep(state, state);
 		}
+
+		case SUGGEST_REUSABLE_ITEMS_STARTED: {
+			// record searchTerm used by both reusableItem and topTenItem searches
+			return updeep(
+				updeep.updateIn(`search.${action.payload.widgetId}.searchTerm`, action.payload.searchTerm),
+				state,
+			);
+		}
 		
-		case SEARCH_REUSABLEITEMS_STARTED	: {
-			return updeep({
-				'searchTerm': action.payload.searchTerm,
-				'searchComplete': false,
-				'searchResults': { 'reusableItems': updeep.constant([]) },
-			}, state);
+		case SEARCH_REUSABLEITEMS_STARTED: {
+			return updeep(
+				updeep.updateIn(`search.${action.payload.widgetId}.reusableItems`, []),
+				state,
+			);
 		}
 
 		case SEARCH_REUSABLEITEMS_SUCCEEDED	: {
-			// console.log('search reusable items succeeded', action.payload);
-			return updeep({
-				'searchComplete': true,
-				'searchResults': { 'reusableItems': updeep.constant(action.payload.results) },
-			}, state);
+			return updeep.updateIn(`search.${action.payload.widgetId}.reusableItems`, action.payload.results, state);
 		}
 
 		case SEARCH_REUSABLEITEMS_FAILED	: {
-			return updeep({
-				'searchComplete': true,
-			}, state);
+			return updeep(state, state);
 		}
 
 		case SEARCH_REUSABLEITEMS_CLEAR	: {
-			return updeep({
-				'searchTerm': updeep.constant(''),
-				'searchComplete': false,
-				'searchResults': { 
-					'reusableItems': updeep.constant([]),
-					'topTenItems': updeep.constant([]),
-				},
-			}, state);
+			return updeep(
+				updeep.updateIn(`search.${action.payload.widgetId}`, {
+					'searchTerm': action.payload.searchTerm,
+					'reusableItems': [],
+					'topTenItems': [],
+				}),
+				state,
+			);
 		}
 
 		case SEARCH_TOPTENITEMS_STARTED	: {
-			return updeep({
-				'searchTerm': action.payload.searchTerm,
-				'searchComplete': false,
-				'searchResults': { 'topTenItems': updeep.constant([]) },
-			}, state);
+			return updeep(
+				updeep.updateIn(`search.${action.payload.widgetId}.topTenItems`, []),
+				state,
+			);
 		}
 
 		case SEARCH_TOPTENITEMS_SUCCEEDED	: {
-			// console.log('search toptenitems succeeded', action.payload);
-			return updeep({
-				'searchComplete': true,
-				'searchResults': { 'topTenItems': updeep.constant(action.payload.results) },
-			}, state);
+			return updeep.updateIn(`search.${action.payload.widgetId}.topTenItems`, action.payload.results, state);
 		}
 
 		case SEARCH_TOPTENITEMS_FAILED	: {
-			return updeep({
-				'searchComplete': true,
-			}, state);
+			return updeep(state, state);
 		}
 
 		default:
