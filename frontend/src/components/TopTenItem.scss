@@ -25,7 +25,6 @@
 	border: 1px solid $color-panel-border;
 	border-radius: 8px;
 	margin: 0 8px 8px 0;
-	overflow: hidden;
 	padding: 8px;
 
 	// hide label but leave contents visible and entire label still readable
@@ -66,5 +65,30 @@
 	.child-toptenlist {
 		float: right;
 		padding: 6px 0;
+	}
+
+	.reusable-item {
+		border: 1px solid $color-reusableitem-border;
+		border-radius: 10px;
+		margin: 10px 0 10px 0;
+		padding: 10px;
+
+		.icon {
+			margin-right: 10px;
+		}
+	}
+
+	.combobox-dropdown {
+		.icon {
+			margin-right: 0.5rem;
+		}
+
+		.definition {
+			color: $color-dropdown-definition;
+			display: block;
+			height: 1.5rem;
+			margin-left: 1.5rem;
+			overflow: hidden;
+		}
 	}
 }

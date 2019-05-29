@@ -8,6 +8,7 @@ import { Label, Input } from 'reactstrap';
 function ReusableItemFormControls(props) {
 	let reusableItemInfo;
 	let showReusableItemInfo = false;
+	//console.log('ReusableItemFormControls props', props);
 
 	const definitionLabel = 'Definition';
 	const linkLabel = 'Weblink';
@@ -16,7 +17,7 @@ function ReusableItemFormControls(props) {
 	const reusableItemHint = 'Reusable items are public and can be seen by anybody. Your list will be private unless you make it public.';
 
 	if (props.newReusableItem) {
-		reusableItemInfo = (<div>
+		reusableItemInfo = (<div className="reusable-item">
 			<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.newReusableItem.name}</h3>
 			<p>Create a new Reusable Item</p>
 			<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>

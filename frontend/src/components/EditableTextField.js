@@ -1,4 +1,6 @@
 // An input or textarea that can be edited by clicking on it
+// use type 'input' or 'textarea' for simple fields
+// use type 'combobox' for the complex topTenItem control to allow reusableItems to be created and selected
 // It can be blank, or required
 // note custom property data-state which is the name of the property in this.state
 // Can be used with keyboard only
@@ -10,6 +12,7 @@ import { Row, Col, Label, Input } from 'reactstrap';
 import './EditableTextField.scss';
 import Markdown from 'react-markdown';
 import { Link } from 'react-router-dom';
+import ReusableItemComboBox from '../components/ReusableItemComboBox';
 
 class EditableTextField extends Component {
 	constructor(props) {
@@ -19,10 +22,10 @@ class EditableTextField extends Component {
 			'isValidated': false,
 			'initialValue': '',
 			'overflowActive': false,
-			'type': props.textarea ? 'textarea' : 'input',
+			'type': props.type,
 		};
 
-		if (props.textarea === true) {
+		if (props.type === 'textarea') {
 			this.state.expanded = false;
 		}
 
@@ -34,7 +37,7 @@ class EditableTextField extends Component {
 
 	// does the text overflow its container?
 	isOverflowActive() {
-		if (!this.props.textarea) {
+		if (!this.state.type === 'textarea') {
 			return false;
 		}
 
@@ -109,6 +112,9 @@ class EditableTextField extends Component {
 
 	validate = () => {
 		// custom validation for consistency with other forms
+		if (this.state.type === 'combobox') { // cannot validate combobox so accept anything; should not cause an error
+			return true;
+		}
 		const formEl = ReactDOM.findDOMNode(this); // component parent node
 		const elem = formEl.querySelector(this.state.type);
 		const errorLabel = elem.parentNode.querySelector('.invalid-feedback');
@@ -126,13 +132,23 @@ class EditableTextField extends Component {
 	}
 
 	handleSubmit(e) {
+		console.log('submit', e);
+		console.log('state', this.state);
 		e.preventDefault();
 
 		// the user has typed a new value and the parent component should be notified
-		
-		const inputElement = e.target.querySelector(this.state.type);
+		console.log('selector', e.target);
+
+		let type = this.state.type;
+		if (type === 'combobox') {
+			type = 'input';
+		}
+		console.log('type', type);
+		const inputElement = e.target.querySelector(type);
+		console.log('inputElement', inputElement);
 
 		if (this.validate()) {
+			//this.props.handleNewValue(this.state.elementId);
 			this.props.handleNewValue(inputElement);
 			this.toggleInput();
 		}
@@ -189,10 +205,8 @@ class EditableTextField extends Component {
 	}
 
 	render() {
-		let type = 'text';
-		if (this.props.textarea) {
-			type = 'textarea';
-		}
+		const type = this.state.type;
+
 		// Add bootstrap's 'was-validated' class to the forms classes to support its styling
 		let classNames = [];
 		if (this.props.className) {
@@ -206,6 +220,50 @@ class EditableTextField extends Component {
 
 		const showInput = this.state.showInput;
 		let item;
+		let inputElement;
+
+		switch (this.state.type) {
+			case 'input':
+			case 'textarea':
+				inputElement = (
+					<div className="form-group">
+						<Label for={this.props.id}>{this.props.label}</Label>
+						<Input autoFocus
+							type={type}
+							name={this.props.id}
+							required={this.props.required}
+							data-state={this.props['data-state']}
+							data-entityid={this.props['data-entityid']}
+							id={this.props.id}
+							onChange={this.props.handleInputChange}
+							value={this.props.value}
+							placeholder={this.props.placeholder}
+						/>
+						<div className='invalid-feedback' />
+					</div>);
+				break;
+
+			case 'combobox':
+				inputElement = (
+					<div className="form-group">
+						<ReusableItemComboBox
+							widgetId={this.props.id}
+							labelText={this.props.label}
+							data={this.props.data}
+							defaultValue={this.props.value}
+							onChange={(param) => this.props.handleInputChange(param, this.props.id)}
+							onSelect={(param) => this.props.onSelect(param, this.props.id)}
+							newReusableItem={this.props.newReusableItem}
+							reusableItem={this.props.reusableItem}
+							topTenItem={this.props.topTenItem}
+							onFormControlsChange={this.handleInputChange}
+						/>
+					</div>);
+				break;
+
+			default:
+				inputElement = <div className="form-group"></div>;
+		}
 
 		if (this.props.canEdit) {
 			if (showInput) {			
@@ -217,21 +275,7 @@ class EditableTextField extends Component {
 					>
 						<Row>
 							<Col>
-								<div className="form-group">
-									<Label for={this.props.id}>{this.props.label}</Label>
-									<Input autoFocus
-										type={type}
-										name={this.props.id}
-										required={this.props.required}
-										data-state={this.props['data-state']}
-										data-entityid={this.props['data-entityid']}
-										id={this.props.id}
-										onChange={this.props.handleInputChange}
-										value={this.props.value}
-										placeholder={this.props.placeholder}
-									/>
-									<div className='invalid-feedback' />
-								</div>
+								{inputElement}
 							</Col>
 						</Row>
 						<Row>

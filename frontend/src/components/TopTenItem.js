@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 class Item extends Component {
 	constructor(props) {
+		// console.log('constructor props', props);
 		super();
 
 		this.state = {
@@ -114,12 +115,13 @@ class Item extends Component {
 		}
 
 		let reusableItem;
+		let reusableItemIcon;
 
 		if (this.props.topTenItem.reusableItem) {
 			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem];
 			const popoverId = `popover${this.props.topTenItem.order}`;
 
-			reusableItem = (
+			reusableItemIcon = (
 				<div>
 					<Button id={popoverId} type="button" className="name-icon btn bg-transparent">
 						<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />
@@ -134,32 +136,41 @@ class Item extends Component {
 					</Popover>
 				</div>
 			);
-			// TODO make this work for multiple popovers
-			// make link work
 		}
+
+		// for topTenItem combobox
+		const comboboxId = `${this.props.topTenItem.order}_name`;
+		const data = this.props.reusableItemSuggestions[comboboxId];
+
 
 		return (
 			<div className="toptenitem-container">
 				<div className="toptenitem-header">
-					<span className="order">{this.props.topTenItem.order}:</span>{reusableItem}<EditableTextField
+					<span className="order">{this.props.topTenItem.order}:</span>{reusableItemIcon}<EditableTextField
+						type='combobox'
 						canEdit={this.props.canEdit}
-						name={`${this.props.topTenItem.order}_name`}
-						label="Item name"
+						name={comboboxId}
+						data={data}
+						label={`Top Ten item ${this.props.topTenItem.order} name`}
 						placeholder="Click here to add a topTenItem"
-						data-state={`${this.props.topTenItem.order}_name`}
+						data-state={comboboxId}
 						data-entityid={this.props.topTenItem.id} // database id of the topTenItem
-						id={`${this.props.topTenItem.order}_name`} // id of the html element
-						handleInputChange={this.props.handleInputChange}
+						id={comboboxId} // id of the html element
+						handleInputChange={this.props.handleItemNameChange}
 						handleNewValue={this.props.handleNewValue}
+						onSelect={this.props.onSelectItemName}
 						isEditing={this.setIsEditingName}
 						value={this.props.topTenItem.name}
+						newReusableItem={this.props.newReusableItem}
+						reusableItem={this.props.reusableItem}
+						topTenItem={this.props.topTenItemForReusableItem}
 					/>
 				</div>
 				{childTopTenList}
 				{showDescription &&
 					<div className="toptenitem-body">
 						<EditableTextField
-							textarea={true}
+							type='textarea'
 							canEdit={this.props.canEdit}
 							name={`${this.props.topTenItem.order}_description`}
 							placeholder="Click here to add a description"

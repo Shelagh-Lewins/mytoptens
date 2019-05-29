@@ -15,6 +15,7 @@ import Loading from '../components/Loading';
 
 import * as topTenListReducer from '../modules/topTenList';
 import * as topTenItemReducer from '../modules/topTenItem';
+import * as reusableItemReducer from '../modules/reusableItem';
 import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -196,6 +197,7 @@ class TopTenListDetails extends Component {
 							<Row>
 								<Col className="toptenlist-name">
 									<EditableTextField
+										type='input'
 										canEdit={this.state.canEdit}
 										required={true}
 										name={'topTenList_name'}
@@ -242,7 +244,7 @@ class TopTenListDetails extends Component {
 							<Row>
 								<Col className="toptenlist-description">
 									<EditableTextField
-										textarea={true}
+										type='textarea'
 										canEdit={this.state.canEdit}
 										name={'topTenList_description'}
 										placeholder="Click here to add a description for the topTenList"
@@ -266,6 +268,7 @@ class TopTenListDetails extends Component {
 									onCreateChildTopTenList={this.onCreateChildTopTenList}
 									onMoveTopTenItemUp={this.onMoveTopTenItemUp}
 									onMoveTopTenItemDown={this.onMoveTopTenItemDown}
+									reusableItemSuggestions={this.props.reusableItemSuggestions}
 								/>
 							)}
 						</Container>
@@ -324,6 +327,7 @@ const mapStateToProps = (state, ownProps) => {
 		'parentTopTenItem': parentTopTenItemAndTopTenList.parentTopTenItem,
 		'topTenListOrganizerData': topTenListReducer.getSortedOrganizerTopTenLists(state), // array containing limited topTenList info: id, name, topTenItem (array of child topTenItems), parent_topTenItem
 		'topTenItemOrganizerData': topTenItemReducer.groupedTopTenItems(state), // object. limited topTenItem info: id, name, topTenList_id
+		'reusableItemSuggestions': reusableItemReducer.getReusableItemList(state),
 	});
 };
 

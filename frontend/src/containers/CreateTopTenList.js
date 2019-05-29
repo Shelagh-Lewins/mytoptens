@@ -13,17 +13,12 @@ import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm';
 // import ReusableItemFormControls from '../components/ReusableItemFormControls';
-import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
+import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
 
 import './CreateTopTenList.scss';
 
 import * as reusableItemReducer from '../modules/reusableItem';
-//import Combobox from 'react-widgets/lib/Combobox';
-//import 'react-widgets/dist/css/react-widgets.css';
 import ReusableItemComboBox from '../components/ReusableItemComboBox';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 
 class CreateTopTenList extends Component {
 	constructor(props) {

@@ -6,6 +6,7 @@ import { Row, Col, Label } from 'reactstrap';
 import Combobox from 'react-widgets/lib/Combobox';
 import 'react-widgets/dist/css/react-widgets.css';
 import ReusableItemFormControls from '../components/ReusableItemFormControls';
+import './ReusableItemComboBox.scss';
 
 // use when creating or editing a topTenItem, to create or edit a reusableItem
 
@@ -74,6 +75,7 @@ function ReusableItemComboBox(props) {
 					name={props.widgetId}
 					id={props.widgetId}
 					data={props.data}
+					defaultValue={props.defaultValue}
 					minLength={2}
 					filter='contains'
 					groupComponent={GroupHeading}
@@ -84,7 +86,6 @@ function ReusableItemComboBox(props) {
 					placeholder="Enter the Top Ten item name"
 					onChange={(param) => props.onChange(param, props.widgetId)}
 					onSelect={(param) => props.onSelect(param, props.widgetId)}
-					required={true}
 				/>
 				<div className='invalid-feedback' />
 

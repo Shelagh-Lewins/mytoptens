@@ -7,7 +7,6 @@ import TopTenListsList from '../components/TopTenListsList';
 import TopTenListSummary from '../components/TopTenListSummary';
 import './TopTenListsPage.scss';
 import Pagination from '../components/Pagination';
-//import Search from '../components/Search';
 
 class TopTenListsPage extends Component {
 	onAddTopTenList = () => {

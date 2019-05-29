@@ -13,31 +13,6 @@
 		}
 	}
 
-	.reusable-item {
-		border: 1px solid $color-reusableitem-border;
-		border-radius: 10px;
-		margin: 10px 0 10px 0;
-		padding: 10px;
-
-		.icon {
-			margin-right: 10px;
-		}
-	}
-
-	.combobox-dropdown {
-		.icon {
-			margin-right: 0.5rem;
-		}
-
-		.definition {
-			color: $color-dropdown-definition;
-			display: block;
-			height: 1.5rem;
-			margin-left: 1.5rem;
-			overflow: hidden;
-		}
-	}
-
 	.btn-primary {
 		margin-left: 8px;
 	}
