@@ -293,20 +293,7 @@ const initialResuableItemsState = {
 	'count': null,
 	'next': null,
 	'previous': null,
-	//'searchTerm': {},
-	//'searchComplete': false,
-	/* 'searchResults': {
-		'reusableItems': {}, // todo search for reusableItems
-		'topTenItems': {}, // todo search for topTenItems
-	}, */
 	'search': {},
-	/*
-	search[widgetId] = {
-		searchTerm: '',
-		reusableItems: [],
-		topTenItems: [],
-	}
-	*/
 	'things': {},
 };
 
@@ -402,8 +389,10 @@ export const getReusableItemList = state => {
 
 	Object.keys(search).map(widgetId => {
 		const searchTerm = search[widgetId].searchTerm;
-		if (searchTerm === '') {
-			return [];
+
+		if (searchTerm === '' || searchTerm === undefined) {
+			results[widgetId] = [];
+			return;
 		}
 
 		const option1 = {
@@ -501,7 +490,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 		case SEARCH_REUSABLEITEMS_CLEAR	: {
 			return updeep(
 				updeep.updateIn(`search.${action.payload.widgetId}`, {
-					'searchTerm': action.payload.searchTerm,
+					'searchTerm': '',
 					'reusableItems': [],
 					'topTenItems': [],
 				}),
