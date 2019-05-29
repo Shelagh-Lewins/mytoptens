@@ -13,7 +13,7 @@ import Login from '../components/Login';
 import Home from '../containers/Home';
 import CreateTopTenList from '../containers/CreateTopTenList';
 import TopTenListDetails from '../containers/TopTenListDetail';
-import ReusableItemDetails from '../containers/ReusableItemDetail';
+import ReusableItemDetails from '../containers/ReusableItemDetails';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';

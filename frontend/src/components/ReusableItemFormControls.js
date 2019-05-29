@@ -3,7 +3,7 @@ import { COLORS } from '../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Row, Col, Label, Input } from 'reactstrap';
 
-// use when creating or editing a topTenItem, to create or edit a reusableItem
+// used by ReusableItemComboBox
 
 function ReusableItemFormControls(props) {
 	let reusableItemDetail;
@@ -43,7 +43,7 @@ function ReusableItemFormControls(props) {
 		</div>);
 		showReusableItemDetail = true;
 	} else if (props.reusableItem) {
-		reusableItemDetail = (<div>
+		reusableItemDetail = (<div className="reusable-item">
 			<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.reusableItem.name}</h3>
 			{props.reusableItem.definition && <p>{props.reusableItem.definition}</p>}
 			{props.reusableItem.link && <p>{props.reusableItem.link}</p>}
@@ -51,7 +51,7 @@ function ReusableItemFormControls(props) {
 		showReusableItemDetail = true;
 	} else if (props.topTenItem) {
 		reusableItemDetail = (
-			<div>
+			<div className="reusable-item">
 				<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{props.topTenItem.name}</h3>
 				<p>Create a Reusable Item from an existing Top Ten Item</p>
 				<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>
@@ -79,13 +79,7 @@ function ReusableItemFormControls(props) {
 		);
 		showReusableItemDetail = true;
 	}
-	return (showReusableItemDetail && (
-		<Row>
-			<Col lg="9" className="reusable-item">
-				{reusableItemDetail}
-			</Col>
-		</Row>
-	));
+	return (showReusableItemDetail && reusableItemDetail);
 }
 
 export default ReusableItemFormControls;

@@ -12,14 +12,15 @@ import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm';
-import ReusableItemFormControls from '../components/ReusableItemFormControls';
+// import ReusableItemFormControls from '../components/ReusableItemFormControls';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
 
 import './CreateTopTenList.scss';
 
 import * as reusableItemReducer from '../modules/reusableItem';
-import Combobox from 'react-widgets/lib/Combobox';
-import 'react-widgets/dist/css/react-widgets.css';
+//import Combobox from 'react-widgets/lib/Combobox';
+//import 'react-widgets/dist/css/react-widgets.css';
+import ReusableItemComboBox from '../components/ReusableItemComboBox';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -190,7 +191,7 @@ class CreateTopTenList extends Component {
 		const elements = [];
 
 		// heading text for the combobox
-		const GroupHeading = ({ item }) => {
+		/* const GroupHeading = ({ item }) => {
 			switch(item) {
 				case 'text':
 					return <span>Use this text:</span>;
@@ -243,7 +244,7 @@ class CreateTopTenList extends Component {
 		    <span className="name">{item.name}</span>
 		    {item.definition && (<span className="definition">{item.definition}</span>)}
 		  </span>);
-		};
+		}; */
 
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
 			const widgetId = `topTenItem${i}_name`;
@@ -269,45 +270,21 @@ class CreateTopTenList extends Component {
 					reusableItem = reusableItemSuggestions.find(item => item.id === reusableItemId);
 				}
 			}
-			//console.log('***');
-			//console.log('widgetId', widgetId);
-			//console.log('data ', this.props.reusableItemSuggestions);
-			//console.log('for widgetId ', this.props.reusableItemSuggestions[widgetId]);
-			//console.log('actual', widgetId === this.state.activeItemNameId ? this.props.reusableItemSuggestions[widgetId] : []);
+
 			const data = widgetId === this.state.activeItemNameId ? reusableItemSuggestions : [];
-			// const data = [];
 
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
-					<Row>
-						<Col lg="9" className="toptenitem-name">
-							<Label for={`topTenItem${i}_name`}>Top Ten item {i}</Label>
-							<Combobox
-								name={widgetId}
-								id={widgetId}
-								data={data}
-								minLength={2}
-      					filter='contains'
-      					groupComponent={GroupHeading}
-      					groupBy={item => item.type}
-								valueField='id'
-    						textField='name'
-    						itemComponent={ComboboxItem}
-								placeholder="Enter the Top Ten item name"
-								onChange={(param) => this.onChangeItemName(param, widgetId)}
-								onSelect={(param) => this.onSelectItemName(param, widgetId)}
-								required={true}
-							/>
-							<div className='invalid-feedback' />
-						</Col>
-					</Row>
-
-					<ReusableItemFormControls
+					<ReusableItemComboBox
+						widgetId={widgetId}
+						labelText={`Top Ten item ${i}`}
+						data={data}
+						onChange={(param) => this.onChangeItemName(param, widgetId)}
+						onSelect={(param) => this.onSelectItemName(param, widgetId)}
 						newReusableItem={newReusableItem}
 						reusableItem={reusableItem}
 						topTenItem={topTenItem}
-						identifier={`topTenItem${i}_name`}
-						onChange={this.handleInputChange}
+						onFormControlsChange={this.handleInputChange}
 					/>
 
 					<Row>
