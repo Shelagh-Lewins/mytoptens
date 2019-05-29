@@ -90,14 +90,11 @@ class TopTenItemsPage extends Component {
 
 	handleNewValue = (element) => {
 		const topTenItemId = element.dataset.entityid;
-		console.log('new value ', element.dataset);
 
 		// the topTenItem's order and the field to update are coded in the 'state' data e.g. '1_name'
 		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
 		const value = element.value;
-		console.log('propertyName ', propertyName);
-		console.log('value ', value);
 
 		// if name is deleted, then description will also be removed
 		if (propertyName === 'name' && value === '') {

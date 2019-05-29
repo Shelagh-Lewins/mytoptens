@@ -10,10 +10,6 @@ import Pagination from '../components/Pagination';
 //import Search from '../components/Search';
 
 class TopTenListsPage extends Component {
-	/*onSearch = e => {
-		this.props.onSearch(e.target.value);
-	} */
-
 	onAddTopTenList = () => {
 		this.props.history.push('/newtopTenList');
 	}
