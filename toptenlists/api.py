@@ -226,13 +226,13 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_create(self, serializer):
-        # do not allow an item to be created by the API
-        # items are created when a list is created
+        # do not allow a topTenItem to be created by the API
+        # topTenItems are created when a list is created
         raise APIException("TopTenItem may not be created via API")
 
     def perform_destroy(self, serializer):
-        # do not allow an item to be created by the API
-        # items are created when a list is created
+        # do not allow a topTenItem to be deleted by the API
+        # topTenItems are deleted when the list is deleted
         raise APIException("TopTenItem may not be deleted via API")
 
 
@@ -313,13 +313,13 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
         return ReusableItem.objects.all()
 
     def perform_create(self, serializer):
-        # do not allow an item to be created by the API
-        # items are created when a list is created
+        # do not allow a reusableItem to be created by the API
+        # reusableItems are created from topTenItems
         raise APIException("ReusableItem may not be created via API")
 
     def perform_destroy(self, serializer):
-        # do not allow an item to be created by the API
-        # items are created when a list is created
+        # do not allow a reusableItem to be deleted by the API
+        # reusableItems are deleted when no longer referenced
         raise APIException("ReusableItem may not be deleted via API")
 
 

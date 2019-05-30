@@ -117,11 +117,6 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
 
         return internal_value
 
-        # TODO ensure cannot create topTenItem without topTenList
-        # TODO ensure cannot create reusableItem without topTenItem
-        # TODO ensure cannot edit reusableItem except via modifications
-
-
 
 class TopTenListSerializer(FlexFieldsModelSerializer):
     """
