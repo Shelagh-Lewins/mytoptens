@@ -132,23 +132,19 @@ class EditableTextField extends Component {
 	}
 
 	handleSubmit(e) {
-		console.log('submit', e);
-		console.log('state', this.state);
 		e.preventDefault();
 
 		// the user has typed a new value and the parent component should be notified
-		console.log('selector', e.target);
-
 		let type = this.state.type;
 		if (type === 'combobox') {
 			type = 'input';
 		}
-		console.log('type', type);
+
+		// id of the database object to update, and the property to change, are encoded in the element's data attribute
+		// this is perhaps unnecessary - data could be passed directly as we do have EditableTextField as 'this' context - but would involve refactoring
 		const inputElement = e.target.querySelector(type);
-		console.log('inputElement', inputElement);
 
 		if (this.validate()) {
-			//this.props.handleNewValue(this.state.elementId);
 			this.props.handleNewValue(inputElement);
 			this.toggleInput();
 		}
@@ -257,6 +253,10 @@ class EditableTextField extends Component {
 							reusableItem={this.props.reusableItem}
 							topTenItem={this.props.topTenItem}
 							onFormControlsChange={this.handleInputChange}
+							inputProps={{
+								'data-entityid': this.props['data-entityid'],
+								'data-state': this.props['data-state'],
+							 }}
 						/>
 					</div>);
 				break;

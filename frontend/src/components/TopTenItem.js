@@ -154,7 +154,7 @@ class Item extends Component {
 						label={`Top Ten item ${this.props.topTenItem.order} name`}
 						placeholder="Click here to add a topTenItem"
 						data-state={comboboxId}
-						data-entityid={this.props.topTenItem.id} // database id of the topTenItem
+						data-entityid={this.props.topTenItem.id} // database id of the topTenItem#
 						id={comboboxId} // id of the html element
 						handleInputChange={this.props.handleItemNameChange}
 						handleNewValue={this.props.handleNewValue}

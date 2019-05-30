@@ -99,25 +99,48 @@ class TopTenItemsPage extends Component {
 
 	// handleNewValue = (topTenItemId, elementId, value) => {
 	handleNewValue = (element) => {
-		console.log('handleNewValue', topTenItemId);
+		console.log('handleNewValue', element,);
 		const topTenItemId = element.dataset.entityid;
+
 
 		// the topTenItem's order and the field to update are coded in the 'state' data e.g. '1_name'
 		//const identifiers = elementId.split('_');
 		const identifiers = element.dataset.state.split('_');
+		const order = identifiers[0];
 		const propertyName = identifiers[1];
 		const value = element.value;
 
 		// if name is deleted, then description will also be removed
-		if (propertyName === 'name' && value === '') {
-			if (confirm('Do you want to delete this item?')) {// eslint-disable-line no-restricted-globals
-				this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));
-				this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, 'description', ''));
-				this.setState({
-					[`${identifiers[0]}_description`]: '',
-				});
+		if (propertyName === 'name') {
+			if (value === '') {
+				if (confirm('Do you want to delete this item?')) {// eslint-disable-line no-restricted-globals
+					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));
+					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, 'description', ''));
+					this.setState({
+						[`${order}_description`]: '',
+					});
+				}
+				return;
+			} else {
+				console.log('change to topTenItemName. Need to check for reusableItem');
+
+				const name = this.state[`${order}_name`];
+				const newReusableItem = this.state[`${order}_newReusableItem`];
+				const topTenItemForNewReusableItem = this.state[`${order}_topTenItemForNewReusableItem`];
+				const reusableItemId = this.state[`${order}_reusableItemId`];
+				const definition = this.state[`${order}_definition`];
+				const link = this.state[`${order}_link`];
+
+				console.log('handleNewValue name', name);
+				console.log('newReusableItem', newReusableItem);
+				console.log('topTenItemForNewReusableItem', topTenItemForNewReusableItem);
+				console.log('reusableItemId', reusableItemId);
+				console.log('definition', definition);
+				console.log('link', link);
+				// TODO process reusableItem data and implement in API
+				// TODO fill in new reusableItem form data - definition, link
+				return;
 			}
-			return;
 		}
 
 		this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));

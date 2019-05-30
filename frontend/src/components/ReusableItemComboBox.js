@@ -86,6 +86,7 @@ function ReusableItemComboBox(props) {
 					placeholder="Enter the Top Ten item name"
 					onChange={(param) => props.onChange(param, props.widgetId)}
 					onSelect={(param) => props.onSelect(param, props.widgetId)}
+					inputProps={props.inputProps}
 				/>
 				<div className='invalid-feedback' />
 
