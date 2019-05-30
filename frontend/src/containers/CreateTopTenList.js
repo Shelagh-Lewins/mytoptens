@@ -12,7 +12,6 @@ import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 
 import ValidatedForm from '../components/ValidatedForm';
-// import ReusableItemFormControls from '../components/ReusableItemFormControls';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
 
 import './CreateTopTenList.scss';

@@ -304,9 +304,12 @@ const initialResuableItemsState = {
 export const getReusableItems = state => {
 	const searchResults = state.reusableItem.search;
 	let results = {};
+	//console.log('running getReusableItems');
 
 	Object.keys(searchResults).map(widgetId => {
+		//console.log('map');
 		if (!searchResults[widgetId].reusableItems) {
+			//console.log('return undefined');
 			return undefined;
 		}
 
@@ -328,9 +331,11 @@ export const getReusableItems = state => {
 export const getTopTenItems = state => {
 	const searchResults = state.reusableItem.search;
 	let results = {};
-	console.log('running reusableItemReducer getTopTenItems');
+	//console.log('running getTopTenItems');
 	Object.keys(searchResults).map(widgetId => {
+		//console.log('map');
 		if (!searchResults[widgetId].topTenItems) {
+			//console.log('return undefined');
 			return undefined;
 		}
 
@@ -356,7 +361,7 @@ export const getTopTenItems = state => {
 export const getSortedReusableItemSuggestions = createSelector(
 	[getReusableItems, getTopTenItems],
 	(reusableItems, topTenItems) => {
-		console.log('running getSortedReusableItemSuggestions getTopTenItems');
+		//console.log('running getSortedReusableItemSuggestions');
 		const results = {};
 		Object.keys(reusableItems).map(widgetId => {
 			var sortedItems = reusableItems[widgetId].slice();
@@ -381,13 +386,15 @@ export const getSortedReusableItemSuggestions = createSelector(
 	}
 );
 
-export const getReusableItemList = state => {
-	console.log('running getSortedReusableItemSuggestions getReusableItemList');
+export const getReusableItemList = (state, widgetIds) => {
+	//console.log('running getReusableItemList');
+	//console.log('widgetIds', widgetIds);
 	const sortedResults = getSortedReusableItemSuggestions(state);
 	const search = state.reusableItem.search;
 	const results = {};
 
 	Object.keys(search).map(widgetId => {
+		//console.log('widgetId', widgetId);
 		const searchTerm = search[widgetId].searchTerm;
 
 		if (searchTerm === '' || searchTerm === undefined) {
