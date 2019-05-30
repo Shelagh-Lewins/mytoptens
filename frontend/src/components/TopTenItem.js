@@ -129,8 +129,8 @@ class Item extends Component {
 					</Button>
 					<Popover placement="bottom" isOpen={this.state.popoverOpen} target={popoverId} toggle={this.togglePopover} html="true">
 						<PopoverHeader>{reusableItem.name}</PopoverHeader>
-						<PopoverBody>{reusableItem.definition}<br />
-							{reusableItem.link}<br />
+						<PopoverBody>{reusableItem.definition && <div className="definition">{reusableItem.definition}</div>}
+							{reusableItem.link && <div className="link">{reusableItem.link}</div>}
 							<Link to={`/reusableitem/${reusableItem.id}`}>More information...
 							</Link>
 						</PopoverBody>

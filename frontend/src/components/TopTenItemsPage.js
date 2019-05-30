@@ -124,7 +124,7 @@ class TopTenItemsPage extends Component {
 				}
 				return;
 			} else {
-				const name = this.state[`${order}_name`];
+				// const name = this.state[`${order}_name`];
 				const newReusableItem = this.state[`${order}_name_newReusableItem`];
 				const topTenItemForNewReusableItem = this.state[`${order}_name_topTenItemForNewReusableItem`];
 				const reusableItemId = this.state[`${order}_name_reusableItemId`];

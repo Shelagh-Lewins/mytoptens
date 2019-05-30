@@ -228,7 +228,7 @@ export function searchTopTenItems(searchTerm, widgetId) {
 var updeep = require('updeep');
 
 // this is no longer used but shows the data structure
-const fakeResuableItems = [
+/* const fakeResuableItems = [
 	{
 		'id': '1001',
 		'created_by': '1234', // UUID
@@ -283,7 +283,7 @@ const fakeResuableItems = [
 			}
 		]
 	}
-];
+]; */
 
 const initialResuableItemsState = {
 	'isLoading': false,
@@ -328,7 +328,7 @@ export const getReusableItems = state => {
 export const getTopTenItems = state => {
 	const searchResults = state.reusableItem.search;
 	let results = {};
-
+	console.log('running reusableItemReducer getTopTenItems');
 	Object.keys(searchResults).map(widgetId => {
 		if (!searchResults[widgetId].topTenItems) {
 			return undefined;
@@ -356,6 +356,7 @@ export const getTopTenItems = state => {
 export const getSortedReusableItemSuggestions = createSelector(
 	[getReusableItems, getTopTenItems],
 	(reusableItems, topTenItems) => {
+		console.log('running getSortedReusableItemSuggestions getTopTenItems');
 		const results = {};
 		Object.keys(reusableItems).map(widgetId => {
 			var sortedItems = reusableItems[widgetId].slice();
@@ -381,6 +382,7 @@ export const getSortedReusableItemSuggestions = createSelector(
 );
 
 export const getReusableItemList = state => {
+	console.log('running getSortedReusableItemSuggestions getReusableItemList');
 	const sortedResults = getSortedReusableItemSuggestions(state);
 	const search = state.reusableItem.search;
 	const results = {};

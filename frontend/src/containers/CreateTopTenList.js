@@ -223,7 +223,7 @@ class CreateTopTenList extends Component {
 						newReusableItem={newReusableItem}
 						reusableItem={reusableItem}
 						topTenItem={topTenItem}
-						onFormControlsChange={this.handleInputChange}
+						onDetailsChange={this.handleInputChange}
 					/>
 
 					<Row>

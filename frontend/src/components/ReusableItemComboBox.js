@@ -87,6 +87,7 @@ function ReusableItemComboBox(props) {
 					onChange={(param) => props.onChange(param, props.widgetId)}
 					onSelect={(param) => props.onSelect(param, props.widgetId)}
 					inputProps={props.inputProps}
+					autoFocus={true}
 				/>
 				<div className='invalid-feedback' />
 
