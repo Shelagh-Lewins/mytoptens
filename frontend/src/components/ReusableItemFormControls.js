@@ -25,6 +25,8 @@ function ReusableItemFormControls(props) {
 				type="text"
 				name={`${props.identifier}_definition`}
 				id={`${props.identifier}_definition`}
+				data-state={`${props.identifier}_definition`}
+				data-entityid={props['data-entityid']} // database id of the object to update
 				onChange={props.onChange}
 				value={props.definition}
 				placeholder={definitionPlaceholder}
@@ -35,6 +37,8 @@ function ReusableItemFormControls(props) {
 				type="text"
 				name={`${props.identifier}_link`}
 				id={`${props.identifier}_link`}
+				data-state={`${props.identifier}_link`}
+				data-entityid={props['data-entityid']} // database id of the object to update
 				onChange={props.onChange}
 				value={props.link}
 				placeholder={linkPlaceholder}
@@ -60,6 +64,8 @@ function ReusableItemFormControls(props) {
 					type="text"
 					name={`${props.identifier}_definition`}
 					id={`${props.identifier}_definition`}
+					data-state={`${props.identifier}_definition`}
+					data-entityid={props['data-entityid']} // database id of the object to update
 					onChange={props.onChange}
 					value={props.definition}
 					placeholder={definitionPlaceholder}
@@ -70,6 +76,8 @@ function ReusableItemFormControls(props) {
 					type="text"
 					name={`${props.identifier}_link`}
 					id={`${props.identifier}_link`}
+					data-state={`${props.identifier}_link`}
+					data-entityid={props['data-entityid']} // database id of the object to update
 					onChange={props.onChange}
 					value={props.link}
 					placeholder={linkPlaceholder}

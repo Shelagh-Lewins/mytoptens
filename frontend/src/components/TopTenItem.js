@@ -117,7 +117,8 @@ class Item extends Component {
 		let reusableItem;
 		let reusableItemIcon;
 
-		if (this.props.topTenItem.reusableItem) {
+		// icon by name to indicate it's a reusableItem. Not shown when editing name.
+		if (this.props.topTenItem.reusableItem && !this.state.isEditingName) {
 			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem];
 			const popoverId = `popover${this.props.topTenItem.order}`;
 
@@ -147,16 +148,17 @@ class Item extends Component {
 			<div className="toptenitem-container">
 				<div className="toptenitem-header">
 					<span className="order">{this.props.topTenItem.order}:</span>{reusableItemIcon}<EditableTextField
-						type='combobox'
+						type='reusableItemCombobox'
 						canEdit={this.props.canEdit}
 						name={comboboxId}
 						data={data}
 						label={`Top Ten item ${this.props.topTenItem.order} name`}
 						placeholder="Click here to add a topTenItem"
 						data-state={comboboxId}
-						data-entityid={this.props.topTenItem.id} // database id of the topTenItem#
+						data-entityid={this.props.topTenItem.id} // database id of the topTenItem
 						id={comboboxId} // id of the html element
-						handleInputChange={this.props.handleItemNameChange}
+						handleInputChange={this.props.handleComboboxChange}
+						handleDetailsChange={this.props.handleInputChange}
 						handleNewValue={this.props.handleNewValue}
 						onSelect={this.props.onSelectItemName}
 						isEditing={this.setIsEditingName}

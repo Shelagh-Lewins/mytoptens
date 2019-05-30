@@ -112,7 +112,7 @@ class EditableTextField extends Component {
 
 	validate = () => {
 		// custom validation for consistency with other forms
-		if (this.state.type === 'combobox') { // cannot validate combobox so accept anything; should not cause an error
+		if (this.state.type === 'reusableItemCombobox') { // cannot validate combobox so accept anything; should not cause an error
 			return true;
 		}
 		const formEl = ReactDOM.findDOMNode(this); // component parent node
@@ -136,7 +136,7 @@ class EditableTextField extends Component {
 
 		// the user has typed a new value and the parent component should be notified
 		let type = this.state.type;
-		if (type === 'combobox') {
+		if (type === 'reusableItemCombobox') {
 			type = 'input';
 		}
 
@@ -239,7 +239,7 @@ class EditableTextField extends Component {
 					</div>);
 				break;
 
-			case 'combobox':
+			case 'reusableItemCombobox':
 				inputElement = (
 					<div className="form-group">
 						<ReusableItemComboBox
@@ -252,7 +252,7 @@ class EditableTextField extends Component {
 							newReusableItem={this.props.newReusableItem}
 							reusableItem={this.props.reusableItem}
 							topTenItem={this.props.topTenItem}
-							onFormControlsChange={this.handleInputChange}
+							onDetailsChange={this.props.handleDetailsChange}
 							inputProps={{
 								'data-entityid': this.props['data-entityid'],
 								'data-state': this.props['data-state'],

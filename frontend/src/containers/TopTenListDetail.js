@@ -269,6 +269,7 @@ class TopTenListDetails extends Component {
 									onMoveTopTenItemUp={this.onMoveTopTenItemUp}
 									onMoveTopTenItemDown={this.onMoveTopTenItemDown}
 									reusableItemSuggestions={this.props.reusableItemSuggestions}
+									reusableItems={this.props.reusableItems}
 								/>
 							)}
 						</Container>
@@ -328,6 +329,7 @@ const mapStateToProps = (state, ownProps) => {
 		'topTenListOrganizerData': topTenListReducer.getSortedOrganizerTopTenLists(state), // array containing limited topTenList info: id, name, topTenItem (array of child topTenItems), parent_topTenItem
 		'topTenItemOrganizerData': topTenItemReducer.groupedTopTenItems(state), // object. limited topTenItem info: id, name, topTenList_id
 		'reusableItemSuggestions': reusableItemReducer.getReusableItemList(state),
+		'reusableItems': state.reusableItem.things,
 	});
 };
 

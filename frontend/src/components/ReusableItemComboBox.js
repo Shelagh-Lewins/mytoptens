@@ -95,7 +95,8 @@ function ReusableItemComboBox(props) {
 					reusableItem={props.reusableItem}
 					topTenItem={props.topTenItem}
 					identifier={props.widgetId}
-					onChange={props.onFormControlsChange}
+					onChange={props.onDetailsChange}
+					data-entityid={props.inputProps ? props.inputProps['data-entityid'] : undefined}
 				/>
 			</Col>
 		</Row>

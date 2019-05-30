@@ -41,16 +41,16 @@ class TopTenItemsPage extends Component {
 
 				// reusableItem
 				if (topTenItems[key].reusableItem) {
-					this.state[`${order}_reusableItem`] = topTenItems[key].reusableItem;
+					this.state[`${order}_name_reusableItemId`] = topTenItems[key].reusableItem;
 				}
 
 				// when editing, to create new reusableItem
-				this.state[`${order}_newReusableItem`] = false;
-				this.state[`${order}_topTenItemId`] = undefined;
+				this.state[`${order}_name_newReusableItem`] = false;
+				this.state[`${order}_name_topTenItemId`] = undefined;
 			}
 		});
 
-		this.handleItemNameChange = this.handleItemNameChange.bind(this);
+		this.handleComboboxChange = this.handleComboboxChange.bind(this);
 		this.onSelectItemName = this.onSelectItemName.bind(this);
 	}
 
@@ -90,14 +90,13 @@ class TopTenItemsPage extends Component {
 		}
 	}
 
-	handleInputChange = (e, comboboxId) => {
-		console.log('handleInputChange', e, comboboxId);
+	handleInputChange = (e) => {
+		console.log('handleInputChange dataset', e.target.dataset);
 		this.setState({
 			[e.target.dataset.state]: e.target.value,
 		});
 	}
 
-	// handleNewValue = (topTenItemId, elementId, value) => {
 	handleNewValue = (element) => {
 		console.log('handleNewValue', element,);
 		const topTenItemId = element.dataset.entityid;
@@ -109,6 +108,7 @@ class TopTenItemsPage extends Component {
 		const order = identifiers[0];
 		const propertyName = identifiers[1];
 		const value = element.value;
+		console.log('handleNewValue. propertyName', propertyName);
 
 		// if name is deleted, then description will also be removed
 		if (propertyName === 'name') {
@@ -125,11 +125,11 @@ class TopTenItemsPage extends Component {
 				console.log('change to topTenItemName. Need to check for reusableItem');
 
 				const name = this.state[`${order}_name`];
-				const newReusableItem = this.state[`${order}_newReusableItem`];
-				const topTenItemForNewReusableItem = this.state[`${order}_topTenItemForNewReusableItem`];
-				const reusableItemId = this.state[`${order}_reusableItemId`];
-				const definition = this.state[`${order}_definition`];
-				const link = this.state[`${order}_link`];
+				const newReusableItem = this.state[`${order}_name_newReusableItem`];
+				const topTenItemForNewReusableItem = this.state[`${order}_name_topTenItemForNewReusableItem`];
+				const reusableItemId = this.state[`${order}_name_reusableItemId`];
+				const definition = this.state[`${order}_name_definition`];
+				const link = this.state[`${order}_name_link`];
 
 				console.log('handleNewValue name', name);
 				console.log('newReusableItem', newReusableItem);
@@ -139,6 +139,11 @@ class TopTenItemsPage extends Component {
 				console.log('link', link);
 				// TODO process reusableItem data and implement in API
 				// TODO fill in new reusableItem form data - definition, link
+
+				// simple text update
+				if (!newReusableItem && !reusableItemId) {
+					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));
+				}
 				return;
 			}
 		}
@@ -147,8 +152,8 @@ class TopTenItemsPage extends Component {
 	}
 
 	// user types in an item name combobox.
-	handleItemNameChange(e, widgetId) {
-		console.log('handleItemNameChange', e, widgetId);
+	handleComboboxChange(e, widgetId) {
+		console.log('handleComboboxChange', e, widgetId);
 
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
@@ -184,33 +189,33 @@ class TopTenItemsPage extends Component {
 		switch (e.type) {
 			case 'newReusableItem':
 				this.setState({
-					[`${order}_newReusableItem`]: true,
-					[`${order}_reusableItemId`]: undefined,
-					[`${order}_topTenItemForNewReusableItem`]: undefined,
+					[`${order}_name_newReusableItem`]: true,
+					[`${order}_name_reusableItemId`]: undefined,
+					[`${order}_name_topTenItemForNewReusableItem`]: undefined,
 				});
 				break;
 
 			case 'reusableItem':
 				this.setState({
-					[`${order}_newReusableItem`]: undefined,
-					[`${order}_reusableItemId`]: e.id,
-					[`${order}_topTenItemForNewReusableItem`]: undefined,
+					[`${order}_name_newReusableItem`]: undefined,
+					[`${order}_name_reusableItemId`]: e.id,
+					[`${order}_name_topTenItemForNewReusableItem`]: undefined,
 				});
 				break;
 
 			case 'topTenItem':
 				this.setState({
-					[`${order}_newReusableItem`]: undefined,
-					[`${order}_reusableItemId`]: undefined,
-					[`${order}_topTenItemForNewReusableItem`]: e.id,
+					[`${order}_name_newReusableItem`]: undefined,
+					[`${order}_name_reusableItemId`]: undefined,
+					[`${order}_name_topTenItemForNewReusableItem`]: e.id,
 				});
 				break;
 
 			default:
 				this.setState({
-					[`${order}_newReusableItem`]: undefined,
-					[`${order}_reusableItemId`]: undefined,
-					[`${order}_topTenItemForNewReusableItem`]: undefined,
+					[`${order}_name_newReusableItem`]: undefined,
+					[`${order}_name_reusableItemId`]: undefined,
+					[`${order}_name_topTenItemForNewReusableItem`]: undefined,
 				});
 		}
 	}
@@ -222,30 +227,40 @@ class TopTenItemsPage extends Component {
 	renderTopTenItemsList() {
 		let elements = [];
 		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+			const identifier = `${i}_name`;
 			const name = this.state[`${i}_name`];
+
 			const canEdit = this.props.canEdit;
 			if (name || canEdit) {
 				// has the user selected an existing topTenItem?
-				const topTenItemId = this.state[`${i}_topTenItemForNewReusableItem`];
+				const topTenItemId = this.state[`${identifier}_topTenItemForNewReusableItem`];
 
 				let newReusableItem;
 				let topTenItem;
 				let reusableItem;
 				const reusableItemSuggestions = this.props.reusableItemSuggestions[`${i}_name`];
+				console.log('checking state', this.state);
+				console.log('identifier', `${identifier}_newReusableItem`);
 
 				// create a new reusableItem based on the name the user typed
-				if (this.state[`${i}_newReusableItem`]) {
-					newReusableItem = { 'name': this.state[`${i}_name`] };
+				if (this.state[`${identifier}_newReusableItem`]) {
+					newReusableItem = { 'name': this.state[`${identifier}`] };
 				} else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
 					topTenItem = reusableItemSuggestions.find(item => item.id === topTenItemId);
 				} else {
 					// use an existing reusableItem
-					const reusableItemId = this.state[`${i}_reusableItemId`];
+					const reusableItemId = this.state[`${identifier}_reusableItemId`];
 
 					if (reusableItemId) {
-						reusableItem = reusableItemSuggestions.find(item => item.id === reusableItemId);
+						if (reusableItemSuggestions) {
+							reusableItem = reusableItemSuggestions.find(item => item.id === reusableItemId);
+						} else {
+							reusableItem = this.props.reusableItems[this.state[`${identifier}_reusableItemId`]];
+						}
 					}
 				}
+				console.log('render says');
+				console.log('newReusableItem', newReusableItem);
 
 				elements.push(
 					<Row key={`topTenItem${i}`}>
@@ -258,10 +273,10 @@ class TopTenItemsPage extends Component {
 									'name': name,
 									'description': this.state[`${i}_description`],
 									'childTopTenList': this.state[`${i}_childTopTenList`],
-									'reusableItem': this.state[`${i}_reusableItemId`],
+									'reusableItem': this.state[`${i}_name_reusableItemId`],
 								}}
 								handleInputChange={this.handleInputChange}
-								handleItemNameChange={this.handleItemNameChange}
+								handleComboboxChange={this.handleComboboxChange}
 								handleNewValue={this.handleNewValue}
 								onSelectItemName={this.onSelectItemName}
 								topTenList={this.props.topTenList}
