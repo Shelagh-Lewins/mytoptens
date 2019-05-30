@@ -34,7 +34,8 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     A topTenItem may be associated with a reusableItem
     """
 
-    reusableItem = ReusableItemSerializer(required=False) # must not set many=True here
+    reusableItem = ReusableItemSerializer(required=False, allow_null=True) # must not set many=True here
+    # allow_null is required for patch
     # https://stackoverflow.com/questions/26702695/django-rest-framework-object-is-not-iterable
     # reusableItem is a single object
     # must set required=False if ForeignKey is optional
@@ -48,6 +49,77 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         model = TopTenItem
         fields = ('id', 'name', 'description', 'topTenList_id', 'modified_at', 'order', 'reusableItem')
         # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model
+
+    def to_internal_value(self, data):
+        # intercept data before it is validated
+        # to use fields like reusableItem_id which do not directly go into model
+        internal_value = super(TopTenItemSerializer, self).to_internal_value(data)
+
+
+        # the topTenItem references a reusableItem
+        if 'reusableItem_id' in data:
+            reusableItemId = data.pop('reusableItem_id', None)
+
+            # remove reference to an existing reusableItem
+            if reusableItemId is None:
+                internal_value['reusableItem'] = None
+
+            # topTenItem should reference an existing reusableItem
+            else:
+                try:
+                    reusableItem = ReusableItem.objects.get(id=reusableItemId)
+
+                    internal_value['reusableItem'] = reusableItem
+
+                    return internal_value
+
+                except reusableItem.DoesNotExist:
+                    print('error attempting to use non-existent reusableItem for patched topTenItem')
+
+        if 'newReusableItem' in data:
+            if data['newReusableItem'] == True:
+                # create a new reusableItem with the same name as the topTenItem
+                # and assign the new reusableItem to that topTenItem also
+                if 'topTenItemForNewReusableItem' in data:
+                    try:
+                        topTenItem = TopTenItem.objects.get(id=data['topTenItemForNewReusableItem'])
+
+                        reusableItemData = {'name': topTenItem.name}
+
+                        if 'reusableItemDefinition' in data:
+                            reusableItemData['definition'] = data['reusableItemDefinition']
+
+                        if 'reusableItemLink' in data:
+                            reusableItemData['link'] = data['reusableItemLink']
+
+                        newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                        topTenItem.ReusableItem = newReusableItem
+                        topTenItem.save
+
+                        internal_value['reusableItem'] = newReusableItem
+
+                    except topTenItem.DoesNotExist:
+                        print('error attempting to use non-existent topTenItem as basis for new reusableItem')
+
+                # create a new reusableItem from the entered name
+                else:
+                    reusableItemData = {'name': data['name']}
+
+                    if 'reusableItemDefinition' in data:
+                            reusableItemData['definition'] = data['reusableItemDefinition']
+
+                    if 'reusableItemLink' in data:
+                            reusableItemData['link'] = data['reusableItemLink']
+
+                    newReusableItem = ReusableItem.objects.create( **reusableItemData)
+
+                    internal_value['reusableItem'] = newReusableItem
+
+        return internal_value
+
+        # TODO ensure cannot create topTenItem without topTenList
+        # TODO ensure cannot create reusableItem without topTenItem
+        # TODO ensure cannot edit reusableItem except via modifications
 
 
 
@@ -82,10 +154,6 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
         # intercept data before it is validated
         # to use fields like reusableItem_id which do not directly go into model
         internal_value = super(TopTenListSerializer, self).to_internal_value(data)
-
-        # TODO handle edit separately from create
-        print('*** topTenList serializer, to_internal_value')
-        print(data)
 
         if data.get('topTenItem') is not None:
             # when creating a list, the items are also created

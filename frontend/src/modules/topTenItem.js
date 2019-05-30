@@ -1,7 +1,9 @@
 import { createSelector } from 'reselect';
-import fetchAPI from '../modules/fetchAPI';
-import { getErrors } from '../modules/errors';
+import fetchAPI from './fetchAPI';
+import { getErrors } from './errors';
 import store from '../store';
+
+import * as topTenListsReducer from './topTenList';
 
 import {
 	LOGOUT_USER_COMPLETE
@@ -60,16 +62,21 @@ export function createTopTenItemSucceeded(topTenItem) {
 
 ////////////////////////////////////
 // update topTenItem
-export const updateTopTenItem = (topTenItemId, propertyName, value) => dispatch => {
-	// should be able to update any simple property e.g. name, description
-	console.log('updateTopTenItem ', topTenItemId, propertyName, value);
+export const updateTopTenItem = (topTenItemId, data) => dispatch => {
+	/* update any simple properties e.g. {
+		'name': 'my new name',
+		'description': 'my new description',
+		}
+		*/
+	// console.log('updateTopTenItem ', topTenItemId, data);
 	return fetchAPI({
 		'url': `/api/v1/content/toptenitem/${topTenItemId}/`,
 		'headers': { 'Content-Type': 'application/json' },
-		'data': JSON.stringify({ [propertyName]: value }),
+		'data': JSON.stringify(data),
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then(response => {
+		dispatch(topTenListsReducer.fetchTopTenListDetail(response.topTenList_id));
 		return dispatch(updateTopTenItemSucceeded(response));
 	}).catch(error => {
 		return dispatch(getErrors({ 'update topTenItem': error.message }));

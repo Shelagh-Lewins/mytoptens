@@ -225,6 +225,16 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
  
         serializer.save()
 
+    def perform_create(self, serializer):
+        # do not allow an item to be created by the API
+        # items are created when a list is created
+        raise APIException("TopTenItem may not be created via API")
+
+    def perform_destroy(self, serializer):
+        # do not allow an item to be created by the API
+        # items are created when a list is created
+        raise APIException("TopTenItem may not be deleted via API")
+
 
 class LimitPagination(MultipleModelLimitOffsetPagination):
     """
@@ -301,6 +311,16 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
 
     def get_queryset(self):
         return ReusableItem.objects.all()
+
+    def perform_create(self, serializer):
+        # do not allow an item to be created by the API
+        # items are created when a list is created
+        raise APIException("ReusableItem may not be created via API")
+
+    def perform_destroy(self, serializer):
+        # do not allow an item to be created by the API
+        # items are created when a list is created
+        raise APIException("ReusableItem may not be deleted via API")
 
 
 class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors

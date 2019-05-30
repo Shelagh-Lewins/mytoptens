@@ -140,9 +140,28 @@ class Item extends Component {
 		}
 
 		// for topTenItem combobox
+		// TODO only get data if editing
+		// cancel doesn't restore
 		const comboboxId = `${this.props.topTenItem.order}_name`;
-		const data = this.props.reusableItemSuggestions[comboboxId];
 
+		let data;
+
+		if (this.state.isEditingName) {
+			data = this.props.reusableItemSuggestions[comboboxId];
+			//console.log('data', data);
+			//console.log('this.props.topTenItem.id', this.props.topTenItem.id);
+
+			if(data) {
+				for( let i = 0; i < data.length; i++){
+				  if ( data[i].id === this.props.topTenItem.id) {
+				  	//console.log('entry id', data[i].id);
+				    data.splice(i, 1);
+				    break;
+				  }
+				}
+			}
+			//console.log('filtered data', data);
+		}
 
 		return (
 			<div className="toptenitem-container">

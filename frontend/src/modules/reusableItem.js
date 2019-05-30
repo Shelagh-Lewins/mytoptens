@@ -7,8 +7,6 @@ import {
 	LOGOUT_USER_COMPLETE
 } from './auth';
 
-// TODO clear store on logout
-
 import {
 	RECEIVE_ENTITIES,
 	FETCH_TOPTENLIST_DETAIL_STARTED,

@@ -76,12 +76,19 @@ class EditableTextField extends Component {
 
 	showInput(e) {
 		const isPlaceholder = e.target.classList.contains('placeholder');
-
 		if (!isPlaceholder) {
 			this.setState({
-				'initialValue': e.target.textContent,
+				'initialValue': this.props.value,
 			});
+
+			if (this.state.type === 'reusableItemCombobox') {
+				// set reusableItem initial values. A topTenItem from the database can either have a reusableItem, or not.
+				this.setState({
+					'initialReusableItem': this.props.reusableItem,
+				});
+			}
 		}
+
 		this.toggleInput();
 	}
 
@@ -100,6 +107,15 @@ class EditableTextField extends Component {
 
 	cancel = () => {
 		// restore the initial value of the field as though the user had just entered it
+		if (this.state.type === 'reusableItemCombobox') {
+			// restore reusableItem defaults
+			const fakeSelectEvent = {
+				'type': this.state.initialReusableItem ? 'reusableItem' : 'text',
+				'id': this.state.initialReusableItem,
+			};
+			this.props.onSelect(fakeSelectEvent);
+		}
+
 		const fakeEvent = {
 			'target': {
 				'dataset': { 'state': this.props['data-state'] },

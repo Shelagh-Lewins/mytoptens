@@ -91,14 +91,12 @@ class TopTenItemsPage extends Component {
 	}
 
 	handleInputChange = (e) => {
-		console.log('handleInputChange dataset', e.target.dataset);
 		this.setState({
 			[e.target.dataset.state]: e.target.value,
 		});
 	}
 
 	handleNewValue = (element) => {
-		console.log('handleNewValue', element,);
 		const topTenItemId = element.dataset.entityid;
 
 
@@ -108,22 +106,24 @@ class TopTenItemsPage extends Component {
 		const order = identifiers[0];
 		const propertyName = identifiers[1];
 		const value = element.value;
-		console.log('handleNewValue. propertyName', propertyName);
 
 		// if name is deleted, then description will also be removed
 		if (propertyName === 'name') {
 			if (value === '') {
 				if (confirm('Do you want to delete this item?')) {// eslint-disable-line no-restricted-globals
-					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));
-					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, 'description', ''));
+					const data = {
+						'name': value,
+						'description': '',
+						'reusableItem_id': null,
+					};
+					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
 					this.setState({
 						[`${order}_description`]: '',
+						[`${order}_name_reusableItem_id`]: undefined,
 					});
 				}
 				return;
 			} else {
-				console.log('change to topTenItemName. Need to check for reusableItem');
-
 				const name = this.state[`${order}_name`];
 				const newReusableItem = this.state[`${order}_name_newReusableItem`];
 				const topTenItemForNewReusableItem = this.state[`${order}_name_topTenItemForNewReusableItem`];
@@ -131,30 +131,41 @@ class TopTenItemsPage extends Component {
 				const definition = this.state[`${order}_name_definition`];
 				const link = this.state[`${order}_name_link`];
 
-				console.log('handleNewValue name', name);
-				console.log('newReusableItem', newReusableItem);
-				console.log('topTenItemForNewReusableItem', topTenItemForNewReusableItem);
-				console.log('reusableItemId', reusableItemId);
-				console.log('definition', definition);
-				console.log('link', link);
-				// TODO process reusableItem data and implement in API
-				// TODO fill in new reusableItem form data - definition, link
+				const data = {
+					'name': value,
+				};
 
-				// simple text update
-				if (!newReusableItem && !reusableItemId) {
-					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));
+				if (reusableItemId) { // 
+					data.reusableItem_id = reusableItemId;
+				} else {
+					data.reusableItem_id = null;
+
+					if (newReusableItem) {
+						data.newReusableItem = true;
+						// base the reusableItem on an existing topTenItem
+						if (topTenItemForNewReusableItem) {
+							data.topTenItemForNewReusableItem = topTenItemForNewReusableItem;
+							// use the topTenItem name
+						} else {
+							// use the entered name text
+						}
+						data.reusableItemDefinition = definition;
+						data.reusableItemLink = link;
+						// make the reusableItem from scratch from a text name
+					}
 				}
+
+				this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
+
 				return;
 			}
 		}
 
-		this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, propertyName, value));
+		this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, { [propertyName]: value }));
 	}
 
 	// user types in an item name combobox.
 	handleComboboxChange(e, widgetId) {
-		console.log('handleComboboxChange', e, widgetId);
-
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
 			if (typeof e === 'string') {
@@ -162,7 +173,6 @@ class TopTenItemsPage extends Component {
 				// and the passed event is the selected item - an object - not the entered text
 				// so, only update the search string if the user has typed text
 				// not if they have made a selection
-				//console.log('suggest for ', e);
 
 				// the dropdown list will be rebuilt.
 				// We need to remove the selection from state to avoid confusion.
@@ -179,8 +189,7 @@ class TopTenItemsPage extends Component {
 
 	// user selects an item name from a dropdown list. This can be to use text directly, or to use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
-		console.log('onSelectItemName', e, widgetId);
-		const order = parseInt(widgetId); // we expect a form like 1_name which resolves to 1
+		// we expect a widgetId like 1_name, 2_name
 
 		this.setState({
 			[`${widgetId}`]: e.name,
@@ -189,33 +198,33 @@ class TopTenItemsPage extends Component {
 		switch (e.type) {
 			case 'newReusableItem':
 				this.setState({
-					[`${order}_name_newReusableItem`]: true,
-					[`${order}_name_reusableItemId`]: undefined,
-					[`${order}_name_topTenItemForNewReusableItem`]: undefined,
+					[`${widgetId}_newReusableItem`]: true,
+					[`${widgetId}_reusableItemId`]: undefined,
+					[`${widgetId}_topTenItemForNewReusableItem`]: undefined,
 				});
 				break;
 
 			case 'reusableItem':
 				this.setState({
-					[`${order}_name_newReusableItem`]: undefined,
-					[`${order}_name_reusableItemId`]: e.id,
-					[`${order}_name_topTenItemForNewReusableItem`]: undefined,
+					[`${widgetId}_newReusableItem`]: undefined,
+					[`${widgetId}_reusableItemId`]: e.id,
+					[`${widgetId}_topTenItemForNewReusableItem`]: undefined,
 				});
 				break;
 
 			case 'topTenItem':
 				this.setState({
-					[`${order}_name_newReusableItem`]: undefined,
-					[`${order}_name_reusableItemId`]: undefined,
-					[`${order}_name_topTenItemForNewReusableItem`]: e.id,
+					[`${widgetId}_newReusableItem`]: true,
+					[`${widgetId}_reusableItemId`]: undefined,
+					[`${widgetId}_topTenItemForNewReusableItem`]: e.id,
 				});
 				break;
 
 			default:
 				this.setState({
-					[`${order}_name_newReusableItem`]: undefined,
-					[`${order}_name_reusableItemId`]: undefined,
-					[`${order}_name_topTenItemForNewReusableItem`]: undefined,
+					[`${widgetId}_newReusableItem`]: undefined,
+					[`${widgetId}_reusableItemId`]: undefined,
+					[`${widgetId}_topTenItemForNewReusableItem`]: undefined,
 				});
 		}
 	}
