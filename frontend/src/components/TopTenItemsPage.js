@@ -239,8 +239,6 @@ class TopTenItemsPage extends Component {
 				let topTenItem;
 				let reusableItem;
 				const reusableItemSuggestions = this.props.reusableItemSuggestions[`${i}_name`];
-				console.log('checking state', this.state);
-				console.log('identifier', `${identifier}_newReusableItem`);
 
 				// create a new reusableItem based on the name the user typed
 				if (this.state[`${identifier}_newReusableItem`]) {
@@ -259,8 +257,6 @@ class TopTenItemsPage extends Component {
 						}
 					}
 				}
-				console.log('render says');
-				console.log('newReusableItem', newReusableItem);
 
 				elements.push(
 					<Row key={`topTenItem${i}`}>

@@ -119,7 +119,7 @@ class Item extends Component {
 
 		// icon by name to indicate it's a reusableItem. Not shown when editing name.
 		if (this.props.topTenItem.reusableItem && !this.state.isEditingName) {
-			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem];
+			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem] || {};
 			const popoverId = `popover${this.props.topTenItem.order}`;
 
 			reusableItemIcon = (
