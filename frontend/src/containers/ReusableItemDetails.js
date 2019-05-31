@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Button, Label, Popover, PopoverHeader, PopoverBody, Container, Row, Col } from 'reactstrap';
+import { Button, Label, Input, Popover, PopoverHeader, PopoverBody, Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import { withFormik, Formik, Field, Form, ErrorMessage } from 'formik';
+
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FlashMessage from '../components/FlashMessage';
@@ -118,62 +119,69 @@ class ReusableItemDetails extends Component {
 		);
 
 		let modification;
+		console.log('test', reusableItem);
+
+		const BasicModificationForm = (props) => {
+			const {
+				values,
+				touched,
+				errors,
+				handleChange,
+				handleBlur,
+				handleSubmit,
+				isSubmitting,
+				onCancel
+			} = props;
+			console.log('props ', props);
+			return (
+				<form onSubmit={handleSubmit}>
+					<Label for="name">Name</Label>
+					<Input
+						type="text"
+						name="name"
+						tag={Field}
+						component="input"
+						value={props.data.name}
+					/>
+					{errors.name && touched.name && <div id="feedback">{errors.name}</div>}
+					<Button type="button" color="secondary" onClick={props.onCancel}>Cancel</Button>
+					<Button type="submit" disabled={isSubmitting}>Done</Button>
+				</form>
+			);
+		};
+
+		const EnhancedModificationForm = withFormik({
+			// 'mapPropsToValues': () => ({'name': 'bob'}),
+
+			// Custom sync validation
+			'validate': (values) => {
+				const errors = {};
+
+				if (!values.name) {
+					errors.name = 'Name is required';
+				}
+
+				return errors;
+			},
+
+			'handleSubmit': (values, { setSubmitting }) => {
+				setTimeout(() => {
+					alert(JSON.stringify(values, null, 2));
+					setSubmitting(false);
+				}, 1000);
+			},
+
+			'displayName': 'ModificationForm',
+		})(BasicModificationForm);
 
 		if (reusableItem.proposed_modification.length === 0) {
 			if (showProposeModificationForm) {
 				modification = (
 					<div className="modification-form">
-						<Formik
-							initialValues={reusableItem}
-							validate={(values) => {
-								let errors = {};
-								if (!values.name) {
-									errors.name = 'Required';
-								}
-								return errors;
-							}}
-							onSubmit={(values, { setSubmitting }) => {
-								console.log('submitted form');
-								setTimeout(() => {
-									alert(JSON.stringify(values, null, 2));
-									setSubmitting(false);
-								}, 400);
-							}}
-						>
-							{({
-								values,
-								errors,
-								touched,
-								handleChange,
-								handleBlur,
-								handleSubmit,
-								isSubmitting,
-								/* and other goodies */
-							}) => (
-								<form onSubmit={handleSubmit}>
-									<Label for="name">Name</Label>
-									<input
-										type="text"
-										name="name"
-										onChange={handleChange}
-										onBlur={handleBlur}
-										value={values.name}
-									/>
-									{errors.email && touched.email && errors.email}
-									<input
-										type="text"
-										name="definition"
-										onChange={handleChange}
-										onBlur={handleBlur}
-										value={values.password}
-									/>
-									{errors.password && touched.password && errors.password}
-									<button type="submit" disabled={isSubmitting}>
-										Submit
-									</button>
-								</form>
-							)}
-						</Formik>
+						<EnhancedModificationForm
+							onCancel={this.toggleProposeModificationForm}
+							data={reusableItem}
+						/>
 					</div>
 				);
 			} else {
