@@ -14,6 +14,7 @@
     "jwt-decode": "^2.2.0",
     "normalizr": "^3.3.0",
     "npm": "^6.9.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
     "react-markdown": "^4.0.6",
@@ -37,7 +38,8 @@
   "proxy": "http://localhost:8000",
   "eslintConfig": {
     "extends": [
-      "react-app"
+      "react-app",
+      "airbnb"
     ],
     "rules": {
       "eol-last": [
@@ -80,6 +82,32 @@
       "quote-props": [
         2,
         "always"
+      ],
+      "no-tabs": [
+        "off"
+      ],
+      "max-len": [
+        "off"
+      ],
+      "react/jsx-indent": [
+        "error",
+        "tab"
+      ],
+      "react/jsx-indent-props": [
+        "error",
+        "tab"
+      ],
+      "react/jsx-filename-extension": [
+        1,
+        {
+          "extensions": [
+            ".js",
+            ".jsx"
+          ]
+        }
+      ],
+      "react/no-did-update-set-state": [
+        "warn"
       ]
     },
     "env": {
@@ -95,6 +123,11 @@
   ],
   "devDependencies": {
     "ajv": "^6.10.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.13.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^7.1.0",
     "typescript": "^3.4.5"

@@ -1,19 +1,19 @@
 import React from 'react';
-import { COLORS } from '../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Row, Col, Label } from 'reactstrap';
 
 import Combobox from 'react-widgets/lib/Combobox';
 import 'react-widgets/dist/css/react-widgets.css';
-import ReusableItemFormControls from '../components/ReusableItemFormControls';
+import ReusableItemFormControls from './ReusableItemFormControls';
 import './ReusableItemComboBox.scss';
+import { COLORS } from '../constants';
 
 // use when creating or editing a topTenItem, to create or edit a reusableItem
 
 function ReusableItemComboBox(props) {
 	// heading text for the combobox
 	const GroupHeading = ({ item }) => {
-		switch(item) {
+		switch (item) {
 			case 'text':
 				return <span>Use this text:</span>;
 
@@ -32,11 +32,11 @@ function ReusableItemComboBox(props) {
 		}
 	};
 
-	let ComboboxItem = ({ item }) => {
+	const ComboboxItem = ({ item }) => {
 		let icon;
 		let color;
 
-		switch(item.type) {
+		switch (item.type) {
 			case 'text':
 				icon = 'pencil-alt';
 				color = COLORS.USETEXT;
@@ -61,35 +61,40 @@ function ReusableItemComboBox(props) {
 				icon = '';
 				break;
 		}
-		return (<span className="combobox-dropdown"><span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
-	    <span className="name">{item.name}</span>
-	    {item.definition && (<span className="definition">{item.definition}</span>)}
-	  </span>);
+		return (
+			<span className="combobox-dropdown">
+				<span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
+				<span className="name">{item.name}</span>
+				{item.definition && (<span className="definition">{item.definition}</span>)}
+			</span>
+		);
 	};
+
+	const { widgetId, labelText, data, defaultValue, inputProps } = props;
 
 	return (
 		<Row>
 			<Col lg="9" className="toptenitem-name">
-				<Label for={props.widgetId}>{props.labelText}</Label>
+				<Label for={widgetId}>{labelText}</Label>
 				<Combobox
-					name={props.widgetId}
-					id={props.widgetId}
-					data={props.data}
-					defaultValue={props.defaultValue}
+					name={widgetId}
+					id={widgetId}
+					data={data}
+					defaultValue={defaultValue}
 					minLength={2}
-					filter='contains'
+					filter="contains"
 					groupComponent={GroupHeading}
 					groupBy={item => item.type}
-					valueField='id'
-					textField='name'
+					valueField="id"
+					textField="name"
 					itemComponent={ComboboxItem}
 					placeholder="Enter the Top Ten item name"
-					onChange={(param) => props.onChange(param, props.widgetId)}
-					onSelect={(param) => props.onSelect(param, props.widgetId)}
-					inputProps={props.inputProps}
-					autoFocus={true}
+					onChange={param => props.onChange(param, widgetId)}
+					onSelect={param => props.onSelect(param, widgetId)}
+					inputProps={inputProps}
+					autoFocus
 				/>
-				<div className='invalid-feedback' />
+				<div className="invalid-feedback" />
 
 				<ReusableItemFormControls
 					newReusableItem={props.newReusableItem}

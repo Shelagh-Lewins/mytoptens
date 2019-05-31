@@ -1,12 +1,13 @@
 // An individual item
 // It is a stateful component so that the description field can be shown only if there is a name defined.
 
-import store from '../store';
-
 import React, { Component } from 'react';
 import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import EditableTextField from './EditableTextField.js';
+
+import store from '../store';
+
+import EditableTextField from './EditableTextField';
 import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
@@ -15,14 +16,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 class Item extends Component {
 	constructor(props) {
-		// console.log('constructor props', props);
 		super();
 
 		this.state = {
 			'isEditingName': false,
 			'popoverOpen': false,
 		};
-		//console.log('topTenItem props, ', props);
+
 		this.onCreateChildTopTenList = this.onCreateChildTopTenList.bind(this);
 		this.setIsEditingName = this.setIsEditingName.bind(this);
 		this.setIsEditingDescription = this.setIsEditingDescription.bind(this);
@@ -30,12 +30,6 @@ class Item extends Component {
 		this.onMoveDown = this.onMoveDown.bind(this);
 
 		this.togglePopover = this.togglePopover.bind(this);
-	}
-
-	togglePopover() {
-		this.setState({
-			'popoverOpen': !this.state.popoverOpen
-		});
 	}
 
 	setIsEditingName(showInput) {
@@ -60,6 +54,12 @@ class Item extends Component {
 
 	onMoveDown = () => {
 		this.props.onMoveTopTenItemDown(this.props.topTenItem.id);
+	}
+
+	togglePopover() {
+		this.setState({
+			'popoverOpen': !this.state.popoverOpen
+		});
 	}
 
 	render() {
