@@ -310,7 +310,22 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
         obj.created_by = self.request.user
 
     def get_queryset(self):
-        return ReusableItem.objects.all()
+        # return details of a single ReusableItem
+        if 'id' in self.request.query_params:
+            reusableItemId = self.request.query_params.get('id', None)
+
+            try:
+                return ReusableItem.objects.filter(id=reusableItemId)
+
+                return reusableItem
+
+            except reusableItem.DoesNotExist:
+                print('error finding reusable item: item with this id does not exist')
+                print(id)
+                return
+
+        else:
+         return ReusableItem.objects.all()
 
     def perform_create(self, serializer):
         # do not allow a reusableItem to be created by the API
