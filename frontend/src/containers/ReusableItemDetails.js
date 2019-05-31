@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
+import { Link } from 'react-router-dom';
 
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
@@ -12,11 +14,14 @@ import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
 
+import './ReusableItemDetails.scss';
+import { COLORS } from '../constants';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 class ReusableItemDetails extends Component {
 	constructor(props) {
 		super();
 
-		// load the topTenList and any parent / children
 		this.getReusableItemData = this.getReusableItemData.bind(this);
 		this.renderReusableItem = this.renderReusableItem.bind(this);
 		const id = this.getReusableItemData(props);
@@ -24,7 +29,25 @@ class ReusableItemDetails extends Component {
 		this.state = {
 			id,
 			'showOrganizer': false,
+			'popoverOpenreusableItemHelp': false,
 		};
+
+		// each popover in the component needs an id
+		this.popoverIds = {
+			'reusableItemHelp': 'reusableItemHelp',
+		};
+
+		Object.keys(this.popoverIds).map((key) => {
+			this.state[`popoverOpen${key}`] = false;
+		});
+
+		this.togglePopover = this.togglePopover.bind(this);
+	}
+
+	togglePopover(popoverId) {
+		this.setState({
+			[`popoverOpen${popoverId}`]: !this.state[`popoverOpen${popoverId}`]
+		});
 	}
 
 	componentDidUpdate(prevProps) {
@@ -37,9 +60,9 @@ class ReusableItemDetails extends Component {
 			});
 		}
 
-		// user has navigated to a different topTenList
+		// user has navigated to a different reusableItem
 		if (prevProps.match.params.id !== this.props.match.params.id) {
-			const id = this.getTopTenListData(this.props);
+			const id = this.getReusableItemData(this.props);
 			this.setState({
 				id,
 			});
@@ -48,7 +71,10 @@ class ReusableItemDetails extends Component {
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			this.getReusableItemData(this.props);
+			const id = this.getReusableItemData(this.props);
+			this.setState({
+				id,
+			});
 		}
 	}
 
@@ -61,10 +87,30 @@ class ReusableItemDetails extends Component {
 	}
 
 	renderReusableItem() {
+		const reusableItemHelpId = this.popoverIds['reusableItemHelp'];
+		const reusableItemIcon = (
+			<div className="help-icon">
+				<Button id={reusableItemHelpId} type="button" className="name-icon btn bg-transparent">
+					<FontAwesomeIcon icon={['fas', 'question-circle']} style={{ 'color': COLORS.HELP }} size="1x" />
+				</Button>
+				<Popover placement="bottom" isOpen={this.state[`popoverOpen${reusableItemHelpId}`]} target={reusableItemHelpId} toggle={() => this.togglePopover(reusableItemHelpId)} html="true">
+					<PopoverBody>A Reusable Item is a shared Top Ten Item name that can be used by anybody in a Top Ten Item. Although the Reusable Item can be seen by anybody, nobody will see your list unless you make the list public.
+					</PopoverBody>
+				</Popover>
+			</div>
+		);
+
+		let modifications;
+
+		if (this.props.reusableItem.proposed_modification.length == 0) {
+
+		}
+
 		return (
 			<Row>
-				<Col>
-					<h2>{this.props.reusableItem.name}</h2>
+				<Col className="summary">
+					<h2><span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{this.props.reusableItem.name}</h2>
+					<div className="about">Reusable item{reusableItemIcon}</div>
 					{this.props.reusableItem.definition && (<p>{this.props.reusableItem.definition}</p>)}
 					{this.props.reusableItem.link && (<p><a href={this.props.reusableItem.link} target="_blank" rel="noopener noreferrer">{this.props.reusableItem.link}</a></p>)}
 				</Col>
@@ -105,7 +151,7 @@ class ReusableItemDetails extends Component {
 		if (this.state.canView) {
 			content = this.renderPage();
 		} else {
-			content = <p>Either this Reusable Item does not exist or you do not have permission to view it</p>;
+			content = <p>This Reusable Item does not exist</p>;
 		}
 		return(
 			<div className="reusableitem-detail">

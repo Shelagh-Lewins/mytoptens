@@ -1,0 +1,27 @@
+@import "../variables";
+
+.reusableitem-detail {
+	.summary {
+		h2 {
+			font-size: 1.5rem;
+
+			.icon {
+				margin-right: 8px;
+			}
+		}
+
+		.about {
+			float: left;
+		}
+	}
+
+	.help-icon {
+		float: right;
+
+		button {
+			border: none;
+			margin-left: 8px;
+			padding: 0;
+		}
+	}
+}

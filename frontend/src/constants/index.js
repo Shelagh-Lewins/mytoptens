@@ -6,5 +6,6 @@ export const COLORS = { // svg icon colors need to be in code not css
 	'TOPTENITEM': '#028fcc',
 	'TOPTENLIST': '#028fcc',
 	'REUSABLEITEM': '#6db65b',
+	'HELP': '#666',
 };
 

@@ -150,7 +150,7 @@ export function fetchReusableItemDetail(id) {
 
 		// All ReusableItems are public
 		const useAuth = false;
-
+console.log('fetchReusableItemDetail', id);
 		return fetchAPI({
 			'url': `/api/v1/content/reusableitem/?id=${id}`,
 			'method': 'GET',

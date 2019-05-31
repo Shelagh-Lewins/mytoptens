@@ -25,9 +25,9 @@ import './App.scss';
 
 // fontawesome
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPencilAlt, faClone, faPlus, faListOl, faStickyNote } from '@fortawesome/free-solid-svg-icons'; // import the icons you want
+import { faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'; // import the icons you want
 
-library.add(faPencilAlt, faClone, faPlus, faListOl, faStickyNote); // and add them to your library
+library.add(faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle); // and add them to your library
 
 // usage: for regular icons, import the component and specify 'far' i.e. font awesome regular as below
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
