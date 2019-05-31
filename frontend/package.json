@@ -87,6 +87,9 @@
         2,
         "always"
       ],
+      "consistent-return": [
+        "off"
+      ],
       "no-tabs": [
         "off"
       ],

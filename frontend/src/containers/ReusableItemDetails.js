@@ -119,7 +119,6 @@ class ReusableItemDetails extends Component {
 		);
 
 		let modification;
-		console.log('test', reusableItem);
 
 		const BasicModificationForm = (props) => {
 			const {
@@ -132,7 +131,7 @@ class ReusableItemDetails extends Component {
 				isSubmitting,
 				onCancel
 			} = props;
-			console.log('props ', props);
+
 			return (
 				<form onSubmit={handleSubmit}>
 					<Label for="name">Name</Label>
@@ -158,7 +157,7 @@ class ReusableItemDetails extends Component {
 					/>
 					{errors.name && touched.name && <div id="feedback">{errors.name}</div>}
 					<Button type="button" color="secondary" onClick={props.onCancel}>Cancel</Button>
-					<Button type="submit" disabled={isSubmitting}>Done</Button>
+					<Button type="submit" color="primary" disabled={isSubmitting}>Done</Button>
 				</form>
 			);
 		};
@@ -190,18 +189,24 @@ class ReusableItemDetails extends Component {
 		if (reusableItem.proposed_modification.length === 0) {
 			if (showProposeModificationForm) {
 				modification = (
-					<div className="modification-form">
-						<EnhancedModificationForm
-							onCancel={this.toggleProposeModificationForm}
-							data={reusableItem}
-						/>
-					</div>
+					<Row>
+						<Col className="modification-form">
+							<EnhancedModificationForm
+								onCancel={this.toggleProposeModificationForm}
+								data={reusableItem}
+							/>
+						</Col>
+					</Row>
 				);
 			} else {
 				modification = (
-					<Button id="show-propose-modification-form" type="button" color="secondary" className="name-icon btn" onClick={this.toggleProposeModificationForm}>
-						<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" />
-					</Button>
+					<Row>
+						<Col className="modification-button">
+							<Button id="show-propose-modification-form" type="button" color="primary" className="name-icon btn" onClick={this.toggleProposeModificationForm} title="Edit this Reusable Item">
+								<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" />
+							</Button>
+						</Col>
+					</Row>
 				);
 			}
 		}
@@ -214,19 +219,15 @@ class ReusableItemDetails extends Component {
 							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
 							{reusableItem.name}
 						</h2>
-						<div className="about">
+						<p className="about">
 							Reusable item
 							{reusableItemIcon}
-						</div>
-						{reusableItem.definition && (<p>{reusableItem.definition}</p>)}
-						{reusableItem.link && (<p><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
+						</p>
+						{reusableItem.definition && (<p className="definition">{reusableItem.definition}</p>)}
+						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
 					</Col>
 				</Row>
-				<Row>
-					<Col className="summary">
-						{modification}
-					</Col>
-				</Row>
+				{modification}
 			</React.Fragment>
 		);
 	}

@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
-import fetchAPI from '../modules/fetchAPI';
-import { getErrors } from '../modules/errors';
 import { normalize, schema } from 'normalizr';
+import fetchAPI from './fetchAPI';
+import { getErrors } from './errors';
 
 import {
 	LOGOUT_USER_COMPLETE
@@ -11,6 +11,8 @@ import {
 	RECEIVE_ENTITIES,
 	FETCH_TOPTENLIST_DETAIL_STARTED,
 } from './topTenList';
+
+var updeep = require('updeep');
 
 /* eslint-disable array-callback-return */
 
@@ -35,7 +37,7 @@ function receiveEntities(entities) {
 	};
 }
 
-//////////////////////////////////
+// ////////////////////////////////
 // Action creators
 
 // define action types so they are visible
@@ -119,10 +121,10 @@ export function searchReusableItems(searchTerm, widgetId) {
 		return fetchAPI({
 			'url': `/api/v1/content/searchreusableitems/?search=${searchTerm}`,
 			'method': 'GET',
-		}).then(response => {
-			//console.log('searchApi says ', response);
+		}).then((response) => {
+			// console.log('searchApi says ', response);
 			return dispatch(searchReusableItemsSucceeded(response.results, widgetId));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(searchReusableItems());
 
 			return dispatch(getErrors({ 'fetch reusableItems': error.message }));
@@ -130,7 +132,7 @@ export function searchReusableItems(searchTerm, widgetId) {
 	};
 }
 
-///////////////////////////////
+// /////////////////////////////
 // fetch a single reusableItem
 export function fetchReusableItemDetailStarted() {
 	return {
@@ -140,7 +142,7 @@ export function fetchReusableItemDetailStarted() {
 
 function fetchReusableItemDetailFailed() {
 	return {
-		'type': FETCH_REUSABLEITEM_DETAIL_FAILED
+		'type': FETCH_REUSABLEITEM_DETAIL_FAILED,
 	};
 }
 
@@ -150,16 +152,16 @@ export function fetchReusableItemDetail(id) {
 
 		// All ReusableItems are public
 		const useAuth = false;
-console.log('fetchReusableItemDetail', id);
+
 		return fetchAPI({
 			'url': `/api/v1/content/reusableitem/?id=${id}`,
 			'method': 'GET',
 			'useAuth': useAuth,
-		}).then(response => {
+		}).then((response) => {
 			const normalizedData = normalize(response, [reusableItemSchema]);
 
 			return dispatch(receiveEntities(normalizedData));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(fetchReusableItemDetailFailed());
 
 			return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
@@ -167,7 +169,7 @@ console.log('fetchReusableItemDetail', id);
 	};
 }
 
-//////////////////////////////////
+// ////////////////////////////////
 // Search for Top Ten Items by name, but only those which have no reusableItem
 export function searchTopTenItemsStarted(searchTerm, widgetId) {
 	return {
@@ -194,7 +196,7 @@ export function searchTopTenItems(searchTerm, widgetId) {
 	return (dispatch, getState) => {
 		// clear is handled by reusableItem reducer
 		// don't search on empty string
-		if(!searchTerm || searchTerm === '') {
+		if (!searchTerm || searchTerm === '') {
 			return;
 		}
 
@@ -211,10 +213,9 @@ export function searchTopTenItems(searchTerm, widgetId) {
 			'url': `/api/v1/content/searchlistsitems/?search=${searchTerm}&includetoptenlists=false&excludereusableitems=true`,
 			'method': 'GET',
 			'useAuth': useAuth,
-		}).then(response => {
-			// console.log('search api says ', response.results);
+		}).then((response) => {
 			return dispatch(searchTopTenItemsSucceeded(response.results, widgetId));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(searchTopTenItemsFailed());
 
 			return dispatch(getErrors({ 'search topTenItems': error.message }));
@@ -223,9 +224,8 @@ export function searchTopTenItems(searchTerm, widgetId) {
 }
 
 
-//////////////////////////////////
+// ////////////////////////////////
 // Reducer
-var updeep = require('updeep');
 
 // this is no longer used but shows the data structure
 /* const fakeResuableItems = [
@@ -295,26 +295,26 @@ const initialResuableItemsState = {
 	'things': {},
 };
 
-/////////////////////////////
+// ///////////////////////////
 // data for props
 
 // data for suggesting reusableItems to select
 // for each widgetId in search
 // returns reusableItems as an array
-export const getReusableItems = state => {
+export const getReusableItems = (state) => {
 	const searchResults = state.reusableItem.search;
 	let results = {};
-	//console.log('running getReusableItems');
+	// console.log('running getReusableItems');
 
-	Object.keys(searchResults).map(widgetId => {
-		//console.log('map');
+	Object.keys(searchResults).map((widgetId) => {
+		// console.log('map');
 		if (!searchResults[widgetId].reusableItems) {
-			//console.log('return undefined');
+			// console.log('return undefined');
 			return undefined;
 		}
 
-		const extendedReusableItems = searchResults[widgetId].reusableItems.map(reusableItem => {
-			const extendedReusableItem = JSON.parse(JSON.stringify(reusableItem)); 
+		const extendedReusableItems = searchResults[widgetId].reusableItems.map((thisReusableItem) => {
+			const extendedReusableItem = JSON.parse(JSON.stringify(thisReusableItem));
 			extendedReusableItem.type = 'reusableItem';
 			return extendedReusableItem;
 		});
@@ -328,18 +328,18 @@ export const getReusableItems = state => {
 // data for suggesting reusableItems to create
 // for each widgetId in search
 // returns topTenItems with no reusableItem, as an array
-export const getTopTenItems = state => {
+export const getTopTenItems = (state) => {
 	const searchResults = state.reusableItem.search;
 	let results = {};
-	//console.log('running getTopTenItems');
-	Object.keys(searchResults).map(widgetId => {
-		//console.log('map');
+	// console.log('running getTopTenItems');
+	Object.keys(searchResults).map((widgetId) => {
+		// console.log('map');
 		if (!searchResults[widgetId].topTenItems) {
-			//console.log('return undefined');
+			// console.log('return undefined');
 			return undefined;
 		}
 
-		const extendedTopTenItems = searchResults[widgetId].topTenItems.map(topTenItem => {
+		const extendedTopTenItems = searchResults[widgetId].topTenItems.map((topTenItem) => {
 			if (!topTenItem.reusableItem) {
 				return {
 					'type': 'topTenItem',
@@ -361,41 +361,37 @@ export const getTopTenItems = state => {
 export const getSortedReusableItemSuggestions = createSelector(
 	[getReusableItems, getTopTenItems],
 	(reusableItems, topTenItems) => {
-		//console.log('running getSortedReusableItemSuggestions');
+		// console.log('running getSortedReusableItemSuggestions');
 		const results = {};
-		Object.keys(reusableItems).map(widgetId => {
-			var sortedItems = reusableItems[widgetId].slice();
+		Object.keys(reusableItems).map((widgetId) => {
+			const sortedItems = reusableItems[widgetId].slice();
 
-			sortedItems.sort(function (a, b) {
-				return a.name.localeCompare(b.name);
-			});
+			sortedItems.sort((a, b) => a.name.localeCompare(b.name));
 
 			results[widgetId] = sortedItems || [];
 		});
 
-		Object.keys(topTenItems).map(widgetId => {
-			topTenItems[widgetId].sort(function (a, b) {
-				return a.name.localeCompare(b.name);
-			});
+		Object.keys(topTenItems).map((widgetId) => {
+			topTenItems[widgetId].sort((a, b) => a.name.localeCompare(b.name));
 
 			results[widgetId] = results[widgetId] || [];
 			results[widgetId] = results[widgetId].concat(topTenItems[widgetId]);
 		});
 
 		return results;
-	}
+	},
 );
 
 export const getReusableItemList = (state, widgetIds) => {
-	//console.log('running getReusableItemList');
-	//console.log('widgetIds', widgetIds);
+	// console.log('running getReusableItemList');
+	// console.log('widgetIds', widgetIds);
 	const sortedResults = getSortedReusableItemSuggestions(state);
-	const search = state.reusableItem.search;
+	const { search } = state.reusableItem;
 	const results = {};
 
-	Object.keys(search).map(widgetId => {
-		//console.log('widgetId', widgetId);
-		const searchTerm = search[widgetId].searchTerm;
+	Object.keys(search).map((widgetId) => {
+		// console.log('widgetId', widgetId);
+		const { searchTerm } = search[widgetId];
 
 		if (searchTerm === '' || searchTerm === undefined) {
 			results[widgetId] = [];
@@ -436,7 +432,7 @@ export const getReusableItemList = (state, widgetIds) => {
 
 // maybe set max number of items to show? Ah, but this is a problem when filtering.
 
-/////////////////////////////
+// ///////////////////////////
 // state updates
 
 export default function reusableItem(state = initialResuableItemsState, action) {
@@ -478,7 +474,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 				state,
 			);
 		}
-		
+
 		case SEARCH_REUSABLEITEMS_STARTED: {
 			return updeep(
 				updeep.updateIn(`search.${action.payload.widgetId}.reusableItems`, []),
@@ -486,15 +482,15 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			);
 		}
 
-		case SEARCH_REUSABLEITEMS_SUCCEEDED	: {
+		case SEARCH_REUSABLEITEMS_SUCCEEDED: {
 			return updeep.updateIn(`search.${action.payload.widgetId}.reusableItems`, action.payload.results, state);
 		}
 
-		case SEARCH_REUSABLEITEMS_FAILED	: {
+		case SEARCH_REUSABLEITEMS_FAILED: {
 			return updeep(state, state);
 		}
 
-		case SEARCH_REUSABLEITEMS_CLEAR	: {
+		case SEARCH_REUSABLEITEMS_CLEAR: {
 			return updeep(
 				updeep.updateIn(`search.${action.payload.widgetId}`, {
 					'searchTerm': '',
@@ -505,18 +501,18 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			);
 		}
 
-		case SEARCH_TOPTENITEMS_STARTED	: {
+		case SEARCH_TOPTENITEMS_STARTED: {
 			return updeep(
 				updeep.updateIn(`search.${action.payload.widgetId}.topTenItems`, []),
 				state,
 			);
 		}
 
-		case SEARCH_TOPTENITEMS_SUCCEEDED	: {
+		case SEARCH_TOPTENITEMS_SUCCEEDED: {
 			return updeep.updateIn(`search.${action.payload.widgetId}.topTenItems`, action.payload.results, state);
 		}
 
-		case SEARCH_TOPTENITEMS_FAILED	: {
+		case SEARCH_TOPTENITEMS_FAILED: {
 			return updeep(state, state);
 		}
 

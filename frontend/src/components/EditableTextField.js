@@ -107,6 +107,8 @@ class EditableTextField extends Component {
 
 	cancel = () => {
 		// restore the initial value of the field as though the user had just entered it
+		const { type, initialReusableItem, initialValue } = this.state;
+		console.log('cancel ', this.state);
 		if (this.state.type === 'reusableItemCombobox') {
 			// restore reusableItem defaults
 			const fakeSelectEvent = {
@@ -120,7 +122,7 @@ class EditableTextField extends Component {
 			'target': {
 				'dataset': { 'state': this.props['data-state'] },
 				'value': this.state.initialValue,
-			}
+			},
 		};
 		this.props.handleInputChange(fakeEvent);
 		this.toggleInput();
