@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Popover, PopoverHeader, PopoverBody, Container, Row, Col } from 'reactstrap';
+import { Button, Label, Popover, PopoverHeader, PopoverBody, Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { Formik, Field, Form, ErrorMessage } from 'formik';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FlashMessage from '../components/FlashMessage';
@@ -121,8 +122,58 @@ class ReusableItemDetails extends Component {
 		if (reusableItem.proposed_modification.length === 0) {
 			if (showProposeModificationForm) {
 				modification = (
-					<div className="modification">
-						<h3>Propose a modification to this Reusable Item</h3>
+					<div className="modification-form">
+						<Formik
+							initialValues={reusableItem}
+							validate={(values) => {
+								let errors = {};
+								if (!values.name) {
+									errors.name = 'Required';
+								}
+								return errors;
+							}}
+							onSubmit={(values, { setSubmitting }) => {
+								console.log('submitted form');
+								setTimeout(() => {
+									alert(JSON.stringify(values, null, 2));
+									setSubmitting(false);
+								}, 400);
+							}}
+						>
+							{({
+								values,
+								errors,
+								touched,
+								handleChange,
+								handleBlur,
+								handleSubmit,
+								isSubmitting,
+								/* and other goodies */
+							}) => (
+								<form onSubmit={handleSubmit}>
+									<Label for="name">Name</Label>
+									<input
+										type="text"
+										name="name"
+										onChange={handleChange}
+										onBlur={handleBlur}
+										value={values.name}
+									/>
+									{errors.email && touched.email && errors.email}
+									<input
+										type="text"
+										name="definition"
+										onChange={handleChange}
+										onBlur={handleBlur}
+										value={values.password}
+									/>
+									{errors.password && touched.password && errors.password}
+									<button type="submit" disabled={isSubmitting}>
+										Submit
+									</button>
+								</form>
+							)}
+						</Formik>
 					</div>
 				);
 			} else {
