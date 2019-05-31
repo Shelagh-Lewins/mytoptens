@@ -30,6 +30,7 @@ class ReusableItemDetails extends Component {
 			id,
 			'showOrganizer': false,
 			'popoverOpenreusableItemHelp': false,
+			'showProposeModificationForm': false,
 		};
 
 		// each popover in the component needs an id
@@ -42,6 +43,7 @@ class ReusableItemDetails extends Component {
 		});
 
 		this.togglePopover = this.togglePopover.bind(this);
+		this.toggleProposeModificationForm = this.toggleProposeModificationForm.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -90,8 +92,17 @@ class ReusableItemDetails extends Component {
 		});
 	}
 
+	toggleProposeModificationForm() {
+		const { showProposeModificationForm } = this.state;
+
+		this.setState({
+			'showProposeModificationForm': !showProposeModificationForm,
+		});
+	}
+
 	renderReusableItem() {
 		const { reusableItem } = this.props;
+		const { showProposeModificationForm } = this.state;
 
 		const reusableItemHelpId = this.popoverIds.reusableItemHelp;
 		const reusableItemIcon = (
@@ -105,27 +116,46 @@ class ReusableItemDetails extends Component {
 			</div>
 		);
 
-		let modifications;
+		let modification;
 
-		if (reusableItem.proposed_modification.length == 0) {
-
+		if (reusableItem.proposed_modification.length === 0) {
+			if (showProposeModificationForm) {
+				modification = (
+					<div className="modification">
+						<h3>Propose a modification to this Reusable Item</h3>
+					</div>
+				);
+			} else {
+				modification = (
+					<Button id="show-propose-modification-form" type="button" color="secondary" className="name-icon btn" onClick={this.toggleProposeModificationForm}>
+						<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" />
+					</Button>
+				);
+			}
 		}
 
 		return (
-			<Row>
-				<Col className="summary">
-					<h2>
-						<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
-						{reusableItem.name}
-					</h2>
-					<div className="about">
-						Reusable item
-						{reusableItemIcon}
-					</div>
-					{reusableItem.definition && (<p>{reusableItem.definition}</p>)}
-					{reusableItem.link && (<p><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
-				</Col>
-			</Row>
+			<React.Fragment>
+				<Row>
+					<Col className="summary">
+						<h2>
+							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
+							{reusableItem.name}
+						</h2>
+						<div className="about">
+							Reusable item
+							{reusableItemIcon}
+						</div>
+						{reusableItem.definition && (<p>{reusableItem.definition}</p>)}
+						{reusableItem.link && (<p><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
+					</Col>
+				</Row>
+				<Row>
+					<Col className="summary">
+						{modification}
+					</Col>
+				</Row>
+			</React.Fragment>
 		);
 	}
 

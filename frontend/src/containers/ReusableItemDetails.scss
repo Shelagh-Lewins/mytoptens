@@ -1,25 +1,27 @@
 @import "../variables";
 
 .reusableitem-detail {
-	.summary {
-		h2 {
-			font-size: 1.5rem;
+	h2 {
+		font-size: 1.5rem;
 
-			.icon {
-				margin-right: 8px;
-			}
+		.icon {
+			margin-right: 8px;
 		}
+	}
 
-		.about {
-			float: left;
-		}
+	h3 {
+		font-size: 1.3rem;
+	}
+
+	.about {
+		float: left;
 	}
 
 	.help-icon {
 		float: right;
 
 		button {
-			border: none;
+			border: 0;
 			margin-left: 8px;
 			padding: 0;
 		}

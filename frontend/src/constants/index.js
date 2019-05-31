@@ -7,5 +7,5 @@ export const COLORS = { // svg icon colors need to be in code not css
 	'TOPTENLIST': '#028fcc',
 	'REUSABLEITEM': '#6db65b',
 	'HELP': '#666',
+	'BUTTONSECONDARY': '#fff',
 };
-

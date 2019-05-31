@@ -56,7 +56,7 @@ export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 export const FETCH_REUSABLEITEM_DETAIL_STARTED = 'FETCH_REUSABLEITEM_DETAIL_STARTED';
 export const FETCH_REUSABLEITEM_DETAIL_FAILED = 'FETCH_REUSABLEITEM_DETAIL_FAILED';
 
-//////////////////////////////////
+// ////////////////////////////////
 // Suggest names for topTenItems based on reusableItems and topTenItems that have no reusable item
 export function suggestReusableItems(searchTerm, widgetId) {
 	return (dispatch) => {
@@ -73,7 +73,7 @@ export function suggestReusableItemsStarted(searchTerm, widgetId) {
 	};
 }
 
-//////////////////////////////////
+// ////////////////////////////////
 // Search for reusableItems
 export function searchReusableItemsStarted(searchTerm, widgetId) {
 	return {

@@ -3,17 +3,26 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
+
+// fontawesome
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+	faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit,
+} from '@fortawesome/free-solid-svg-icons'; // import the icons you want
+
 import store from '../store';
-import { setCurrentUser, getUserInfo, logoutUser, getAuthToken } from '../modules/auth';
+import {
+	setCurrentUser, getUserInfo, logoutUser, getAuthToken,
+} from '../modules/auth';
 
 import Navbar from '../components/Navbar';
 import Register from '../components/Register';
 import Welcome from '../components/Welcome';
 import Login from '../components/Login';
-import Home from '../containers/Home';
-import CreateTopTenList from '../containers/CreateTopTenList';
-import TopTenListDetails from '../containers/TopTenListDetail';
-import ReusableItemDetails from '../containers/ReusableItemDetails';
+import Home from './Home';
+import CreateTopTenList from './CreateTopTenList';
+import TopTenListDetails from './TopTenListDetail';
+import ReusableItemDetails from './ReusableItemDetails';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';
@@ -23,25 +32,19 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './App.scss';
 // note that the Django template pages reset password loads the bootstrap css from static/bootstrap
 
-// fontawesome
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'; // import the icons you want
-
-library.add(faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle); // and add them to your library
+library.add(faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit); // and add them to your library
 
 // usage: for regular icons, import the component and specify 'far' i.e. font awesome regular as below
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // <FontAwesomeIcon icon={['far', 'clone']} />
 
-
-
 // check if user is already logged in
-if(getAuthToken()) {
+if (getAuthToken()) {
 	store.dispatch(setCurrentUser(localStorage.mytoptensJwtToken));
 	store.dispatch(getUserInfo());
 
 	const currentTime = Date.now() / 1000;
-	if(localStorage.mytoptensJwtToken.exp < currentTime) {
+	if (localStorage.mytoptensJwtToken.exp < currentTime) {
 		store.dispatch(logoutUser());
 	}
 }
