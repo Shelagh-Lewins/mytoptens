@@ -141,7 +141,20 @@ class ReusableItemDetails extends Component {
 						name="name"
 						tag={Field}
 						component="input"
-						value={props.data.name}
+					/>
+					<Label for="definition">Definition</Label>
+					<Input
+						type="text"
+						name="definition"
+						tag={Field}
+						component="input"
+					/>
+					<Label for="name">Link</Label>
+					<Input
+						type="text"
+						name="link"
+						tag={Field}
+						component="input"
 					/>
 					{errors.name && touched.name && <div id="feedback">{errors.name}</div>}
 					<Button type="button" color="secondary" onClick={props.onCancel}>Cancel</Button>
@@ -151,7 +164,7 @@ class ReusableItemDetails extends Component {
 		};
 
 		const EnhancedModificationForm = withFormik({
-			// 'mapPropsToValues': () => ({'name': 'bob'}),
+			'mapPropsToValues': (props: Props) => ({ 'name': props.data.name, 'definition': props.data.definition, 'link': props.data.link }),
 
 			// Custom sync validation
 			'validate': (values) => {
