@@ -166,6 +166,7 @@ class TopTenItemsPage extends Component {
 
 	// user types in an item name combobox.
 	handleComboboxChange(e, widgetId) {
+		console.log('handleComboboxChange', e, widgetId);
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
 			if (typeof e === 'string') {
@@ -190,7 +191,7 @@ class TopTenItemsPage extends Component {
 	// user selects an item name from a dropdown list. This can be to use text directly, or to use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
 		// we expect a widgetId like 1_name, 2_name
-
+console.log('onSelectItemName', e, widgetId);
 		this.setState({
 			[`${widgetId}`]: e.name,
 		});
