@@ -31,42 +31,61 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     def to_internal_value(self, data):
         # intercept data before it is validated
-        # to process votes and check whether a modification can be proposed
-        # ensure only one, valid action is passed through to update
-        print('raw data')
+        # update may contain a vote or a proposed modification
+        # ensure only one, valid action is passed through
+        print('raw data:')
         print(data)
         modification_submitted = False
         vote_submitted = False
         validated_data = {}
-        
 
-        # if name, definition or link, propose modification
+        # if name, definition or link, a modification is proposed
         editable_properties = ['name', 'definition', 'link']
-        # if new values have been proposed for any of these, consider creating a modification
-
 
         for key in editable_properties:
             if key in data:
                 modification_submitted = True
+                break
 
-        # if vote (yes / no), consider registering a vote
+        # if vote (yes / no), a vote is registered
         if 'vote' in data:
             if data['vote'] in ['yes', 'no']:
                 vote_submitted =  True
 
         # do not accept request for both
         if modification_submitted and vote_submitted:
-            raise ValidationError({'reusable item': 'you cannot submit an proposed modification and a vote in the same request'})
+            raise ValidationError({'reusable item': 'you cannot submit a proposed modification and a vote in the same request'})
+
+        # if neither vote nor modification, error
+        if not modification_submitted and not vote_submitted:
+            raise ValidationError({'reusable item': 'you must submit either a proposed modification or a vote'})
+
+        if modification_submitted:
+            for key in editable_properties:
+                if key in data:
+                    if not data[key]: # empty string
+                        raise ValidationError({'reusable item': 'empty string submitted for modification to ' + key})
+
+                    else:
+                        validated_data[key] = data[key]
+
+        if vote_submitted:
+            validated_data['vote'] = data['vote']
 
         return validated_data
-        
+
 
     def update(self, instance, validated_data):
+        """ we trust to_internal_value to have ensured there is either
+        a proposed modification or a vote. No other data will be processed.
+        """
         print('***** instance')
         print(instance)
         # instance.name = validated_data.get('name', instance.name)
         print(instance.name)
         print(instance.proposed_modification)
+        print('validated_data')
+        print(validated_data)
 
         # find the topTenItems that reference this reusableItem
         topTenItems = TopTenItem.objects.filter(reusableItem=instance)
@@ -74,13 +93,40 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         print(topTenItems.count()) # number of topTenItems that reference this reusableItem
 
         # propose a modification
-        # there must not already be a proposed_modification
-        if instance.proposed_modification is not None:
-            print('proposed_modification')
-            print(instance.proposed_modification)
-            print(len(instance.proposed_modification))
-            # if len(instance.proposed_modification) is not 0:
-        # check values are different
+        modification_submitted = False
+        vote_submitted = False
+
+        # if name, definition or link, a modification is proposed
+        editable_properties = ['name', 'definition', 'link']
+        proposed_modification = {}
+
+        for key in editable_properties:
+            if key in validated_data:
+                print(key)
+                print(getattr(instance, key))
+                # only process new values
+                if getattr(instance, key) != validated_data[key]:
+                    modification_submitted = True
+                    proposed_modification[key] = validated_data[key]
+
+        if modification_submitted:
+            # there must not already be a proposed_modification
+            if instance.proposed_modification is not None: # avoid error if no value already
+                print('proposed_modification')
+                print(instance.proposed_modification)
+                print(len(instance.proposed_modification))
+                if len(instance.proposed_modification) is not 0:
+                    raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
+
+            else:
+                if len.proposed_modification is 0:
+                    raise ValidationError({'reusable item': 'no new values have been specified'})
+
+                else:
+                    instance.proposed_modification = proposed_modification
+
+            # check values are different
+            # don't set name to empty string
 
         # vote on a modification
 

@@ -11,6 +11,7 @@ import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
 
 import * as reusableItemReducer from '../modules/reusableItem';
+import * as errorsReducer from '../modules/errors';
 import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
@@ -105,12 +106,22 @@ class ReusableItemDetails extends Component {
 	}
 
 	submitProposeModificationForm(data) {
-		// e.preventDefault();
-		console.log('submit form', data);
-		console.log('id ', this.state.id);
-		const { dispatch } = this.props;
-		dispatch(reusableItemReducer.updateReusableItem(this.state.id, data));
-		
+		const { id } = this.state;
+		const { dispatch, reusableItem } = this.props;
+		const cleanedData = {};
+
+		// only send changed values
+		Object.keys(data).map((key) => {
+			if (data[key] !== reusableItem[key]) {
+				cleanedData[key] = data[key];
+			}
+		});
+
+		if (Object.keys(cleanedData).length > 0) {
+			dispatch(reusableItemReducer.updateReusableItem(id, cleanedData));
+		} else {
+			dispatch(errorsReducer.getErrors({ 'Reusable Item': 'No new values have been entered for this Reusable Item' }));
+		}
 	}
 
 	renderReusableItem() {

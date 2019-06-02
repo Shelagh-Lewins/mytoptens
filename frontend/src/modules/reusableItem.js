@@ -489,7 +489,8 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 
 			return updeep({
 				'things': updeep.constant(things),
-				'isLoading': false }, state);
+				'isLoading': false,
+			}, state);
 		}
 
 		case FETCH_REUSABLEITEM_DETAIL_STARTED: {

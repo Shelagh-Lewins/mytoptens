@@ -1,15 +1,15 @@
 // errorReducer.js
+const updeep = require('updeep');
 
 const GET_ERRORS = 'GET_ERRORS';
 const CLEAR_ERRORS = 'CLEAR_ERRORS';
 
-export const getErrors = error => {
+export const getErrors = error =>
 	// error is an object, e.g. { 'registration': error.message }
-	return {
+	({
 		'type': GET_ERRORS,
 		'payload': error,
-	};
-};
+	});
 
 export const clearErrors = () => {
 	return {
@@ -17,15 +17,13 @@ export const clearErrors = () => {
 	};
 };
 
-var updeep = require('updeep');
-
 const initialState = {};
 
 export default function(state = initialState, action ) {
-	switch(action.type) {
+	switch (action.type) {
 		case GET_ERRORS: {
 			// ensure we have a key-value object to allow multiple errors to be displayed
-			let errors = {};
+			const errors = {};
 
 			Object.keys(action.payload).forEach((key) => {
 				if (typeof action.payload[key] === 'string') {
@@ -43,7 +41,7 @@ export default function(state = initialState, action ) {
 			return {};
 		}
 
-		default: 
+		default:
 			return state;
 	}
 }
