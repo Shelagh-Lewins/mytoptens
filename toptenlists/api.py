@@ -301,7 +301,9 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
     ViewSet for reusableItems.
     ReusableItems are public.
     """
-    permission_classes = [IsOwnerOrReadOnly, HasVerifiedEmail]
+
+    # only users with verified email can propose modifications
+    permission_classes = [HasVerifiedEmail]
     model = ReusableItem
     serializer_class = ReusableItemSerializer
 

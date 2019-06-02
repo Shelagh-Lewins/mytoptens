@@ -46,6 +46,7 @@ class ReusableItemDetails extends Component {
 
 		this.togglePopover = this.togglePopover.bind(this);
 		this.toggleProposeModificationForm = this.toggleProposeModificationForm.bind(this);
+		this.submitProposeModificationForm = this.submitProposeModificationForm.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -88,7 +89,8 @@ class ReusableItemDetails extends Component {
 	}
 
 	togglePopover(popoverId) {
-		const popoverOpen = this.state[`popoverOpen${popoverId}`];
+		const { [`popoverOpen${popoverId}`]: popoverOpen } = this.state;
+		// const popoverOpen = this.state[`popoverOpen${popoverId}`];
 		this.setState({
 			[`popoverOpen${popoverId}`]: !popoverOpen,
 		});
@@ -102,17 +104,27 @@ class ReusableItemDetails extends Component {
 		});
 	}
 
+	submitProposeModificationForm(data) {
+		// e.preventDefault();
+		console.log('submit form', data);
+		console.log('id ', this.state.id);
+		const { dispatch } = this.props;
+		dispatch(reusableItemReducer.updateReusableItem(this.state.id, data));
+		
+	}
+
 	renderReusableItem() {
 		const { reusableItem } = this.props;
 		const { showProposeModificationForm } = this.state;
 
 		const reusableItemHelpId = this.popoverIds.reusableItemHelp;
+		const { [`popoverOpen${reusableItemHelpId}`]: popoverOpen } = this.state;
 		const reusableItemIcon = (
 			<div className="help-icon">
 				<Button id={reusableItemHelpId} type="button" className="name-icon btn bg-transparent">
 					<FontAwesomeIcon icon={['fas', 'question-circle']} style={{ 'color': COLORS.HELP }} size="1x" />
 				</Button>
-				<Popover placement="bottom" isOpen={this.state[`popoverOpen${reusableItemHelpId}`]} target={reusableItemHelpId} toggle={() => this.togglePopover(reusableItemHelpId)} html="true">
+				<Popover placement="bottom" isOpen={popoverOpen} target={reusableItemHelpId} toggle={() => this.togglePopover(reusableItemHelpId)} html="true">
 					<PopoverBody>A Reusable Item is a shared Top Ten Item name that can be used by anybody in a Top Ten Item. Although the Reusable Item can be seen by anybody, nobody will see your list unless you make the list public.</PopoverBody>
 				</Popover>
 			</div>
@@ -122,14 +134,10 @@ class ReusableItemDetails extends Component {
 
 		const BasicModificationForm = (props) => {
 			const {
-				values,
 				touched,
 				errors,
-				handleChange,
-				handleBlur,
 				handleSubmit,
 				isSubmitting,
-				onCancel
 			} = props;
 
 			return (
@@ -141,6 +149,7 @@ class ReusableItemDetails extends Component {
 						tag={Field}
 						component="input"
 					/>
+					{errors.name && touched.name && <div className="invalid-feedback">{errors.name}</div>}
 					<Label for="definition">Definition</Label>
 					<Input
 						type="text"
@@ -155,7 +164,6 @@ class ReusableItemDetails extends Component {
 						tag={Field}
 						component="input"
 					/>
-					{errors.name && touched.name && <div id="feedback">{errors.name}</div>}
 					<Button type="button" color="secondary" onClick={props.onCancel}>Cancel</Button>
 					<Button type="submit" color="primary" disabled={isSubmitting}>Done</Button>
 				</form>
@@ -163,23 +171,27 @@ class ReusableItemDetails extends Component {
 		};
 
 		const EnhancedModificationForm = withFormik({
-			'mapPropsToValues': (props: Props) => ({ 'name': props.data.name, 'definition': props.data.definition, 'link': props.data.link }),
+			'mapPropsToValues': (props: Props) => ({
+				'name': props.data.name, 'definition': props.data.definition, 'link': props.data.link,
+			}),
 
 			// Custom sync validation
 			'validate': (values) => {
 				const errors = {};
 
-				if (!values.name) {
+				if (!values.name || values.name === '') {
 					errors.name = 'Name is required';
 				}
 
 				return errors;
 			},
 
-			'handleSubmit': (values, { setSubmitting }) => {
+			// note how to upack onSubmit from props in the FormikBag parameter
+			'handleSubmit': (values, { setSubmitting, 'props': { onSubmit, closeForm } }) => {
+				onSubmit(values);
 				setTimeout(() => {
-					alert(JSON.stringify(values, null, 2));
 					setSubmitting(false);
+					closeForm();
 				}, 1000);
 			},
 
@@ -193,6 +205,8 @@ class ReusableItemDetails extends Component {
 						<Col className="modification-form">
 							<EnhancedModificationForm
 								onCancel={this.toggleProposeModificationForm}
+								onSubmit={this.submitProposeModificationForm}
+								closeForm={this.toggleProposeModificationForm}
 								data={reusableItem}
 							/>
 						</Col>
@@ -219,10 +233,10 @@ class ReusableItemDetails extends Component {
 							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
 							{reusableItem.name}
 						</h2>
-						<p className="about">
+						<span className="about">
 							Reusable item
 							{reusableItemIcon}
-						</p>
+						</span>
 						{reusableItem.definition && (<p className="definition">{reusableItem.definition}</p>)}
 						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
 					</Col>
@@ -288,6 +302,7 @@ ReusableItemDetails.defaultProps = {
 
 ReusableItemDetails.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'dispatch': PropTypes.func.isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),

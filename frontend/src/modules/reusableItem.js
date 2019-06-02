@@ -55,6 +55,9 @@ export const SEARCH_TOPTENITEMS_STARTED = 'SEARCH_TOPTENITEMS_STARTED';
 export const SEARCH_TOPTENITEMS_SUCCEEDED = 'SEARCH_TOPTENITEMS_SUCCEEDED';
 export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 
+export const UPDATE_REUSABLEITEM_STARTED = 'UPDATE_REUSABLEITEMS_STARTED';
+export const UPDATE_REUSABLEITEM_FAILED = 'UPDATE_REUSABLEITEMS_FAILED';
+
 export const FETCH_REUSABLEITEM_DETAIL_STARTED = 'FETCH_REUSABLEITEM_DETAIL_STARTED';
 export const FETCH_REUSABLEITEM_DETAIL_FAILED = 'FETCH_REUSABLEITEM_DETAIL_FAILED';
 
@@ -110,7 +113,7 @@ export function searchReusableItemsClear(widgetId) {
 export function searchReusableItems(searchTerm, widgetId) {
 	return (dispatch, getState) => {
 		// don't search on empty string
-		if(!searchTerm || searchTerm === '') {
+		if (!searchTerm || searchTerm === '') {
 			return dispatch(searchReusableItemsClear(widgetId));
 		}
 
@@ -223,6 +226,40 @@ export function searchTopTenItems(searchTerm, widgetId) {
 	};
 }
 
+// /////////////////////////////
+// Modify reusableItem
+export function updateReusableItemStarted() {
+	return {
+		'type': UPDATE_REUSABLEITEM_STARTED,
+	};
+}
+
+function updateReusableItemFailed() {
+	return {
+		'type': UPDATE_REUSABLEITEM_FAILED,
+	};
+}
+
+export const updateReusableItem = (reusableItemId, data) => (dispatch) => {
+// export function updateReusableItem(reusableItemId, data) {
+	// return (dispatch) => {
+	console.log('updateReusableItem', reusableItemId, data);
+	dispatch(updateReusableItemStarted());
+
+	return fetchAPI({
+		'url': `/api/v1/content/reusableitem/${reusableItemId}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify(data),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then((response) => {
+		console.log('updateReusableItem response', response);
+	}).catch((error) => {
+		dispatch(updateReusableItemFailed());
+
+		return dispatch(getErrors({ 'update reusableItem': error.message }));
+	});
+};
 
 // ////////////////////////////////
 // Reducer
@@ -303,7 +340,7 @@ const initialResuableItemsState = {
 // returns reusableItems as an array
 export const getReusableItems = (state) => {
 	const searchResults = state.reusableItem.search;
-	let results = {};
+	const results = {};
 	// console.log('running getReusableItems');
 
 	Object.keys(searchResults).map((widgetId) => {
@@ -330,7 +367,7 @@ export const getReusableItems = (state) => {
 // returns topTenItems with no reusableItem, as an array
 export const getTopTenItems = (state) => {
 	const searchResults = state.reusableItem.search;
-	let results = {};
+	const results = {};
 	// console.log('running getTopTenItems');
 	Object.keys(searchResults).map((widgetId) => {
 		// console.log('map');

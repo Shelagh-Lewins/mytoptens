@@ -55,14 +55,14 @@ export function createTopTenItemSucceeded(topTenItem) {
 	return {
 		'type': 'CREATE_TOPTENITEM_SUCCEEDED',
 		'payload': {
-			topTenItem
-		}
+			topTenItem,
+		},
 	};
 }
 
-////////////////////////////////////
+// //////////////////////////////////
 // update topTenItem
-export const updateTopTenItem = (topTenItemId, data) => dispatch => {
+export const updateTopTenItem = (topTenItemId, data) => (dispatch) => {
 	/* update any simple properties e.g. {
 		'name': 'my new name',
 		'description': 'my new description',
@@ -75,10 +75,10 @@ export const updateTopTenItem = (topTenItemId, data) => dispatch => {
 		'data': JSON.stringify(data),
 		'method': 'PATCH',
 		'useAuth': true,
-	}).then(response => {
+	}).then((response) => {
 		dispatch(topTenListsReducer.fetchTopTenListDetail(response.topTenList_id));
 		return dispatch(updateTopTenItemSucceeded(response));
-	}).catch(error => {
+	}).catch((error) => {
 		return dispatch(getErrors({ 'update topTenItem': error.message }));
 	});
 };
@@ -90,7 +90,7 @@ export function updateTopTenItemSucceeded(response) {
 	};
 }
 
-//////////////////////////////////
+// ////////////////////////////////
 // move topTenItem up
 export const moveTopTenItemUp = ({ topTenItemId }) => dispatch => {
 	return fetchAPI({

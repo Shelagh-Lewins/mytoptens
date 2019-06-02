@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 import uuid
 
 from django.db import models
@@ -26,6 +28,64 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = ReusableItem
         fields = ('id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
+
+    def to_internal_value(self, data):
+        # intercept data before it is validated
+        # to process votes and check whether a modification can be proposed
+        # ensure only one, valid action is passed through to update
+        print('raw data')
+        print(data)
+        modification_submitted = False
+        vote_submitted = False
+        validated_data = {}
+        
+
+        # if name, definition or link, propose modification
+        editable_properties = ['name', 'definition', 'link']
+        # if new values have been proposed for any of these, consider creating a modification
+
+
+        for key in editable_properties:
+            if key in data:
+                modification_submitted = True
+
+        # if vote (yes / no), consider registering a vote
+        if 'vote' in data:
+            if data['vote'] in ['yes', 'no']:
+                vote_submitted =  True
+
+        # do not accept request for both
+        if modification_submitted and vote_submitted:
+            raise ValidationError({'reusable item': 'you cannot submit an proposed modification and a vote in the same request'})
+
+        return validated_data
+        
+
+    def update(self, instance, validated_data):
+        print('***** instance')
+        print(instance)
+        # instance.name = validated_data.get('name', instance.name)
+        print(instance.name)
+        print(instance.proposed_modification)
+
+        # find the topTenItems that reference this reusableItem
+        topTenItems = TopTenItem.objects.filter(reusableItem=instance)
+        print('topTenItems')
+        print(topTenItems.count()) # number of topTenItems that reference this reusableItem
+
+        # propose a modification
+        # there must not already be a proposed_modification
+        if instance.proposed_modification is not None:
+            print('proposed_modification')
+            print(instance.proposed_modification)
+            print(len(instance.proposed_modification))
+            # if len(instance.proposed_modification) is not 0:
+        # check values are different
+
+        # vote on a modification
+
+        instance.save()
+        return instance 
 
 
 class TopTenItemSerializer(FlexFieldsModelSerializer):
