@@ -2,8 +2,12 @@
 // It is a stateful component so that the description field can be shown only if there is a name defined.
 
 import React, { Component } from 'react';
-import { Button, Popover, PopoverHeader, PopoverBody } from 'reactstrap';
+import {
+	Button, Popover, PopoverHeader, PopoverBody
+} from 'reactstrap';
 import { Link } from 'react-router-dom';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import store from '../store';
 
@@ -12,7 +16,7 @@ import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 class Item extends Component {
 	constructor(props) {

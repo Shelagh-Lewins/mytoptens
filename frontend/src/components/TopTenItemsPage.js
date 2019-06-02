@@ -166,7 +166,6 @@ class TopTenItemsPage extends Component {
 
 	// user types in an item name combobox.
 	handleComboboxChange(e, widgetId) {
-		console.log('handleComboboxChange', e, widgetId);
 		clearTimeout(this.itemNameTimeout);
 		this.itemNameTimeout = setTimeout(() => {
 			if (typeof e === 'string') {

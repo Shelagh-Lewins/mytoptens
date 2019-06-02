@@ -3,10 +3,10 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from 'react-router-dom';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
-import TopTenListsList from '../components/TopTenListsList';
-import TopTenListSummary from '../components/TopTenListSummary';
+import TopTenListsList from './TopTenListsList';
+import TopTenListSummary from './TopTenListSummary';
 import './TopTenListsPage.scss';
-import Pagination from '../components/Pagination';
+import Pagination from './Pagination';
 
 class TopTenListsPage extends Component {
 	onAddTopTenList = () => {
@@ -18,15 +18,15 @@ class TopTenListsPage extends Component {
 
 		return (
 			<TopTenListsList headerText="All public Top Ten lists">
-				{publicTopTenLists.map(topTenList => 
+				{publicTopTenLists.map(topTenList => (
 					<TopTenListSummary
 						key={topTenList.id}
 						topTenList={topTenList}
 						onChangeIsPublic={onChangeIsPublic}
 						onDeleteTopTenList={onDeleteTopTenList}
-						showCreatedBy={true}
+						showCreatedBy
 					/>
-				)}
+				))}
 			</TopTenListsList>
 		);
 	}
@@ -112,7 +112,7 @@ class TopTenListsPage extends Component {
 								<Input
 									type="checkbox"
 									defaultChecked={this.props.topLevelTopTenListsOnly}
-									onChange={this.props.handleTopLevelListsChange}/>{' '}
+									onChange={this.props.handleTopLevelTopTenListsChange}/>{' '}
 								Show top level Top Ten lists only
 							</Label>
 						</Col>
