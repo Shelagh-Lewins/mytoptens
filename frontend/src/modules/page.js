@@ -1,12 +1,13 @@
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
+var updeep = require('updeep');
 
 export const SEARCH_HOME_STARTED = 'SEARCH_HOME_STARTED';
 export const SEARCH_HOME_SUCCEEDED = 'SEARCH_HOME_SUCCEEDED';
 export const SEARCH_HOME_FAILED = 'SEARCH_HOME_FAILED';
 export const SEARCH_HOME_CLEAR = 'SEARCH_HOME_CLEAR';
 
-///////////////////////////////////
+// /////////////////////////////////
 // Home page search function
 export function searchHomeStarted(searchTerm) {
 	return {
@@ -39,7 +40,7 @@ export function searchHomeClear() {
 export function searchHome(searchTerm) {
 	return (dispatch, getState) => {
 		// don't search on empty string
-		if(!searchTerm || searchTerm === '') {
+		if (!searchTerm || searchTerm === '') {
 			return dispatch(searchHomeClear());
 		}
 
@@ -56,9 +57,9 @@ export function searchHome(searchTerm) {
 			'url': `/api/v1/content/searchlistsitems/?search=${searchTerm}`,
 			'method': 'GET',
 			'useAuth': useAuth,
-		}).then(response => {
+		}).then((response) => {
 			return dispatch(searchHomeSucceeded(response.results));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(searchHomeFailed());
 
 			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
@@ -66,10 +67,8 @@ export function searchHome(searchTerm) {
 	};
 }
 
-///////////////////////////////////
+// /////////////////////////////////
 // reducer
-var updeep = require('updeep');
-
 const initialState = {
 	'searchTerm': '',
 	'searchComplete': false,
@@ -78,7 +77,7 @@ const initialState = {
 
 export default function page(state = initialState, action) {
 	switch (action.type) {
-		case SEARCH_HOME_STARTED	: {
+		case SEARCH_HOME_STARTED: {
 			return updeep({
 				'searchTerm': action.payload.searchTerm,
 				'searchComplete': false,
@@ -86,20 +85,20 @@ export default function page(state = initialState, action) {
 			}, state);
 		}
 
-		case SEARCH_HOME_SUCCEEDED	: {
+		case SEARCH_HOME_SUCCEEDED: {
 			return updeep({
 				'searchComplete': true,
 				'searchResults': updeep.constant(action.payload.results),
 			}, state);
 		}
 
-		case SEARCH_HOME_FAILED	: {
+		case SEARCH_HOME_FAILED: {
 			return updeep({
 				'searchComplete': true,
 			}, state);
 		}
 
-		case SEARCH_HOME_CLEAR	: {
+		case SEARCH_HOME_CLEAR: {
 			return updeep({
 				'searchTerm': updeep.constant(''),
 				'searchComplete': false,
