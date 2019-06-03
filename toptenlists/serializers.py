@@ -156,7 +156,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = TopTenItem
-        fields = ('id', 'name', 'description', 'topTenList_id', 'modified_at', 'order', 'reusableItem')
+        fields = ('id', 'name', 'description', 'topTenList_id', 'modified_at', 'order', 'reusableItem', 'reusableItem_id')
         # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model
 
     def to_internal_value(self, data):

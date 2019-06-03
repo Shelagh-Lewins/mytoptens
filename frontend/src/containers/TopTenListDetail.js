@@ -8,7 +8,7 @@ import { Container, Row, Col } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';
 import SetTopTenListIsPublic from '../components/SetTopTenListIsPublic';
-import EditableTextField from '../components/EditableTextField.js';
+import EditableTextField from '../components/EditableTextField';
 import TopTenItemsPage from '../components/TopTenItemsPage';
 import Organizer from '../components/Organizer';
 import Loading from '../components/Loading';
@@ -35,7 +35,7 @@ class TopTenListDetails extends Component {
 
 		this.state = {
 			id,
-			'showOrganizer': false,
+			// 'showOrganizer': false,
 		};
 
 		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
@@ -302,12 +302,12 @@ class TopTenListDetails extends Component {
 }
 
 TopTenListDetails.propTypes = {
-	'auth': PropTypes.object.isRequired,
-	'errors': PropTypes.object.isRequired,
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'thisTopTenListTopTenItems': PropTypes.array.isRequired, // topTenItems belonging to this topTenList
-	'topTenListOrganizerData': PropTypes.array.isRequired, // minimal data for all topTenLists owned by the same user.
-	'topTenItemOrganizerData': PropTypes.object.isRequired, // minimal data for all topTenLists owned by the same user
+	'thisTopTenListTopTenItems': PropTypes.arrayOf(PropTypes.any).isRequired, // topTenItems belonging to this topTenList
+	'topTenListOrganizerData': PropTypes.arrayOf(PropTypes.any).isRequired, // minimal data for all topTenLists owned by the same user.
+	'topTenItemOrganizerData': PropTypes.objectOf(PropTypes.any).isRequired, // minimal data for all topTenLists owned by the same user
 };
 
 const mapStateToProps = (state, ownProps) => {

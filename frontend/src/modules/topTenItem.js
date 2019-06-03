@@ -17,7 +17,7 @@ import {
 
 /* eslint-disable array-callback-return */
 
-//////////////////////////////////
+// ////////////////////////////////
 // Action creators
 
 // define action types so they are visible
@@ -29,7 +29,7 @@ export const MOVE_TOPTENITEM_UP_SUCCEEDED = 'MOVE_TOPTENITEM_UP_SUCCEEDED';
 
 ////////////////////////////////////
 // create topTenItem
-export const createTopTenItem = topTenItem => dispatch => {
+export const createTopTenItem = (topTenItem) => (dispatch) => {
 	dispatch(createTopTenItemRequested());
 
 	return fetchAPI({

@@ -70,11 +70,13 @@ export function fetchTopTenListsStarted(is_public) {
 
 function fetchTopTenListsFailed() {
 	return {
-		'type': FETCH_TOPTENLISTS_FAILED
+		'type': FETCH_TOPTENLISTS_FAILED,
 	};
 }
 
-export function fetchTopTenLists({ listset, topLevelTopTenListsOnly, limit, offset } = {}) {
+export function fetchTopTenLists({
+	listset, topLevelTopTenListsOnly, limit, offset,
+} = {}) {
 	return (dispatch, getState) => {
 		dispatch(fetchTopTenListsStarted());
 		// if the user is not logged in, don't use auth. The server should return only the topTenLists a non-authenticated user should see.
@@ -105,8 +107,8 @@ export function fetchTopTenLists({ listset, topLevelTopTenListsOnly, limit, offs
 			'url': url,
 			'method': 'GET',
 			'useAuth': useAuth,
-		}).then(response => {
-			let data = {
+		}).then((response) => {
+			const data = {
 				'count': response.count,
 				'next': response.next,
 				'previous': response.previous,
@@ -114,7 +116,7 @@ export function fetchTopTenLists({ listset, topLevelTopTenListsOnly, limit, offs
 			};
 
 			return dispatch(receiveEntities(data));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(fetchTopTenListsFailed());
 
 			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
@@ -122,7 +124,7 @@ export function fetchTopTenLists({ listset, topLevelTopTenListsOnly, limit, offs
 	};
 }
 
-///////////////////////////////
+// /////////////////////////////
 // fetch a single topTenList with is parent and children, if any
 export function fetchTopTenListDetailStarted() {
 	return {
@@ -132,7 +134,7 @@ export function fetchTopTenListDetailStarted() {
 
 function fetchTopTenListDetailFailed() {
 	return {
-		'type': FETCH_TOPTENLIST_DETAIL_FAILED
+		'type': FETCH_TOPTENLIST_DETAIL_FAILED,
 	};
 }
 
@@ -151,11 +153,11 @@ export function fetchTopTenListDetail(id) {
 			'url': `/api/v1/content/toptenlistdetail/?id=${id}`,
 			'method': 'GET',
 			'useAuth': useAuth,
-		}).then(response => {
+		}).then((response) => {
 			const normalizedData = normalize(response, [topTenListSchema]);
 
 			return dispatch(receiveEntities(normalizedData));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(fetchTopTenListDetailFailed());
 
 			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
@@ -163,9 +165,9 @@ export function fetchTopTenListDetail(id) {
 	};
 }
 
-/////////////////////////////
+// ///////////////////////////
 // create topTenList
-export const createTopTenList = (topTenList, history) => dispatch => {
+export const createTopTenList = (topTenList, history) => (dispatch) => {
 	dispatch(createTopTenListStarted());
 	// console.log('createTopTenList data', topTenList);
 
@@ -175,12 +177,12 @@ export const createTopTenList = (topTenList, history) => dispatch => {
 		'method': 'POST',
 		'useAuth': true,
 		'headers': { 'Content-Type': 'application/json' },
-	}).then(response => {
+	}).then((response) => {
 		dispatch(createTopTenListSucceeded(response));
 
 		history.push(`/topTenList/${response.id}`);
 		return;
-	}).catch(error => {
+	}).catch((error) => {
 		return dispatch(getErrors({ 'create topTenList': error.message }));
 	});
 };
@@ -195,14 +197,14 @@ export function createTopTenListSucceeded(topTenList) {
 	return {
 		'type': CREATE_TOPTENLIST_SUCCEEDED,
 		'payload': {
-			topTenList
-		}
+			topTenList,
+		},
 	};
 }
 
-///////////////////////////
+// /////////////////////////
 // update topTenList
-export const updateTopTenList = (topTenListId, propertyName, value) => dispatch => {
+export const updateTopTenList = (topTenListId, propertyName, value) => (dispatch) => {
 	// should be able to update any simple property e.g. name, description
 	return fetchAPI({
 		'url': `/api/v1/content/toptenlist/${topTenListId}/`,
@@ -210,10 +212,10 @@ export const updateTopTenList = (topTenListId, propertyName, value) => dispatch 
 		'data': JSON.stringify({ [propertyName]: value }),
 		'method': 'PATCH',
 		'useAuth': true,
-	}).then(response => {
+	}).then((response) => {
 		dispatch(fetchOrganizerData(response.created_by));
 		return dispatch(updateTopTenListSucceeded(response));
-	}).catch(error => {
+	}).catch((error) => {
 		return dispatch(getErrors({ 'update topTenItem': error.message }));
 	});
 };
@@ -225,16 +227,16 @@ export function updateTopTenListSucceeded(response) {
 	};
 }
 
-///////////////////////////
+// /////////////////////////
 // delete topTenList
 export const deleteTopTenList = id => (dispatch, getState) => {
 	return fetchAPI({
 		'url': `/api/v1/content/toptenlist/${id}/`,
 		'method': 'DELETE',
 		'useAuth': true,
-	}).then(response => {
+	}).then((response) => {
 		return dispatch(deleteTopTenListSucceeded(id));
-	}).catch(error => {
+	}).catch((error) => {
 		return dispatch(getErrors({ 'delete topTenList': error.message }));
 	});
 };
@@ -248,16 +250,16 @@ export function deleteTopTenListSucceeded(id) {
 	};
 }
 
-export const setTopTenListIsPublic = ({ id, is_public }) => dispatch => {
+export const setTopTenListIsPublic = ({ id, is_public }) => (dispatch) => {
 	return fetchAPI({
 		'url': `/api/v1/content/toptenlist/${id}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify({ is_public }),
 		'method': 'PATCH',
 		'useAuth': true,
-	}).then(response => {
+	}).then((response) => {
 		return dispatch(setTopTenListIsPublicSucceeded(response));
-	}).catch(error => {
+	}).catch((error) => {
 		return dispatch(getErrors({ 'set topTenList is public': error.message }));
 	});
 };
@@ -267,12 +269,12 @@ export function setTopTenListIsPublicSucceeded({ id, is_public }) {
 		'type': SET_TOPTENLIST_IS_PUBLIC_SUCCEEDED,
 		'payload': {
 			'id': id,
-			is_public
-		}
+			is_public,
+		},
 	};
 }
 
-//////////////////////////////////
+// ////////////////////////////////
 // fetch the names of my topTenLists and their topTenItems
 // for displaying and managing topTenList hierarchy i.e. topTenList parent_topTenItem
 // returns only the fields that are required for this function
@@ -291,7 +293,7 @@ export function fetchOrganizerDataStarted(is_public) {
 
 function fetchOrganizerDataFailed() {
 	return {
-		'type': FETCH_ORGANIZER_DATA_FAILED
+		'type': FETCH_ORGANIZER_DATA_FAILED,
 	};
 }
 
@@ -309,14 +311,15 @@ export function fetchOrganizerData(userId) {
 		}
 
 		return fetchAPI({
-			'url': `/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,is_public,order,parent_topTenItem&created_by=${userId}`,
+			'url': `/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem&created_by=${userId}`,
 			'method': 'GET',
 			'useAuth': useAuth,
-		}).then(response => {
+		}).then((response) => {
+			// console.log('response', response);
 			const normalizedData = normalize(response, [topTenListSchema]);
-
+			// console.log('normalizedData', normalizedData);
 			return dispatch(receiveOrganizerData(normalizedData));
-		}).catch(error => {
+		}).catch((error) => {
 			dispatch(fetchOrganizerDataFailed());
 
 			return dispatch(getErrors({ 'fetch my topTenList names': error.message }));
@@ -324,7 +327,7 @@ export function fetchOrganizerData(userId) {
 	};
 }
 
-//////////////////////////////////
+// ////////////////////////////////
 // Reducer
 var updeep = require('updeep');
 
@@ -341,13 +344,13 @@ const initialTopTenListsState = {
 };
 
 // 'state' here is global state
-export const getSearchTerm = state => {
+export const getSearchTerm = (state) => {
 	return state.page.searchTerm;
 };
 
 // returns topTenLists as an array not an object
-export const getTopTenLists = state => {
-	return Object.keys(state.topTenList.things).map(id => {
+export const getTopTenLists = (state) => {
+	return Object.keys(state.topTenList.things).map((id) => {
 		return state.topTenList.things[id];
 	});
 };
@@ -356,11 +359,11 @@ const getTopTenItems = state => state.topTenItem.things;
 
 export const getPublicTopTenLists = createSelector(
 	[getTopTenLists],
-	topTenLists => {
-		return topTenLists.filter(topTenList => {
+	(topTenLists) => {
+		return topTenLists.filter((topTenList) => {
 			return topTenList.is_public;
 		});
-	}
+	},
 ); 
 
 export const getMyGroupedTopTenLists = createSelector(
@@ -376,7 +379,7 @@ export const getMyGroupedTopTenLists = createSelector(
 	}
 );
 
-/////////////////////////////
+// ///////////////////////////
 // organizer data
 export const getOrganizerTopTenLists = state => state.topTenList.organizerData;
 const getOrganizerTopTenItems = state => state.topTenItem.organizerData;
@@ -442,10 +445,10 @@ export const getParentTopTenItemAndTopTenList = createSelector(
 			}
 		}
 		return { parentTopTenItem, parentTopTenList };
-	}
+	},
 );
 
-/////////////////////////////
+// ///////////////////////////
 // state updates
 
 // state here is the substate state.topTenLists
@@ -475,7 +478,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 				'next': next,
 				'things': updeep.constant(things), // constant provides placement instead of update, so all previous entries are removed
 				'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
-				'isLoading': false
+				'isLoading': false,
 			}, state);
 		}
 
@@ -501,7 +504,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 		}
 
 		case CREATE_TOPTENLIST_SUCCEEDED: {
-			const topTenList = action.payload.topTenList;
+			const { topTenList } = action.payload;
 			return updeep({ 'things': { [topTenList.id]: topTenList } }, state);
 		}
 
@@ -518,14 +521,14 @@ export default function topTenList(state = initialTopTenListsState, action) {
 
 			if (index !== -1) {
 				return updeep.updateIn(`things.${index}.is_public`, action.payload.is_public, state);
-			} 
+			}
 
 			return state; // in case topTenList was not found
 			*/
 		}
 
 		case CREATE_TOPTENITEM_SUCCEEDED: {
-			const topTenItem = action.payload.topTenItem;
+			const { topTenItem } = action.payload;
 
 			function addTopTenItem(topTenItems) {
 				return [].concat(topTenItems, topTenItem.id);

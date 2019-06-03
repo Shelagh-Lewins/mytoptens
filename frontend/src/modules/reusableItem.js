@@ -2,6 +2,9 @@ import { createSelector } from 'reselect';
 import { normalize, schema } from 'normalizr';
 import fetchAPI from './fetchAPI';
 import { getErrors } from './errors';
+// import { getErrors } from './errors';
+
+import * as topTenListsReducer from './topTenList';
 
 import {
 	LOGOUT_USER_COMPLETE
@@ -12,7 +15,7 @@ import {
 	FETCH_TOPTENLIST_DETAIL_STARTED,
 } from './topTenList';
 
-var updeep = require('updeep');
+const updeep = require('updeep');
 
 /* eslint-disable array-callback-return */
 
@@ -162,6 +165,7 @@ export function fetchReusableItemDetail(id) {
 			'useAuth': useAuth,
 		}).then((response) => {
 			const normalizedData = normalize(response, [reusableItemSchema]);
+			dispatch(topTenListsReducer.fetchOrganizerData(getState().auth.user.id));
 
 			return dispatch(receiveEntities(normalizedData));
 		}).catch((error) => {
@@ -419,7 +423,7 @@ export const getSortedReusableItemSuggestions = createSelector(
 	},
 );
 
-export const getReusableItemList = (state, widgetIds) => {
+export const getReusableItemList = (state) => {
 	// console.log('running getReusableItemList');
 	// console.log('widgetIds', widgetIds);
 	const sortedResults = getSortedReusableItemSuggestions(state);
@@ -460,6 +464,29 @@ export const getReusableItemList = (state, widgetIds) => {
 
 	return results;
 };
+
+// Functions to provide data to component
+// topTenItems belonging to the user
+const getMyTopTenItems = state => state.topTenItem.organizerData;
+
+const getReusableItemId = (state, props) => props.match.params.id;
+
+// return array of ids of topTenItems that reference the reusableItem being viewed in ReusableItemDetails
+export const getMyTopTenItemsForReusableItem = createSelector(
+	[getMyTopTenItems, getReusableItemId],
+	(myTopTenItems, reusableItemId) => {
+		const results = [];
+
+		Object.keys(myTopTenItems).map((id) => {
+			const topTenItem = myTopTenItems[id];
+
+			if (topTenItem.reusableItem_id === reusableItemId) {
+				results.push(topTenItem.id);
+			}
+		});
+		return results;
+	},
+);
 
 
 // construct list of suggested item names

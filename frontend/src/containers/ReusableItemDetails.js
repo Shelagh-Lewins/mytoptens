@@ -15,7 +15,6 @@ import * as errorsReducer from '../modules/errors';
 import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
-import { clearErrors } from '../modules/errors';
 
 import './ReusableItemDetails.scss';
 import { COLORS } from '../constants';
@@ -31,7 +30,6 @@ class ReusableItemDetails extends Component {
 
 		this.state = {
 			id,
-			'showOrganizer': false,
 			'popoverOpenreusableItemHelp': false,
 			'showProposeModificationForm': false,
 		};
@@ -66,6 +64,7 @@ class ReusableItemDetails extends Component {
 		// user has navigated to a different reusableItem
 		if (prevProps.match.params.id !== match.params.id) {
 			id = this.getReusableItemData(this.props);
+
 			this.setState({
 				id,
 			});
@@ -82,11 +81,17 @@ class ReusableItemDetails extends Component {
 	}
 
 	getReusableItemData = (props) => {
-		const { id } = props.match.params;
+		const { 'id': reusableItemId } = props.match.params;
 
-		props.dispatch(reusableItemReducer.fetchReusableItemDetail(id));
-		props.dispatch(clearErrors());
-		return id;
+		props.dispatch(reusableItemReducer.fetchReusableItemDetail(reusableItemId));
+		props.dispatch(errorsReducer.clearErrors());
+		return reusableItemId;
+	}
+
+
+	onCloseFlashMessage = () => {
+		const { dispatch } = this.props;
+		dispatch(errorsReducer.clearErrors());
 	}
 
 	togglePopover(popoverId) {
@@ -124,11 +129,6 @@ class ReusableItemDetails extends Component {
 		}
 	}
 
-	onCloseFlashMessage = () => {
-		const { dispatch } = this.props;
-		dispatch(clearErrors());
-	}
-
 	renderReusableItem() {
 		const { reusableItem } = this.props;
 		const { showProposeModificationForm } = this.state;
@@ -147,6 +147,10 @@ class ReusableItemDetails extends Component {
 		);
 
 		let modification;
+
+		// TODO if proposed modification exists, show it and allow vote if conditions met. Show votes and number required for resolution. Should this information come from the server?
+		// if no proposed modification exists, and user references reusableItem, allow them to propose a modification if verified
+		// props.topTenItems is array of my topTenItems that reference this reusableItem
 
 		const BasicModificationForm = (props) => {
 			const {
@@ -239,6 +243,8 @@ class ReusableItemDetails extends Component {
 					</Row>
 				);
 			}
+		} else {
+			modification = (<span>TODO show proposed modification and voting if appropriate, see TODO in comments</span>);
 		}
 
 		return (
@@ -330,6 +336,7 @@ const mapStateToProps = (state, ownProps) => ({
 	'errors': state.errors,
 	'isLoading': state.reusableItem.isLoading,
 	'reusableItem': state.reusableItem.things[ownProps.match.params.id],
+	'topTenItems': reusableItemReducer.getMyTopTenItemsForReusableItem(state, ownProps), // topTenItems that reference this reusableItem
 });
 
 export default connect(mapStateToProps)(ReusableItemDetails);

@@ -503,8 +503,21 @@ class UpdateReusableItemAPITest(APITestCase):
     """
     tests required:
 
+    basics:
+    must be verified user
+    cannot submit modification and vote together
+
+    propose modification:
     cannot directly edit a reusableItem
-    can submit modification if none exists already, and verified user, and user references the item, and new data, and not also voting
-    can vote if modification exists and have not voted on it and verified user and not also submitting modification
+    can submit modification if none exists already, and user references the item, and new data
+    automatically vote after successfully proposing modification
+    cannot set name to empty string, but can set definition and link to empty string
+
+    vote:
+    can vote if modification exists and have not voted on it
+    vote must be 'yes' or 'no'
     votes are processed and modification removed and reusable item updated if 'yes' passes
+    reusableItem history is updated
+    do we keep a record of failed modifications?
+
     """
