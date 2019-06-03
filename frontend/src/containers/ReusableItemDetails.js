@@ -124,6 +124,11 @@ class ReusableItemDetails extends Component {
 		}
 	}
 
+	onCloseFlashMessage = () => {
+		const { dispatch } = this.props;
+		dispatch(clearErrors());
+	}
+
 	renderReusableItem() {
 		const { reusableItem } = this.props;
 		const { showProposeModificationForm } = this.state;

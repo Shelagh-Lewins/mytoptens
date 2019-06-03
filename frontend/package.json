@@ -79,6 +79,9 @@
           "mode": "strict"
         }
       ],
+      "no-alert": [
+        "off"
+      ],
       "object-curly-spacing": [
         "error",
         "always"
