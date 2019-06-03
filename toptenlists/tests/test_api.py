@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
 from allauth.account.models import EmailAddress 
-from toptenlists.models import TopTenList, TopTenItem
+from toptenlists.models import TopTenList, TopTenItem, ReusableItem
 
 new_list_data = {'name': 'Tasty food', 'description':'My favourite foods', 'topTenItem': [
     {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1},
@@ -466,3 +466,45 @@ class DeleteTopTenListAPITest(APITestCase):
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+
+"""
+Tests for ReusableItem
+"""
+
+class UpdateReusableItemAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Set up non-modified objects used by all test methods
+        cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
+        EmailAddress.objects.create(user=cls.user, 
+            email='person@example.com',
+            primary=True,
+            verified=True)
+
+    def setUp(self):
+        self.reusableItem = ReusableItem.objects.create(name='Test reusableItem', definition='A definition', created_by=self.user)
+
+    def test_modify_reusableitem(self):
+        """
+        a modification can be proposed if none exists already
+        """
+
+        self.client.force_authenticate(user=self.user)
+
+        edit_data = { 'name': 'A new name' }
+
+        reusableitem_detail_url = reverse('topTenLists:ReusableItems-detail', kwargs={'pk': self.reusableItem.id})
+
+        response = self.client.patch(reusableitem_detail_url, edit_data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    """
+    tests required:
+
+    cannot directly edit a reusableItem
+    can submit modification if none exists already, and verified user, and user references the item, and new data, and not also voting
+    can vote if modification exists and have not voted on it and verified user and not also submitting modification
+    votes are processed and modification removed and reusable item updated if 'yes' passes
+    """

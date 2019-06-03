@@ -60,11 +60,13 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if not modification_submitted and not vote_submitted:
             raise ValidationError({'reusable item': 'you must submit either a proposed modification or a vote'})
 
+        # do not accept empty string for name
+        # user may propose empty string for definition or link, though it's unclear why they would want to
         if modification_submitted:
             for key in editable_properties:
                 if key in data:
-                    if not data[key]: # empty string
-                        raise ValidationError({'reusable item': 'empty string submitted for modification to ' + key})
+                    if key is 'name' and not data[key]: # empty string
+                        raise ValidationError({'reusable item': 'name cannot be empty string'})
 
                     else:
                         validated_data[key] = data[key]
@@ -112,23 +114,24 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if modification_submitted:
             # there must not already be a proposed_modification
             if instance.proposed_modification is not None: # avoid error if no value already
-                print('proposed_modification')
+                print('existing proposed_modification')
                 print(instance.proposed_modification)
                 print(len(instance.proposed_modification))
                 if len(instance.proposed_modification) is not 0:
                     raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
 
+            if len(proposed_modification) is 0:
+                raise ValidationError({'reusable item': 'no new values have been specified'})
+
             else:
-                if len.proposed_modification is 0:
-                    raise ValidationError({'reusable item': 'no new values have been specified'})
+                instance.proposed_modification = []
+                instance.proposed_modification.append(proposed_modification)
 
-                else:
-                    instance.proposed_modification = proposed_modification
-
-            # check values are different
             # don't set name to empty string
 
         # vote on a modification
+        print('about to save')
+        print()
 
         instance.save()
         return instance 
