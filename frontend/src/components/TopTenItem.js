@@ -2,8 +2,9 @@
 // It is a stateful component so that the description field can be shown only if there is a name defined.
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
-	Button, Popover, PopoverHeader, PopoverBody
+	Button, Popover, PopoverHeader, PopoverBody,
 } from 'reactstrap';
 import { Link } from 'react-router-dom';
 
@@ -15,7 +16,6 @@ import EditableTextField from './EditableTextField';
 import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
-
 
 
 class Item extends Component {
@@ -49,93 +49,121 @@ class Item extends Component {
 	}
 
 	onCreateChildTopTenList = () => {
-		this.props.onCreateChildTopTenList(this.props.topTenItem);
+		const { onCreateChildTopTenList, topTenItem } = this.props;
+		onCreateChildTopTenList(topTenItem);
 	}
 
 	onMoveUp = () => {
-		this.props.onMoveTopTenItemUp(this.props.topTenItem.id);
+		const { onMoveTopTenItemUp, topTenItem } = this.props;
+		onMoveTopTenItemUp(topTenItem.id);
 	}
 
 	onMoveDown = () => {
-		this.props.onMoveTopTenItemDown(this.props.topTenItem.id);
+		const { onMoveTopTenItemDown, topTenItem } = this.props;
+		onMoveTopTenItemDown(topTenItem.id);
 	}
 
 	togglePopover() {
+		const { popoverOpen } = this.state;
 		this.setState({
-			'popoverOpen': !this.state.popoverOpen
+			'popoverOpen': !popoverOpen,
 		});
 	}
 
 	render() {
 		let showDescription = true;
-		if (this.props.topTenItem.name === '' && !this.state.isEditingName) {
+		const {
+			topTenItem,
+			canEdit,
+			reusableItemSuggestions,
+			handleComboboxChange,
+			handleInputChange,
+			handleNewValue,
+			onSelectItemName,
+			newReusableItem,
+			reusableItem,
+			topTenItemForReusableItem,
+		} = this.props;
+		const { isEditingName, setIsEditingDescription, popoverOpen } = this.state;
+
+		if (topTenItem.name === '' && !isEditingName) {
 			showDescription = false;
-		} else if (this.state.isEditingName && store.getState().topTenItem.things[this.props.topTenItem.id] && store.getState().topTenItem.things[this.props.topTenItem.id].name === '') {
+		} else if (isEditingName && store.getState().topTenItem.things[topTenItem.id] && store.getState().topTenItem.things[topTenItem.id].name === '') {
 			showDescription = false;
 		}
 
 		let canCreateChildTopTenList = true; // should the "create child topTenList" button be visible?
 
-		if (this.props.topTenItem.childTopTenList || // there is already a child topTenList
-			this.props.topTenItem.name === '' || // there is no topTenItem
-			this.state.isEditingName || // the topTenItem name is being edited
-			!this.props.canEdit) { // the user can't edit this topTenList
+		if (topTenItem.childTopTenList // there is already a child topTenList
+		|| topTenItem.name === '' // there is no topTenItem
+			|| isEditingName // the topTenItem name is being edited
+			|| !canEdit) { // the user can't edit this topTenList
 			canCreateChildTopTenList = false;
 		}
 
 		let canViewChildTopTenList = false;
 
 		// child topTenList exists and user can view it
-		if (this.props.topTenItem.childTopTenList && permissions.canViewTopTenList(this.props.topTenItem.childTopTenList.id)) {
+		if (topTenItem.childTopTenList && permissions.canViewTopTenList(topTenItem.childTopTenList.id)) {
 			canViewChildTopTenList = true;
 		}
 
 		let childTopTenList;
 
 		if (canCreateChildTopTenList) {
-			childTopTenList = (<button className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>); 
+			childTopTenList = (<button type="button" className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);
 		} else if (canViewChildTopTenList) {
 			childTopTenList = (
-				<div className="child-toptenlist">  
-					<Link to={`/toptenlist/${this.props.topTenItem.childTopTenList.id}`}>{this.props.topTenItem.childTopTenList.name} ></Link>
-				</div>);
+				<div className="child-toptenlist">
+					<Link to={`/toptenlist/${topTenItem.childTopTenList.id}`}>
+						{topTenItem.childTopTenList.name}
+					</Link>
+				</div>
+			);
 		}
 
 		let showUp = true;
 		let showDown = true;
 
-		if (this.state.isEditingName || this.state.setIsEditingDescription) {
+		if (isEditingName || setIsEditingDescription) {
 			showUp = false;
 			showDown = false;
-		} else if (!this.props.canEdit ||
-			this.props.topTenItem.name === '' ||
-			!showDescription) { // assume that showDescription means there is a saved name i.e. the topTenItem exists
+		} else if (!canEdit
+			|| topTenItem.name === ''
+			|| !showDescription) { // assume that showDescription means there is a saved name i.e. the topTenItem exists
 			showUp = false;
 			showDown = false;
-		} else if (this.props.topTenItem.order === 1) {
+		} else if (topTenItem.order === 1) {
 			showUp = false;
-		} else if (this.props.topTenItem.order === MAX_TOPTENITEMS_IN_TOPTENLIST) {
+		} else if (topTenItem.order === MAX_TOPTENITEMS_IN_TOPTENLIST) {
 			showDown = false;
 		}
 
-		let reusableItem;
+		let currentReusableItem;
 		let reusableItemIcon;
 
 		// icon by name to indicate it's a reusableItem. Not shown when editing name.
-		if (this.props.topTenItem.reusableItem && !this.state.isEditingName) {
-			reusableItem = store.getState().reusableItem.things[this.props.topTenItem.reusableItem] || {};
-			const popoverId = `popover${this.props.topTenItem.order}`;
+		if (topTenItem.reusableItem && !isEditingName) {
+			currentReusableItem = store.getState().reusableItem.things[topTenItem.reusableItem] || {};
+			const popoverId = `popover${topTenItem.order}`;
 
 			reusableItemIcon = (
 				<div>
 					<Button id={popoverId} type="button" className="name-icon btn bg-transparent">
 						<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />
 					</Button>
-					<Popover placement="bottom" isOpen={this.state.popoverOpen} target={popoverId} toggle={this.togglePopover} html="true">
-						<PopoverHeader>{reusableItem.name}</PopoverHeader>
-						<PopoverBody>{reusableItem.definition && <div className="definition">{reusableItem.definition}</div>}
-							{reusableItem.link && <div className="link">{reusableItem.link}</div>}
-							<Link to={`/reusableitem/${reusableItem.id}`}>More information...
+					<Popover placement="bottom" isOpen={popoverOpen} target={popoverId} toggle={this.togglePopover} html="true">
+						<PopoverHeader>{currentReusableItem.name}</PopoverHeader>
+						<PopoverBody>
+							<p>Reusable item</p>
+							{currentReusableItem.definition && (
+								<div className="definition">
+									{currentReusableItem.definition}
+								</div>
+							)}
+							{currentReusableItem.link && <div className="link">{currentReusableItem.link}</div>}
+							<Link to={`/reusableitem/${currentReusableItem.id}`}>
+							More information...
 							</Link>
 						</PopoverBody>
 					</Popover>
@@ -146,77 +174,100 @@ class Item extends Component {
 		// for topTenItem combobox
 		// TODO only get data if editing
 		// cancel doesn't restore
-		const comboboxId = `${this.props.topTenItem.order}_name`;
+		const comboboxId = `${topTenItem.order}_name`;
 
 		let data;
 
-		if (this.state.isEditingName) {
-			data = this.props.reusableItemSuggestions[comboboxId];
-			//console.log('data', data);
-			//console.log('this.props.topTenItem.id', this.props.topTenItem.id);
+		if (isEditingName) {
+			data = reusableItemSuggestions[comboboxId];
+			// console.log('data', data);
+			// console.log('this.props.topTenItem.id', this.props.topTenItem.id);
 
-			if(data) {
-				for( let i = 0; i < data.length; i++){
-				  if ( data[i].id === this.props.topTenItem.id) {
-				  	//console.log('entry id', data[i].id);
-				    data.splice(i, 1);
-				    break;
-				  }
+			if (data) {
+				for (let i = 0; i < data.length; i += 1) {
+					if (data[i].id === topTenItem.id) {
+						// console.log('entry id', data[i].id);
+						data.splice(i, 1);
+						break;
+					}
 				}
 			}
-			//console.log('filtered data', data);
+			// console.log('filtered data', data);
 		}
 
 		return (
 			<div className="toptenitem-container">
 				<div className="toptenitem-header">
-					<span className="order">{this.props.topTenItem.order}:</span>{reusableItemIcon}<EditableTextField
-						type='reusableItemCombobox'
-						canEdit={this.props.canEdit}
+					<span className="order">
+						{topTenItem.order}
+						:
+					</span>
+					{reusableItemIcon}
+					<EditableTextField
+						type="reusableItemCombobox"
+						canEdit={canEdit}
 						name={comboboxId}
 						data={data}
-						label={`Top Ten item ${this.props.topTenItem.order} name`}
+						label={`Top Ten item ${topTenItem.order} name`}
 						placeholder="Click here to add a topTenItem"
 						data-state={comboboxId}
-						data-entityid={this.props.topTenItem.id} // database id of the topTenItem
+						data-entityid={topTenItem.id} // database id of the topTenItem
 						id={comboboxId} // id of the html element
-						handleInputChange={this.props.handleComboboxChange}
-						handleDetailsChange={this.props.handleInputChange}
-						handleNewValue={this.props.handleNewValue}
-						onSelect={this.props.onSelectItemName}
+						handleInputChange={handleComboboxChange}
+						handleDetailsChange={handleInputChange}
+						handleNewValue={handleNewValue}
+						onSelect={onSelectItemName}
 						isEditing={this.setIsEditingName}
-						value={this.props.topTenItem.name}
-						newReusableItem={this.props.newReusableItem}
-						reusableItem={this.props.reusableItem}
-						topTenItem={this.props.topTenItemForReusableItem}
+						value={topTenItem.name}
+						newReusableItem={newReusableItem}
+						reusableItem={reusableItem}
+						topTenItem={topTenItemForReusableItem}
 					/>
 				</div>
 				{childTopTenList}
-				{showDescription &&
-					<div className="toptenitem-body">
-						<EditableTextField
-							type='textarea'
-							canEdit={this.props.canEdit}
-							name={`${this.props.topTenItem.order}_description`}
-							placeholder="Click here to add a description"
-							label="Item description"
-							data-state={`${this.props.topTenItem.order}_description`}
-							data-entityid={this.props.topTenItem.id} // database id of the topTenItem
-							id={`${this.props.topTenItem.order}_description`} // id of the html element
-							handleInputChange={this.props.handleInputChange}
-							handleNewValue={this.props.handleNewValue}
-							isEditing={this.setIsEditingDescription}
-							value={this.props.topTenItem.description}
-						/>
-					</div>
+				{showDescription
+					&& (
+						<div className="toptenitem-body">
+							<EditableTextField
+								type="textarea"
+								canEdit={canEdit}
+								name={`${topTenItem.order}_description`}
+								placeholder="Click here to add a description"
+								label="Item description"
+								data-state={`${topTenItem.order}_description`}
+								data-entityid={topTenItem.id} // database id of the topTenItem
+								id={`${topTenItem.order}_description`} // id of the html element
+								handleInputChange={handleInputChange}
+								handleNewValue={handleNewValue}
+								isEditing={this.setIsEditingDescription}
+								value={topTenItem.description}
+							/>
+						</div>
+					)
 				}
-				{showUp && <button className="btn btn-secondary move-up" onClick={this.onMoveUp}>Up</button>
+				{showUp && <button type="button" className="btn btn-secondary move-up" onClick={this.onMoveUp}>Up</button>
 				}
-				{showDown && <button className="btn btn-secondary move-down" onClick={this.onMoveDown}>Down</button>
+				{showDown && <button type="button" className="btn btn-secondary move-down" onClick={this.onMoveDown}>Down</button>
 				}
 			</div>
 		);
 	}
+}
+
+Item.propTypes = {
+	'topTenItem': PropTypes.objectOf(PropTypes.any).isRequired,
+	'onCreateChildTopTenList': PropTypes.func.isRequired,
+	'onMoveTopTenItemUp': PropTypes.func.isRequired,
+	'onMoveTopTenItemDown': PropTypes.func.isRequired,
+	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any).isRequired,
+	'canEdit': PropTypes.bool.isRequired,
+	'handleComboboxChange': PropTypes.func.isRequired,
+	'handleInputChange': PropTypes.func.isRequired,
+	'handleNewValue': PropTypes.func.isRequired,
+	'onSelectItemName': PropTypes.func.isRequired,
+	'newReusableItem': PropTypes.objectOf(PropTypes.any).isRequired,
+	'reusableItem': PropTypes.objectOf(PropTypes.any).isRequired,
+	'topTenItemForReusableItem': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
 export default Item;
