@@ -27,11 +27,12 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = ReusableItem
-        fields = ('id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
+        fields = ('id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
 
     def to_internal_value(self, data):
-        # intercept data before it is validated
+        # intercept update data before it is validated
         # update may contain a vote or a proposed modification
+        # or a change to is_public
         # ensure only one, valid action is passed through
         print('raw data:')
         print(data)
@@ -79,7 +80,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     def update(self, instance, validated_data):
         """ we trust to_internal_value to have ensured there is either
-        a proposed modification or a vote. No other data will be processed.
+        a proposed modification, a vote or a change to is_public. No other data will be processed.
         """
         print('***** instance')
         print(instance)
@@ -151,7 +152,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     # https://github.com/encode/django-rest-framework/issues/627
 
     expandable_fields = {
-        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history']})
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history']})
     }
 
     class Meta:

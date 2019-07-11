@@ -40,6 +40,7 @@ class ReusableItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
     definition = models.CharField(max_length=255, blank=True, default='')
+    is_public = models.BooleanField(default=False, blank=True)
     link = models.CharField(max_length=255, blank=True, default='')
     modified_at = models.DateTimeField(auto_now_add=True)
     users_when_modified = models.IntegerField(default=0)

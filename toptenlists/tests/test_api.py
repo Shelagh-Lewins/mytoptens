@@ -507,6 +507,11 @@ class UpdateReusableItemAPITest(APITestCase):
     must be verified user
     cannot submit modification and vote together
 
+    is_public:
+    can only see public reusableItems and those they created
+    can make a reusableItem public if they created it
+    can make a reusableItem private if they created it and nobody else referencing it
+
     propose modification:
     cannot directly edit a reusableItem
     can submit modification if none exists already, and user references the item, and new data
