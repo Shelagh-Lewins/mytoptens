@@ -84,6 +84,8 @@ class Item extends Component {
 			reusableItem,
 			topTenItemForReusableItem,
 		} = this.props;
+		// console.log('topTenItem', topTenItem);
+		// console.log('reusableItem', reusableItem);
 		const { isEditingName, setIsEditingDescription, popoverOpen } = this.state;
 
 		if (topTenItem.name === '' && !isEditingName) {
@@ -265,9 +267,9 @@ Item.propTypes = {
 	'handleInputChange': PropTypes.func.isRequired,
 	'handleNewValue': PropTypes.func.isRequired,
 	'onSelectItemName': PropTypes.func.isRequired,
-	'newReusableItem': PropTypes.objectOf(PropTypes.any).isRequired,
-	'reusableItem': PropTypes.objectOf(PropTypes.any).isRequired,
-	'topTenItemForReusableItem': PropTypes.objectOf(PropTypes.any).isRequired,
+	'newReusableItem': PropTypes.objectOf(PropTypes.any),
+	'reusableItem': PropTypes.objectOf(PropTypes.any),
+	'topTenItemForReusableItem': PropTypes.objectOf(PropTypes.any),
 };
 
 export default Item;

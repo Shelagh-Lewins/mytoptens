@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 
 import FlashMessage from '../components/FlashMessage';
-import SetTopTenListIsPublic from '../components/SetTopTenListIsPublic';
+import IsPublicIndicator from '../components/IsPublicIndicator';
 import EditableTextField from '../components/EditableTextField';
 import TopTenItemsPage from '../components/TopTenItemsPage';
 import Organizer from '../components/Organizer';
@@ -73,8 +73,8 @@ class TopTenListDetails extends Component {
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
-			//this.props.dispatch(topTenListReducer.fetchTopTenListDetail(this.state.id));
-			//this.props.dispatch(clearErrors());
+			// this.props.dispatch(topTenListReducer.fetchTopTenListDetail(this.state.id));
+			// this.props.dispatch(clearErrors());
 			this.getTopTenListData(this.props);
 		}
 	}
@@ -212,7 +212,7 @@ class TopTenListDetails extends Component {
 									/>
 									{this.state.canEdit && (
 										<div className="toptenlist-detail-controls">
-											<SetTopTenListIsPublic
+											<IsPublicIndicator
 												topTenListId={this.props.topTenList.id}
 												isPublic={this.props.topTenList.is_public}
 												onChangeIsPublic={this.onChangeIsPublic}
@@ -279,7 +279,7 @@ class TopTenListDetails extends Component {
 		);
 	}
 
-	///////////////
+	// /////////////
 
 	render() {
 		if (this.props.isLoading) {

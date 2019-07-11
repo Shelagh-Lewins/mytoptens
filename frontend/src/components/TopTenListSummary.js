@@ -6,13 +6,14 @@ import { Link } from 'react-router-dom';
 // Note how the is_public is updated without making this into a React Component with state.
 // By using props to populate the UI, we enable time travel and a direct connection with the store.
 
-import SetTopTenListIsPublic from './SetTopTenListIsPublic';
+import IsPublicIndicator from './IsPublicIndicator';
 
 import * as permissions from '../modules/permissions';
 
 import './TopTenListSummary.scss';
 
-const TopTenListSummary = props => {
+const TopTenListSummary = (props) => {
+	const { topTenList } = props;
 	let canEdit = permissions.canEditTopTenList(props.topTenList.id);
 
 	return (
@@ -25,7 +26,7 @@ const TopTenListSummary = props => {
 				</Link>
 				{canEdit && (
 					<div className="toptenlist-summary-controls">
-						<SetTopTenListIsPublic
+						<IsPublicIndicator
 							topTenListId={props.topTenList.id}
 							isPublic={props.topTenList.is_public}
 							onChangeIsPublic={props.onChangeIsPublic}
