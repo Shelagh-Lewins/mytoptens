@@ -1,6 +1,7 @@
 // Top-level summary of a topTenList
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
 // Note how the is_public is updated without making this into a React Component with state.
@@ -13,42 +14,49 @@ import * as permissions from '../modules/permissions';
 import './TopTenListSummary.scss';
 
 const TopTenListSummary = (props) => {
-	const { topTenList } = props;
-	let canEdit = permissions.canEditTopTenList(props.topTenList.id);
+	const { topTenList, onChangeIsPublic, showCreatedBy } = props;
+	const canEdit = permissions.canEditTopTenList(topTenList.id);
+
+	function onDeleteTopTenList() {
+		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });
+	}
 
 	return (
 		<Col sm="12" md="6">
 			<div className="toptenlist-summary">
-				<Link to={`/topTenList/${props.topTenList.id}`}>
+				<Link to={`/topTenList/${topTenList.id}`}>
 					<div className="toptenlist-name">
-						<div>{props.topTenList.name}</div>
+						<div>{topTenList.name}</div>
 					</div>
 				</Link>
 				{canEdit && (
 					<div className="toptenlist-summary-controls">
 						<IsPublicIndicator
-							topTenListId={props.topTenList.id}
-							isPublic={props.topTenList.is_public}
-							onChangeIsPublic={props.onChangeIsPublic}
+							targetId={topTenList.id}
+							isPublic={topTenList.is_public}
+							onChangeIsPublic={onChangeIsPublic}
 						/>
-						<button className="btn btn-danger" title="Delete" onClick={onDeleteTopTenList}>X</button>
+						<button type="button" className="btn btn-danger" title="Delete" onClick={onDeleteTopTenList}>X</button>
 					</div>
 				)}
-				<Link to={`/toptenlist/${props.topTenList.id}`}>
-					<div className="toptenlist-description">{props.topTenList.description}</div>
+				<Link to={`/toptenlist/${topTenList.id}`}>
+					<div className="toptenlist-description">{topTenList.description}</div>
 				</Link>
-				
-				{props.showCreatedBy && 
-					<div className="toptenlist-created-by">{props.topTenList.created_by_username}</div>
+
+				{showCreatedBy
+					&& <div className="toptenlist-created-by">{topTenList.created_by_username}</div>
 
 				}
 			</div>
 		</Col>
 	);
+};
 
-	function onDeleteTopTenList(e) {
-		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });
-	}
+TopTenListSummary.propTypes = {
+	'onChangeIsPublic': PropTypes.func.isRequired,
+	'onDeleteTopTenList': PropTypes.func.isRequired,
+	'showCreatedBy': PropTypes.bool.isRequired,
+	'topTenList': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
 export default TopTenListSummary;

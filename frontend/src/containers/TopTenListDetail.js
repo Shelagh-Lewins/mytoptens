@@ -213,7 +213,7 @@ class TopTenListDetails extends Component {
 									{this.state.canEdit && (
 										<div className="toptenlist-detail-controls">
 											<IsPublicIndicator
-												topTenListId={this.props.topTenList.id}
+												targetId={this.props.topTenList.id}
 												isPublic={this.props.topTenList.is_public}
 												onChangeIsPublic={this.onChangeIsPublic}
 											/>
