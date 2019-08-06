@@ -35,17 +35,25 @@ class TopTenListDetails extends Component {
 
 		this.state = {
 			id,
-			// 'showOrganizer': false,
 		};
 
 		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
-		if (prevProps.isLoading && !this.props.isLoading) {
+		const {
+			auth,
+			isLoading,
+			topTenList,
+			match,
+		} = this.props;
+
+		const { id } = this.state;
+
+		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this topTenList
-			const canEditTopTenList = permissions.canEditTopTenList(this.state.id);
-			const canViewTopTenList = permissions.canViewTopTenList(this.state.id);
+			const canEditTopTenList = permissions.canEditTopTenList(id);
+			const canViewTopTenList = permissions.canViewTopTenList(id);
 
 			this.getOrganizerData();
 
@@ -54,25 +62,25 @@ class TopTenListDetails extends Component {
 				'canEdit': canEditTopTenList,
 			});
 
-			if(canViewTopTenList) {
+			if (canViewTopTenList) {
 				this.setState({
-					'topTenList_name': this.props.topTenList.name,
-					'topTenList_description': this.props.topTenList.description,
+					'topTenList_name': topTenList.name,
+					'topTenList_description': topTenList.description,
 				});
 			}
 		}
 
 		// user has navigated to a different topTenList
-		if (prevProps.match.params.id !== this.props.match.params.id) {
-			const id = this.getTopTenListData(this.props);
+		if (prevProps.match.params.id !== match.params.id) {
+			const newId = this.getTopTenListData(this.props);
 			this.setState({
-				id,
+				'id': newId,
 			});
 		}
 
 		// user has just logged out
 		// store needs to be repopulated
-		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+		if (prevProps.auth.isAuthenticated && !auth.isAuthenticated) {
 			// this.props.dispatch(topTenListReducer.fetchTopTenListDetail(this.state.id));
 			// this.props.dispatch(clearErrors());
 			this.getTopTenListData(this.props);
@@ -80,7 +88,7 @@ class TopTenListDetails extends Component {
 	}
 
 	getTopTenListData = (props) => {
-		const id = props.match.params.id;
+		const { id } = props.match.params;
 
 		props.dispatch(topTenListReducer.fetchTopTenListDetail(id));
 		props.dispatch(clearErrors());
@@ -90,41 +98,49 @@ class TopTenListDetails extends Component {
 	getOrganizerData = () => {
 		// minimal data for all my topTenLists and topTenItems to allow parent topTenList to be changed.
 		// can't do this until the topTenList has been loaded, to find the owner
-		if (!this.props.topTenList) { // probably the user does not have permission to view this topTenList
+		const { topTenList, dispatch} = this.props;
+
+		if (!topTenList) { // probably the user does not have permission to view this topTenList
 			return;
 		}
-		this.props.dispatch(topTenListReducer.fetchOrganizerData(this.props.topTenList.created_by));
-		this.props.dispatch(clearErrors());
+		dispatch(topTenListReducer.fetchOrganizerData(topTenList.created_by));
+		dispatch(clearErrors());
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		this.props.dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
+		const { dispatch} = this.props;
+
+		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
 	}
 
 	onDeleteTopTenList = () => {
-		const id = this.props.topTenList.id;
-		const name = this.props.topTenList.name;
+		const {
+			topTenList,
+			dispatch,
+			history,
+			parentTopTenList,
+		} = this.props;
+		const { id, name } = topTenList;
 
-		if (confirm(`Are you sure you want to delete the topTenList ${name}?`)) // eslint-disable-line no-restricted-globals
-		{
-		  this.props.dispatch(topTenListReducer.deleteTopTenList(id));
+		if (confirm(`Are you sure you want to delete the topTenList ${name}?`)) { // eslint-disable-line no-restricted-globals
+			dispatch(topTenListReducer.deleteTopTenList(id));
 
-		  // if there is a visible parent, navigate there
-		  if (this.props.parentTopTenList) {
-		  	if (permissions.canViewTopTenList(this.props.parentTopTenList.id)) {
-		  		this.props.history.push(`/topTenList/${this.props.parentTopTenList.id}`);
-		  		return;
-		  	}
-		  }
+			// if there is a visible parent, navigate there
+			if (parentTopTenList) {
+				if (permissions.canViewTopTenList(parentTopTenList.id)) {
+					history.push(`/topTenList/${parentTopTenList.id}`);
+					return;
+				}
+			}
 
-		  // otherwise navigate home
-		  this.props.history.push('/');
+			// otherwise navigate home
+			history.push('/');
 		}
 	}
 
 	handleInputChange = (e) => {
 		this.setState({
-			[e.target.dataset.state]: e.target.value
+			[e.target.dataset.state]: e.target.value,
 		});
 	}
 
@@ -135,36 +151,61 @@ class TopTenListDetails extends Component {
 		// we want to keep topTenItem name and topTenList name clearly separate
 		const identifiers = element.dataset.state.split('_');
 		const propertyName = identifiers[1];
-		const value = element.value;
+		const { dispatch } = this.props;
+		const { value } = element;
 
-		this.props.dispatch(topTenListReducer.updateTopTenList(topTenListId, propertyName, value));
+		dispatch(topTenListReducer.updateTopTenList(topTenListId, propertyName, value));
 	}
 
 	onCreateChildTopTenList = (topTenItem) => {
-		this.props.history.push(`/newtopTenList?parent-topTenItem-id=${topTenItem.id}&parent-topTenItem-name=${topTenItem.name}&parent-topTenList-name=${this.props.topTenList.name}&parent-topTenList-id=${this.props.topTenList.id}`);
+		const { history, topTenList } = this.props;
+
+		history.push(`/newtopTenList?parent-topTenItem-id=${topTenItem.id}&parent-topTenItem-name=${topTenItem.name}&parent-topTenList-name=${topTenList.name}&parent-topTenList-id=${topTenList.id}`);
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		this.props.dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
+		const { dispatch } = this.props;
+
+		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
 	}
 
 	onCloseFlashMessage = () => {
-		this.props.dispatch(clearErrors());
+		const { dispatch } = this.props;
+
+		dispatch(clearErrors());
 	}
 
 	renderPage() {
-		if (!this.props.topTenList) {
+		const {
+			errors,
+			parentTopTenList,
+			parentTopTenItem,
+			reusableItems,
+			reusableItemSuggestions,
+			topTenList,
+			topTenItemOrganizerData,
+			topTenListOrganizerData,
+			thisTopTenListTopTenItems,
+		} = this.props;
+
+		const {
+			canEdit,
+			topTenList_name,
+			topTenList_description,
+		} = this.state;
+
+		if (!topTenList) {
 			return;
 		}
 
 		let showPrivacyWarning = false;
 		let privacyWarningText = '';
 
-		if (this.state.canEdit && this.props.parentTopTenList) {
-			if (this.props.topTenList.is_public && !this.props.parentTopTenList.is_public) {
+		if (canEdit && parentTopTenList) {
+			if (topTenList.is_public && !parentTopTenList.is_public) {
 				privacyWarningText = 'This public topTenList has a private parent topTenList';
 				showPrivacyWarning = true;
-			} else if (!this.props.topTenList.is_public && this.props.parentTopTenList.is_public) {
+			} else if (!topTenList.is_public && parentTopTenList.is_public) {
 				privacyWarningText = 'This private topTenList has a public parent topTenList';
 				showPrivacyWarning = true;
 			}
@@ -173,64 +214,72 @@ class TopTenListDetails extends Component {
 		let breadcrumbs = <div className="breadcrumbs">Top level list</div>;
 
 		let parentTopTenListId;
-		if (this.props.parentTopTenList) {
-			parentTopTenListId = this.props.parentTopTenList.id;
+		if (parentTopTenList) {
+			parentTopTenListId = parentTopTenList.id;
 
-			breadcrumbs = <div className="breadcrumbs"><Link to={`/topTenList/${this.props.parentTopTenList.id}`}>{this.props.parentTopTenList.name}</Link> > {this.props.parentTopTenItem.name}</div>;
+			breadcrumbs = (
+				<div className="breadcrumbs">
+					<Link to={`/topTenList/${parentTopTenList.id}`}>{parentTopTenList.name}</Link> &gt; {parentTopTenItem.name}
+				</div>
+			);
 		}
 		return (
 			<div>
-				{!isEmpty(this.props.errors) && (<Container>
-					<Row>
-						<Col>
-							<FlashMessage
-								message={formatErrorMessages(this.props.errors)}
-								type="error"
-								onClick={this.onCloseFlashMessage}
-							/>
-						</Col>
-					</Row>
-				</Container>)}
-				{this.props.topTenList && (
+				{!isEmpty(errors) && (
+					<Container>
+						<Row>
+							<Col>
+								<FlashMessage
+									message={formatErrorMessages(errors)}
+									type="error"
+									onClick={this.onCloseFlashMessage}
+								/>
+							</Col>
+						</Row>
+					</Container>
+				)}
+				{topTenList && (
 					<div>
 						<Container>
 							<Row>
 								<Col className="toptenlist-name">
 									<EditableTextField
-										type='input'
-										canEdit={this.state.canEdit}
+										type="input"
+										canEdit={canEdit}
 										required={true}
-										name={'topTenList_name'}
+										name="topTenList_name"
 										placeholder="Click here to add a name for the list"
 										label="Top Ten item name"
-										data-state={'topTenList_name'} // this.state property
-										data-entityid={this.props.topTenList.id} // database id of the topTenItem
-										id='topTenList_name' // id of the html element
+										data-state="topTenList_name" // this.state property
+										data-entityid={topTenList.id} // database id of the topTenItem
+										id="topTenList_name" // id of the html element
 										handleInputChange={this.handleInputChange}
 										handleNewValue={this.handleNewValue}
-										value={this.state.topTenList_name}
+										value={topTenList_name}
 									/>
-									{this.state.canEdit && (
+									{canEdit && (
 										<div className="toptenlist-detail-controls">
 											<IsPublicIndicator
-												targetId={this.props.topTenList.id}
-												isPublic={this.props.topTenList.is_public}
+												targetId={topTenList.id}
+												isPublic={topTenList.is_public}
 												onChangeIsPublic={this.onChangeIsPublic}
 											/>
-											<button className="btn btn-danger" onClick={this.onDeleteTopTenList}>X</button>
+											<button type="button" className="btn btn-danger" onClick={this.onDeleteTopTenList}>X</button>
 										</div>
 									)}
 								</Col>
 							</Row>
 							<Row>
 								<Col>
-									{this.state.canEdit && this.props.topTenListOrganizerData.length > 1 &&
-									<Organizer
-										topTenList={this.props.topTenList}
-										parentTopTenListId={parentTopTenListId}
-										topTenListOrganizerData={this.props.topTenListOrganizerData}
-										topTenItemOrganizerData={this.props.topTenItemOrganizerData}
-									/>}
+									{canEdit && topTenListOrganizerData.length > 1
+										&& (
+											<Organizer
+												topTenList={topTenList}
+												parentTopTenListId={parentTopTenListId}
+												topTenListOrganizerData={topTenListOrganizerData}
+												topTenItemOrganizerData={topTenItemOrganizerData}
+											/>
+										)}
 									{breadcrumbs}
 								</Col>
 							</Row>
@@ -244,32 +293,32 @@ class TopTenListDetails extends Component {
 							<Row>
 								<Col className="toptenlist-description">
 									<EditableTextField
-										type='textarea'
-										canEdit={this.state.canEdit}
-										name={'topTenList_description'}
+										type="textarea"
+										canEdit={canEdit}
+										name="topTenList_description"
 										placeholder="Click here to add a description for the topTenList"
 										label="Description"
-										data-state={'topTenList_description'} // this.state property
-										data-entityid={this.props.topTenList.id} // database id of the topTenItem
-										id='topTenList_description' // id of the html element
+										data-state="topTenList_description" // this.state property
+										data-entityid={topTenList.id} // database id of the topTenItem
+										id="topTenList_description" // id of the html element
 										handleInputChange={this.handleInputChange}
 										handleNewValue={this.handleNewValue}
-										value={this.state.topTenList_description}
+										value={topTenList_description}
 									/>
 								</Col>
 							</Row>
 						</Container>
 						<Container>
-							{this.props.thisTopTenListTopTenItems && (
+							{thisTopTenListTopTenItems && (
 								<TopTenItemsPage
-									topTenItems={this.props.thisTopTenListTopTenItems}
-									topTenList={this.props.topTenList.id}
-									canEdit={this.state.canEdit}
+									topTenItems={thisTopTenListTopTenItems}
+									topTenList={topTenList.id}
+									canEdit={canEdit}
 									onCreateChildTopTenList={this.onCreateChildTopTenList}
 									onMoveTopTenItemUp={this.onMoveTopTenItemUp}
 									onMoveTopTenItemDown={this.onMoveTopTenItemDown}
-									reusableItemSuggestions={this.props.reusableItemSuggestions}
-									reusableItems={this.props.reusableItems}
+									reusableItemSuggestions={reusableItemSuggestions}
+									reusableItems={reusableItems}
 								/>
 							)}
 						</Container>
@@ -282,18 +331,21 @@ class TopTenListDetails extends Component {
 	// /////////////
 
 	render() {
-		if (this.props.isLoading) {
+		const { isLoading } = this.props;
+		const { canView } = this.state;
+
+		if (isLoading) {
 			return <Loading />;
 		}
 
 		let content;
 
-		if (this.state.canView) {
+		if (canView) {
 			content = this.renderPage();
 		} else {
 			content = <p>Either this Top Ten List does not exist or you do not have permission to view it</p>;
 		}
-		return(
+		return (
 			<div className="toptenlist-detail">
 				{ content }
 			</div>
@@ -303,11 +355,19 @@ class TopTenListDetails extends Component {
 
 TopTenListDetails.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'dispatch': PropTypes.func.isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
+	'match': PropTypes.objectOf(PropTypes.any).isRequired,
+	'parentTopTenItem': PropTypes.objectOf(PropTypes.any),
+	'parentTopTenList': PropTypes.objectOf(PropTypes.any),
+	'reusableItems': PropTypes.objectOf(PropTypes.any).isRequired,
+	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any).isRequired,
 	'thisTopTenListTopTenItems': PropTypes.arrayOf(PropTypes.any).isRequired, // topTenItems belonging to this topTenList
 	'topTenListOrganizerData': PropTypes.arrayOf(PropTypes.any).isRequired, // minimal data for all topTenLists owned by the same user.
 	'topTenItemOrganizerData': PropTypes.objectOf(PropTypes.any).isRequired, // minimal data for all topTenLists owned by the same user
+	'topTenList': PropTypes.objectOf(PropTypes.any), // may take a while to load
 };
 
 const mapStateToProps = (state, ownProps) => {
