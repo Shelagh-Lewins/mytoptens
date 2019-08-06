@@ -7,8 +7,6 @@ import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import * as topTenListReducer from '../modules/topTenList';
 import * as pageReducer from '../modules/page';
-import { getPublicTopTenLists, getMyGroupedTopTenLists } from '../modules/topTenList';
-
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
 import TopTenListsPage from '../components/TopTenListsPage';
@@ -50,14 +48,15 @@ class Home extends Component {
 		this.fetchTopTenLists({});
 	}
 
-	componentDidUpdate(prevProps){
+	componentDidUpdate(prevProps) {
+		const { auth } = this.props;
 		// If the user's status has changed, refresh TopTenLists
-		if(prevProps.auth.user.token !== this.props.auth.user.token){
+		if (prevProps.auth.user.token !== auth.user.token) {
 			this.fetchTopTenLists({});
 		}
 
 		// user has just logged out
-		if (prevProps.auth.isAuthenticated && !this.props.auth.isAuthenticated) {
+		if (prevProps.auth.isAuthenticated && !auth.isAuthenticated) {
 			this.setState({
 				'selectedTab': 'publictoptens',
 			});
@@ -66,64 +65,51 @@ class Home extends Component {
 		}
 	}
 
-	// refresh topTenLists based on user choices
-	fetchTopTenLists({ listset = this.state.topTenListset, topLevelTopTenListsOnly = this.state.topLevelTopTenListsOnly, currentPage = this.state.currentPage }) {
-		// use state values by default
-		// however these may be passed in by functions that set state because setState is not synchronous
-		this.props.dispatch(topTenListReducer.fetchTopTenLists({
-			listset,
-			topLevelTopTenListsOnly,
-			'limit': PAGE_SIZE,
-			'offset': (currentPage - 1) * PAGE_SIZE,
-		}));
-	}
-
-	onChangePage(currentPage) {
+	onChangePage(newCurrentPage) {
 		// update state with new page of topTenLists
-		this.setState({ 'currentPage': currentPage });
+		const { currentPage } = this.state;
 
-		if (currentPage !== this.state.currentPage) {
-			this.fetchTopTenLists({ currentPage });
+		if (newCurrentPage !== currentPage) {
+			this.setState({ 'currentPage': newCurrentPage });
+			this.fetchTopTenLists({ 'currentPage': newCurrentPage });
 		}
 	}
 
-	onSearch = searchTerm => {
+	onSearch = (searchTerm) => {
 		// wait until the user pauses in typing before searching
 		clearTimeout(this.searchTimeout);
+		const { dispatch } = this.props;
+
 		this.searchTimeout = setTimeout(() => {
-			this.props.dispatch(pageReducer.searchHome(searchTerm));
+			dispatch(pageReducer.searchHome(searchTerm));
 		}, 500);
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		this.props.dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
+		const { dispatch } = this.props;
+
+		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
 	}
 
 	onDeleteTopTenList = ({ id, name }) => {
-		if (confirm(`Are you sure you want to delete the topTenList ${name}`)) // eslint-disable-line no-restricted-globals
-		{
-			this.props.dispatch(topTenListReducer.deleteTopTenList(id));
+		if (confirm(`Are you sure you want to delete the topTenList ${name}`)) { // eslint-disable-line no-restricted-globals
+			const { dispatch } = this.props;
+
+			dispatch(topTenListReducer.deleteTopTenList(id));
 		}
 	}
 
-	handleTopLevelTopTenListsChange() {
-		const topLevelTopTenListsOnly = !this.state.topLevelTopTenListsOnly;
-		this.setState({
-			'topLevelTopTenListsOnly': topLevelTopTenListsOnly,
-		});
-
-		this.fetchTopTenLists({ topLevelTopTenListsOnly });
-	}
-
 	setListSetURL(listset) { // indicate current topTenList set in URL; depends on selected tab
-		let URL = `${this.props.location.pathname}?listset=${listset}`;
-		this.props.history.push(URL);
+		const { location, history } = this.props;
+		const URL = `${location.pathname}?listset=${listset}`;
+		history.push(URL);
 	}
 
 	handleTabClick = (e) => {
 		const selectedTab = e.target.id;
+		const { newSelectedTab } = this.state;
 
-		if (this.state.selectedTab !== selectedTab) {
+		if (newSelectedTab !== selectedTab) {
 			this.setState({
 				'selectedTab': selectedTab,
 			});
@@ -134,40 +120,82 @@ class Home extends Component {
 	}
 
 	onCloseFlashMessage = () => {
-		this.props.dispatch(clearErrors());
+		const { dispatch } = this.props;
+
+		dispatch(clearErrors());
+	}
+
+	handleTopLevelTopTenListsChange() {
+		const { topLevelTopTenListsOnly } = this.state;
+
+		// use callback to avoid async issues
+		this.setState(prevState => ({ 'topLevelTopTenListsOnly': !prevState.topLevelTopTenListsOnly }));
+
+		this.fetchTopTenLists({ 'topLevelTopTenListsOnly': !topLevelTopTenListsOnly });
+	}
+
+	// refresh topTenLists based on user choices
+	fetchTopTenLists({ listset = this.state.topTenListset, topLevelTopTenListsOnly = this.state.topLevelTopTenListsOnly, currentPage = this.state.currentPage }) { // eslint-disable-line react/destructuring-assignment
+		// use state values by default
+		// however these may be passed in by functions that set state because setState is not synchronous
+
+		const { dispatch } = this.props;
+
+		dispatch(topTenListReducer.fetchTopTenLists({
+			listset,
+			topLevelTopTenListsOnly,
+			'limit': PAGE_SIZE,
+			'offset': (currentPage - 1) * PAGE_SIZE,
+		}));
 	}
 
 	render() {
+		const {
+			auth,
+			count,
+			errors,
+			isLoading,
+			myTopTenLists,
+			publicTopTenLists,
+		} = this.props;
+
+		const {
+			currentPage,
+			selectedTab,
+			topLevelTopTenListsOnly,
+		} = this.state;
 		return (
 			<div>
-				{!isEmpty(this.props.errors) && (<Container>
-					<Row>
-						<Col>
-							<FlashMessage
-								message={formatErrorMessages(this.props.errors)}
-								type="error"
-								onClick={this.onCloseFlashMessage}
-							/>
-						</Col>
-					</Row>
-				</Container>)}
-				{this.props.isLoading && <Loading />}
+				{!isEmpty(errors) && (
+					<Container>
+						<Row>
+							<Col>
+								<FlashMessage
+									message={formatErrorMessages(errors)}
+									type="error"
+									onClick={this.onCloseFlashMessage}
+								/>
+							</Col>
+						</Row>
+					</Container>
+				)}
+				{isLoading && <Loading />}
 				<TopTenListsPage
-					auth={this.props.auth}
-					myTopTenLists={this.props.myTopTenLists}
-					publicTopTenLists={this.props.publicTopTenLists}
+					auth={auth}
+					myTopTenLists={myTopTenLists}
+					publicTopTenLists={publicTopTenLists}
 					canCreateTopTenList={permissions.canCreateTopTenList}
 					onCreateTopTenList={this.onCreateTopTenList}
 					onChangeIsPublic={this.onChangeIsPublic}
 					onDeleteTopTenList={this.onDeleteTopTenList}
-					isLoading={this.props.isLoading}
-					topLevelTopTenListsOnly={this.state.topLevelTopTenListsOnly}
+					isLoading={isLoading}
+					topLevelTopTenListsOnly={topLevelTopTenListsOnly}
 					handleTopLevelTopTenListsChange={this.handleTopLevelTopTenListsChange}
 					handleTabClick={this.handleTabClick}
-					selectedTab={this.state.selectedTab}
-					count={this.props.count}
+					selectedTab={selectedTab}
+					count={count}
 					pageSize={PAGE_SIZE}
-					currentPage={this.state.currentPage}
+					currentPage={currentPage}
 					onChangePage={this.onChangePage}
 				/>
 			</div>
@@ -176,22 +204,25 @@ class Home extends Component {
 }
 
 Home.propTypes = {
-	'auth': PropTypes.object.isRequired,
-	'errors': PropTypes.object.isRequired,
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'dispatch': PropTypes.func.isRequired,
+	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'publicTopTenLists': PropTypes.array.isRequired,
-	'myTopTenLists': PropTypes.object.isRequired,
+	'location': PropTypes.objectOf(PropTypes.any).isRequired,
+	'publicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'count': PropTypes.number, // data may not yet be loaded
-	'next': PropTypes.string, // there may be no 'next' page
-	'previous': PropTypes.string, // there may be no 'previous' page
+	// 'next': PropTypes.string, // there may be no 'next' page
+	// 'previous': PropTypes.string, // there may be no 'previous' page
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
 	'auth': state.auth,
 	'errors': state.errors,
 	'isLoading': state.topTenList.isLoading,
-	'publicTopTenLists': getPublicTopTenLists(state),
-	'myTopTenLists': getMyGroupedTopTenLists(state),
+	'publicTopTenLists': topTenListReducer.getPublicTopTenLists(state),
+	'myTopTenLists': topTenListReducer.getMyGroupedTopTenLists(state),
 	'count': state.topTenList.count,
 	'next': state.topTenList.next,
 	'previous': state.topTenList.previous,

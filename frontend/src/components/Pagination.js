@@ -4,13 +4,13 @@ import './Pagination.scss';
 // adapted from http://jasonwatmore.com/post/2017/03/14/react-pagination-example-with-logic-like-google
 // major changes to render only pagination controls, not data
 // replaced <a> with <button> for accessibility
- 
+
 class Pagination extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { 'pager': {} };
 	}
- 
+
 	componentDidMount() {
 		// set page if there is a count
 		// also check for currentPage. Parent component may re-render, causing this component to be recreated.
@@ -19,18 +19,18 @@ class Pagination extends React.Component {
 			this.setPage(initialPage);
 		}
 	}
- 
+
 	componentDidUpdate(prevProps, prevState) {
 		// reset page if topTenItems array has changed
 		if (this.props.count !== prevProps.count) {
 			this.setPage(this.props.defaultPage);
 		}
 	}
- 
+
 	setPage(pageNumber) {
 		var { count, pageSize } = this.props;
 		var pager = this.state.pager;
- 
+
 		// get new pager object for specified page
 		pager = this.getPager(count, pageNumber, pageSize);
 
@@ -39,13 +39,13 @@ class Pagination extends React.Component {
 		}
 
 		pageNumber = Math.min(pageNumber, pager.totalPages);
- 
+
 		// update state
 		this.setState({ 'pager': pager });
- 
+
 		this.props.onChangePage(pageNumber);
 	}
- 
+
 	getPager(totalTopTenItems, currentPage, pageSize) {
 		// default to first page
 		currentPage = currentPage || 1;
