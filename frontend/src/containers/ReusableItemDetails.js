@@ -16,6 +16,8 @@ import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 
+import IsPublicIndicator from '../containers/IsPublicIndicator';
+
 import './ReusableItemDetails.scss';
 import { COLORS } from '../constants';
 
