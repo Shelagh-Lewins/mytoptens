@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 
-const TopTenListsList = ({ children, is_public, headerText }) => (
+const TopTenListsList = ({ children, headerText }) => (
 	<Container className="topTenLists-list">
 		{headerText
 			&& (
@@ -25,7 +25,6 @@ const TopTenListsList = ({ children, is_public, headerText }) => (
 
 TopTenListsList.propTypes = {
 	'headerText': PropTypes.string.isRequired,
-	'is_public': PropTypes.string.isRequired,
 	'children': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 

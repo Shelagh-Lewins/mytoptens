@@ -1,8 +1,15 @@
 // Page to display list of topTenLists
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { withRouter, Link } from 'react-router-dom';
-import { Container, Row, Col, Label, Input } from 'reactstrap';
+import {
+	Container,
+	Row,
+	Col,
+	Label,
+	Input,
+} from 'reactstrap';
 import TopTenListsList from './TopTenListsList';
 import TopTenListSummary from './TopTenListSummary';
 import './TopTenListsPage.scss';
@@ -10,7 +17,8 @@ import Pagination from './Pagination';
 
 class TopTenListsPage extends Component {
 	onAddTopTenList = () => {
-		this.props.history.push('/newtopTenList');
+		const { history } = this.props; // eslint-disable-line react/prop-types
+		history.push('/newtopTenList');
 	}
 
 	renderPublicTopTenLists() {
@@ -24,7 +32,7 @@ class TopTenListsPage extends Component {
 						topTenList={topTenList}
 						onChangeIsPublic={onChangeIsPublic}
 						onDeleteTopTenList={onDeleteTopTenList}
-						showCreatedBy
+						showCreatedBy={true}
 					/>
 				))}
 			</TopTenListsList>
@@ -34,22 +42,23 @@ class TopTenListsPage extends Component {
 	renderMyTopTenLists() {
 		const { myTopTenLists, onChangeIsPublic, onDeleteTopTenList } = this.props;
 
-		return Object.keys(myTopTenLists).map((is_public, index) => {
+		return Object.keys(myTopTenLists).map((is_public) => {
 			const topTenListsByIsPublic = myTopTenLists[is_public];
-			let headerText = is_public === 'true' ? 'My public Top Ten lists' : 'My private Top Ten lists';
+			const headerText = is_public === 'true' ? 'My public Top Ten lists' : 'My private Top Ten lists';
 
 			return (
-				<div key={index}>
+				<div key={`${is_public}_lists`}>
 					{(topTenListsByIsPublic.length > 0) && (
 						<TopTenListsList is_public={is_public} headerText={headerText}>
-							{topTenListsByIsPublic.map(topTenList => 
+							{topTenListsByIsPublic.map(topTenList => (
 								<TopTenListSummary
 									key={topTenList.id}
 									topTenList={topTenList}
 									onChangeIsPublic={onChangeIsPublic}
 									onDeleteTopTenList={onDeleteTopTenList}
+									showCreatedBy={false}
 								/>
-							)}
+							))}
 						</TopTenListsList>
 					)}
 				</div>
@@ -58,32 +67,59 @@ class TopTenListsPage extends Component {
 	}
 
 	renderTabs() {
+		const { selectedTab, handleTabClick } = this.props;
 		return (
-			<ul><li>
-				<span
-					className={this.props.selectedTab === 'mytoptens'? 'selected' : ''}
-					id='mytoptens'
-					onClick={this.props.handleTabClick}>My Top Ten lists
-				</span>
-				<span
-					className={this.props.selectedTab === 'publictoptens'? 'selected' : ''}
-					id='publictoptens'
-					onClick={this.props.handleTabClick}>Public Top Ten lists
-				</span>
-			</li></ul>
+			<ul>
+				<li>
+					<button
+						href="#"
+						tabIndex="0"
+						type="button"
+						className={selectedTab === 'mytoptens' ? 'selected' : ''}
+						id="mytoptens"
+						onClick={handleTabClick}
+					>
+						My Top Ten lists
+					</button>
+				</li>
+				<li>
+					<button
+						href="#"
+						tabIndex="0"
+						type="button"
+						className={selectedTab === 'publictoptens' ? 'selected' : ''}
+						id="publictoptens"
+						onClick={handleTabClick}
+					>
+						Public Top Ten lists
+					</button>
+				</li>
+			</ul>
 		);
 	}
 
 	render() {
-		let TopTenListsList;
+		let TopTenListsListElement;
+		const {
+			auth,
+			count,
+			selectedTab,
+			isLoading,
+			canCreateTopTenList,
+			currentPage,
+			onChangePage,
+			pageSize,
+			topLevelTopTenListsOnly,
+			handleTopLevelTopTenListsChange,
+		} = this.props;
 
-		if (this.props.selectedTab === 'mytoptens') {
-			TopTenListsList = this.renderMyTopTenLists();
-		} else if (this.props.selectedTab === 'publictoptens') {
-			TopTenListsList = this.renderPublicTopTenLists();
+		if (selectedTab === 'mytoptens') {
+			TopTenListsListElement = this.renderMyTopTenLists();
+		} else if (selectedTab === 'publictoptens') {
+			TopTenListsListElement = this.renderPublicTopTenLists();
 		}
 
-		if (this.props.isLoading) {
+		if (isLoading) {
 			return (
 				<div className="topTenLists-loading">
 					Loading...
@@ -92,27 +128,42 @@ class TopTenListsPage extends Component {
 		}
 
 		let createTopTenList;
-		if (this.props.canCreateTopTenList()) {
-			createTopTenList = (<button
-				className="btn btn-primary create-toptenlist"
-				onClick={this.onAddTopTenList}
-			>+ New Top Ten list</button>);
-		} else if (this.props.auth.isAuthenticated) {
-			createTopTenList = (<div>In order to create new Top Ten lists, please verify your email address by clicking the link in the email you were sent when you registered. You can request a new verification email from your <Link to="/account">Account</Link> page.</div>);
+		if (canCreateTopTenList()) {
+			createTopTenList = (
+				<button
+					type="button"
+					className="btn btn-primary create-toptenlist"
+					onClick={this.onAddTopTenList}
+				>
+				+ New Top Ten list
+				</button>
+			);
+		} else if (auth.isAuthenticated) {
+			createTopTenList = (
+				<div>
+				In order to create new Top Ten lists, please verify your email address by clicking the link in the email you were sent when you registered. You can request a new verification email from your <Link to="/account">Account</Link> page.
+				</div>
+			);
 		} else {
-			createTopTenList = (<div>In order to create new Top Ten lists, please <Link to="/login">log in</Link> or <Link to="/register">register a My Top Tens account</Link>.</div>);
+			createTopTenList = (
+				<div>
+				In order to create new Top Ten lists, please <Link to="/login">log in</Link> or <Link to="/register">register a My Top Tens account</Link>.
+				</div>
+			);
 		}
 
 		return (
 			<div className="toptenlists-list">
 				<Container>
 					<Row>
-						<Col  className="top-level-toptenlists-control">
+						<Col className="top-level-toptenlists-control">
 							<Label check>
 								<Input
 									type="checkbox"
-									defaultChecked={this.props.topLevelTopTenListsOnly}
-									onChange={this.props.handleTopLevelTopTenListsChange}/>{' '}
+									defaultChecked={topLevelTopTenListsOnly}
+									onChange={handleTopLevelTopTenListsChange}
+								/>
+								{' '}
 								Show top level Top Ten lists only
 							</Label>
 						</Col>
@@ -123,20 +174,22 @@ class TopTenListsPage extends Component {
 						</Col>
 					</Row>
 				</Container>
-				{this.props.auth.isAuthenticated && <div className="tabs">
-					{this.renderTabs()}
-					<div className="clearing"></div>
-				</div>}
+				{auth.isAuthenticated && (
+					<div className="tabs">
+						{this.renderTabs()}
+						<div className="clearing" />
+					</div>
+				)}
 				<div className="topTenLists">
-					{TopTenListsList}
+					{TopTenListsListElement}
 				</div>
 				<div className="container">
 					<div className="text-center">
 						<Pagination
-							count={this.props.count}
-							pageSize={this.props.pageSize}
-							currentPage={this.props.currentPage}
-							onChangePage={this.props.onChangePage}
+							count={count}
+							pageSize={pageSize}
+							currentPage={currentPage}
+							onChangePage={onChangePage}
 						/>
 					</div>
 				</div>
@@ -144,5 +197,23 @@ class TopTenListsPage extends Component {
 		);
 	}
 }
+
+TopTenListsPage.propTypes = {
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'canCreateTopTenList': PropTypes.func.isRequired,
+	'count': PropTypes.number,
+	'currentPage': PropTypes.number.isRequired,
+	'handleTabClick': PropTypes.func.isRequired,
+	'handleTopLevelTopTenListsChange': PropTypes.func.isRequired,
+	'isLoading': PropTypes.bool.isRequired,
+	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
+	'onChangeIsPublic': PropTypes.func.isRequired,
+	'onChangePage': PropTypes.func.isRequired,
+	'onDeleteTopTenList': PropTypes.func.isRequired,
+	'pageSize': PropTypes.number.isRequired,
+	'publicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'selectedTab': PropTypes.string.isRequired,
+	'topLevelTopTenListsOnly': PropTypes.bool.isRequired,
+};
 
 export default withRouter(TopTenListsPage);

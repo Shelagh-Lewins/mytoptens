@@ -127,6 +127,9 @@
       ],
       "react/jsx-one-expression-per-line": [
         "warn"
+      ],
+      "react/jsx-boolean-value": [
+        "never"
       ]
     },
     "env": {
