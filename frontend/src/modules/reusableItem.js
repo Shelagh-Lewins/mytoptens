@@ -58,6 +58,8 @@ export const SEARCH_TOPTENITEMS_STARTED = 'SEARCH_TOPTENITEMS_STARTED';
 export const SEARCH_TOPTENITEMS_SUCCEEDED = 'SEARCH_TOPTENITEMS_SUCCEEDED';
 export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 
+export const SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED = 'SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED';
+
 export const UPDATE_REUSABLEITEM_STARTED = 'UPDATE_REUSABLEITEMS_STARTED';
 export const UPDATE_REUSABLEITEM_FAILED = 'UPDATE_REUSABLEITEMS_FAILED';
 
@@ -229,6 +231,33 @@ export function searchTopTenItems(searchTerm, widgetId) {
 		});
 	};
 }
+
+// /////////////////////////
+// change reusableItem is_public
+
+export function setReusableItemIsPublicSucceeded({ id, is_public }) {
+	return {
+		'type': SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED,
+		'payload': {
+			'id': id,
+			is_public,
+		},
+	};
+}
+
+export const setReusableItemIsPublic = ({ id, is_public }) => (dispatch) => {
+	return fetchAPI({
+		'url': `/api/v1/content/reusableitem/${id}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify({ is_public }),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then((response) => {
+		return dispatch(setReusableItemIsPublicSucceeded(response));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'set reusableItem is public': error.message }));
+	});
+};
 
 // /////////////////////////////
 // Modify reusableItem

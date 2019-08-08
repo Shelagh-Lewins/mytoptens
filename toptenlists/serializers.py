@@ -25,46 +25,71 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     A topTenItem may be associated with a reusableItem
     """
 
+    # automatically set created_by as the current user's id
+    created_by = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+    )
+
+    created_by_username = serializers.PrimaryKeyRelatedField(
+        read_only=True
+    )
+
+    editable_properties = ['name', 'definition', 'link']
+
     class Meta:
         model = ReusableItem
-        fields = ('id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
+        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
 
     def to_internal_value(self, data):
-        # intercept update data before it is validated
-        # update may contain a vote or a proposed modification
-        # or a change to is_public
-        # ensure only one, valid action is passed through
+        """ intercept update data before it is validated
+        update may contain one of these change requests:
+         a change to is_public
+         proposed modification
+         a vote
+        # ensure only one, valid change request is passed through
+        """
+
         print('raw data:')
         print(data)
-        modification_submitted = False
-        vote_submitted = False
+
+        # TODO do not allow modification or vote if private and not owned by user
+        # TODO do not allow is_public change unless owned by user
+        # TODO allow is_public change and create new reusableItem if necessary (in use by other users)
+
+        change_type = ''
         validated_data = {}
+        count = 0
+
+        # if is_public, the owner is changing the is_public calue
+        if 'is_public' in data:
+            change_type = 'is_public'
+            count = count + 1
 
         # if name, definition or link, a modification is proposed
-        editable_properties = ['name', 'definition', 'link']
-
-        for key in editable_properties:
+        for key in ReusableItemSerializer.editable_properties:
             if key in data:
-                modification_submitted = True
+                change_type = 'modification'
+                count = count + 1
                 break
 
         # if vote (yes / no), a vote is registered
         if 'vote' in data:
             if data['vote'] in ['yes', 'no']:
-                vote_submitted =  True
+                change_type = 'vote'
+                count = count + 1
 
-        # do not accept request for both
-        if modification_submitted and vote_submitted:
-            raise ValidationError({'reusable item': 'you cannot submit a proposed modification and a vote in the same request'})
+        # there must be a change request
+        if count == 0:
+            ({'reusable item': 'no change request submitted'})
 
-        # if neither vote nor modification, error
-        if not modification_submitted and not vote_submitted:
-            raise ValidationError({'reusable item': 'you must submit either a proposed modification or a vote'})
+        # only one type of change request is allowed
+        if count > 1:
+            raise ValidationError({'reusable item': 'you cannot submit more than one type of change in the same request'})
 
         # do not accept empty string for name
-        # user may propose empty string for definition or link, though it's unclear why they would want to
-        if modification_submitted:
-            for key in editable_properties:
+        # user may propose empty string for definition or link
+        if change_type == 'modification':
+            for key in ReusableItemSerializer.editable_properties:
                 if key in data:
                     if key is 'name' and not data[key]: # empty string
                         raise ValidationError({'reusable item': 'name cannot be empty string'})
@@ -72,69 +97,77 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                     else:
                         validated_data[key] = data[key]
 
-        if vote_submitted:
+        elif change_type == 'vote':
             validated_data['vote'] = data['vote']
 
+        elif change_type == 'is_public':
+            validated_data['is_public'] = data['is_public']
+
+        self.change_type = change_type # This ought to be defined in __init__ but I can't get it to work in the serializer
         return validated_data
 
 
     def update(self, instance, validated_data):
         """ we trust to_internal_value to have ensured there is either
-        a proposed modification, a vote or a change to is_public. No other data will be processed.
+        a proposed modification, a vote or a change to is_public, and that the instance's change_type is correct for the change request. No other data will be processed.
         """
-        print('***** instance')
-        print(instance)
-        # instance.name = validated_data.get('name', instance.name)
+        print('***** reusableItem:')
         print(instance.name)
         print(instance.proposed_modification)
         print('validated_data')
         print(validated_data)
+        print('change_type')
+        print(self.change_type)
+
+        print('user:')
+        print(self.context['request'].user.username)
+        print('created_by:')
+        print(getattr(instance, 'created_by'))
+
+        # TODO only allow proposed_modification or vote if item is public
+        # TODO if item is owned by user and private, just change it
+
 
         # find the topTenItems that reference this reusableItem
         topTenItems = TopTenItem.objects.filter(reusableItem=instance)
-        print('topTenItems')
+        print('# topTenItems that reference this reusableItem:')
         print(topTenItems.count()) # number of topTenItems that reference this reusableItem
 
         # propose a modification
-        modification_submitted = False
-        vote_submitted = False
+        if self.change_type == 'modification':
 
-        # if name, definition or link, a modification is proposed
-        editable_properties = ['name', 'definition', 'link']
-        proposed_modification = {}
+            # if name, definition or link, a modification is proposed
+            proposed_modification = {}
 
-        for key in editable_properties:
-            if key in validated_data:
-                print(key)
-                print(getattr(instance, key))
-                # only process new values
-                if getattr(instance, key) != validated_data[key]:
-                    modification_submitted = True
-                    proposed_modification[key] = validated_data[key]
-
-        if modification_submitted:
-            # there must not already be a proposed_modification
-            if instance.proposed_modification is not None: # avoid error if no value already
-                print('existing proposed_modification')
-                print(instance.proposed_modification)
-                print(len(instance.proposed_modification))
-                if len(instance.proposed_modification) is not 0:
-                    raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
+            for key in ReusableItemSerializer.editable_properties:
+                if key in validated_data:
+                    print(key)
+                    print(getattr(instance, key))
+                    # only process new values
+                    if getattr(instance, key) != validated_data[key]:
+                        proposed_modification[key] = validated_data[key]
 
             if len(proposed_modification) is 0:
-                raise ValidationError({'reusable item': 'no new values have been specified'})
+                raise ValidationError({'reusable item': 'no new values have been proposed'})
+
+            # there must not already be a proposed_modification
+            if instance.proposed_modification is not None: # avoid error if no value already
+                if len(instance.proposed_modification) is not 0:
+                    raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
 
             else:
                 instance.proposed_modification = []
                 instance.proposed_modification.append(proposed_modification)
 
             # don't set name to empty string
+            print('about to save')
+            instance.save()
 
         # vote on a modification
-        print('about to save')
-        print()
+        #print('about to save')
+        #print()
 
-        instance.save()
+        # instance.save()
         return instance 
 
 
@@ -189,6 +222,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         if 'newReusableItem' in data:
             if data['newReusableItem'] == True:
                 # create a new reusableItem with the same name as the topTenItem
+
                 # and assign the new reusableItem to that topTenItem also
                 if 'topTenItemForNewReusableItem' in data:
                     try:
@@ -202,18 +236,24 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         if 'reusableItemLink' in data:
                             reusableItemData['link'] = data['reusableItemLink']
 
+                        reusableItemData['created_by'] = self.context['request'].user
+                        reusableItemData['created_by_username'] = self.context['request'].user.username
+
                         newReusableItem = ReusableItem.objects.create( **reusableItemData)
                         topTenItem.ReusableItem = newReusableItem
                         topTenItem.save
 
                         internal_value['reusableItem'] = newReusableItem
 
-                    except topTenItem.DoesNotExist:
+                    except:
                         print('error attempting to use non-existent topTenItem as basis for new reusableItem')
 
                 # create a new reusableItem from the entered name
                 else:
                     reusableItemData = {'name': data['name']}
+
+                    reusableItemData['created_by'] = self.context['request'].user
+                    reusableItemData['created_by_username'] = self.context['request'].user.username
 
                     if 'reusableItemDefinition' in data:
                             reusableItemData['definition'] = data['reusableItemDefinition']
@@ -341,7 +381,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
         return internal_value
 
     def create(self, validated_data):
-
+        print('create topTenList')
         topTenItems_data = validated_data.pop('topTenItem', None)
         validated_data['created_by'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username

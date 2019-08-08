@@ -37,6 +37,7 @@ class ReusableItem(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,related_name='reusableItem_created_by')
+    created_by_username = models.CharField(max_length=255) # this shold be OK given that the topTenList will be deleted if the created_by_id user is deleted
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
     definition = models.CharField(max_length=255, blank=True, default='')

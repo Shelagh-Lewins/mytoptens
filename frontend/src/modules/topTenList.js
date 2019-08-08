@@ -1,8 +1,8 @@
 import { createSelector } from 'reselect';
 import { TOPTENLIST_IS_PUBLIC_VALUES } from '../constants';
+import { normalize, schema } from 'normalizr';
 import fetchAPI from '../modules/fetchAPI';
 import { getErrors } from '../modules/errors';
-import { normalize, schema } from 'normalizr';
 import store from '../store';
 
 import {
@@ -13,6 +13,8 @@ import {
 	CREATE_TOPTENITEM_SUCCEEDED,
 	MOVE_TOPTENITEM_UP_SUCCEEDED,
 } from './topTenItem';
+
+var updeep = require('updeep');
 
 // define action types so they are visible
 // and export them so other reducers can use them
@@ -165,115 +167,6 @@ export function fetchTopTenListDetail(id) {
 	};
 }
 
-// ///////////////////////////
-// create topTenList
-export const createTopTenList = (topTenList, history) => (dispatch) => {
-	dispatch(createTopTenListStarted());
-	// console.log('createTopTenList data', topTenList);
-
-	return fetchAPI({
-		'url': '/api/v1/content/toptenlist/',
-		'data': JSON.stringify(topTenList),
-		'method': 'POST',
-		'useAuth': true,
-		'headers': { 'Content-Type': 'application/json' },
-	}).then((response) => {
-		dispatch(createTopTenListSucceeded(response));
-
-		history.push(`/topTenList/${response.id}`);
-		return;
-	}).catch((error) => {
-		return dispatch(getErrors({ 'create topTenList': error.message }));
-	});
-};
-
-export function createTopTenListStarted() {
-	return {
-		'type': CREATE_TOPTENLIST_STARTED,
-	};
-}
-
-export function createTopTenListSucceeded(topTenList) {
-	return {
-		'type': CREATE_TOPTENLIST_SUCCEEDED,
-		'payload': {
-			topTenList,
-		},
-	};
-}
-
-// /////////////////////////
-// update topTenList
-export const updateTopTenList = (topTenListId, propertyName, value) => (dispatch) => {
-	// should be able to update any simple property e.g. name, description
-	return fetchAPI({
-		'url': `/api/v1/content/toptenlist/${topTenListId}/`,
-		'headers': { 'Content-Type': 'application/json' },
-		'data': JSON.stringify({ [propertyName]: value }),
-		'method': 'PATCH',
-		'useAuth': true,
-	}).then((response) => {
-		dispatch(fetchOrganizerData(response.created_by));
-		return dispatch(updateTopTenListSucceeded(response));
-	}).catch((error) => {
-		return dispatch(getErrors({ 'update topTenItem': error.message }));
-	});
-};
-
-export function updateTopTenListSucceeded(response) {
-	return {
-		'type': UPDATE_TOPTENLIST_SUCCEEDED,
-		'payload': response,
-	};
-}
-
-// /////////////////////////
-// delete topTenList
-export const deleteTopTenList = id => (dispatch, getState) => {
-	return fetchAPI({
-		'url': `/api/v1/content/toptenlist/${id}/`,
-		'method': 'DELETE',
-		'useAuth': true,
-	}).then((response) => {
-		return dispatch(deleteTopTenListSucceeded(id));
-	}).catch((error) => {
-		return dispatch(getErrors({ 'delete topTenList': error.message }));
-	});
-};
-
-export function deleteTopTenListSucceeded(id) {
-	return {
-		'type': DELETE_TOPTENLIST_SUCCEEDED,
-		'payload': {
-			id
-		}
-	};
-}
-
-export const setTopTenListIsPublic = ({ id, is_public }) => (dispatch) => {
-	return fetchAPI({
-		'url': `/api/v1/content/toptenlist/${id}/`,
-		'headers': { 'Content-Type': 'application/json' },
-		'data': JSON.stringify({ is_public }),
-		'method': 'PATCH',
-		'useAuth': true,
-	}).then((response) => {
-		return dispatch(setTopTenListIsPublicSucceeded(response));
-	}).catch((error) => {
-		return dispatch(getErrors({ 'set topTenList is public': error.message }));
-	});
-};
-
-export function setTopTenListIsPublicSucceeded({ id, is_public }) {
-	return {
-		'type': SET_TOPTENLIST_IS_PUBLIC_SUCCEEDED,
-		'payload': {
-			'id': id,
-			is_public,
-		},
-	};
-}
-
 // ////////////////////////////////
 // fetch the names of my topTenLists and their topTenItems
 // for displaying and managing topTenList hierarchy i.e. topTenList parent_topTenItem
@@ -327,10 +220,120 @@ export function fetchOrganizerData(userId) {
 	};
 }
 
+// ///////////////////////////
+// create topTenList
+export function createTopTenListStarted() {
+	return {
+		'type': CREATE_TOPTENLIST_STARTED,
+	};
+}
+
+export function createTopTenListSucceeded(topTenListData) {
+	return {
+		'type': CREATE_TOPTENLIST_SUCCEEDED,
+		'payload': {
+			topTenListData,
+		},
+	};
+}
+
+export const createTopTenList = (topTenListData, history) => (dispatch) => {
+	dispatch(createTopTenListStarted());
+	// console.log('createTopTenList data', topTenListData);
+
+	return fetchAPI({
+		'url': '/api/v1/content/toptenlist/',
+		'data': JSON.stringify(topTenListData),
+		'method': 'POST',
+		'useAuth': true,
+		'headers': { 'Content-Type': 'application/json' },
+	}).then((response) => {
+		dispatch(createTopTenListSucceeded(response));
+
+		history.push(`/topTenList/${response.id}`);
+		// return;
+	}).catch((error) => {
+		return dispatch(getErrors({ 'create topTenList': error.message }));
+	});
+};
+
+// /////////////////////////
+// update topTenList
+export function updateTopTenListSucceeded(response) {
+	return {
+		'type': UPDATE_TOPTENLIST_SUCCEEDED,
+		'payload': response,
+	};
+}
+
+export const updateTopTenList = (topTenListId, propertyName, value) => (dispatch) => {
+	// should be able to update any simple property e.g. name, description
+	return fetchAPI({
+		'url': `/api/v1/content/toptenlist/${topTenListId}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify({ [propertyName]: value }),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then((response) => {
+		dispatch(fetchOrganizerData(response.created_by));
+		return dispatch(updateTopTenListSucceeded(response));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'update topTenItem': error.message }));
+	});
+};
+
+// /////////////////////////
+// delete topTenList
+export function deleteTopTenListSucceeded(id) {
+	return {
+		'type': DELETE_TOPTENLIST_SUCCEEDED,
+		'payload': {
+			id,
+		},
+	};
+}
+
+export const deleteTopTenList = id => (dispatch, getState) => {
+	return fetchAPI({
+		'url': `/api/v1/content/toptenlist/${id}/`,
+		'method': 'DELETE',
+		'useAuth': true,
+	}).then((response) => {
+		return dispatch(deleteTopTenListSucceeded(id));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'delete topTenList': error.message }));
+	});
+};
+
+// /////////////////////////
+// change topTenList is_public
+
+export function setTopTenListIsPublicSucceeded({ id, is_public }) {
+	return {
+		'type': SET_TOPTENLIST_IS_PUBLIC_SUCCEEDED,
+		'payload': {
+			'id': id,
+			is_public,
+		},
+	};
+}
+
+export const setTopTenListIsPublic = ({ id, is_public }) => (dispatch) => {
+	return fetchAPI({
+		'url': `/api/v1/content/toptenlist/${id}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify({ is_public }),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then((response) => {
+		return dispatch(setTopTenListIsPublicSucceeded(response));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'set topTenList is public': error.message }));
+	});
+};
+
 // ////////////////////////////////
 // Reducer
-var updeep = require('updeep');
-
 // this is initial state of topTenLists and the topTenList loading states
 // note that the topTenLists's list of topTenItems is called 'topTenItem' for consistency with the database.
 const initialTopTenListsState = {
@@ -360,23 +363,23 @@ const getTopTenItems = state => state.topTenItem.things;
 export const getPublicTopTenLists = createSelector(
 	[getTopTenLists],
 	(topTenLists) => {
-		return topTenLists.filter((topTenList) => {
-			return topTenList.is_public;
+		return topTenLists.filter((topTenListObject) => {
+			return topTenListObject.is_public;
 		});
 	},
-); 
+);
 
 export const getMyGroupedTopTenLists = createSelector(
 	[getTopTenLists],
-	topTenLists => {
+	(topTenLists) => {
 		const grouped = {};
 
-		TOPTENLIST_IS_PUBLIC_VALUES.forEach(is_public => {
-			grouped[is_public] = topTenLists.filter(topTenList => (topTenList.created_by === store.getState().auth.user.id) && (topTenList.is_public === is_public));
+		TOPTENLIST_IS_PUBLIC_VALUES.forEach((is_public) => {
+			grouped[is_public] = topTenLists.filter(topTenListObject => (topTenListObject.created_by === store.getState().auth.user.id) && (topTenListObject.is_public === is_public));
 		});
 
 		return grouped;
-	}
+	},
 );
 
 // ///////////////////////////
@@ -389,7 +392,7 @@ const getOrganizerTopTenItems = state => state.topTenItem.organizerData;
 export const getSortedOrganizerTopTenLists = createSelector(
 	[getOrganizerTopTenLists],
 	(topTenLists) => {
-		const topTenListsArray = Object.keys(topTenLists).map(id => {
+		const topTenListsArray = Object.keys(topTenLists).map((id) => {
 			return topTenLists[id];
 		});
 
@@ -398,7 +401,7 @@ export const getSortedOrganizerTopTenLists = createSelector(
 		});
 
 		return topTenListsArray;
-	}
+	},
 );
 
 // topTenLists, topTenItems should be memoized
@@ -431,13 +434,13 @@ export const getParentTopTenItemAndTopTenList = createSelector(
 	[getOrganizerTopTenLists, getOrganizerTopTenItems],
 	// find a topTenLists's parent topTenItem and the parent topTenList, if any
 	// uses the organizer data which has minimal data for all topTenLists belonging to that user
-	(topTenLists, topTenItems) => (topTenList) => {
+	(topTenLists, topTenItems) => (topTenListObject) => {
 		let parentTopTenItem;
 		let parentTopTenList;
 
-		if (topTenList && topTenList.parent_topTenItem) {
+		if (topTenListObject && topTenListObject.parent_topTenItem) {
 			if (topTenItems) {
-				parentTopTenItem = topTenItems[topTenList.parent_topTenItem];
+				parentTopTenItem = topTenItems[topTenListObject.parent_topTenItem];
 
 				if (parentTopTenItem) {
 					parentTopTenList = topTenLists[parentTopTenItem.topTenList_id];
@@ -504,8 +507,8 @@ export default function topTenList(state = initialTopTenListsState, action) {
 		}
 
 		case CREATE_TOPTENLIST_SUCCEEDED: {
-			const { topTenList } = action.payload;
-			return updeep({ 'things': { [topTenList.id]: topTenList } }, state);
+			const { topTenListData } = action.payload;
+			return updeep({ 'things': { [topTenListData.id]: topTenListData } }, state);
 		}
 
 		case DELETE_TOPTENLIST_SUCCEEDED: {
@@ -530,7 +533,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 		case CREATE_TOPTENITEM_SUCCEEDED: {
 			const { topTenItem } = action.payload;
 
-			function addTopTenItem(topTenItems) {
+			function addTopTenItem(topTenItems) { // eslint-disable-line no-inner-declarations
 				return [].concat(topTenItems, topTenItem.id);
 			}
 
@@ -556,10 +559,10 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			// update the TopTenItems array in their parent topTenList, change order
 			const topTenListId = topTenItemsArray[0].topTenList_id;
 
-			function replaceTopTenItems(topTenItems) {
-				let newTopTenItems = [].concat(state.things[topTenListId].topTenItem);
+			function replaceTopTenItems() { // eslint-disable-line no-inner-declarations
+				const newTopTenItems = [].concat(state.things[topTenListId].topTenItem);
 				topTenItemsArray.map((topTenItem) => { // eslint-disable-line array-callback-return
-					newTopTenItems[topTenItem.order-1] = topTenItem.id;
+					newTopTenItems[topTenItem.order - 1] = topTenItem.id;
 				});
 
 				return newTopTenItems;
@@ -592,4 +595,3 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			return state;
 	}
 }
-

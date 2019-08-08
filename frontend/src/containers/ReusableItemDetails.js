@@ -16,7 +16,7 @@ import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 
-import IsPublicIndicator from '../containers/IsPublicIndicator';
+import IsPublicIndicator from '../components/IsPublicIndicator';
 
 import './ReusableItemDetails.scss';
 import { COLORS } from '../constants';
@@ -96,6 +96,12 @@ class ReusableItemDetails extends Component {
 		dispatch(errorsReducer.clearErrors());
 	}
 
+	onChangeIsPublic = ({ id, is_public }) => {
+		const { dispatch } = this.props;
+
+		dispatch(reusableItemReducer.setReusableItemIsPublic({ id, is_public }));
+	}
+
 	togglePopover(popoverId) {
 		const { [`popoverOpen${popoverId}`]: popoverOpen } = this.state;
 		// const popoverOpen = this.state[`popoverOpen${popoverId}`];
@@ -143,7 +149,7 @@ class ReusableItemDetails extends Component {
 					<FontAwesomeIcon icon={['fas', 'question-circle']} style={{ 'color': COLORS.HELP }} size="1x" />
 				</Button>
 				<Popover placement="bottom" isOpen={popoverOpen} target={reusableItemHelpId} toggle={() => this.togglePopover(reusableItemHelpId)} html="true">
-					<PopoverBody>A Reusable Item is a shared Top Ten Item name that can be used by anybody in a Top Ten Item. Although the Reusable Item can be seen by anybody, nobody will see your list unless you make the list public.</PopoverBody>
+					<PopoverBody>A Reusable Item is a shared Top Ten Item name that can be used by anybody. Although the Reusable Item can be seen by anybody, nobody will see your list unless you make the list public.</PopoverBody>
 				</Popover>
 			</div>
 		);
@@ -257,6 +263,15 @@ class ReusableItemDetails extends Component {
 							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
 							{reusableItem.name}
 						</h2>
+						{true && (
+							<div className="reusableitem-summary-controls">
+								<IsPublicIndicator
+									targetId={reusableItem.id}
+									isPublic={reusableItem.is_public}
+									onChangeIsPublic={this.onChangeIsPublic}
+								/>
+							</div>
+						)}
 						<span className="about">
 							Reusable item
 							{reusableItemIcon}

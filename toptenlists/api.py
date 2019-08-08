@@ -46,7 +46,7 @@ class HasVerifiedEmail(permissions.BasePermission):
             email_address = EmailAddress.objects.get(user_id=request.user.id)
             return email_address.verified
 
-        except EmailAddress.DoesNotExist:
+        except:
             return False
 
 
@@ -316,15 +316,7 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
         if 'id' in self.request.query_params:
             reusableItemId = self.request.query_params.get('id', None)
 
-            try:
-                return ReusableItem.objects.filter(id=reusableItemId)
-
-                return reusableItem
-
-            except reusableItem.DoesNotExist:
-                print('error finding reusable item: item with this id does not exist')
-                print(id)
-                return
+            return ReusableItem.objects.filter(id=reusableItemId)
 
         else:
          return ReusableItem.objects.all()
