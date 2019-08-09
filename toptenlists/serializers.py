@@ -34,6 +34,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         read_only=True
     )
 
+    # user may propose empty string for definition or link
     editable_properties = ['name', 'definition', 'link']
 
     class Meta:
@@ -49,12 +50,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # ensure only one, valid change request is passed through
         """
 
-        print('raw data:')
+        print('resuableItem to_internal_value received raw data:')
         print(data)
-
-        # TODO do not allow modification or vote if private and not owned by user
-        # TODO do not allow is_public change unless owned by user
-        # TODO allow is_public change and create new reusableItem if necessary (in use by other users)
 
         change_type = ''
         validated_data = {}
@@ -70,7 +67,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             if key in data:
                 change_type = 'modification'
                 count = count + 1
-                break
+                break # don't count more than one
 
         # if vote (yes / no), a vote is registered
         if 'vote' in data:
@@ -87,7 +84,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             raise ValidationError({'reusable item': 'you cannot submit more than one type of change in the same request'})
 
         # do not accept empty string for name
-        # user may propose empty string for definition or link
         if change_type == 'modification':
             for key in ReusableItemSerializer.editable_properties:
                 if key in data:
@@ -103,21 +99,40 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         elif change_type == 'is_public':
             validated_data['is_public'] = data['is_public']
 
-        self.change_type = change_type # This ought to be defined in __init__ but I can't get it to work in the serializer
+        self.change_type = change_type # change_type ought to be declared in __init__ but I can't get it to work in the serializer
         return validated_data
 
 
     def update(self, instance, validated_data):
-        """ we trust to_internal_value to have ensured there is either
-        a proposed modification, a vote or a change to is_public, and that the instance's change_type is correct for the change request. No other data will be processed.
+        """ we trust to_internal_value to have ensured there is exactly one change request which may be:
+        -  a proposed modification
+        - a vote on an existing modification
+        - a change to is_public
+
+        and that the instance's change_type is correct for the change request. No other data will be processed.
         """
-        print('***** reusableItem:')
+        print('***** update reusableItem *****')
         print(instance.name)
+
+        # check permissions
+        if self.change_type == 'is_public':
+            print('change_type is_public')
+
+        elif self.change_type == 'modification':
+            print('change_type modification')
+
+        elif self.change_type == 'vote':
+            print('change_type vote')
+
+        else:
+            print('change_type')
+            print(self.change_type)
+            raise ValidationError({'update reusable item': 'invalid change type'})
+
         print(instance.proposed_modification)
         print('validated_data')
         print(validated_data)
-        print('change_type')
-        print(self.change_type)
+
 
         print('user:')
         print(self.context['request'].user.username)
@@ -126,6 +141,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # TODO only allow proposed_modification or vote if item is public
         # TODO if item is owned by user and private, just change it
+        # TODO do not allow modification or vote if private and not owned by user
+        # TODO do not allow is_public change unless owned by user
+        # TODO allow is_public change and create new reusableItem if necessary (in use by other users)
 
 
         # find the topTenItems that reference this reusableItem
@@ -152,12 +170,15 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             # there must not already be a proposed_modification
             if instance.proposed_modification is not None: # avoid error if no value already
+                print('already got a proposed_modification')
                 if len(instance.proposed_modification) is not 0:
                     raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
-
+# TODO something wrong here! Modifiction is not saved.
             else:
                 instance.proposed_modification = []
                 instance.proposed_modification.append(proposed_modification)
+                print('instance.proposed_modification:')
+                print(instance.proposed_modification)
 
             # don't set name to empty string
             print('about to save')
