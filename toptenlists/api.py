@@ -343,8 +343,12 @@ class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=to
     def get_querylist(self):
         reusableItem_query_set = {'queryset': ReusableItem.objects.all(), 'serializer_class': ReusableItemSerializer}
 
+        print('user')
+        print(self.request.user.__dict__)
+
         # authenticated user can view public ReusableItems and ReusableItems the user created
         if self.request.user.is_authenticated:
+            print('authenticated')
             reusableItem_query_set['queryset'] = reusableItem_query_set['queryset'].filter(
                 Q(created_by=self.request.user) |
                 Q(is_public=True)
@@ -352,8 +356,11 @@ class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=to
 
         # unauthenticated user can view public ReusableItems
         else:
+            print('not authenticated')
             reusableItem_query_set['queryset'] = reusableItem_query_set['queryset'].filter(is_public=True)
 
         querylist = [reusableItem_query_set]
+        print('querylist from search')
+        print(querylist)
 
         return querylist

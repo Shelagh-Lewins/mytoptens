@@ -113,43 +113,60 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         """
         print('***** update reusableItem *****')
         print(instance.name)
+        # print(instance.__dict__) # all values of current reusableItem
 
         # check permissions
-        if self.change_type == 'is_public':
-            print('change_type is_public')
+        created_by_current_user = (self.context['request'].user == getattr(instance, 'created_by'))
+        change_types = ['is_public','modification','vote']
 
-        elif self.change_type == 'modification':
-            print('change_type modification')
+        # basic gatekeeping
+        if self.change_type not in change_types:
+            raise ValidationError({'cannot update reusable item': 'invalid change type'})
 
         elif self.change_type == 'vote':
-            print('change_type vote')
+            if not getattr(instance, 'is_public'):
+                raise ValidationError({'cannot vote on modification to reusableItem': 'the reusableItem is not public'})
 
-        else:
-            print('change_type')
-            print(self.change_type)
-            raise ValidationError({'update reusable item': 'invalid change type'})
-
-        print(instance.proposed_modification)
         print('validated_data')
         print(validated_data)
 
 
-        print('user:')
-        print(self.context['request'].user.username)
-        print('created_by:')
-        print(getattr(instance, 'created_by'))
+
 
         # TODO only allow proposed_modification or vote if item is public
-        # TODO if item is owned by user and private, just change it
+        # TODO if item is owned by user and private, or only the user references it, just change it
         # TODO do not allow modification or vote if private and not owned by user
         # TODO do not allow is_public change unless owned by user
         # TODO allow is_public change and create new reusableItem if necessary (in use by other users)
+        # TODO handle making a reusableItem private when it has a proposed_modification outstanding. Should the modification be accepted, rejected, or the user asked what to do? Can they reference the public modification, if there still is one?
+        # TODO warn user in UI before they change is_public
 
 
         # find the topTenItems that reference this reusableItem
-        topTenItems = TopTenItem.objects.filter(reusableItem=instance)
+        # select_related gets their parent topTenList as well so we can check ownership
+        topTenItems = TopTenItem.objects.filter(reusableItem=instance).select_related('topTenList')
         print('# topTenItems that reference this reusableItem:')
         print(topTenItems.count()) # number of topTenItems that reference this reusableItem
+
+        # find the topTenLists that own these topTenItems
+        for topTenItem in topTenItems:
+            print('got an item')
+            print(topTenItem.name)
+            print(topTenItem.topTenList)
+
+        # find the topTenLists that the user created
+
+        # change privacy
+        if self.change_type == 'is_public':
+            if getattr(instance, 'is_public'):
+                instance.is_public = False
+                # TODO check if any other users reference this reusableItem
+                # if so, make a copy and use it for all THIS user's reusableItems
+
+            else:
+                instance.is_public = True
+
+            instance.save()
 
         # propose a modification
         if self.change_type == 'modification':
@@ -169,20 +186,23 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 raise ValidationError({'reusable item': 'no new values have been proposed'})
 
             # there must not already be a proposed_modification
+            modification_already_exists = False
+
             if instance.proposed_modification is not None: # avoid error if no value already
                 print('already got a proposed_modification')
                 if len(instance.proposed_modification) is not 0:
-                    raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
-# TODO something wrong here! Modifiction is not saved.
+                    modification_already_exists = True
+                    print('and it has elements')
+
+            if modification_already_exists:
+                raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
+
             else:
                 instance.proposed_modification = []
                 instance.proposed_modification.append(proposed_modification)
                 print('instance.proposed_modification:')
                 print(instance.proposed_modification)
-
-            # don't set name to empty string
-            print('about to save')
-            instance.save()
+                instance.save()
 
         # vote on a modification
         #print('about to save')

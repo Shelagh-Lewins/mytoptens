@@ -124,13 +124,19 @@ export function searchReusableItems(searchTerm, widgetId) {
 
 		dispatch(searchReusableItemsStarted(searchTerm, widgetId));
 
-		// all reusableItems are public, so do not use auth
+		// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
 
 		return fetchAPI({
 			'url': `/api/v1/content/searchreusableitems/?search=${searchTerm}`,
 			'method': 'GET',
+			'useAuth': useAuth,
 		}).then((response) => {
-			// console.log('searchApi says ', response);
+			console.log('searchApi says ', response);
 			return dispatch(searchReusableItemsSucceeded(response.results, widgetId));
 		}).catch((error) => {
 			dispatch(searchReusableItems());
@@ -274,8 +280,6 @@ function updateReusableItemFailed() {
 }
 
 export const updateReusableItem = (reusableItemId, data) => (dispatch) => {
-// export function updateReusableItem(reusableItemId, data) {
-	// return (dispatch) => {
 	console.log('updateReusableItem', reusableItemId, data);
 	dispatch(updateReusableItemStarted());
 
@@ -608,6 +612,12 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 
 		case SEARCH_TOPTENITEMS_FAILED: {
 			return updeep(state, state);
+		}
+
+		case SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED: {
+			const reusableItemId = action.payload.id;
+
+			return updeep({ 'things': { [reusableItemId]: { 'is_public': action.payload.is_public } } }, state);
 		}
 
 		default:

@@ -97,9 +97,20 @@ class ReusableItemDetails extends Component {
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		const { dispatch } = this.props;
+		const { reusableItem } = this.props;
+		const currentIsPublic = reusableItem.is_public;
 
-		dispatch(reusableItemReducer.setReusableItemIsPublic({ id, is_public }));
+		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest modifications to it. Are you sure you want to continue?';
+
+		if (currentIsPublic) {
+			text = 'This is a public Reusable Item. Are you sure you want to make a private copy of it, which only you will see?';
+		}
+
+		if (confirm(text)) { // eslint-disable-line no-restricted-globals
+			const { dispatch } = this.props;
+
+			dispatch(reusableItemReducer.setReusableItemIsPublic({ id, is_public }));
+		}
 	}
 
 	togglePopover(popoverId) {
