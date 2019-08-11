@@ -1,8 +1,8 @@
 import React from 'react';
-import { COLORS } from '../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Label, Input } from 'reactstrap';
 
+import { COLORS } from '../constants';
 import './ReusableItemFormControls.scss';
 
 // used by ReusableItemComboBox
@@ -10,13 +10,13 @@ import './ReusableItemFormControls.scss';
 function ReusableItemFormControls(props) {
 	let reusableItemInfo;
 	let showReusableItemInfo = false;
-	//console.log('ReusableItemFormControls props', props);
+	// console.log('ReusableItemFormControls props', props);
 
 	const definitionLabel = 'Definition';
 	const linkLabel = 'Weblink';
 	const definitionPlaceholder = 'Enter a brief definition of the Reusable Item';
 	const linkPlaceholder = 'Enter a weblink that defines the Reusable Item';
-	const reusableItemHint = 'Reusable items are public and can be seen by anybody. Your list will be private unless you make it public.';
+	const reusableItemHint = 'Your new Reusable Item will be private unless you make it public';
 
 	if (props.newReusableItem) {
 		reusableItemInfo = (<div className="reusable-item">

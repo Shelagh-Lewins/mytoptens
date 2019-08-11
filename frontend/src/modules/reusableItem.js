@@ -136,7 +136,7 @@ export function searchReusableItems(searchTerm, widgetId) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			console.log('searchApi says ', response);
+			// console.log('searchApi says ', response);
 			return dispatch(searchReusableItemsSucceeded(response.results, widgetId));
 		}).catch((error) => {
 			dispatch(searchReusableItems());

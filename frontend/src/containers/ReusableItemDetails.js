@@ -103,7 +103,7 @@ class ReusableItemDetails extends Component {
 		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest modifications to it. Are you sure you want to continue?';
 
 		if (currentIsPublic) {
-			text = 'This is a public Reusable Item. Are you sure you want to make a private copy of it, which only you will see?';
+			text = 'This is a public Reusable Item. Are you sure you want to make it private? If other people have lists which use this Reusable Item, the public Reusable Item will still exist, but your lists will reference a new private copy of it.';
 		}
 
 		if (confirm(text)) { // eslint-disable-line no-restricted-globals

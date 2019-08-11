@@ -20,6 +20,8 @@ from dynamic_rest.fields import (
     DynamicRelationField
 )
 
+from itertools import groupby
+
 class ReusableItemSerializer(FlexFieldsModelSerializer):
     """
     A topTenItem may be associated with a reusableItem
@@ -123,6 +125,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if self.change_type not in change_types:
             raise ValidationError({'cannot update reusable item': 'invalid change type'})
 
+        elif self.change_type == 'is_public':
+            if not created_by_current_user:
+                raise ValidationError({'cannot change is_public of reusableItem': 'the reusableItem was not created by the user'})
+
         elif self.change_type == 'vote':
             if not getattr(instance, 'is_public'):
                 raise ValidationError({'cannot vote on modification to reusableItem': 'the reusableItem is not public'})
@@ -133,42 +139,86 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # TODO only allow proposed_modification or vote if item is public
         # TODO if item is owned by user and private, or only the user references it, just change it
         # TODO do not allow modification or vote if private and not owned by user
-        # TODO do not allow is_public change unless owned by user
+
         # TODO allow is_public change and create new reusableItem if necessary (in use by other users)
         # TODO handle making a reusableItem private when it has a proposed_modification outstanding. Should the modification be accepted, rejected, or the user asked what to do? Can they reference the public modification, if there still is one?
         # TODO warn user in UI before they change is_public
 
-
-        # find the topTenItems that reference this reusableItem
-        # select_related gets their parent topTenList as well so we can check ownership
-        topTenItems = TopTenItem.objects.filter(reusableItem=instance,topTenList__created_by=self.context['request'].user).select_related('topTenList')
-        print('# topTenLilsts owned by the current user that reference this reusableItem:')
-        print(topTenItems.count()) # number of topTenItems that reference this reusableItem
-
         # TODO find topTenLists owned by other users
         # TODO if no other users, just make the reusableItem private
         # TODO if other users, make a private copy and reference it everywhere
-        # TODO show this in the UI
-
-        # find the topTenLists that own these topTenItems
-        for topTenItem in topTenItems:
-            print('got an item')
-            print(topTenItem.name)
-            print(topTenItem.topTenList)
+        # TODO show this in the U
 
         # find the topTenLists that the user created
+
 
         # change privacy
         if self.change_type == 'is_public':
             if getattr(instance, 'is_public'):
-                instance.is_public = False
-                # TODO check if any other users reference this reusableItem
-                # if so, make a copy and use it for all THIS user's reusableItems
+                # before making a public reusableItem private, check if other people are using it
+                # select_related gets their parent topTenList as well so we can check ownership
+
+                # topTenItems whose parent topTenList was created by current user
+                myTopTenItems = TopTenItem.objects.filter(reusableItem=instance,
+                    topTenList__created_by=self.context['request'].user).select_related('topTenList')
+                # print('# topTenLists owned by the current user that reference this reusableItem:')
+                # print(myTopTenItems.count())
+
+                # topTenItems whose parent topTenList was created by another user
+                otherTopTenItems = TopTenItem.objects.filter(reusableItem=instance).exclude(topTenList__created_by=self.context['request'].user).select_related('topTenList')
+                # print('# topTenLists NOT owned by the current user that reference this reusableItem:')
+                # print(otherTopTenItems.count())
+
+                # find the topTenLists that own these topTenItems
+                """
+                for topTenItem in myTopTenItems:
+                    print('myTopTenItems got an item')
+                    print(topTenItem.name)
+                    print(topTenItem.topTenList)
+
+                for topTenItem in otherTopTenItems:
+                    print('otherTopTenItems got an item')
+                    print(topTenItem.name)
+                    print(topTenItem.topTenList)
+                """
+
+                if otherTopTenItems.count() > 0:
+                    print('other users\' topTenItems reference this reusableItem')
+                    # make a copy and assign it to the user's topTenItems
+                    # proposed modifications and votes are not copied
+                    # because the user can now change their new private reusableItem directly
+                    # if a reusableItem is very popular, this avoids changing all the references - the current user's number of references are likely to be fewer
+                    # note that the current instance is not saved because it is unchanged
+                    reusableItemData =  {
+                    'name': instance.name,
+                    'definition': instance.definition,
+                    'is_public': False,
+                    'link': instance.link,
+                    'created_by': self.context['request'].user,
+                    'created_by_username': self.context['request'].user.username
+                    }
+
+                    newReusableItem = ReusableItem.objects.create( **reusableItemData)
+
+                    print(newReusableItem.name)
+                    print(newReusableItem.is_public)
+
+                    # all the user's topTenItems will now reference the new reusableItem
+                    for topTenItem in myTopTenItems:
+                        # print('my topTenItem will use the new private reusableItem:')
+                        # print(topTenItem.name)
+                        # print(topTenItem.topTenList)
+                        topTenItem.reusableItem = newReusableItem
+                        topTenItem.save()
+
+                else:
+                    print('only my topTenItems reference this reusableItem')
+                    instance.is_public = False
+                    instance.save()
 
             else:
                 instance.is_public = True
-
-            instance.save()
+                instance.save()
 
         # propose a modification
         if self.change_type == 'modification':
@@ -283,8 +333,8 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         reusableItemData['created_by_username'] = self.context['request'].user.username
 
                         newReusableItem = ReusableItem.objects.create( **reusableItemData)
-                        topTenItem.ReusableItem = newReusableItem
-                        topTenItem.save
+                        topTenItem.reusableItem = newReusableItem
+                        topTenItem.save()
 
                         internal_value['reusableItem'] = newReusableItem
 
