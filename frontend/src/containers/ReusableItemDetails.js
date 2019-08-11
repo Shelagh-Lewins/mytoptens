@@ -51,7 +51,13 @@ class ReusableItemDetails extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
-		const { isLoading, match, auth } = this.props;
+		const {
+			isLoading,
+			match,
+			auth,
+			reusableItem,
+			history
+		} = this.props;
 		let { id } = this.state;
 		// console.log('props', this.props);
 		if (prevProps.isLoading && !isLoading) {
@@ -79,6 +85,24 @@ class ReusableItemDetails extends Component {
 			this.setState({
 				id,
 			});
+		}
+
+		// if (id !== match.params.id) {
+		console.log('id from state', id);
+		console.log('id from props', match.params.id);
+		/* if (reusableItem) {
+			console.log('targetId', reusableItem.targetId);
+			history.push(`/reusableitem/${currentReusableItem.id}`);
+		} */
+		// }
+		// the reusableItem has been replaced by a new one
+		// probably because the user made a popular reusableItem private
+		// so all their topTenItems now reference a new, private reusableItem
+		// we need to show this one so navigate to it
+		if (reusableItem && reusableItem.targetId) {
+			if (reusableItem.targetId !== match.params.id) {
+				history.push(`/reusableitem/${reusableItem.targetId}`);
+			}
 		}
 	}
 
@@ -237,7 +261,7 @@ class ReusableItemDetails extends Component {
 			'displayName': 'ModificationForm',
 		})(BasicModificationForm);
 
-		if (reusableItem.proposed_modification.length === 0) {
+		if (reusableItem.proposed_modification && reusableItem.proposed_modification.length === 0) {
 			if (showProposeModificationForm) {
 				modification = (
 					<Row>

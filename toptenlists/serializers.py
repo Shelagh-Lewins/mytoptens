@@ -211,6 +211,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                         topTenItem.reusableItem = newReusableItem
                         topTenItem.save()
 
+                    return newReusableItem
+
                 else:
                     print('only my topTenItems reference this reusableItem')
                     instance.is_public = False

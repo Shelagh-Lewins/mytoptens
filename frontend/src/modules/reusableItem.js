@@ -241,12 +241,13 @@ export function searchTopTenItems(searchTerm, widgetId) {
 // /////////////////////////
 // change reusableItem is_public
 
-export function setReusableItemIsPublicSucceeded({ id, is_public }) {
+export function setReusableItemIsPublicSucceeded({ id, is_public, sourceId }) {
 	return {
 		'type': SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED,
 		'payload': {
 			'id': id,
 			is_public,
+			sourceId,
 		},
 	};
 }
@@ -259,7 +260,15 @@ export const setReusableItemIsPublic = ({ id, is_public }) => (dispatch) => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		return dispatch(setReusableItemIsPublicSucceeded(response));
+		// console.log('setReusableItemIsPublic response', response);
+		// this may be a new reusableItem if the user made a popular reusableItem private
+		// so pass on the original ID so the UI can check
+
+		const newResponse = JSON.parse(JSON.stringify(response));
+		newResponse.sourceId = id;
+		console.log('newResponse', newResponse);
+
+		return dispatch(setReusableItemIsPublicSucceeded(newResponse));
 	}).catch((error) => {
 		return dispatch(getErrors({ 'set reusableItem is public': error.message }));
 	});
@@ -616,8 +625,11 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 
 		case SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED: {
 			const reusableItemId = action.payload.id;
+			const sourceId = action.payload.sourceId;
+			// this may be a new reusableItem if the user made a popular reusableItem private
+			console.log('response', action.payload);
 
-			return updeep({ 'things': { [reusableItemId]: { 'is_public': action.payload.is_public } } }, state);
+			return updeep({ 'things': { [reusableItemId]: { 'is_public': action.payload.is_public, 'sourceId': action.payload.sourceId }, [sourceId]: { 'targetId': action.payload.id } } }, state);
 		}
 
 		default:

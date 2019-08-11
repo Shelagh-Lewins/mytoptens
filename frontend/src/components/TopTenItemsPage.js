@@ -190,7 +190,6 @@ class TopTenItemsPage extends Component {
 	// user selects an item name from a dropdown list. This can be to use text directly, or to use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
 		// we expect a widgetId like 1_name, 2_name
-console.log('onSelectItemName', e, widgetId);
 		this.setState({
 			[`${widgetId}`]: e.name,
 		});

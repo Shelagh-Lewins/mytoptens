@@ -128,7 +128,6 @@ class EditableTextField extends Component {
 				this.setState({
 					'initialReusableItem': reusableItem ? reusableItem.id : undefined,
 				});
-				console.log('test setting ', reusableItem);
 			}
 		}
 
@@ -349,9 +348,12 @@ class EditableTextField extends Component {
 								<button type="submit" className="btn btn-primary">
 								Done
 								</button>
-								<span className="hint">
+								{type === 'textarea'
+								&& (
+									<span className="hint">
 								You can use <Link to="https://help.github.com/articles/basic-writing-and-formatting-syntax/">Markdown</Link>
-								</span>
+									</span>
+								)}
 							</Col>
 						</Row>
 					</form>
