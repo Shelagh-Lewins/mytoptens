@@ -130,9 +130,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         print('validated_data')
         print(validated_data)
 
-
-
-
         # TODO only allow proposed_modification or vote if item is public
         # TODO if item is owned by user and private, or only the user references it, just change it
         # TODO do not allow modification or vote if private and not owned by user
@@ -144,9 +141,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # find the topTenItems that reference this reusableItem
         # select_related gets their parent topTenList as well so we can check ownership
-        topTenItems = TopTenItem.objects.filter(reusableItem=instance).select_related('topTenList')
-        print('# topTenItems that reference this reusableItem:')
+        topTenItems = TopTenItem.objects.filter(reusableItem=instance,topTenList__created_by=self.context['request'].user).select_related('topTenList')
+        print('# topTenLilsts owned by the current user that reference this reusableItem:')
         print(topTenItems.count()) # number of topTenItems that reference this reusableItem
+
+        # TODO find topTenLists owned by other users
+        # TODO if no other users, just make the reusableItem private
+        # TODO if other users, make a private copy and reference it everywhere
+        # TODO show this in the UI
 
         # find the topTenLists that own these topTenItems
         for topTenItem in topTenItems:
