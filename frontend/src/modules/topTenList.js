@@ -293,7 +293,7 @@ export function deleteTopTenListSucceeded(id) {
 	};
 }
 
-export const deleteTopTenList = id => (dispatch, getState) => {
+export const deleteTopTenList = id => (dispatch) => {
 	return fetchAPI({
 		'url': `/api/v1/content/toptenlist/${id}/`,
 		'method': 'DELETE',
@@ -396,9 +396,7 @@ export const getSortedOrganizerTopTenLists = createSelector(
 			return topTenLists[id];
 		});
 
-		topTenListsArray.sort(function (a, b) {
-			return a.name.localeCompare(b.name);
-		});
+		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
 		return topTenListsArray;
 	},
@@ -408,14 +406,14 @@ export const getSortedOrganizerTopTenLists = createSelector(
 // even though the rest of the selector will be rerun, it's still a gain
 export const getTopTenItemsForTopTenList = createSelector(
 	[getTopTenLists, getTopTenItems],
-	(topTenLists, topTenItems) => (topTenList) => {
-		let topTenListTopTenItems = [];
+	(topTenLists, topTenItems) => (topTenListObject) => {
+		const topTenListTopTenItems = [];
 
-		if (topTenList) {
-			topTenList.topTenItem.map((topTenItemId) => { // eslint-disable-line array-callback-return
-				let topTenItem = { ...topTenItems[topTenItemId] }; // shallow copy is extensible
+		if (topTenListObject) {
+			topTenListObject.topTenItem.map((topTenItemId) => { // eslint-disable-line array-callback-return
+				const topTenItem = { ...topTenItems[topTenItemId] }; // shallow copy is extensible
 
-				const childTopTenList = topTenLists.find(topTenList => topTenList.parent_topTenItem === topTenItemId);
+				const childTopTenList = topTenLists.find(topTenListInner => topTenListInner.parent_topTenItem === topTenItemId);
 
 				if (childTopTenList) {
 					topTenItem.childTopTenList = { ...childTopTenList };
@@ -425,7 +423,7 @@ export const getTopTenItemsForTopTenList = createSelector(
 			});
 		}
 		return topTenListTopTenItems;
-	}
+	},
 );
 
 // topTenLists, topTenItems should be memoized
@@ -467,7 +465,12 @@ export default function topTenList(state = initialTopTenListsState, action) {
 
 		case RECEIVE_ENTITIES: {
 			// load topTenLists data into store
-			const { count, previous, next, entities } = action.payload;
+			const {
+				count,
+				previous,
+				next,
+				entities
+			} = action.payload;
 
 			let things = {};
 

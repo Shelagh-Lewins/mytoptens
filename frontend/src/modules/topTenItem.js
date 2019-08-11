@@ -15,6 +15,8 @@ import {
 	RECEIVE_ORGANIZER_DATA,
 } from './topTenList';
 
+const updeep = require('updeep');
+
 /* eslint-disable array-callback-return */
 
 // ////////////////////////////////
@@ -27,41 +29,47 @@ export const CREATE_TOPTENITEM_SUCCEEDED = 'CREATE_TOPTENITEM_SUCCEEDED';
 export const UPDATE_TOPTENITEM_SUCCEEDED = 'UPDATE_TOPTENITEM_SUCCEEDED';
 export const MOVE_TOPTENITEM_UP_SUCCEEDED = 'MOVE_TOPTENITEM_UP_SUCCEEDED';
 
-////////////////////////////////////
+// //////////////////////////////////
 // create topTenItem
-export const createTopTenItem = (topTenItem) => (dispatch) => {
-	dispatch(createTopTenItemRequested());
-
-	return fetchAPI({
-		'url': '/api/v1/content/toptenitem/',
-		'data': JSON.stringify(topTenItem),
-		'method': 'POST',
-		'useAuth': true,
-		'headers': { 'Content-Type': 'application/json' },
-	}).then(response => {
-		return dispatch(createTopTenItemSucceeded(response));
-	}).catch(error => {
-		return dispatch(getErrors({ 'create topTenItem': error.message }));
-	});
-};
-
 export function createTopTenItemRequested() {
 	return {
 		'type': 'CREATE_TOPTENITEM_REQUESTED',
 	};
 }
 
-export function createTopTenItemSucceeded(topTenItem) {
+export function createTopTenItemSucceeded(topTenItemData) {
 	return {
 		'type': 'CREATE_TOPTENITEM_SUCCEEDED',
 		'payload': {
-			topTenItem,
+			topTenItemData,
 		},
 	};
 }
+export const createTopTenItem = topTenItemData => (dispatch) => {
+	dispatch(createTopTenItemRequested());
+
+	return fetchAPI({
+		'url': '/api/v1/content/toptenitem/',
+		'data': JSON.stringify(topTenItemData),
+		'method': 'POST',
+		'useAuth': true,
+		'headers': { 'Content-Type': 'application/json' },
+	}).then((response) => {
+		return dispatch(createTopTenItemSucceeded(response));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'create topTenItem': error.message }));
+	});
+};
 
 // //////////////////////////////////
 // update topTenItem
+export function updateTopTenItemSucceeded(response) {
+	return {
+		'type': UPDATE_TOPTENITEM_SUCCEEDED,
+		'payload': response,
+	};
+}
+
 export const updateTopTenItem = (topTenItemId, data) => (dispatch) => {
 	/* update any simple properties e.g. {
 		'name': 'my new name',
@@ -83,58 +91,49 @@ export const updateTopTenItem = (topTenItemId, data) => (dispatch) => {
 	});
 };
 
-export function updateTopTenItemSucceeded(response) {
-	return {
-		'type': UPDATE_TOPTENITEM_SUCCEEDED,
-		'payload': response,
-	};
-}
-
 // ////////////////////////////////
 // move topTenItem up
-export const moveTopTenItemUp = ({ topTenItemId }) => dispatch => {
-	return fetchAPI({
-		'url': `/api/v1/content/toptenitem/${topTenItemId}/moveup/`,
-		'headers': { 'Content-Type': 'application/json' },
-		'method': 'PATCH',
-		'useAuth': true,
-	}).then(response => {
-		return dispatch(moveTopTenItemUpSucceeded(response));
-	}).catch(error => {
-		return dispatch(getErrors({ 'move topTenItem up error ': error.message }));
-	});
-};
-
-export const moveTopTenItemDown = ({ topTenItemId }) => dispatch => {
-	// to move an topTenItem down, we move the topTenItem below up
-	// find the topTenItem
-	const topTenItem = store.getState().topTenItem.things[topTenItemId];
-
-	// find its parent topTenList
-	const topTenListId = topTenItem.topTenList_id;
-
-	// find the topTenItem's order
-	const order = topTenItem.order;
-
-	// find the topTenItem below it in the parent topTenList
-	const topTenItem_below_id = store.getState().topTenList.things[topTenListId].topTenItem[order];
-
-	dispatch(moveTopTenItemUp({ 'topTenItemId': topTenItem_below_id }));
-};
-
 export function moveTopTenItemUpSucceeded(topTenItems) {
 	return {
 		'type': 'MOVE_TOPTENITEM_UP_SUCCEEDED',
 		'payload': {
 			topTenItems,
-		}
+		},
 	};
 }
 
-//////////////////////////////////
-// Reducer
-var updeep = require('updeep');
+export const moveTopTenItemUp = ({ topTenItemId }) => (dispatch) => {
+	return fetchAPI({
+		'url': `/api/v1/content/toptenitem/${topTenItemId}/moveup/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then((response) => {
+		return dispatch(moveTopTenItemUpSucceeded(response));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'move topTenItem up error ': error.message }));
+	});
+};
 
+export const moveTopTenItemDown = ({ topTenItemId }) => (dispatch) => {
+	// to move an topTenItem down, we move the topTenItem below up
+	// find the topTenItem
+	const topTenItemObject = store.getState().topTenItem.things[topTenItemId];
+
+	// find its parent topTenList
+	const topTenListId = topTenItemObject.topTenList_id;
+
+	// find the topTenItem's order
+	const { order } = topTenItemObject;
+
+	// find the topTenItem below it in the parent topTenList
+	const topTenItemBelowId = store.getState().topTenList.things[topTenListId].topTenItem[order];
+
+	dispatch(moveTopTenItemUp({ 'topTenItemId': topTenItemBelowId }));
+};
+
+// ////////////////////////////////
+// Reducer
 const initialTopTenItemsState = {
 	'isLoading': false,
 	'error': null,
@@ -145,7 +144,7 @@ const initialTopTenItemsState = {
 	'organizerData': {},
 };
 
-/////////////////////////////
+// ///////////////////////////
 // organizer data
 // all topTenItems and topTenLists, for selector to use
 export const getOrganizerTopTenItems = state => state.topTenItem.organizerData;
@@ -154,19 +153,19 @@ const getOrganizerTopTenLists = state => state.topTenList.organizerData;
 export const groupedTopTenItems = createSelector(
 	[getOrganizerTopTenItems, getOrganizerTopTenLists],
 	(topTenItems, topTenLists) => {
-		let topTenItemsByTopTenList = {};
+		const topTenItemsByTopTenList = {};
 
 		// find the topTenItems for each topTenList
-		Object.keys(topTenLists).map(topTenListId => { // eslint-disable-line array-callback-return
+		Object.keys(topTenLists).map((topTenListId) => { // eslint-disable-line array-callback-return
 			const topTenList = topTenLists[topTenListId];
 
-			let topTenItemsArray = [];
+			const topTenItemsArray = [];
 
-			for (let i=0; i<topTenList.topTenItem.length; i++) {
-				let topTenItem = { ...topTenItems[topTenList.topTenItem[i]] };
+			for (let i = 0; i < topTenList.topTenItem.length; i += 1) {
+				const topTenItemObject = { ...topTenItems[topTenList.topTenItem[i]] };
 
-				if (topTenItem.name !== '') {
-					topTenItemsArray.push(topTenItem);
+				if (topTenItemObject.name !== '') {
+					topTenItemsArray.push(topTenItemObject);
 				}
 			}
 
@@ -174,7 +173,7 @@ export const groupedTopTenItems = createSelector(
 		});
 		// note the parent_topTenItem, if any, of each topTenList
 		// add the topTenList's id to the topTenItem as childTopTenListId
-		Object.keys(topTenLists).map(topTenListId => { // eslint-disable-line array-callback-return
+		Object.keys(topTenLists).map((topTenListId) => { // eslint-disable-line array-callback-return
 			const topTenList = topTenLists[topTenListId];
 
 			if (topTenList.parent_topTenItem) {
@@ -184,19 +183,18 @@ export const groupedTopTenItems = createSelector(
 					// can't use array order to pull out topTenItem, because topTenItems with no name have been removed
 					// instead, explicitly find the topTenItem object in the array by its 'order' property
 
-					let topTenItemsArray2 = topTenItemsByTopTenList[parentTopTenItem.topTenList_id];
-					let topTenItem = topTenItemsArray2.find(topTenItem => topTenItem.order === parentTopTenItem.order);
-					topTenItem.childTopTenListId = topTenList.id;
+					const topTenItemsArray2 = topTenItemsByTopTenList[parentTopTenItem.topTenList_id];
+					const topTenItemObject = topTenItemsArray2.find(topTenItemInner => topTenItemInner.order === parentTopTenItem.order);
+					topTenItemObject.childTopTenListId = topTenList.id;
 				}
 			}
 		});
 
 		return topTenItemsByTopTenList;
-	}
-
+	},
 );
 
-/////////////////////////////
+// ///////////////////////////
 // state updates
 
 export default function topTenItem(state = initialTopTenItemsState, action) {
@@ -204,7 +202,7 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		case LOGOUT_USER_COMPLETE: {
 			return updeep(initialTopTenItemsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
-		
+
 		case RECEIVE_ENTITIES: {
 			const { entities } = action.payload;
 
@@ -217,7 +215,8 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 			return updeep({
 				'things': updeep.constant(things),
 				'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
-				'isLoading': false }, state);
+				'isLoading': false,
+			}, state);
 		}
 
 		case FETCH_TOPTENLIST_DETAIL_STARTED: {
@@ -225,8 +224,8 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		}
 
 		case CREATE_TOPTENITEM_SUCCEEDED: {
-			const topTenItem = action.payload.topTenItem;
-			return updeep({ 'things': { [topTenItem.id]: topTenItem } }, state);
+			const { topTenItemData } = action.payload;
+			return updeep({ 'things': { [topTenItem.id]: topTenItemData } }, state);
 		}
 
 		case UPDATE_TOPTENITEM_SUCCEEDED: {
@@ -244,9 +243,9 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
 			const topTenItemsArray = action.payload.topTenItems; // array containing the two topTenItems that have been swapped
 
-			let topTenItemsObject = {};
-			topTenItemsArray.map((topTenItem) => { // eslint-disable-line array-callback-return
-				topTenItemsObject[topTenItem.id] = topTenItem;
+			const topTenItemsObject = {};
+			topTenItemsArray.map((topTenItemObject) => { // eslint-disable-line array-callback-return
+				topTenItemsObject[topTenItemObject.id] = topTenItemObject;
 			});
 			return updeep({ 'things': topTenItemsObject }, state);
 		}
@@ -255,15 +254,15 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 			const { entities } = action.payload;
 
 			// we only want items that have a name
-			const topTenItem = {};
-			Object.keys(entities.topTenItem).map(id => {
+			const topTenItemObject = {};
+			Object.keys(entities.topTenItem).map((id) => {
 				if (entities.topTenItem[id].name) {
-					topTenItem[id] = entities.topTenItem[id];
+					topTenItemObject[id] = entities.topTenItem[id];
 				}
 			});
 
 			if (entities && entities.topTenItem) {
-				return updeep({ 'organizerData': updeep.constant(topTenItem), 'isLoading': false }, state);
+				return updeep({ 'organizerData': updeep.constant(topTenItemObject), 'isLoading': false }, state);
 			}
 
 			return state;
@@ -273,4 +272,3 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 			return state;
 	}
 }
-
