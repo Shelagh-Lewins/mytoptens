@@ -53,7 +53,7 @@ class ReusableItemDetails extends Component {
 	componentDidUpdate(prevProps) {
 		const { isLoading, match, auth } = this.props;
 		let { id } = this.state;
-		console.log('props', this.props);
+		// console.log('props', this.props);
 		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this reusableItem
 			const canViewReusableItem = permissions.canViewReusableItem(id);
