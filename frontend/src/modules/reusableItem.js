@@ -624,12 +624,17 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 		}
 
 		case SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED: {
-			const reusableItemId = action.payload.id;
-			const sourceId = action.payload.sourceId;
-			// this may be a new reusableItem if the user made a popular reusableItem private
-			console.log('response', action.payload);
+			const { id, is_public, sourceId } = action.payload;
+			// console.log('response', action.payload);
 
-			return updeep({ 'things': { [reusableItemId]: { 'is_public': action.payload.is_public, 'sourceId': action.payload.sourceId }, [sourceId]: { 'targetId': action.payload.id } } }, state);
+			if (id !== sourceId) { // a new reusableItem, probably because the user made a new private reusableItem from a public one
+				// sourceId is the original reusableItem that was copied. This reusableItem needs to be modified so the UI will detect a change in properties
+				return updeep({ 'things': { [id]: { 'is_public': is_public }, [sourceId]: { 'targetId': id } } }, state);
+			}
+
+			// same reusableItem that the user was originally trying to edit
+			// probably the user made a private reusableItem public
+			return updeep({ 'things': { [id]: { 'is_public': is_public } } }, state);
 		}
 
 		default:

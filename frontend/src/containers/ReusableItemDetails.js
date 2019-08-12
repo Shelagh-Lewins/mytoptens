@@ -124,10 +124,10 @@ class ReusableItemDetails extends Component {
 		const { reusableItem } = this.props;
 		const currentIsPublic = reusableItem.is_public;
 
-		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest modifications to it. Are you sure you want to continue?';
+		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest modifications to it. Do you want to continue?';
 
 		if (currentIsPublic) {
-			text = 'This is a public Reusable Item. Are you sure you want to make it private? If other people have lists which use this Reusable Item, the public Reusable Item will still exist, but your lists will reference a new private copy of it.';
+			text = 'This is a public Reusable Item. This action will make a private copy of it which your lists will reference. Do you want to continue?';
 		}
 
 		if (confirm(text)) { // eslint-disable-line no-restricted-globals

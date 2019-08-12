@@ -83,14 +83,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # only one type of change request is allowed
         if count > 1:
-            raise ValidationError({'reusable item': 'you cannot submit more than one type of change in the same request'})
+            raise ValidationError({'reusable item error: you cannot submit more than one type of change in the same request'})
 
         # do not accept empty string for name
         if change_type == 'modification':
             for key in ReusableItemSerializer.editable_properties:
                 if key in data:
                     if key is 'name' and not data[key]: # empty string
-                        raise ValidationError({'reusable item': 'name cannot be empty string'})
+                        raise ValidationError({'reusable item error: name cannot be empty string'})
 
                     else:
                         validated_data[key] = data[key]
@@ -123,104 +123,57 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # basic gatekeeping
         if self.change_type not in change_types:
-            raise ValidationError({'cannot update reusable item': 'invalid change type'})
-
-        elif self.change_type == 'is_public':
-            if not created_by_current_user:
-                raise ValidationError({'cannot change is_public of reusableItem': 'the reusableItem was not created by the user'})
+            raise ValidationError({'reusable item error: invalid change type'})
 
         elif self.change_type == 'vote':
             if not getattr(instance, 'is_public'):
-                raise ValidationError({'cannot vote on modification to reusableItem': 'the reusableItem is not public'})
+                raise ValidationError({'reusable item error: cannot vote on modification to reusableItem because the reusableItem is not public'})
 
         print('validated_data')
         print(validated_data)
 
-        # TODO only allow proposed_modification or vote if item is public
-        # TODO if item is owned by user and private, or only the user references it, just change it
-        # TODO do not allow modification or vote if private and not owned by user
-
-        # TODO allow is_public change and create new reusableItem if necessary (in use by other users)
-        # TODO handle making a reusableItem private when it has a proposed_modification outstanding. Should the modification be accepted, rejected, or the user asked what to do? Can they reference the public modification, if there still is one?
-        # TODO warn user in UI before they change is_public
-
-        # TODO find topTenLists owned by other users
-        # TODO if no other users, just make the reusableItem private
-        # TODO if other users, make a private copy and reference it everywhere
-        # TODO show this in the U
-
-        # find the topTenLists that the user created
-
-
-        # change privacy
         if self.change_type == 'is_public':
             if getattr(instance, 'is_public'):
-                # before making a public reusableItem private, check if other people are using it
-                # select_related gets their parent topTenList as well so we can check ownership
+                """
+                make a public resuableItem private
+                we make a new private reusableItem as a copy of the public one (intance)
+                without the proposed modifications and votes
+                and change the current user's topTenItems to reference the new reusableItem instead of the instance
+                if nobody else references the original resuableItem, it will be automatically deleted
+                """
+                reusableItemData =  {
+                'name': instance.name,
+                'definition': instance.definition,
+                'is_public': False,
+                'link': instance.link,
+                'created_by': self.context['request'].user,
+                'created_by_username': self.context['request'].user.username
+                }
+
+                newReusableItem = ReusableItem.objects.create( **reusableItemData)
 
                 # topTenItems whose parent topTenList was created by current user
+                # select_related gets their parent topTenList as well so we can check ownership
                 myTopTenItems = TopTenItem.objects.filter(reusableItem=instance,
                     topTenList__created_by=self.context['request'].user).select_related('topTenList')
-                # print('# topTenLists owned by the current user that reference this reusableItem:')
-                # print(myTopTenItems.count())
 
-                # topTenItems whose parent topTenList was created by another user
-                otherTopTenItems = TopTenItem.objects.filter(reusableItem=instance).exclude(topTenList__created_by=self.context['request'].user).select_related('topTenList')
-                # print('# topTenLists NOT owned by the current user that reference this reusableItem:')
-                # print(otherTopTenItems.count())
-
-                # find the topTenLists that own these topTenItems
-                """
+                # all the user's topTenItems should reference the new reusableItem
                 for topTenItem in myTopTenItems:
-                    print('myTopTenItems got an item')
-                    print(topTenItem.name)
-                    print(topTenItem.topTenList)
+                    topTenItem.reusableItem = newReusableItem
+                    topTenItem.save()
 
-                for topTenItem in otherTopTenItems:
-                    print('otherTopTenItems got an item')
-                    print(topTenItem.name)
-                    print(topTenItem.topTenList)
-                """
-
-                if otherTopTenItems.count() > 0:
-                    print('other users\' topTenItems reference this reusableItem')
-                    # make a copy and assign it to the user's topTenItems
-                    # proposed modifications and votes are not copied
-                    # because the user can now change their new private reusableItem directly
-                    # if a reusableItem is very popular, this avoids changing all the references - the current user's number of references are likely to be fewer
-                    # note that the current instance is not saved because it is unchanged
-                    reusableItemData =  {
-                    'name': instance.name,
-                    'definition': instance.definition,
-                    'is_public': False,
-                    'link': instance.link,
-                    'created_by': self.context['request'].user,
-                    'created_by_username': self.context['request'].user.username
-                    }
-
-                    newReusableItem = ReusableItem.objects.create( **reusableItemData)
-
-                    print(newReusableItem.name)
-                    print(newReusableItem.is_public)
-
-                    # all the user's topTenItems will now reference the new reusableItem
-                    for topTenItem in myTopTenItems:
-                        # print('my topTenItem will use the new private reusableItem:')
-                        # print(topTenItem.name)
-                        # print(topTenItem.topTenList)
-                        topTenItem.reusableItem = newReusableItem
-                        topTenItem.save()
-
-                    return newReusableItem
-
-                else:
-                    print('only my topTenItems reference this reusableItem')
-                    instance.is_public = False
-                    instance.save()
+                return newReusableItem
 
             else:
+                # make a private reusableItem public
+                if not created_by_current_user:
+                    raise ValidationError({'reusable item error: cannot make the reusableItem public because it was not created by the current user'})
+
                 instance.is_public = True
                 instance.save()
+
+        # TODO only allow proposed_modification or vote if item is public
+        # TODO do not allow modification or vote if private and not owned by user
 
         # propose a modification
         if self.change_type == 'modification':
@@ -237,7 +190,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                         proposed_modification[key] = validated_data[key]
 
             if len(proposed_modification) is 0:
-                raise ValidationError({'reusable item': 'no new values have been proposed'})
+                raise ValidationError({'reusable item error: no new values have been proposed'})
 
             # there must not already be a proposed_modification
             modification_already_exists = False
@@ -249,7 +202,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                     print('and it has elements')
 
             if modification_already_exists:
-                raise ValidationError({'reusable item': 'a new modification cannot be proposed while there is an unresolved existing modification proposal'})
+                raise ValidationError({'reusable item error: a new modification cannot be proposed while there is an unresolved existing modification proposal'})
 
             else:
                 instance.proposed_modification = []
