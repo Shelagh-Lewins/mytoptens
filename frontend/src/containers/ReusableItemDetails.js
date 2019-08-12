@@ -56,7 +56,7 @@ class ReusableItemDetails extends Component {
 			match,
 			auth,
 			reusableItem,
-			history
+			history,
 		} = this.props;
 		let { id } = this.state;
 		// console.log('props', this.props);
@@ -88,8 +88,8 @@ class ReusableItemDetails extends Component {
 		}
 
 		// if (id !== match.params.id) {
-		console.log('id from state', id);
-		console.log('id from props', match.params.id);
+		// console.log('id from state', id);
+		// console.log('id from props', match.params.id);
 		/* if (reusableItem) {
 			console.log('targetId', reusableItem.targetId);
 			history.push(`/reusableitem/${currentReusableItem.id}`);
@@ -301,8 +301,8 @@ class ReusableItemDetails extends Component {
 						{true && (
 							<div className="reusableitem-summary-controls">
 								<IsPublicIndicator
-									targetId={reusableItem.id}
-									isPublic={reusableItem.is_public}
+									targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
+									isPublic={reusableItem.is_public || false}
 									onChangeIsPublic={this.onChangeIsPublic}
 								/>
 							</div>
@@ -378,6 +378,7 @@ ReusableItemDetails.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
