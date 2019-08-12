@@ -68,6 +68,8 @@ export const UPDATE_REUSABLEITEM_FAILED = 'UPDATE_REUSABLEITEMS_FAILED';
 export const FETCH_REUSABLEITEM_DETAIL_STARTED = 'FETCH_REUSABLEITEM_DETAIL_STARTED';
 export const FETCH_REUSABLEITEM_DETAIL_FAILED = 'FETCH_REUSABLEITEM_DETAIL_FAILED';
 
+export const FETCH_REUSABLEITEM_VOTES_STARTED = 'FETCH_REUSABLEITEM_VOTES_STARTED';
+
 // ////////////////////////////////
 // Suggest names for topTenItems based on reusableItems and topTenItems that have no reusable item
 export function suggestReusableItems(searchTerm, widgetId) {
@@ -186,6 +188,38 @@ export function fetchReusableItemDetail(id) {
 			dispatch(fetchReusableItemDetailFailed());
 
 			return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
+		});
+	};
+}
+
+// /////////////////////////////
+// fetch voting information for a single reusableItem
+export function fetchReusableItemVotesStarted() {
+	return {
+		'type': FETCH_REUSABLEITEM_VOTES_STARTED,
+	};
+}
+
+export function fetchReusableItemVotes(id) {
+	return (dispatch, getState) => {
+		dispatch(fetchReusableItemDetailStarted());
+
+		// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
+
+		return fetchAPI({
+			'url': `/api/v1/content/reusableitem/${id}/votes/?fields=id,name&expand=name`,
+			'method': 'GET',
+			'useAuth': useAuth,
+		}).then((response) => {
+			console.log('votes response', response);
+			// return dispatch(receiveEntities(normalizedData));
+		}).catch((error) => {
+			return dispatch(getErrors({ 'fetch reusableItemVotes': error.message }));
 		});
 	};
 }
@@ -312,7 +346,7 @@ export const updateReusableItem = (reusableItemId, data) => (dispatch) => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		// console.log('updateReusableItem response', response);
+		console.log('updateReusableItem response', response);
 		return dispatch(updateReusableItemSucceeded(response));
 	}).catch((error) => {
 		dispatch(updateReusableItemFailed());
@@ -658,6 +692,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 				'definition': action.payload.definition,
 				'link': action.payload.link,
 				'modified_at': action.payload.modified_at,
+				'proposed_modification': action.payload.proposed_modification,
 			};
 
 			return updeep({ 'things': { [action.payload.id]: update } }, state);

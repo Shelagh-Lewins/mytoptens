@@ -48,6 +48,7 @@ class ReusableItemDetails extends Component {
 		this.togglePopover = this.togglePopover.bind(this);
 		this.toggleProposeModificationForm = this.toggleProposeModificationForm.bind(this);
 		this.submitProposeModificationForm = this.submitProposeModificationForm.bind(this);
+		this.VoteOnModification = this.VoteOnModification.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -102,6 +103,7 @@ class ReusableItemDetails extends Component {
 		const { 'id': reusableItemId } = props.match.params;
 
 		props.dispatch(reusableItemReducer.fetchReusableItemDetail(reusableItemId));
+		props.dispatch(reusableItemReducer.fetchReusableItemVotes(reusableItemId));
 		props.dispatch(errorsReducer.clearErrors());
 		return reusableItemId;
 	}
@@ -162,6 +164,13 @@ class ReusableItemDetails extends Component {
 		} else {
 			dispatch(errorsReducer.getErrors({ 'Reusable Item': 'No new values have been entered for this Reusable Item' }));
 		}
+	}
+
+	VoteOnModification(vote) {
+		const { id } = this.state;
+		const { dispatch } = this.props;
+
+		dispatch(reusableItemReducer.updateReusableItem(id, { vote }));
 	}
 
 	renderReusableItem() {
@@ -275,31 +284,69 @@ class ReusableItemDetails extends Component {
 				);
 			} else { // button to show the form
 				modification = (
-					<Row>
-						<Col className="modification-button">
-							<Button id="show-propose-modification-form" type="button" color="primary" className="name-icon btn" onClick={this.toggleProposeModificationForm} title="Edit this Reusable Item">
-								<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" />
-							</Button>
-						</Col>
-					</Row>
+					<div className="modification-button">
+						<Row>
+							<Col>
+								<Button id="show-propose-modification-form" type="button" color="primary" className="name-icon btn" onClick={this.toggleProposeModificationForm} title="Edit this Reusable Item">
+									<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" />
+								</Button>
+							</Col>
+						</Row>
+					</div>
 				);
 			}
 		} else if (reusableItem.proposed_modification && reusableItem.proposed_modification.length > 0) { // a proposed modification exists
+			let votesYes = 0;
+			let votesNo = 0;
+
+			if (reusableItem.proposed_modification[0].votes_yes) {
+				votesYes = reusableItem.proposed_modification[0].votes_yes.length();
+			}
+
+			if (reusableItem.proposed_modification[0].votes_no) {
+				votesNo = reusableItem.proposed_modification[0].votes_no.length();
+			}
+
 			modification = (
-				<Row>
-					<Col className="proposed-modification">
-						<h3>Proposed change</h3>
-						{reusableItem.proposed_modification[0].name && (
-							<div>Name: {reusableItem.proposed_modification[0].name}</div>
-						)}
-						{reusableItem.proposed_modification[0].link && (
-							<div>Link: {reusableItem.proposed_modification[0].link}</div>
-						)}
-						{reusableItem.proposed_modification[0].definition && (
-							<div>Definition: {reusableItem.proposed_modification[0].definition}</div>
-						)}
-					</Col>
-				</Row>
+				<div className="proposed-modification">
+					<Row>
+						<Col className="changes">
+							<h3>Proposed change</h3>
+							{reusableItem.proposed_modification[0].name && (
+								<div>Name: {reusableItem.proposed_modification[0].name}</div>
+							)}
+							{reusableItem.proposed_modification[0].link && (
+								<div>Link: {reusableItem.proposed_modification[0].link}</div>
+							)}
+							{reusableItem.proposed_modification[0].definition && (
+								<div>Definition: {reusableItem.proposed_modification[0].definition}</div>
+							)}
+						</Col>
+					</Row>
+					<Row>
+						<Col>
+							<h3>Voting</h3>
+						</Col>
+					</Row>
+					<Row>
+						<Col md="6" lg="12" className="votes">
+							{reusableItem.proposed_modification[0] && (
+								<React.Fragment>
+									<span>For: {votesYes}</span>
+									<span><button type="button" color="secondary" onClick={() => this.VoteOnModification('yes')}>Vote for change</button></span>
+								</React.Fragment>
+							)}
+						</Col>
+						<Col md="6" lg="12" className="votes">
+							{reusableItem.proposed_modification[0] && (
+								<React.Fragment>
+									<span>Against: {votesNo}</span>
+									<span><button type="button" color="secondary" onClick={() => this.VoteOnModification('no')}>Vote against change</button></span>
+								</React.Fragment>
+							)}
+						</Col>
+					</Row>
+				</div>
 			);
 		}
 

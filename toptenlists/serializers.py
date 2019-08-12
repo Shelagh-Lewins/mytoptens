@@ -43,7 +43,11 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = ReusableItem
-        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
+        # note that votes_yes and votes_no must not be returned
+        # they are lists of user email addresses
+        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history')
+
+        # fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -123,8 +127,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         created_by_current_user = (current_user == getattr(instance, 'created_by'))
         change_types = ['is_public','modification','vote']
 
-        # check permissions
-        # basic gatekeeping
+        # check basic permissions
         if not current_user.is_authenticated:
             raise ValidationError({'update reusable item error: user is not logged in'})
 
@@ -186,9 +189,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
                 instance.is_public = True
                 instance.save()
+                return instance
 
         # propose a modification
-        if self.change_type == 'modification':
+        elif self.change_type == 'modification':
 
             # if name, definition or link, a modification is proposed
             proposed_modification = {}
@@ -240,22 +244,38 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.proposed_modification.append(proposed_modification)
             instance.proposed_at = timezone.now()
             instance.proposed_by = current_user
-            instance.votes_yes = 0
-            instance.votes_no = 0
-            #print('instance.proposed_modification:')
-            #print(instance.proposed_modification)
+            instance.votes_yes = []
+            instance.votes_no = []
+
             instance.save()
+            return instance
 
         # vote on a modification
-        #print('about to save')
-        #print()
+        elif self.change_type == 'vote':
+            # is this a private reusableItem?
+            if not getattr(instance, 'is_public'):
+                raise ValidationError({'reusable item error: cannot vote on a private reusable item'})
 
-        # TODO only allow proposed_modification or vote if item is public
-        # TODO do not allow modification or vote if private and not owned by user
+            # remove any previous vote by this user
+            try:
+                instance.votes_yes.remove(current_user.email)
+            except ValueError: # avoid error if user has not previously voted
+                pass
 
+            try:
+                instance.votes_no.remove(current_user.email)
+            except ValueError: # avoid error if user has not previously voted
+                pass
 
-        # instance.save()
-        return instance
+            if validated_data['vote'] == 'yes':
+                print('appending to votes_yes')
+                instance.votes_yes.append(current_user.email)
+
+            elif validated_data['vote'] == 'no':
+                instance.votes_no.append(current_user.email)
+
+            instance.save()
+            return instance
 
 
 class TopTenItemSerializer(FlexFieldsModelSerializer):
@@ -272,7 +292,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     # https://github.com/encode/django-rest-framework/issues/627
 
     expandable_fields = {
-        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history']})
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history']})
     }
 
     class Meta:

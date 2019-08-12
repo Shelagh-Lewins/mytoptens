@@ -339,6 +339,50 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
         # reusableItems are deleted when no longer referenced
         raise APIException("ReusableItem may not be deleted via API")
 
+    @detail_route(methods=['get'])
+    def votes(self, request, pk=None):
+        current_user = self.request.user
+
+        if not current_user.is_authenticated:
+            raise APIException({'get reusable item votes error: user is not logged in'})
+
+        try:
+            email_address = EmailAddress.objects.get(user_id=current_user.id)
+
+            if not email_address.verified:
+                raise ValidationError({'get reusable item votes error: user idoes not have a verified email address'})
+
+        except:
+            raise APIException({'get reusable item votes error: error getting email_address'})
+
+        reusableItem = ReusableItem.objects.get(pk=pk)
+
+
+        print('votes: reusableItem, name')
+        print(reusableItem.name)
+        print(ReusableItem._meta.get_field('name').value_from_object(reusableItem))
+        print(getattr(reusableItem, 'name'))
+        # investigate further. This seems to work but is very clunky.
+        # for some reason all fields are deferred and can't be got in the usual way.
+        # https://stackoverflow.com/questions/51905712/how-to-get-the-value-of-a-django-model-field-object
+
+        myVote = ''
+
+        #if email_address in ReusableItem.votes_yes:
+            #myVote = 'yes'
+
+        #elif email_address in ReusableItem.votes_yes:
+            #myVote = 'no'
+
+
+        votingData = {
+        'id': pk,
+        #'votes_yes_count': len(reusableItem.votes_yes),
+        #'votes_no_count': len(reusableItem.votes_no),
+        }
+
+        return Response(votingData)
+
 
 class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
     """
@@ -351,8 +395,8 @@ class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=to
     def get_querylist(self):
         reusableItem_query_set = {'queryset': ReusableItem.objects.all(), 'serializer_class': ReusableItemSerializer}
 
-        print('user')
-        print(self.request.user.__dict__)
+        #print('user')
+        #print(self.request.user.__dict__)
 
         # authenticated user can view public ReusableItems and ReusableItems the user created
         if self.request.user.is_authenticated:
@@ -368,7 +412,7 @@ class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=to
             reusableItem_query_set['queryset'] = reusableItem_query_set['queryset'].filter(is_public=True)
 
         querylist = [reusableItem_query_set]
-        print('querylist from search')
-        print(querylist)
+        #print('querylist from search')
+        #print(querylist)
 
         return querylist

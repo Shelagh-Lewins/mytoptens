@@ -52,7 +52,8 @@
 
 .popover {
 	.definition {
-		max-height: 2em;
 		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 }
