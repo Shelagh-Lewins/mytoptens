@@ -163,7 +163,6 @@ class Item extends Component {
 									{currentReusableItem.definition}
 								</div>
 							)}
-							{currentReusableItem.link && <div className="link">{currentReusableItem.link}</div>}
 							<Link to={`/reusableitem/${currentReusableItem.id}`}>
 							More information...
 							</Link>
