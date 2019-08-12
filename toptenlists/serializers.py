@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from django.utils import timezone
 
 import uuid
 
@@ -202,11 +203,15 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                     print('and it has elements')
 
             if modification_already_exists:
-                raise ValidationError({'reusable item error: a new modification cannot be proposed while there is an unresolved existing modification proposal'})
+                raise ValidationError({'reusable item error: a new modification cannot be proposed while there is an existing modification proposal'})
 
             else:
                 instance.proposed_modification = []
                 instance.proposed_modification.append(proposed_modification)
+                instance.proposed_at = timezone.now()
+                instance.proposed_by = self.context['request'].user
+                instance.votes_yes = 0
+                instance.votes_no = 0
                 print('instance.proposed_modification:')
                 print(instance.proposed_modification)
                 instance.save()

@@ -87,18 +87,10 @@ class ReusableItemDetails extends Component {
 			});
 		}
 
-		// if (id !== match.params.id) {
-		// console.log('id from state', id);
-		// console.log('id from props', match.params.id);
-		/* if (reusableItem) {
-			console.log('targetId', reusableItem.targetId);
-			history.push(`/reusableitem/${currentReusableItem.id}`);
-		} */
-		// }
 		// the reusableItem has been replaced by a new one
 		// probably because the user made a popular reusableItem private
 		// so all their topTenItems now reference a new, private reusableItem
-		// we need to show this one so navigate to it
+		// navigate to the new one
 		if (reusableItem && reusableItem.targetId) {
 			if (reusableItem.targetId !== match.params.id) {
 				history.push(`/reusableitem/${reusableItem.targetId}`);
@@ -261,8 +253,9 @@ class ReusableItemDetails extends Component {
 			'displayName': 'ModificationForm',
 		})(BasicModificationForm);
 
-		if (reusableItem.proposed_modification && reusableItem.proposed_modification.length === 0) {
-			if (showProposeModificationForm) {
+		// if no proposed modification exists already
+		if (!reusableItem.proposed_modification || (reusableItem.proposed_modification && reusableItem.proposed_modification.length === 0)) {
+			if (showProposeModificationForm) { // form to propose a modification
 				modification = (
 					<Row>
 						<Col className="modification-form">
@@ -275,7 +268,7 @@ class ReusableItemDetails extends Component {
 						</Col>
 					</Row>
 				);
-			} else {
+			} else { // button to show the form
 				modification = (
 					<Row>
 						<Col className="modification-button">
@@ -286,8 +279,23 @@ class ReusableItemDetails extends Component {
 					</Row>
 				);
 			}
-		} else {
-			modification = (<span>TODO show proposed modification and voting if appropriate, see TODO in comments</span>);
+		} else if (reusableItem.proposed_modification && reusableItem.proposed_modification.length > 0) { // a proposed modification exists
+			modification = (
+				<Row>
+					<Col className="proposed-modification">
+						<h3>Proposed change</h3>
+						{reusableItem.proposed_modification[0].name && (
+							<div>Name: {reusableItem.proposed_modification[0].name}</div>
+						)}
+						{reusableItem.proposed_modification[0].link && (
+							<div>Link: {reusableItem.proposed_modification[0].link}</div>
+						)}
+						{reusableItem.proposed_modification[0].definition && (
+							<div>Definition: {reusableItem.proposed_modification[0].definition}</div>
+						)}
+					</Col>
+				</Row>
+			);
 		}
 
 		return (

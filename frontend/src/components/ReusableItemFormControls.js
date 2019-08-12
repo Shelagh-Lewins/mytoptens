@@ -19,42 +19,46 @@ function ReusableItemFormControls(props) {
 	const reusableItemHint = 'Your new Reusable Item will be private unless you make it public';
 
 	if (props.newReusableItem) {
-		reusableItemInfo = (<div className="reusable-item">
-			<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.newReusableItem.name}</h3>
-			<p className="header">Create a new Reusable Item</p>
-			<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>
-			<Input
-				type="text"
-				name={`${props.identifier}_definition`}
-				id={`${props.identifier}_definition`}
-				data-state={`${props.identifier}_definition`}
-				data-entityid={props['data-entityid']} // database id of the object to update
-				onChange={props.onChange}
-				value={props.definition}
-				placeholder={definitionPlaceholder}
-			/>
-			<div className='invalid-feedback' />
-			<Label for={`${props.identifier}_link`}>{linkLabel}</Label>
-			<Input
-				type="text"
-				name={`${props.identifier}_link`}
-				id={`${props.identifier}_link`}
-				data-state={`${props.identifier}_link`}
-				data-entityid={props['data-entityid']} // database id of the object to update
-				onChange={props.onChange}
-				value={props.link}
-				placeholder={linkPlaceholder}
-			/>
-			<div className='invalid-feedback' />
-			<p className="hint">{reusableItemHint}</p>
-		</div>);
+		reusableItemInfo = (
+			<div className="reusable-item">
+				<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.newReusableItem.name}</h3>
+				<p className="header">Create a new Reusable Item</p>
+				<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>
+				<Input
+					type="text"
+					name={`${props.identifier}_definition`}
+					id={`${props.identifier}_definition`}
+					data-state={`${props.identifier}_definition`}
+					data-entityid={props['data-entityid']} // database id of the object to update
+					onChange={props.onChange}
+					value={props.definition}
+					placeholder={definitionPlaceholder}
+				/>
+				<div className="invalid-feedback" />
+				<Label for={`${props.identifier}_link`}>{linkLabel}</Label>
+				<Input
+					type="text"
+					name={`${props.identifier}_link`}
+					id={`${props.identifier}_link`}
+					data-state={`${props.identifier}_link`}
+					data-entityid={props['data-entityid']} // database id of the object to update
+					onChange={props.onChange}
+					value={props.link}
+					placeholder={linkPlaceholder}
+				/>
+				<div className="invalid-feedback" />
+				<p className="hint">{reusableItemHint}</p>
+			</div>
+		);
 		showReusableItemInfo = true;
 	} else if (props.reusableItem) {
-		reusableItemInfo = (<div className="reusable-item">
-			<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.reusableItem.name}</h3>
-			{props.reusableItem.definition && <p>{props.reusableItem.definition}</p>}
-			{props.reusableItem.link && <p>{props.reusableItem.link}</p>}
-		</div>);
+		reusableItemInfo = (
+			<div className="reusable-item">
+				<h3><span className="icon" title="Reusable item"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.reusableItem.name}</h3>
+				{props.reusableItem.definition && <p>{props.reusableItem.definition}</p>}
+				{props.reusableItem.link && <p>{props.reusableItem.link}</p>}
+			</div>
+		);
 		showReusableItemInfo = true;
 	} else if (props.topTenItem) {
 		reusableItemInfo = (
@@ -72,7 +76,7 @@ function ReusableItemFormControls(props) {
 					value={props.definition}
 					placeholder={definitionPlaceholder}
 				/>
-				<div className='invalid-feedback' />
+				<div className="invalid-feedback" />
 				<Label for={`${props.identifier}_link`}>{linkLabel}</Label>
 				<Input
 					type="text"
@@ -84,7 +88,7 @@ function ReusableItemFormControls(props) {
 					value={props.link}
 					placeholder={linkPlaceholder}
 				/>
-				<div className='invalid-feedback' />
+				<div className="invalid-feedback" />
 				<p className="hint">{reusableItemHint}</p>
 			</div>
 		);
