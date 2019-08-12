@@ -299,7 +299,7 @@ class SearchListsItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-m
 class ReusableItemViewSet(FlexFieldsModelViewSet):
     """
     ViewSet for reusableItems.
-    ReusableItems are public.
+    User can see public reusableItems and reusableItems that they created
     """
 
     # only users with verified email can propose modifications
@@ -312,14 +312,22 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
         obj.created_by = self.request.user
 
     def get_queryset(self):
+        queryset = ReusableItem.objects.all()
+
         # return details of a single ReusableItem
         if 'id' in self.request.query_params:
             reusableItemId = self.request.query_params.get('id', None)
 
-            return ReusableItem.objects.filter(id=reusableItemId)
+            queryset = queryset.filter(id=reusableItemId)
+
+        if self.request.user.is_authenticated:
+            return queryset.filter(
+                Q(created_by=self.request.user) | 
+                Q(is_public=True)
+            )
 
         else:
-         return ReusableItem.objects.all()
+            return queryset.filter(is_public=True)
 
     def perform_create(self, serializer):
         # do not allow a reusableItem to be created by the API

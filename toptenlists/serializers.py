@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
+from allauth.account.models import EmailAddress 
 
 import uuid
 
@@ -80,7 +81,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # there must be a change request
         if count == 0:
-            ({'reusable item': 'no change request submitted'})
+            raise ValidationError({'reusable item error': 'no change request submitted'})
 
         # only one type of change request is allowed
         if count > 1:
@@ -107,10 +108,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
 
     def update(self, instance, validated_data):
-        """ we trust to_internal_value to have ensured there is exactly one change request which may be:
-        -  a proposed modification
-        - a vote on an existing modification
+        """ to_internal_value thas made sure there is exactly one change request which may be:
         - a change to is_public
+        - a proposed modification
+        - a vote on an existing modification
 
         and that the instance's change_type is correct for the change request. No other data will be processed.
         """
@@ -118,17 +119,30 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         print(instance.name)
         # print(instance.__dict__) # all values of current reusableItem
 
-        # check permissions
-        created_by_current_user = (self.context['request'].user == getattr(instance, 'created_by'))
+        current_user = self.context['request'].user
+        created_by_current_user = (current_user == getattr(instance, 'created_by'))
         change_types = ['is_public','modification','vote']
 
+        # check permissions
         # basic gatekeeping
+        if not current_user.is_authenticated:
+            raise ValidationError({'update reusable item error: user is not logged in'})
+
+        try:
+            email_address = EmailAddress.objects.get(user_id=current_user.id)
+
+            if not email_address.verified:
+                raise ValidationError({'update reusable item error: user idoes not have a verified email address'})
+
+        except:
+            raise ValidationError({'update reusable item error: error getting email_address'})
+
         if self.change_type not in change_types:
-            raise ValidationError({'reusable item error: invalid change type'})
+            raise ValidationError({'update reusable item error: invalid change type'})
 
         elif self.change_type == 'vote':
             if not getattr(instance, 'is_public'):
-                raise ValidationError({'reusable item error: cannot vote on modification to reusableItem because the reusableItem is not public'})
+                raise ValidationError({'update reusable item error: cannot vote on modification to reusableItem because the reusableItem is not public'})
 
         print('validated_data')
         print(validated_data)
@@ -142,13 +156,13 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 and change the current user's topTenItems to reference the new reusableItem instead of the instance
                 if nobody else references the original resuableItem, it will be automatically deleted
                 """
-                reusableItemData =  {
+                reusableItemData = {
                 'name': instance.name,
                 'definition': instance.definition,
                 'is_public': False,
                 'link': instance.link,
-                'created_by': self.context['request'].user,
-                'created_by_username': self.context['request'].user.username
+                'created_by': current_user,
+                'created_by_username': current_user.username
                 }
 
                 newReusableItem = ReusableItem.objects.create( **reusableItemData)
@@ -156,7 +170,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 # topTenItems whose parent topTenList was created by current user
                 # select_related gets their parent topTenList as well so we can check ownership
                 myTopTenItems = TopTenItem.objects.filter(reusableItem=instance,
-                    topTenList__created_by=self.context['request'].user).select_related('topTenList')
+                    topTenList__created_by=current_user).select_related('topTenList')
 
                 # all the user's topTenItems should reference the new reusableItem
                 for topTenItem in myTopTenItems:
@@ -173,9 +187,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 instance.is_public = True
                 instance.save()
 
-        # TODO only allow proposed_modification or vote if item is public
-        # TODO do not allow modification or vote if private and not owned by user
-
         # propose a modification
         if self.change_type == 'modification':
 
@@ -191,37 +202,60 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                         proposed_modification[key] = validated_data[key]
 
             if len(proposed_modification) is 0:
-                raise ValidationError({'reusable item error: no new values have been proposed'})
+                raise ValidationError({'update reusable item error: no new values have been proposed'})
 
             # there must not already be a proposed_modification
-            modification_already_exists = False
-
-            if instance.proposed_modification is not None: # avoid error if no value already
-                print('already got a proposed_modification')
+            if instance.proposed_modification is not None: # avoid error if no value already, but usually there is an empty array
                 if len(instance.proposed_modification) is not 0:
-                    modification_already_exists = True
-                    print('and it has elements')
+                    raise ValidationError({'update reusable item error: a new modification cannot be proposed while there is an existing modification proposal'})
 
-            if modification_already_exists:
-                raise ValidationError({'reusable item error: a new modification cannot be proposed while there is an existing modification proposal'})
+            # update the reusableItem immediately, or create a modification proposal?
+            update_immediately = False
+
+            # is this a private reusableItem?
+            if not getattr(instance, 'is_public'):
+                if not created_by_current_user:
+                    raise ValidationError({'reusable item error: cannot update the private reusable item because it was not created by the current user'})
+
+                update_immediately = True
 
             else:
-                instance.proposed_modification = []
-                instance.proposed_modification.append(proposed_modification)
-                instance.proposed_at = timezone.now()
-                instance.proposed_by = self.context['request'].user
-                instance.votes_yes = 0
-                instance.votes_no = 0
-                print('instance.proposed_modification:')
-                print(instance.proposed_modification)
+                # topTenItems belonging to other users that reference this reusableItem
+                otherTopTenItems = TopTenItem.objects.filter(reusableItem=instance).exclude(topTenList__created_by=current_user).select_related('topTenList')
+
+                if otherTopTenItems.count() is 0:
+                    # no other user references this reusableItem
+                    update_immediately = True
+
+            if update_immediately:
+                for key in validated_data:
+                    setattr(instance, key, validated_data[key])
+
+                instance.modified_at = timezone.now()
                 instance.save()
+                return instance
+
+            # there needs to be a vote on the modification
+            instance.proposed_modification = []
+            instance.proposed_modification.append(proposed_modification)
+            instance.proposed_at = timezone.now()
+            instance.proposed_by = current_user
+            instance.votes_yes = 0
+            instance.votes_no = 0
+            #print('instance.proposed_modification:')
+            #print(instance.proposed_modification)
+            instance.save()
 
         # vote on a modification
         #print('about to save')
         #print()
 
+        # TODO only allow proposed_modification or vote if item is public
+        # TODO do not allow modification or vote if private and not owned by user
+
+
         # instance.save()
-        return instance 
+        return instance
 
 
 class TopTenItemSerializer(FlexFieldsModelSerializer):
@@ -366,14 +400,13 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
                         if 'definition' in topTenItem_data:
                             reusableItemData['definition'] = topTenItem_data['definition']
-                        
+
                         if 'link' in topTenItem_data:
                             reusableItemData['link'] = topTenItem_data['link']
 
-                        newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                        newReusableItem = ReusableItem.objects.create(**reusableItemData)
 
                         internal_value['topTenItem'][index]['reusableItem'] = newReusableItem
-                    
 
                 elif 'reusableItem_id' in topTenItem_data:
                     # reference an existing reusableItem
@@ -408,11 +441,11 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
                         if 'definition' in topTenItem_data:
                             reusableItemData['definition'] = topTenItem_data['definition']
-                        
+
                         if 'link' in topTenItem_data:
                             reusableItemData['link'] = topTenItem_data['link']
 
-                        newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                        newReusableItem = ReusableItem.objects.create(**reusableItemData)
 
                         # assign this reusableItem to the topTenItem from which it was created - so it will now be referenced twice
                         parentTopTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
@@ -434,7 +467,6 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
         return internal_value
 
     def create(self, validated_data):
-        print('create topTenList')
         topTenItems_data = validated_data.pop('topTenItem', None)
         validated_data['created_by'] = self.context['request'].user
         validated_data['created_by_username'] = self.context['request'].user.username

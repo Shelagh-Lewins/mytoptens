@@ -60,6 +60,8 @@ export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 
 export const SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED = 'SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED';
 
+export const UPDATE_REUSABLEITEM_SUCCEEDED = 'UPDATE_REUSABLEITEM_SUCCEEDED';
+
 export const UPDATE_REUSABLEITEM_STARTED = 'UPDATE_REUSABLEITEMS_STARTED';
 export const UPDATE_REUSABLEITEM_FAILED = 'UPDATE_REUSABLEITEMS_FAILED';
 
@@ -164,8 +166,12 @@ export function fetchReusableItemDetail(id) {
 	return (dispatch, getState) => {
 		dispatch(fetchReusableItemDetailStarted());
 
-		// All ReusableItems are public
-		const useAuth = false;
+		// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
+		let useAuth = false;
+
+		if (getState().auth.user.token) {
+			useAuth = true;
+		}
 
 		return fetchAPI({
 			'url': `/api/v1/content/reusableitem/?id=${id}`,
@@ -266,7 +272,7 @@ export const setReusableItemIsPublic = ({ id, is_public }) => (dispatch) => {
 
 		const newResponse = JSON.parse(JSON.stringify(response));
 		newResponse.sourceId = id;
-		console.log('newResponse', newResponse);
+		// console.log('newResponse', newResponse);
 
 		return dispatch(setReusableItemIsPublicSucceeded(newResponse));
 	}).catch((error) => {
@@ -288,8 +294,15 @@ function updateReusableItemFailed() {
 	};
 }
 
+export function updateReusableItemSucceeded(response) {
+	return {
+		'type': UPDATE_REUSABLEITEM_SUCCEEDED,
+		'payload': response,
+	};
+}
+
 export const updateReusableItem = (reusableItemId, data) => (dispatch) => {
-	console.log('updateReusableItem', reusableItemId, data);
+	// console.log('updateReusableItem', reusableItemId, data);
 	dispatch(updateReusableItemStarted());
 
 	return fetchAPI({
@@ -299,7 +312,8 @@ export const updateReusableItem = (reusableItemId, data) => (dispatch) => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		console.log('updateReusableItem response', response);
+		// console.log('updateReusableItem response', response);
+		return dispatch(updateReusableItemSucceeded(response));
 	}).catch((error) => {
 		dispatch(updateReusableItemFailed());
 
@@ -635,6 +649,18 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			// same reusableItem that the user was originally trying to edit
 			// probably the user made a private reusableItem public
 			return updeep({ 'things': { [id]: { 'is_public': is_public } } }, state);
+		}
+
+		case UPDATE_REUSABLEITEM_SUCCEEDED: {
+			// update editable properties
+			const update = {
+				'name': action.payload.name,
+				'definition': action.payload.definition,
+				'link': action.payload.link,
+				'modified_at': action.payload.modified_at,
+			};
+
+			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
 		default:

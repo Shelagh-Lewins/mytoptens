@@ -203,8 +203,15 @@ export function fetchOrganizerData(userId) {
 			useAuth = true;
 		}
 
+		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem';
+
+		if (useAuth) {
+			URL += `&created_by=${userId}`;
+		}
+
 		return fetchAPI({
-			'url': `/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem&created_by=${userId}`,
+			// 'url': `/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem&created_by=${userId}`,
+			'url': URL,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {

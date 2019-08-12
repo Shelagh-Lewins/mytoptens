@@ -176,7 +176,12 @@ class ReusableItemDetails extends Component {
 					<FontAwesomeIcon icon={['fas', 'question-circle']} style={{ 'color': COLORS.HELP }} size="1x" />
 				</Button>
 				<Popover placement="bottom" isOpen={popoverOpen} target={reusableItemHelpId} toggle={() => this.togglePopover(reusableItemHelpId)} html="true">
-					<PopoverBody>A Reusable Item is a shared Top Ten Item name that can be used by anybody. Although the Reusable Item can be seen by anybody, nobody will see your list unless you make the list public.</PopoverBody>
+					<PopoverBody>
+						<p>A Reusable Item is a shared Top Ten Item name that can be used in multiple lists.</p>
+						<p>A Reusable Item is private by default, meaning that only its creator can see it.</p>
+						<p>If you make a Reusable Item public, other people will be able to use it in their Top Ten Lists and suggest changes to it, even if their lists are private.</p>
+						<p>You will never see another user&apos;s private Top Ten Lists, even if it includes a public Reusable Item</p>
+					</PopoverBody>
 				</Popover>
 			</div>
 		);
@@ -368,7 +373,7 @@ class ReusableItemDetails extends Component {
 		if (canView) {
 			content = this.renderPage();
 		} else {
-			content = <p>This Reusable Item does not exist</p>;
+			content = <p>This Reusable Item does not exist or you do not have permission to see it.</p>;
 		}
 		return (
 			<div className="reusableitem-detail">
