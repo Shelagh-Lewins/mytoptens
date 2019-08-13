@@ -180,7 +180,9 @@ export function fetchReusableItemDetail(id) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
+			// console.log('fetchReusableItemDetail response', response);
 			const normalizedData = normalize(response, [reusableItemSchema]);
+
 			dispatch(topTenListsReducer.fetchOrganizerData(getState().auth.user.id));
 
 			return dispatch(receiveEntities(normalizedData));
@@ -188,38 +190,6 @@ export function fetchReusableItemDetail(id) {
 			dispatch(fetchReusableItemDetailFailed());
 
 			return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
-		});
-	};
-}
-
-// /////////////////////////////
-// fetch voting information for a single reusableItem
-export function fetchReusableItemVotesStarted() {
-	return {
-		'type': FETCH_REUSABLEITEM_VOTES_STARTED,
-	};
-}
-
-export function fetchReusableItemVotes(id) {
-	return (dispatch, getState) => {
-		dispatch(fetchReusableItemDetailStarted());
-
-		// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
-		let useAuth = false;
-
-		if (getState().auth.user.token) {
-			useAuth = true;
-		}
-
-		return fetchAPI({
-			'url': `/api/v1/content/reusableitem/${id}/votes/?fields=id,name&expand=name`,
-			'method': 'GET',
-			'useAuth': useAuth,
-		}).then((response) => {
-			console.log('votes response', response);
-			// return dispatch(receiveEntities(normalizedData));
-		}).catch((error) => {
-			return dispatch(getErrors({ 'fetch reusableItemVotes': error.message }));
 		});
 	};
 }
@@ -328,26 +298,22 @@ function updateReusableItemFailed() {
 	};
 }
 
-export function updateReusableItemSucceeded(response) {
-	return {
-		'type': UPDATE_REUSABLEITEM_SUCCEEDED,
-		'payload': response,
-	};
-}
-
-export const updateReusableItem = (reusableItemId, data) => (dispatch) => {
+export const updateReusableItem = (id, data) => (dispatch) => {
 	// console.log('updateReusableItem', reusableItemId, data);
 	dispatch(updateReusableItemStarted());
 
 	return fetchAPI({
-		'url': `/api/v1/content/reusableitem/${reusableItemId}/`,
+		'url': `/api/v1/content/reusableitem/${id}/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'data': JSON.stringify(data),
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		console.log('updateReusableItem response', response);
-		return dispatch(updateReusableItemSucceeded(response));
+		// console.log('updateReusableItem response', response);
+
+		const normalizedData = normalize([response], [reusableItemSchema]);
+
+		return dispatch(receiveEntities(normalizedData));
 	}).catch((error) => {
 		dispatch(updateReusableItemFailed());
 
@@ -683,19 +649,6 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			// same reusableItem that the user was originally trying to edit
 			// probably the user made a private reusableItem public
 			return updeep({ 'things': { [id]: { 'is_public': is_public } } }, state);
-		}
-
-		case UPDATE_REUSABLEITEM_SUCCEEDED: {
-			// update editable properties
-			const update = {
-				'name': action.payload.name,
-				'definition': action.payload.definition,
-				'link': action.payload.link,
-				'modified_at': action.payload.modified_at,
-				'proposed_modification': action.payload.proposed_modification,
-			};
-
-			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
 		default:

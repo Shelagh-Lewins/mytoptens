@@ -53,6 +53,12 @@ class ReusableItem(models.Model):
         blank=True, related_name='reusableItem_proposed_by') # user who proposed the modification
     history = JSONField(default=list, blank=True) # array of version objects
 
+    votes_yes_count = models.IntegerField(blank=True, null=True)
+    votes_no_count = models.IntegerField(blank=True, null=True)
+
+    # this should never be saved. It is only here to allow a user's vote to be returned to them, so the UI can display their vote
+    my_vote = models.CharField(max_length=255, blank=True, null=True)
+
     # blank=True says the field is not required in forms. This is necessary for Django admin interface to work.
     # default=... provides a default value to the database.
     

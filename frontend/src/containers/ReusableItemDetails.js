@@ -103,7 +103,6 @@ class ReusableItemDetails extends Component {
 		const { 'id': reusableItemId } = props.match.params;
 
 		props.dispatch(reusableItemReducer.fetchReusableItemDetail(reusableItemId));
-		props.dispatch(reusableItemReducer.fetchReusableItemVotes(reusableItemId));
 		props.dispatch(errorsReducer.clearErrors());
 		return reusableItemId;
 	}

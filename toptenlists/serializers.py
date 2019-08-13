@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
+from rest_framework.response import Response
 from allauth.account.models import EmailAddress 
 
 import uuid
@@ -45,9 +46,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         model = ReusableItem
         # note that votes_yes and votes_no must not be returned
         # they are lists of user email addresses
-        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history')
-
-        # fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'votes_yes', 'votes_no', 'proposed_modification', 'proposed_by', 'history')
+        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote')
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -58,8 +57,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # ensure only one, valid change request is passed through
         """
 
-        print('resuableItem to_internal_value received raw data:')
-        print(data)
+        #print('resuableItem to_internal_value received raw data:')
+        #print(data)
 
         change_type = ''
         validated_data = {}
@@ -119,8 +118,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         and that the instance's change_type is correct for the change request. No other data will be processed.
         """
-        print('***** update reusableItem *****')
-        print(instance.name)
+        #print('***** update reusableItem *****')
+        #print(instance.name)
         # print(instance.__dict__) # all values of current reusableItem
 
         current_user = self.context['request'].user
@@ -147,8 +146,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             if not getattr(instance, 'is_public'):
                 raise ValidationError({'update reusable item error: cannot vote on modification to reusableItem because the reusableItem is not public'})
 
-        print('validated_data')
-        print(validated_data)
+        #print('validated_data')
+        #print(validated_data)
 
         if self.change_type == 'is_public':
             if getattr(instance, 'is_public'):
@@ -246,6 +245,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.proposed_by = current_user
             instance.votes_yes = []
             instance.votes_no = []
+            instance.votes_yes_count = 0
+            instance.votes_no_count = 0
 
             instance.save()
             return instance
@@ -274,7 +275,17 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             elif validated_data['vote'] == 'no':
                 instance.votes_no.append(current_user.email)
 
+            # users cannot see the actual list of votes, because these are recorded by email address
+            # instead we save the summarised voting data
+            # and return the unsaved value of the user's vote
+
+            instance.votes_yes_count = len(instance.votes_yes)
+            instance.votes_no_count = len(instance.votes_no)
+
             instance.save()
+
+            instance.my_vote = validated_data['vote']
+
             return instance
 
 
@@ -292,7 +303,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     # https://github.com/encode/django-rest-framework/issues/627
 
     expandable_fields = {
-        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history']})
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote']})
     }
 
     class Meta:

@@ -339,51 +339,6 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
         # reusableItems are deleted when no longer referenced
         raise APIException("ReusableItem may not be deleted via API")
 
-    @detail_route(methods=['get'])
-    def votes(self, request, pk=None):
-        current_user = self.request.user
-
-        if not current_user.is_authenticated:
-            raise APIException({'get reusable item votes error: user is not logged in'})
-
-        try:
-            email_address = EmailAddress.objects.get(user_id=current_user.id)
-
-            if not email_address.verified:
-                raise ValidationError({'get reusable item votes error: user idoes not have a verified email address'})
-
-        except:
-            raise APIException({'get reusable item votes error: error getting email_address'})
-
-        reusableItem = ReusableItem.objects.get(pk=pk)
-
-
-        print('votes: reusableItem, name')
-        print(reusableItem.name)
-        print(ReusableItem._meta.get_field('name').value_from_object(reusableItem))
-        print(getattr(reusableItem, 'name'))
-        # investigate further. This seems to work but is very clunky.
-        # for some reason all fields are deferred and can't be got in the usual way.
-        # https://stackoverflow.com/questions/51905712/how-to-get-the-value-of-a-django-model-field-object
-
-        myVote = ''
-
-        #if email_address in ReusableItem.votes_yes:
-            #myVote = 'yes'
-
-        #elif email_address in ReusableItem.votes_yes:
-            #myVote = 'no'
-
-
-        votingData = {
-        'id': pk,
-        #'votes_yes_count': len(reusableItem.votes_yes),
-        #'votes_no_count': len(reusableItem.votes_no),
-        }
-
-        return Response(votingData)
-
-
 class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-many-ancestors
     """
     Search for ReusableItems by name
