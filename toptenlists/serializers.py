@@ -42,11 +42,24 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     # user may propose empty string for definition or link
     editable_properties = ['name', 'definition', 'link']
 
+    my_vote = serializers.SerializerMethodField()
+
     class Meta:
         model = ReusableItem
         # note that votes_yes and votes_no must not be returned
         # they are lists of user email addresses
         fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote')
+
+    def get_my_vote(self, obj):
+        current_user = self.context['request'].user
+
+        if current_user.email in obj.votes_yes:
+            return 'yes'
+
+        if current_user.email in obj.votes_no:
+            return 'no'
+
+        return ''
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -284,7 +297,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             instance.save()
 
-            instance.my_vote = validated_data['vote']
+            # instance.my_vote = validated_data['vote']
 
             return instance
 
