@@ -225,9 +225,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 raise ValidationError({'update reusable item error: no new values have been proposed'})
 
             # there must not already be a proposed_modification
-            if instance.proposed_modification is not None: # avoid error if no value already, but usually there is an empty array
-                if len(instance.proposed_modification) is not 0:
-                    raise ValidationError({'update reusable item error: a new modification cannot be proposed while there is an existing modification proposal'})
+            if instance.proposed_modification is not None:
+                raise ValidationError({'update reusable item error: a new modification cannot be proposed while there is an existing modification proposal'})
 
             # update the reusableItem immediately, or create a modification proposal?
             update_immediately = False
@@ -256,8 +255,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 return instance
 
             # there needs to be a vote on the modification
-            instance.proposed_modification = []
-            instance.proposed_modification.append(proposed_modification)
+            instance.proposed_modification = proposed_modification
             instance.proposed_at = timezone.now()
             instance.proposed_by = current_user
             instance.votes_yes = []

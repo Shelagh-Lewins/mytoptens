@@ -267,7 +267,7 @@ class ReusableItemDetails extends Component {
 		})(BasicModificationForm);
 
 		// if no proposed modification exists already
-		if (!reusableItem.proposed_modification || (reusableItem.proposed_modification && reusableItem.proposed_modification.length === 0)) {
+		if (!reusableItem.proposed_modification) {
 			if (showProposeModificationForm) { // form to propose a modification
 				modification = (
 					<Row>
@@ -294,31 +294,20 @@ class ReusableItemDetails extends Component {
 					</div>
 				);
 			}
-		} else if (reusableItem.proposed_modification && reusableItem.proposed_modification.length > 0) { // a proposed modification exists
-			let votesYes = 0;
-			let votesNo = 0;
-
-			if (reusableItem.proposed_modification[0].votes_yes) {
-				votesYes = reusableItem.proposed_modification[0].votes_yes.length();
-			}
-
-			if (reusableItem.proposed_modification[0].votes_no) {
-				votesNo = reusableItem.proposed_modification[0].votes_no.length();
-			}
-
+		} else if (reusableItem.proposed_modification) { // a proposed modification exists
 			modification = (
 				<div className="proposed-modification">
 					<Row>
 						<Col className="changes">
 							<h3>Proposed change</h3>
-							{reusableItem.proposed_modification[0].name && (
-								<div>Name: {reusableItem.proposed_modification[0].name}</div>
+							{reusableItem.proposed_modification.name && (
+								<div>Name: {reusableItem.proposed_modification.name}</div>
 							)}
-							{reusableItem.proposed_modification[0].link && (
-								<div>Link: {reusableItem.proposed_modification[0].link}</div>
+							{reusableItem.proposed_modification.link && (
+								<div>Link: {reusableItem.proposed_modification.link}</div>
 							)}
-							{reusableItem.proposed_modification[0].definition && (
-								<div>Definition: {reusableItem.proposed_modification[0].definition}</div>
+							{reusableItem.proposed_modification.definition && (
+								<div>Definition: {reusableItem.proposed_modification.definition}</div>
 							)}
 						</Col>
 					</Row>
@@ -329,20 +318,25 @@ class ReusableItemDetails extends Component {
 					</Row>
 					<Row>
 						<Col md="6" lg="12" className="votes">
-							{reusableItem.proposed_modification[0] && (
+							{reusableItem.proposed_modification && (
 								<React.Fragment>
-									<span>For: {votesYes}</span>
+									<span>For: {reusableItem.votes_yes_count}</span>
 									<span><button type="button" color="secondary" onClick={() => this.VoteOnModification('yes')}>Vote for change</button></span>
 								</React.Fragment>
 							)}
 						</Col>
 						<Col md="6" lg="12" className="votes">
-							{reusableItem.proposed_modification[0] && (
+							{reusableItem.proposed_modification && (
 								<React.Fragment>
-									<span>Against: {votesNo}</span>
+									<span>Against: {reusableItem.votes_no_count}</span>
 									<span><button type="button" color="secondary" onClick={() => this.VoteOnModification('no')}>Vote against change</button></span>
 								</React.Fragment>
 							)}
+						</Col>
+					</Row>
+					<Row>
+						<Col>
+							My vote: {reusableItem.my_vote}
 						</Col>
 					</Row>
 				</div>

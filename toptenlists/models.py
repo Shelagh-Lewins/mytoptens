@@ -47,7 +47,7 @@ class ReusableItem(models.Model):
     users_when_modified = models.IntegerField(default=0)
     votes_yes = JSONField(default=list, blank=True) # array of usernames.
     votes_no = JSONField(default=list, blank=True) # array of usernames.
-    proposed_modification = JSONField(default=list, blank=True) # array of modification objects
+    proposed_modification = JSONField(default=None, blank=True, null=True) # array of modification objects
     proposed_at = models.DateTimeField(blank=True, null=True)
     proposed_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
         blank=True, related_name='reusableItem_proposed_by') # user who proposed the modification
