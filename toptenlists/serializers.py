@@ -159,12 +159,18 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if self.change_type not in change_types:
             raise ValidationError({'update reusable item error: invalid change type'})
 
+        # Find the current user's topTenLists which reference this reusableItem
+        # topTenItems whose parent topTenList was created by current user
+        # select_related gets their parent topTenList as well so we can check ownership
+        myTopTenItems = TopTenItem.objects.filter(reusableItem=instance,
+            topTenList__created_by=current_user).select_related('topTenList')
+
+        if myTopTenItems.count() == 0:
+            raise ValidationError({'update reusable item error: you cannot update a reusableItem that is not used in any of your lists'})
+
         elif self.change_type == 'vote':
             if not getattr(instance, 'is_public'):
                 raise ValidationError({'update reusable item error: cannot vote on modification to reusableItem because the reusableItem is not public'})
-
-        #print('validated_data')
-        #print(validated_data)
 
         if self.change_type == 'is_public':
             if getattr(instance, 'is_public'):
@@ -185,11 +191,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 }
 
                 newReusableItem = ReusableItem.objects.create( **reusableItemData)
-
-                # topTenItems whose parent topTenList was created by current user
-                # select_related gets their parent topTenList as well so we can check ownership
-                myTopTenItems = TopTenItem.objects.filter(reusableItem=instance,
-                    topTenList__created_by=current_user).select_related('topTenList')
 
                 # all the user's topTenItems should reference the new reusableItem
                 for topTenItem in myTopTenItems:

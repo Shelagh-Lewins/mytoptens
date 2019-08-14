@@ -222,6 +222,8 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
         # do not allow order to be changed
         if serializer.validated_data.get('order', None) is not None:
             raise APIException("TopTenItem order may not be changed. Use moveup instead.")
+
+        print('updating topTenItem')
  
         serializer.save()
 
