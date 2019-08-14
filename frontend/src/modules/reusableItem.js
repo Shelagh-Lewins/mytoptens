@@ -335,9 +335,9 @@ export const updateReusableItem = (id, data) => (dispatch) => {
 		'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
 		'modified_at': new Date(),
 		'users_when_modified': 403, // number of different users referencing this resuableItem in their own lists at the time when the last update was accepted. This is for tracking the approval process.
-		'votes_yes': [], // votes cast for the most recent modification
+		'votes_yes': [], // votes cast for the most recent change request
 		'votes_no': [],
-		'proposed_modification': [ // may need to allow multiple proposed edits
+		'change_request': [ // may need to allow multiple proposed edits
 		// prevent same user voting more than once
 		// allow them to change their vote
 		// only allow votes by people using the item? And remove the vote if they stop using the item. Time delay?

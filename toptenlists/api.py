@@ -224,6 +224,8 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
             raise APIException("TopTenItem order may not be changed. Use moveup instead.")
 
         print('updating topTenItem')
+
+        # as a user can only vote on a reusableItem change request if they use it in one of their lists
  
         serializer.save()
 
@@ -304,7 +306,7 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
     User can see public reusableItems and reusableItems that they created
     """
 
-    # only users with verified email can propose modifications
+    # only users with verified email can request changes
     permission_classes = [HasVerifiedEmail]
     model = ReusableItem
     serializer_class = ReusableItemSerializer

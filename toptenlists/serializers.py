@@ -50,7 +50,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         model = ReusableItem
         # note that votes_yes and votes_no must not be returned
         # they are lists of user email addresses
-        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote')
+        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'modified_at', 'users_when_modified', 'change_request', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote')
 
     # magic method name
     def get_my_vote(self, obj):
@@ -69,8 +69,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         """ intercept update data before it is validated
         update may contain one of these change requests:
          a change to is_public
-         proposed modification
-         a vote
+         a new change request
+         a vote on a change request
         # ensure only one, valid change request is passed through
         """
 
@@ -86,10 +86,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             change_type = 'is_public'
             count = count + 1
 
-        # if name, definition or link, a modification is proposed
+        # if name, definition or link, a change request is proposed
         for key in ReusableItemSerializer.editable_properties:
             if key in data:
-                change_type = 'modification'
+                change_type = 'change_request'
                 count = count + 1
                 break # don't count more than one
 
@@ -108,7 +108,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             raise ValidationError({'reusable item error: you cannot submit more than one type of change in the same request'})
 
         # do not accept empty string for name
-        if change_type == 'modification':
+        if change_type == 'change_request':
             for key in ReusableItemSerializer.editable_properties:
                 if key in data:
                     if key is 'name' and not data[key]: # empty string
@@ -130,8 +130,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     def update(self, instance, validated_data):
         """ to_internal_value thas made sure there is exactly one change request which may be:
         - a change to is_public
-        - a proposed modification
-        - a vote on an existing modification
+        - a proposed change request
+        - a vote on an existing change request
 
         and that the instance's change_type is correct for the change request. No other data will be processed.
         """
@@ -141,7 +141,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         current_user = self.context['request'].user
         created_by_current_user = (current_user == getattr(instance, 'created_by'))
-        change_types = ['is_public','modification','vote']
+        change_types = ['is_public','change_request','vote']
 
         # check basic permissions
         if not current_user.is_authenticated:
@@ -170,14 +170,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         elif self.change_type == 'vote':
             if not getattr(instance, 'is_public'):
-                raise ValidationError({'update reusable item error: cannot vote on modification to reusableItem because the reusableItem is not public'})
+                raise ValidationError({'update reusable item error: cannot vote on change request to reusableItem because the reusableItem is not public'})
 
         if self.change_type == 'is_public':
             if getattr(instance, 'is_public'):
                 """
                 make a public resuableItem private
                 we make a new private reusableItem as a copy of the public one (intance)
-                without the proposed modifications and votes
+                without the proposed change requests and votes
                 and change the current user's topTenItems to reference the new reusableItem instead of the instance
                 if nobody else references the original resuableItem, it will be automatically deleted
                 """
@@ -208,11 +208,11 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 instance.save()
                 return instance
 
-        # propose a modification
-        elif self.change_type == 'modification':
+        # propose a change request
+        elif self.change_type == 'change_request':
 
-            # if name, definition or link, a modification is proposed
-            proposed_modification = {}
+            # if name, definition or link, a change request is proposed
+            change_request = {}
 
             for key in ReusableItemSerializer.editable_properties:
                 if key in validated_data:
@@ -220,16 +220,16 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                     print(getattr(instance, key))
                     # only process new values
                     if getattr(instance, key) != validated_data[key]:
-                        proposed_modification[key] = validated_data[key]
+                        change_request[key] = validated_data[key]
 
-            if len(proposed_modification) is 0:
+            if len(change_request) is 0:
                 raise ValidationError({'update reusable item error: no new values have been proposed'})
 
-            # there must not already be a proposed_modification
-            if instance.proposed_modification is not None:
-                raise ValidationError({'update reusable item error: a new modification cannot be proposed while there is an existing modification proposal'})
+            # there must not already be a change_request
+            if instance.change_request is not None:
+                raise ValidationError({'update reusable item error: a new change request cannot be created while there is an existing change request proposal'})
 
-            # update the reusableItem immediately, or create a modification proposal?
+            # update the reusableItem immediately, or create a change request?
             update_immediately = False
 
             # is this a private reusableItem?
@@ -255,8 +255,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 instance.save()
                 return instance
 
-            # there needs to be a vote on the modification
-            instance.proposed_modification = proposed_modification
+            # there needs to be a vote on the change request
+            instance.change_request = change_request
             instance.proposed_at = timezone.now()
             instance.proposed_by = current_user
             instance.votes_yes = []
@@ -267,7 +267,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.save()
             return instance
 
-        # vote on a modification
+        # vote on a change request
         elif self.change_type == 'vote':
             # is this a private reusableItem?
             if not getattr(instance, 'is_public'):
@@ -314,7 +314,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     # https://github.com/encode/django-rest-framework/issues/627
 
     expandable_fields = {
-        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'proposed_modification', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote']})
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'modified_at', 'users_when_modified', 'change_request', 'proposed_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote']})
     }
 
     class Meta:

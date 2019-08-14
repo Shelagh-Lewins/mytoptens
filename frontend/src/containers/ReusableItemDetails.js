@@ -33,7 +33,7 @@ class ReusableItemDetails extends Component {
 		this.state = {
 			id,
 			'popoverOpenreusableItemHelp': false,
-			'showProposeModificationForm': false,
+			'showChangeRequestForm': false,
 		};
 
 		// each popover in the component needs an id
@@ -46,9 +46,9 @@ class ReusableItemDetails extends Component {
 		});
 
 		this.togglePopover = this.togglePopover.bind(this);
-		this.toggleProposeModificationForm = this.toggleProposeModificationForm.bind(this);
-		this.submitProposeModificationForm = this.submitProposeModificationForm.bind(this);
-		this.VoteOnModification = this.VoteOnModification.bind(this);
+		this.toggleChangeRequestForm = this.toggleChangeRequestForm.bind(this);
+		this.submitChangeRequestForm = this.submitChangeRequestForm.bind(this);
+		this.VoteOnChangeRequest = this.VoteOnChangeRequest.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -117,7 +117,7 @@ class ReusableItemDetails extends Component {
 		const { reusableItem } = this.props;
 		const currentIsPublic = reusableItem.is_public;
 
-		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest modifications to it. Do you want to continue?';
+		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest changes to it. Do you want to continue?';
 
 		if (currentIsPublic) {
 			text = 'This is a public Reusable Item. This action will make a private copy of it which your lists will reference. Do you want to continue?';
@@ -138,15 +138,15 @@ class ReusableItemDetails extends Component {
 		});
 	}
 
-	toggleProposeModificationForm() {
-		const { showProposeModificationForm } = this.state;
+	toggleChangeRequestForm() {
+		const { showChangeRequestForm } = this.state;
 
 		this.setState({
-			'showProposeModificationForm': !showProposeModificationForm,
+			'showChangeRequestForm': !showChangeRequestForm,
 		});
 	}
 
-	submitProposeModificationForm(data) {
+	submitChangeRequestForm(data) {
 		const { id } = this.state;
 		const { dispatch, reusableItem } = this.props;
 		const cleanedData = {};
@@ -165,7 +165,7 @@ class ReusableItemDetails extends Component {
 		}
 	}
 
-	VoteOnModification(vote) {
+	VoteOnChangeRequest(vote) {
 		const { id } = this.state;
 		const { dispatch } = this.props;
 
@@ -174,7 +174,7 @@ class ReusableItemDetails extends Component {
 
 	renderReusableItem() {
 		const { reusableItem } = this.props;
-		const { showProposeModificationForm } = this.state;
+		const { showChangeRequestForm } = this.state;
 
 		const reusableItemHelpId = this.popoverIds.reusableItemHelp;
 		const { [`popoverOpen${reusableItemHelpId}`]: popoverOpen } = this.state;
@@ -194,13 +194,13 @@ class ReusableItemDetails extends Component {
 			</div>
 		);
 
-		let modification;
+		let changeRequest;
 
-		// TODO if proposed modification exists, show it and allow vote if conditions met. Show votes and number required for resolution. Should this information come from the server?
-		// if no proposed modification exists, and user references reusableItem, allow them to propose a modification if verified
+		// TODO if proposed change request exists, show it and allow vote if conditions met. Show votes and number required for resolution. Should this information come from the server?
+		// if no proposed change request exists, and user references reusableItem, allow them to propose a change request if verified
 		// props.topTenItems is array of my topTenItems that reference this reusableItem
 
-		const BasicModificationForm = (props) => {
+		const BasicChangeRequestForm = (props) => {
 			const {
 				touched,
 				errors,
@@ -238,7 +238,7 @@ class ReusableItemDetails extends Component {
 			);
 		};
 
-		const EnhancedModificationForm = withFormik({
+		const EnhancedChangeRequestForm = withFormik({
 			'mapPropsToValues': (props: Props) => ({
 				'name': props.data.name, 'definition': props.data.definition, 'link': props.data.link,
 			}),
@@ -263,30 +263,30 @@ class ReusableItemDetails extends Component {
 				}, 1000);
 			},
 
-			'displayName': 'ModificationForm',
-		})(BasicModificationForm);
+			'displayName': 'ChangeRequestForm',
+		})(BasicChangeRequestForm);
 
-		// if no proposed modification exists already
-		if (!reusableItem.proposed_modification) {
-			if (showProposeModificationForm) { // form to propose a modification
-				modification = (
+		// if no proposed change request exists already
+		if (!reusableItem.change_request) {
+			if (showChangeRequestForm) { // form to propose a change request
+				changeRequest = (
 					<Row>
-						<Col className="modification-form">
-							<EnhancedModificationForm
-								onCancel={this.toggleProposeModificationForm}
-								onSubmit={this.submitProposeModificationForm}
-								closeForm={this.toggleProposeModificationForm}
+						<Col className="change-request-form">
+							<EnhancedChangeRequestForm
+								onCancel={this.toggleChangeRequestForm}
+								onSubmit={this.submitChangeRequestForm}
+								closeForm={this.toggleChangeRequestForm}
 								data={reusableItem}
 							/>
 						</Col>
 					</Row>
 				);
 			} else { // button to show the form
-				modification = (
-					<div className="modification-button">
+				changeRequest = (
+					<div className="change-request-button">
 						<Row>
 							<Col>
-								<Button id="show-propose-modification-form" type="button" color="primary" className="name-icon btn" onClick={this.toggleProposeModificationForm} title="Edit this Reusable Item">
+								<Button id="show-change-request-form" type="button" color="primary" className="name-icon btn" onClick={this.toggleChangeRequestForm} title="Edit this Reusable Item">
 									<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" />
 								</Button>
 							</Col>
@@ -294,20 +294,20 @@ class ReusableItemDetails extends Component {
 					</div>
 				);
 			}
-		} else if (reusableItem.proposed_modification) { // a proposed modification exists
-			modification = (
-				<div className="proposed-modification">
+		} else if (reusableItem.change_request) { // a proposed change request exists
+			changeRequest = (
+				<div className="proposed-change-request">
 					<Row>
 						<Col className="changes">
 							<h3>Proposed change</h3>
-							{reusableItem.proposed_modification.name && (
-								<div>Name: {reusableItem.proposed_modification.name}</div>
+							{reusableItem.change_request.name && (
+								<div>Name: {reusableItem.change_request.name}</div>
 							)}
-							{reusableItem.proposed_modification.link && (
-								<div>Link: {reusableItem.proposed_modification.link}</div>
+							{reusableItem.change_request.link && (
+								<div>Link: {reusableItem.change_request.link}</div>
 							)}
-							{reusableItem.proposed_modification.definition && (
-								<div>Definition: {reusableItem.proposed_modification.definition}</div>
+							{reusableItem.change_request.definition && (
+								<div>Definition: {reusableItem.change_request.definition}</div>
 							)}
 						</Col>
 					</Row>
@@ -318,18 +318,18 @@ class ReusableItemDetails extends Component {
 					</Row>
 					<Row>
 						<Col md="6" lg="12" className="votes">
-							{reusableItem.proposed_modification && (
+							{reusableItem.change_request && (
 								<React.Fragment>
 									<span>For: {reusableItem.votes_yes_count}</span>
-									<span><button type="button" color="secondary" onClick={() => this.VoteOnModification('yes')}>Vote for change</button></span>
+									<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('yes')}>Vote for change</button></span>
 								</React.Fragment>
 							)}
 						</Col>
 						<Col md="6" lg="12" className="votes">
-							{reusableItem.proposed_modification && (
+							{reusableItem.change_request && (
 								<React.Fragment>
 									<span>Against: {reusableItem.votes_no_count}</span>
-									<span><button type="button" color="secondary" onClick={() => this.VoteOnModification('no')}>Vote against change</button></span>
+									<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('no')}>Vote against change</button></span>
 								</React.Fragment>
 							)}
 						</Col>
@@ -368,7 +368,7 @@ class ReusableItemDetails extends Component {
 						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
 					</Col>
 				</Row>
-				{modification}
+				{changeRequest}
 			</React.Fragment>
 		);
 	}
