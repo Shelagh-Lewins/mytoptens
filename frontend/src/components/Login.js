@@ -3,10 +3,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { loginUser } from '../modules/auth';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
 import { Link } from 'react-router-dom';
-import ValidatedForm from './ValidatedForm.js';
+import ValidatedForm from './ValidatedForm';
+import { loginUser } from '../modules/auth';
 
 class Login extends Component {
 	constructor() {
@@ -21,34 +21,46 @@ class Login extends Component {
 	}
 
 	componentDidMount() {
-		if(this.props.auth.isAuthenticated) {
-			this.props.history.push('/');
+		const { auth, history } = this.props;
+
+		if (auth.isAuthenticated) {
+			history.push('/');
 		}
 	}
 
 	componentWillReceiveProps(nextProps) {
-		if(nextProps.auth.isAuthenticated) {
-			this.props.history.push('/');
+		const { auth } = nextProps;
+		const { history } = this.props;
+
+		if (auth.isAuthenticated) {
+			history.push('/');
 		}
 	}
 
 	handleInputChange(e) {
 		this.setState({
-			[e.target.name]: e.target.value
+			[e.target.name]: e.target.value,
 		});
 	}
 
 	handleSubmit(e) {
+		const { email, password } = this.state;
+		const { history } = this.props;
+
 		e.preventDefault();
 		const user = {
-			'email': this.state.email,
-			'password': this.state.password,
+			'email': email,
+			'password': password,
 		};
-		this.props.loginUser(user, this.props.history);
+		this.props.loginUser(user, history); // eslint-disable-line react/destructuring-assignment
+		// avoid ambiguity with loginUser declared in upper scope
 	}
 
 	render() {
-		return(
+		const { email, password } = this.state;
+		const { errors } = this.props;
+
+		return (
 			<Container>
 				<h2>Login</h2>
 				<ValidatedForm onSubmit={this.handleSubmit}>
@@ -62,10 +74,10 @@ class Login extends Component {
 									id="email"
 									required={true}
 									onChange={this.handleInputChange}
-									value={this.state.email}
+									value={email}
 									placeholder="Email address"
 								/>
-								<div className='invalid-feedback' />
+								<div className="invalid-feedback" />
 							</div>
 						</Col>
 					</Row>
@@ -78,11 +90,11 @@ class Login extends Component {
 									name="password"
 									required={true}
 									id="password"
-									value={this.state.password}
+									value={password}
 									placeholder="Password"
 									onChange={this.handleInputChange}
 								/>
-								<div className='invalid-feedback' />
+								<div className="invalid-feedback" />
 							</div>
 						</Col>
 					</Row>
@@ -93,9 +105,9 @@ class Login extends Component {
 							</button>
 						</Col>
 					</Row>
-	        <Row>
+					<Row>
 						<Col md="9" lg="6">
-							{this.props.errors.authentication && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.authentication}</div>}
+							{errors.authentication && <div className="invalid-feedback " style={{ 'display': 'block' }}>{errors.authentication}</div>}
 						</Col>
 					</Row>
 				</ValidatedForm>
@@ -107,13 +119,14 @@ class Login extends Component {
 
 Login.propTypes = {
 	'loginUser': PropTypes.func.isRequired,
-	'auth': PropTypes.object.isRequired,
-	'errors': PropTypes.object.isRequired
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
 	'auth': state.auth,
-	'errors': state.errors
+	'errors': state.errors,
 });
 
-export  default connect(mapStateToProps, { loginUser })(Login);
+export default connect(mapStateToProps, { loginUser })(Login);
