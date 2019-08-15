@@ -63,7 +63,7 @@ class Login extends Component {
 									required={true}
 									onChange={this.handleInputChange}
 									value={this.state.email}
-									placeholder="Email address or username"
+									placeholder="Email address"
 								/>
 								<div className='invalid-feedback' />
 							</div>
