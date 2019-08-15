@@ -36,7 +36,7 @@ class ReusableItem(models.Model):
     This may be referenced by many topTenItems
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,related_name='reusableItem_created_by')
+    created_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True, related_name='reusableItem_created_by')
     created_by_username = models.CharField(max_length=255) # this shold be OK given that the topTenList will be deleted if the created_by_id user is deleted
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
@@ -45,18 +45,23 @@ class ReusableItem(models.Model):
     link = models.CharField(max_length=255, blank=True, default='')
     modified_at = models.DateTimeField(auto_now_add=True)
     users_when_modified = models.IntegerField(default=0)
-    votes_yes = JSONField(default=list, blank=True) # array of usernames.
-    votes_no = JSONField(default=list, blank=True) # array of usernames.
+    #votes_yes = JSONField(default=list, blank=True) # array of usernames.
+    #votes_no = JSONField(default=list, blank=True) # array of usernames.
+
+    votes_yes = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_yes')
+    votes_no = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_no')
+    
     change_request = JSONField(default=None, blank=True, null=True) # change request object
     proposed_at = models.DateTimeField(blank=True, null=True)
     proposed_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
         blank=True, related_name='reusableItem_proposed_by') # user who proposed the change request
     history = JSONField(default=list, blank=True) # array of version objects
 
+
+
+    # these should never be saved. It is only here to allow a user's vote to be returned to them, so the UI can display their vote
     votes_yes_count = models.IntegerField(blank=True, null=True)
     votes_no_count = models.IntegerField(blank=True, null=True)
-
-    # this should never be saved. It is only here to allow a user's vote to be returned to them, so the UI can display their vote
     my_vote = models.CharField(max_length=255, blank=True, null=True)
 
     # blank=True says the field is not required in forms. This is necessary for Django admin interface to work.

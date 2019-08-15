@@ -45,6 +45,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     # allows my_vote to be returned dynamically and not saved in the instance
     # see method get_my_vote
     my_vote = serializers.SerializerMethodField()
+    votes_yes_count = serializers.SerializerMethodField()
+    votes_no_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ReusableItem
@@ -57,13 +59,23 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # return the user's recorded vote, if any
         current_user = self.context['request'].user
 
-        if current_user.email in obj.votes_yes:
+        if current_user in obj.votes_yes.all():
             return 'yes'
 
-        if current_user.email in obj.votes_no:
+        if current_user in obj.votes_no.all():
             return 'no'
 
         return ''
+
+    # magic method name
+    def get_votes_yes_count(self, obj):
+        # return the number of users who have voted yes to a change request
+        return obj.votes_yes.count()
+
+    # magic method name
+    def get_votes_no_count(self, obj):
+        # return the number of users who have voted no to a change request
+            return obj.votes_no.count()
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -259,10 +271,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.change_request = change_request
             instance.proposed_at = timezone.now()
             instance.proposed_by = current_user
-            instance.votes_yes = []
-            instance.votes_no = []
-            instance.votes_yes_count = 0
-            instance.votes_no_count = 0
+            instance.votes_yes.clear()
+            instance.votes_no.clear()
+            #instance.votes_yes_count = 0
+            #instance.votes_no_count = 0
 
             instance.save()
             return instance
@@ -275,26 +287,20 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             # remove any previous vote by this user
             try:
-                instance.votes_yes.remove(current_user.email)
+                instance.votes_yes.remove(current_user)
             except ValueError: # avoid error if user has not previously voted
                 pass
 
             try:
-                instance.votes_no.remove(current_user.email)
+                instance.votes_no.remove(current_user)
             except ValueError: # avoid error if user has not previously voted
                 pass
 
             if validated_data['vote'] == 'yes':
-                instance.votes_yes.append(current_user.email)
+                instance.votes_yes.add(current_user)
 
             elif validated_data['vote'] == 'no':
-                instance.votes_no.append(current_user.email)
-
-            # users may not see the votes_yes or votes_no, because these are lists of email addresses
-            # so we also save the counts of votes
-
-            instance.votes_yes_count = len(instance.votes_yes)
-            instance.votes_no_count = len(instance.votes_no)
+                instance.votes_no.add(current_user)
 
             instance.save()
             return instance
