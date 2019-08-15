@@ -239,6 +239,7 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
                 print(current_reusable_item.name)
 
                 ReusableItemSerializer.remove_my_votes(current_reusable_item, self.request.user)
+                ReusableItemSerializer.count_votes(current_reusable_item)
  
 
     def perform_create(self, serializer):

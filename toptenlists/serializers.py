@@ -2,7 +2,10 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 from rest_framework.response import Response
-from allauth.account.models import EmailAddress 
+from allauth.account.models import EmailAddress
+
+from django.contrib.auth import get_user_model
+USER = get_user_model()
 
 import uuid
 
@@ -77,28 +80,53 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # return the number of users who have voted no to a change request
             return obj.votes_no.count()
 
-    def remove_my_votes(instance, user):
+    def remove_my_votes(self, user):
         print('remove my votes')
-        print(instance)
+        print(self)
         print(user)
 
         # remove any previous vote by this user
         try:
-            instance.votes_yes.remove(user)
+            self.votes_yes.remove(user)
         except ValueError: # avoid error if user has not previously voted
             pass
 
         try:
-            instance.votes_no.remove(user)
+            self.votes_no.remove(user)
         except ValueError: # avoid error if user has not previously voted
             pass
 
-    def cast_vote(instance, user, vote):
+    def cast_vote(self, user, vote):
         if vote == 'yes':
-            instance.votes_yes.add(user)
+            self.votes_yes.add(user)
 
         elif vote == 'no':
-            instance.votes_no.add(user)
+            self.votes_no.add(user)
+
+        ReusableItemSerializer.count_votes(self)
+
+    # process votes on a reusableItem to see if a change request has been accepted or rejected
+    def count_votes(self):
+        print('count_votes')
+        print('for', self.votes_yes.count())
+        print('against', self.votes_no.count())
+
+        # find all users who reference this reusableItem in any topTenList
+        # find the topTenItems that reference this reusableItem
+        selected_toptenitems = TopTenItem.objects.filter(reusableItem=self)
+
+        # and find the topTenLists to which those topTenItems belong
+        selected_toptenlist_ids = selected_toptenitems.values_list('topTenList_id')
+        selected_toptenlists = TopTenList.objects.filter(id__in=selected_toptenlist_ids)
+
+        print('selectedTopTenLists', selected_toptenlists.values())
+
+        # and finally select the users who created these topTenLists
+        selected_userids = selected_toptenlists.values_list('created_by')
+        selected_users = USER.objects.filter(id__in=selected_userids)
+
+        print('selected users', selected_users)
+
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -286,14 +314,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 instance.save()
                 return instance
 
-            # there needs to be a vote on the change request
+            # set up a vote on the change request
             instance.change_request = change_request
             instance.proposed_at = timezone.now()
             instance.proposed_by = current_user
             instance.votes_yes.clear()
             instance.votes_no.clear()
 
-            # automatically vote for your own proposal
+            # automatically vote for your own change request
             ReusableItemSerializer.cast_vote(instance, current_user, 'yes')
 
             instance.save()
@@ -306,14 +334,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 raise ValidationError({'reusable item error: cannot vote on a private reusable item'})
 
             ReusableItemSerializer.remove_my_votes(instance, current_user)
-
             ReusableItemSerializer.cast_vote(instance, current_user, validated_data['vote'])
-
-            #if validated_data['vote'] == 'yes':
-                #instance.votes_yes.add(current_user)
-
-            #elif validated_data['vote'] == 'no':
-                #instance.votes_no.add(current_user)
 
             instance.save()
             return instance
