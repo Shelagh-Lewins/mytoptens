@@ -116,16 +116,17 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         selected_toptenitems = TopTenItem.objects.filter(reusableItem=self)
 
         # and find the topTenLists to which those topTenItems belong
-        selected_toptenlist_ids = selected_toptenitems.values_list('topTenList_id')
+        selected_toptenlist_ids = selected_toptenitems.values_list('topTenList_id', flat=True)
         selected_toptenlists = TopTenList.objects.filter(id__in=selected_toptenlist_ids)
 
         print('selectedTopTenLists', selected_toptenlists.values())
 
         # and finally select the users who created these topTenLists
-        selected_userids = selected_toptenlists.values_list('created_by')
+        selected_userids = selected_toptenlists.values_list('created_by', flat=True)
         selected_users = USER.objects.filter(id__in=selected_userids)
 
         print('selected users', selected_users)
+        print('number of users', selected_users.count())
 
 
     def to_internal_value(self, data):
