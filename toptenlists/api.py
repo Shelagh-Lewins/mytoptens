@@ -223,11 +223,23 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
         if serializer.validated_data.get('order', None) is not None:
             raise APIException("TopTenItem order may not be changed. Use moveup instead.")
 
-        print('updating topTenItem')
+        # find the topTenItem's reusableItem, if any
+        current_reusable_item = self.get_object().reusableItem
 
-        # as a user can only vote on a reusableItem change request if they use it in one of their lists
- 
         serializer.save()
+
+        # if the user has just dereferenced a reusableItem
+        # remove any votes for change requests on that reusableItem
+        if current_reusable_item is not None:
+            topTenItemsUsingReusableItem = TopTenItem.objects.filter(reusableItem=current_reusable_item,
+                topTenList__created_by=self.request.user).select_related('topTenList')
+
+            if topTenItemsUsingReusableItem.count() == 0:
+                print('no longer using reusableItem')
+                print(current_reusable_item.name)
+
+                ReusableItemSerializer.remove_my_votes(current_reusable_item, self.request.user)
+ 
 
     def perform_create(self, serializer):
         # do not allow a topTenItem to be created by the API

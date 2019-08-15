@@ -77,6 +77,29 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # return the number of users who have voted no to a change request
             return obj.votes_no.count()
 
+    def remove_my_votes(instance, user):
+        print('remove my votes')
+        print(instance)
+        print(user)
+
+        # remove any previous vote by this user
+        try:
+            instance.votes_yes.remove(user)
+        except ValueError: # avoid error if user has not previously voted
+            pass
+
+        try:
+            instance.votes_no.remove(user)
+        except ValueError: # avoid error if user has not previously voted
+            pass
+
+    def cast_vote(instance, user, vote):
+        if vote == 'yes':
+            instance.votes_yes.add(user)
+
+        elif vote == 'no':
+            instance.votes_no.add(user)
+
     def to_internal_value(self, data):
         """ intercept update data before it is validated
         update may contain one of these change requests:
@@ -155,7 +178,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         created_by_current_user = (current_user == getattr(instance, 'created_by'))
         change_types = ['is_public','change_request','vote']
 
-        # check basic permissions
+        # check permissions
         if not current_user.is_authenticated:
             raise ValidationError({'update reusable item error: user is not logged in'})
 
@@ -179,10 +202,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         if myTopTenItems.count() == 0:
             raise ValidationError({'update reusable item error: you cannot update a reusableItem that is not used in any of your lists'})
-
-        elif self.change_type == 'vote':
-            if not getattr(instance, 'is_public'):
-                raise ValidationError({'update reusable item error: cannot vote on change request to reusableItem because the reusableItem is not public'})
 
         if self.change_type == 'is_public':
             if getattr(instance, 'is_public'):
@@ -273,8 +292,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.proposed_by = current_user
             instance.votes_yes.clear()
             instance.votes_no.clear()
-            #instance.votes_yes_count = 0
-            #instance.votes_no_count = 0
+
+            # automatically vote for your own proposal
+            ReusableItemSerializer.cast_vote(instance, current_user, 'yes')
 
             instance.save()
             return instance
@@ -285,22 +305,15 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             if not getattr(instance, 'is_public'):
                 raise ValidationError({'reusable item error: cannot vote on a private reusable item'})
 
-            # remove any previous vote by this user
-            try:
-                instance.votes_yes.remove(current_user)
-            except ValueError: # avoid error if user has not previously voted
-                pass
+            ReusableItemSerializer.remove_my_votes(instance, current_user)
 
-            try:
-                instance.votes_no.remove(current_user)
-            except ValueError: # avoid error if user has not previously voted
-                pass
+            ReusableItemSerializer.cast_vote(instance, current_user, validated_data['vote'])
 
-            if validated_data['vote'] == 'yes':
-                instance.votes_yes.add(current_user)
+            #if validated_data['vote'] == 'yes':
+                #instance.votes_yes.add(current_user)
 
-            elif validated_data['vote'] == 'no':
-                instance.votes_no.add(current_user)
+            #elif validated_data['vote'] == 'no':
+                #instance.votes_no.add(current_user)
 
             instance.save()
             return instance
