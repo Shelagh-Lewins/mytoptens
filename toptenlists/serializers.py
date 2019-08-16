@@ -114,6 +114,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         print('for', instance.votes_yes.count())
         print('against', instance.votes_no.count())
 
+        votes_yes = instance.votes_yes.count()
+        votes_no = instance.votes_no.count()
+        total_votes = votes_yes + votes_no
+
         # find all users who reference this reusableItem in any topTenList
         # find the topTenItems that reference this reusableItem
         selected_toptenitems = TopTenItem.objects.filter(reusableItem=instance)
@@ -122,14 +126,16 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         selected_toptenlist_ids = selected_toptenitems.values_list('topTenList_id', flat=True)
         selected_toptenlists = TopTenList.objects.filter(id__in=selected_toptenlist_ids)
 
-        print('selectedTopTenLists', selected_toptenlists.values())
+        # print('selectedTopTenLists', selected_toptenlists.values())
 
         # and finally select the users who created these topTenLists
         selected_userids = selected_toptenlists.values_list('created_by', flat=True)
         selected_users = USER.objects.filter(id__in=selected_userids)
 
-        print('selected users', selected_users)
-        print('number of users', selected_users.count())
+        number_of_selected_users = selected_users.count()
+
+        print('selected users', selected_users.values('email'))
+        print('number of selected users', number_of_selected_users)
 
         """ voting rules
         number_of_users: rule applies to reusableItem referenced by this number of users, or fewer
@@ -139,15 +145,106 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         elibibility_scheme: who is eligible to vote. Initially just 'A', but with the potential to have different schemes depending on the popularity of the reusableItem ('B', 'C' etc). For example, can people vote even if they only reference the reusableItem in private topTenLists?
         """
         voting_rules = [
-        {
+        { # one user so change will happen immediately
         'number_of_users': 1,
         'accept_quorum': 1,
         'reject_quorum': 1,
         'accept_percentage': 100,
         'voting_scheme': 'A'
+        },
+        { # 2 users: all must vote
+        'number_of_users': 2,
+        'accept_quorum': 2,
+        'reject_quorum': 1,
+        'accept_percentage': 100,
+        'voting_scheme': 'A'
+        },
+        { # 2 users: 2 must vote
+        'number_of_users': 3,
+        'accept_quorum': 2,
+        'reject_quorum': 2,
+        'accept_percentage': 60,
+        'voting_scheme': 'A'
+        },
+        { # 4 or 5 users: 3 must vote
+        'number_of_users': 5,
+        'accept_quorum': 3,
+        'reject_quorum': 3,
+        'accept_percentage': 60,
+        'voting_scheme': 'A'
+        },
+        { # 6 - 10 users: 5 must vote
+        'number_of_users': 10,
+        'accept_quorum': 5,
+        'reject_quorum': 5,
+        'accept_percentage': 60,
+        'voting_scheme': 'A'
+        },
+        { # 11 - 20 users: 10 must vote
+        'number_of_users': 20,
+        'accept_quorum': 10,
+        'reject_quorum': 10,
+        'accept_percentage': 80,
+        'voting_scheme': 'A'
+        },
+        { # 21 - 100 users: 10 must vote
+        'number_of_users': 100,
+        'accept_quorum': 10,
+        'reject_quorum': 20,
+        'accept_percentage': 90,
+        'voting_scheme': 'A'
+        },
+        { # 101 - 1000 users: 10 must vote
+        'number_of_users': 1000,
+        'accept_quorum': 40,
+        'reject_quorum': 80,
+        'accept_percentage': 90,
+        'voting_scheme': 'A'
         }
         ]
 
+        selected_rule =  voting_rules[-1] # default will apply if more users than the last voting rule covers
+
+        for rule in voting_rules:
+            if number_of_selected_users <= rule['number_of_users']:
+                selected_rule = rule
+                break
+
+        # print('got rule: ', selected_rule)
+        percentage_yes = 100 * votes_yes / total_votes
+
+        if percentage_yes >= selected_rule['accept_percentage']:
+            if total_votes >= selected_rule['accept_quorum']:
+                self.accept_change(instance)
+                return
+
+        # if the change hasn't been accepted with this number of votes, reject it
+        elif total_votes >= selected_rule['reject_quorum']:
+            self.reject_change(instance)
+            return
+
+        return # we have not yet reached a quorum
+
+    @classmethod
+    def accept_change(self, instance):
+        print('accept change')
+
+        for key in instance.change_request:
+            setattr(instance, key, instance.change_request[key])
+
+        instance.modified_at = timezone.now()
+        instance.change_request = None
+        print('instance', instance)
+        instance.save()
+        return instance
+
+    @classmethod
+    def reject_change(self, instance):
+        print('reject change')
+        instance.change_request = None
+        print('instance', instance)
+        instance.save()
+        return instance
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -310,30 +407,30 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 raise ValidationError({'update reusable item error: a new change request cannot be created while there is an existing change request proposal'})
 
             # update the reusableItem immediately, or create a change request?
-            update_immediately = False
+            #update_immediately = False
 
             # is this a private reusableItem?
             if not getattr(instance, 'is_public'):
                 if not created_by_current_user:
                     raise ValidationError({'reusable item error: cannot update the private reusable item because it was not created by the current user'})
 
-                update_immediately = True
+                #update_immediately = True
 
-            else:
+            #else:
                 # topTenItems belonging to other users that reference this reusableItem
-                otherTopTenItems = TopTenItem.objects.filter(reusableItem=instance).exclude(topTenList__created_by=current_user).select_related('topTenList')
+                #otherTopTenItems = TopTenItem.objects.filter(reusableItem=instance).exclude(topTenList__created_by=current_user).select_related('topTenList')
 
-                if otherTopTenItems.count() is 0:
+                #if otherTopTenItems.count() is 0:
                     # no other user references this reusableItem
-                    update_immediately = True
+                    #update_immediately = True
 
-            if update_immediately:
-                for key in validated_data:
-                    setattr(instance, key, validated_data[key])
+            #if update_immediately:
+                #for key in validated_data:
+                    #setattr(instance, key, validated_data[key])
 
-                instance.modified_at = timezone.now()
-                instance.save()
-                return instance
+                #instance.modified_at = timezone.now()
+                #instance.save()
+                #return instance
 
             # set up a vote on the change request
             instance.change_request = change_request
@@ -344,6 +441,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             # automatically vote for your own change request
             self.cast_vote(instance, current_user, 'yes')
+            self.count_votes(instance)
 
             instance.save()
             return instance

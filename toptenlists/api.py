@@ -231,10 +231,10 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
         # if the user has just dereferenced a reusableItem
         # remove any votes for change requests on that reusableItem
         if current_reusable_item is not None:
-            topTenItemsUsingReusableItem = TopTenItem.objects.filter(reusableItem=current_reusable_item,
+            myTopTenItemsUsingReusableItem = TopTenItem.objects.filter(reusableItem=current_reusable_item,
                 topTenList__created_by=self.request.user).select_related('topTenList')
 
-            if topTenItemsUsingReusableItem.count() == 0:
+            if myTopTenItemsUsingReusableItem.count() == 0:
                 print('no longer using reusableItem')
                 print(current_reusable_item.name)
 
