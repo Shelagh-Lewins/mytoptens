@@ -335,8 +335,8 @@ export const updateReusableItem = (id, data) => (dispatch) => {
 		'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
 		'modified_at': new Date(),
 		'users_when_modified': 403, // number of different users referencing this resuableItem in their own lists at the time when the last update was accepted. This is for tracking the approval process.
-		'votes_yes': [], // votes cast for the most recent change request
-		'votes_no': [],
+		'change_request_votes_yes': [], // votes cast for the most recent change request
+		'change_request_votes_no': [],
 		'change_request': [ // may need to allow multiple proposed edits
 		// prevent same user voting more than once
 		// allow them to change their vote
@@ -347,13 +347,13 @@ export const updateReusableItem = (id, data) => (dispatch) => {
 				'name': 'Jane Austen',
 				'definition': 'English novelist (16 December 1775 – 18 July 1817)',
 				'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-				'proposed_by': '1234',
-				'proposed_at': new Date(),
-				'votes_yes': [], // list of usernames
-				'votes_no': [], // list of usernames
+				'change_request_by': '1234',
+				'change_request_at': new Date(),
+				'change_request_votes_yes': [], // list of usernames
+				'change_request_votes_no': [], // list of usernames
 			},
 		],
-		'proposed_by': '1234',
+		'change_request_by': '1234',
 		'history': [ // not sure this will be used but safer to keep it from the start
 		// when a new version is accepted, add current version to history
 		// remove version from suggested_edits
@@ -362,21 +362,21 @@ export const updateReusableItem = (id, data) => (dispatch) => {
 				'name': 'Jane austin',
 				'definition': 'Writer',
 				'link': '',
-				'proposed_by': '1234',
+				'change_request_by': '1234',
 				'modified_at': new Date(),
 				'users_when_modified': 403,
-				'votes_yes': [],
-				'votes_no': [],
+				'change_request_votes_yes': [],
+				'change_request_votes_no': [],
 			},
 			{ // second version
 				'name': 'Jane austen',
 				'definition': 'Novelist',
 				'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-				'proposed_by': '1234',
+				'change_request_by': '1234',
 				'modified_at': new Date(),
 				'users_when_modified': 403,
-				'votes_yes': [],
-				'votes_no': [],
+				'change_request_votes_yes': [],
+				'change_request_votes_no': [],
 			}
 		]
 	}

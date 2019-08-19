@@ -45,19 +45,17 @@ class ReusableItem(models.Model):
     link = models.CharField(max_length=255, blank=True, default='')
     modified_at = models.DateTimeField(auto_now_add=True)
     users_when_modified = models.IntegerField(default=0)
-    #votes_yes = JSONField(default=list, blank=True) # array of usernames.
+    #change_request_votes_yes = JSONField(default=list, blank=True) # array of usernames.
     #votes_no = JSONField(default=list, blank=True) # array of usernames.
 
-    votes_yes = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_yes')
-    votes_no = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_no')
+    change_request_votes_yes = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_yes')
+    change_request_votes_no = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_no')
     
     change_request = JSONField(default=None, blank=True, null=True) # change request object
-    proposed_at = models.DateTimeField(blank=True, null=True)
-    proposed_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
-        blank=True, related_name='reusableItem_proposed_by') # user who proposed the change request
+    change_request_at = models.DateTimeField(blank=True, null=True) # when the change request was submitted
+    change_request_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
+        blank=True, related_name='reusableItem_change_request_by') # user who submitted the change request
     history = JSONField(default=list, blank=True) # array of version objects
-
-
 
     # these should never be saved. It is only here to allow a user's vote to be returned to them, so the UI can display their vote
     votes_yes_count = models.IntegerField(blank=True, null=True)

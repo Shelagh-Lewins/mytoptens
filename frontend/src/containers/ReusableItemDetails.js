@@ -320,7 +320,7 @@ class ReusableItemDetails extends Component {
 						<Col md="6" lg="12" className="votes">
 							{reusableItem.change_request && (
 								<React.Fragment>
-									<span>For: {reusableItem.votes_yes_count}</span>
+									<span>For: {reusableItem.change_request_votes_yes_count}</span>
 									<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('yes')}>Vote for change</button></span>
 								</React.Fragment>
 							)}
@@ -328,7 +328,7 @@ class ReusableItemDetails extends Component {
 						<Col md="6" lg="12" className="votes">
 							{reusableItem.change_request && (
 								<React.Fragment>
-									<span>Against: {reusableItem.votes_no_count}</span>
+									<span>Against: {reusableItem.change_request_votes_no_count}</span>
 									<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('no')}>Vote against change</button></span>
 								</React.Fragment>
 							)}
