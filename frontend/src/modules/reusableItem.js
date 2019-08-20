@@ -119,36 +119,34 @@ export function searchReusableItemsClear(widgetId) {
 	};
 }
 
-export function searchReusableItems(searchTerm, widgetId) {
-	return (dispatch, getState) => {
-		// don't search on empty string
-		if (!searchTerm || searchTerm === '') {
-			return dispatch(searchReusableItemsClear(widgetId));
-		}
+export const searchReusableItems = (searchTerm, widgetId) => (dispatch, getState) => {
+	// don't search on empty string
+	if (!searchTerm || searchTerm === '') {
+		return dispatch(searchReusableItemsClear(widgetId));
+	}
 
-		dispatch(searchReusableItemsStarted(searchTerm, widgetId));
+	dispatch(searchReusableItemsStarted(searchTerm, widgetId));
 
-		// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
-		let useAuth = false;
+	// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
+	let useAuth = false;
 
-		if (getState().auth.user.token) {
-			useAuth = true;
-		}
+	if (getState().auth.user.token) {
+		useAuth = true;
+	}
 
-		return fetchAPI({
-			'url': `/api/v1/content/searchreusableitems/?search=${searchTerm}`,
-			'method': 'GET',
-			'useAuth': useAuth,
-		}).then((response) => {
-			// console.log('searchApi says ', response);
-			return dispatch(searchReusableItemsSucceeded(response.results, widgetId));
-		}).catch((error) => {
-			dispatch(searchReusableItems());
+	return fetchAPI({
+		'url': `/api/v1/content/searchreusableitems/?search=${searchTerm}`,
+		'method': 'GET',
+		'useAuth': useAuth,
+	}).then((response) => {
+		// console.log('searchApi says ', response);
+		return dispatch(searchReusableItemsSucceeded(response.results, widgetId));
+	}).catch((error) => {
+		dispatch(searchReusableItems());
 
-			return dispatch(getErrors({ 'fetch reusableItems': error.message }));
-		});
-	};
-}
+		return dispatch(getErrors({ 'fetch reusableItems': error.message }));
+	});
+};
 
 // /////////////////////////////
 // fetch a single reusableItem
@@ -165,8 +163,6 @@ function fetchReusableItemDetailFailed() {
 }
 
 export const fetchReusableItemDetail = id => (dispatch, getState) => {
-// export function fetchReusableItemDetail(id) {
-	// return (dispatch, getState) => {
 	dispatch(fetchReusableItemDetailStarted());
 
 	// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
@@ -199,7 +195,6 @@ export const fetchReusableItemDetail = id => (dispatch, getState) => {
 		return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
 	});
 };
-// }
 
 // ////////////////////////////////
 // Search for Top Ten Items by name, but only those which have no reusableItem
@@ -224,36 +219,34 @@ function searchTopTenItemsFailed() {
 	};
 }
 
-export function searchTopTenItems(searchTerm, widgetId) {
-	return (dispatch, getState) => {
-		// clear is handled by reusableItem reducer
-		// don't search on empty string
-		if (!searchTerm || searchTerm === '') {
-			return;
-		}
+export const searchTopTenItems = (searchTerm, widgetId) => (dispatch, getState) => {
+	// clear is handled by reusableItem reducer
+	// don't search on empty string
+	if (!searchTerm || searchTerm === '') {
+		return;
+	}
 
-		dispatch(searchTopTenItemsStarted(searchTerm, widgetId));
+	dispatch(searchTopTenItemsStarted(searchTerm, widgetId));
 
-		// if the user is not logged in, don't use auth. The server should return the topTenItem if a non-authenticated user should see it.
-		let useAuth = false;
+	// if the user is not logged in, don't use auth. The server should return the topTenItem if a non-authenticated user should see it.
+	let useAuth = false;
 
-		if (getState().auth.user.token) {
-			useAuth = true;
-		}
+	if (getState().auth.user.token) {
+		useAuth = true;
+	}
 
-		return fetchAPI({
-			'url': `/api/v1/content/searchlistsitems/?search=${searchTerm}&includetoptenlists=false&excludereusableitems=true`,
-			'method': 'GET',
-			'useAuth': useAuth,
-		}).then((response) => {
-			return dispatch(searchTopTenItemsSucceeded(response.results, widgetId));
-		}).catch((error) => {
-			dispatch(searchTopTenItemsFailed());
+	return fetchAPI({
+		'url': `/api/v1/content/searchlistsitems/?search=${searchTerm}&includetoptenlists=false&excludereusableitems=true`,
+		'method': 'GET',
+		'useAuth': useAuth,
+	}).then((response) => {
+		return dispatch(searchTopTenItemsSucceeded(response.results, widgetId));
+	}).catch((error) => {
+		dispatch(searchTopTenItemsFailed());
 
-			return dispatch(getErrors({ 'search topTenItems': error.message }));
-		});
-	};
-}
+		return dispatch(getErrors({ 'search topTenItems': error.message }));
+	});
+};
 
 // /////////////////////////
 // change reusableItem is_public
