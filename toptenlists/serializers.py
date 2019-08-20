@@ -237,24 +237,33 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     @classmethod
     def accept_change(self, instance):
-        # print('accept change')
-
         for key in instance.change_request:
             setattr(instance, key, instance.change_request[key])
 
-        instance.change_request_at = timezone.now()
-        instance.change_request = None
-        # print('instance', instance)
+        self.remove_change_request(instance)
+
         instance.save()
         return instance
 
     @classmethod
     def reject_change(self, instance):
-        # print('reject change')
-        instance.change_request = None
-        # print('instance', instance)
+        self.remove_change_request(instance)
+
         instance.save()
         return instance
+
+    @classmethod
+    def remove_change_request(self, instance):
+        instance.change_request = None
+        instance.change_request_at = None
+        instance.change_request_by = None
+
+        self.reset_change_votes(instance)
+
+    @classmethod
+    def reset_change_votes(self, instance):
+        instance.change_request_votes_yes.clear()
+        instance.change_request_votes_no.clear()
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
@@ -423,12 +432,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             # set up a vote on the change request
             instance.change_request = change_request
-            instance.proposed_at = timezone.now()
+            instance.change_request_at = timezone.now()
             instance.change_request_by = current_user
-            instance.change_request_votes_yes.clear()
-            instance.change_request_votes_no.clear()
-
-            # automatically vote for your own change request
+            self.reset_change_votes(instance)
             self.cast_vote(instance, current_user, 'yes')
 
             instance.save()
@@ -545,35 +551,22 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         return internal_value
 
     def update(self, instance, validated_data):
-        print('update topTenItemForNewReusableItem')
-        print('data', validated_data)
-
-        currentReusableItem = instance.reusableItem
-
-        if currentReusableItem is not None:
-            print('currentReusableItem', currentReusableItem)
-
-        newReusableItem = None
+        current_reusableitem = instance.reusableItem
+        new_reusableitem = None
 
         if 'reusableItem' in validated_data:
-            newReusableItem = validated_data['reusableItem']
+            new_reusableitem = validated_data['reusableItem']
 
-        if currentReusableItem != newReusableItem:
-            # there has been a change of reusableItem
+        if current_reusableitem != new_reusableitem:
             # recount votes in case a change request should be resolved
 
-            if currentReusableItem is not None:
-                ReusableItemSerializer.count_votes(currentReusableItem)
+            if current_reusableitem is not None:
+                ReusableItemSerializer.count_votes(current_reusableitem)
 
-            if newReusableItem is not None:
-                ReusableItemSerializer.count_votes(newReusableItem)
+            if new_reusableitem is not None:
+                ReusableItemSerializer.count_votes(new_reusableitem)
 
-        # do the regular update
-        for key in validated_data:
-            setattr(instance, key, validated_data[key])
-
-        instance.save()
-        return instance
+        return super(TopTenItemSerializer, self).update(instance, validated_data)
 
 
 class TopTenListSerializer(FlexFieldsModelSerializer):
