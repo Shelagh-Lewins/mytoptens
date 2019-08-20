@@ -82,10 +82,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     @classmethod # required for self to be consistently passed automatically as the first parameter. Otherwise it depends on whether you call the method with 'self.remove_my_votes()' or 'ReusableItemSerializer.remove_my_votes()'
     def remove_my_votes(self, instance, user):
-        print('remove my votes')
-        print(instance)
-        print(user)
-
         # remove any previous vote by this user
         try:
             instance.change_request_votes_yes.remove(user)
@@ -99,6 +95,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     @classmethod
     def cast_vote(self, instance, user, vote):
+        if instance.change_request is None:
+            return
+
+        # if vote is '' then the user has withdrawn their vote
+        # if yes or no, add the vote
+
+        self.remove_my_votes(instance, user)
+
         if vote == 'yes':
             instance.change_request_votes_yes.add(user)
 
@@ -110,6 +114,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     # process votes on a reusableItem to see if a change request has been accepted or rejected
     @classmethod
     def count_votes(self, instance):
+        if instance.change_request is None:
+            return
+
         # print('count_votes')
         # print('for', instance.change_request_votes_yes.count())
         # print('against', instance.change_request_votes_no.count())
@@ -117,6 +124,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         change_request_votes_yes = instance.change_request_votes_yes.count()
         change_request_votes_no = instance.change_request_votes_no.count()
         total_votes = change_request_votes_yes + change_request_votes_no
+
+        if total_votes == 0:
+            return
 
         # find all users who reference this reusableItem in any topTenList
         # find the topTenItems that reference this reusableItem
@@ -420,7 +430,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             # automatically vote for your own change request
             self.cast_vote(instance, current_user, 'yes')
-            self.count_votes(instance)
 
             instance.save()
             return instance
@@ -431,11 +440,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             if not getattr(instance, 'is_public'):
                 raise ValidationError({'reusable item error: cannot vote on a private reusable item'})
 
-            self.remove_my_votes(instance, current_user)
-
             # if vote is '' then the user has withdrawn their vote already
             # if yes or no, add the vote
-            if validated_data['vote'] in ['yes', 'no']:
+            if validated_data['vote'] in ['yes', 'no', '']:
                 self.cast_vote(instance, current_user, validated_data['vote'])
 
             instance.save()
@@ -468,7 +475,6 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         # intercept data before it is validated
         # to use fields like reusableItem_id which do not directly go into model
         internal_value = super(TopTenItemSerializer, self).to_internal_value(data)
-
 
         # the topTenItem references a reusableItem
         if 'reusableItem_id' in data:
@@ -537,6 +543,37 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                     internal_value['reusableItem'] = newReusableItem
 
         return internal_value
+
+    def update(self, instance, validated_data):
+        print('update topTenItemForNewReusableItem')
+        print('data', validated_data)
+
+        currentReusableItem = instance.reusableItem
+
+        if currentReusableItem is not None:
+            print('currentReusableItem', currentReusableItem)
+
+        newReusableItem = None
+
+        if 'reusableItem' in validated_data:
+            newReusableItem = validated_data['reusableItem']
+
+        if currentReusableItem != newReusableItem:
+            # there has been a change of reusableItem
+            # recount votes in case a change request should be resolved
+
+            if currentReusableItem is not None:
+                ReusableItemSerializer.count_votes(currentReusableItem)
+
+            if newReusableItem is not None:
+                ReusableItemSerializer.count_votes(newReusableItem)
+
+        # do the regular update
+        for key in validated_data:
+            setattr(instance, key, validated_data[key])
+
+        instance.save()
+        return instance
 
 
 class TopTenListSerializer(FlexFieldsModelSerializer):
