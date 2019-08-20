@@ -253,19 +253,20 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		case RECEIVE_ORGANIZER_DATA: {
 			const { entities } = action.payload;
 
-			// we only want items that have a name
-			const topTenItemObject = {};
-			Object.keys(entities.topTenItem).map((id) => {
-				if (entities.topTenItem[id].name) {
-					topTenItemObject[id] = entities.topTenItem[id];
-				}
-			});
-
 			if (entities && entities.topTenItem) {
+				// we only want items that have a name
+				const topTenItemObject = {};
+
+				Object.keys(entities.topTenItem).map((id) => {
+					if (entities.topTenItem[id].name) {
+						topTenItemObject[id] = entities.topTenItem[id];
+					}
+				});
+
 				return updeep({ 'organizerData': updeep.constant(topTenItemObject), 'isLoading': false }, state);
 			}
 
-			return state;
+			return updeep(state, state);
 		}
 
 		default:

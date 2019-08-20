@@ -1,15 +1,14 @@
 // Navbar.js
 
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import * as authReducer from '../modules/auth';
 import * as pageReducer from '../modules/page';
 
-import Search from '../components/Search';
+import Search from './Search';
 
 class Navbar extends Component {
 	constructor(props) {
@@ -19,12 +18,6 @@ class Navbar extends Component {
 		};
 
 		this.onLogout = this.onLogout.bind(this);
-	}
-	showDropdown(e) {
-		e.preventDefault();
-		this.setState(prevState => ({
-			'showDropdown': !prevState.showDropdown,
-		}));
 	}
 
 	onLogout(e) {
@@ -43,8 +36,16 @@ class Navbar extends Component {
 		}, 500);
 	}
 
+	showDropdown(e) {
+		e.preventDefault();
+		this.setState(prevState => ({
+			'showDropdown': !prevState.showDropdown,
+		}));
+	}
+
 	render() {
-		const { isAuthenticated, user } = this.props.auth;
+		const { auth } = this.props;
+		const { isAuthenticated, user } = auth;
 
 		const authLinks = (
 			<ul className="navbar-nav ml-auto">
@@ -79,19 +80,18 @@ class Navbar extends Component {
 						searchTerm={this.props.searchTerm}
 					/>
 				</div>
-				
 			</nav>
 		);
 	}
 }
 Navbar.propTypes = {
-	'auth': PropTypes.object.isRequired,
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'searchTerm': PropTypes.string.isRequired,
 	'searchComplete': PropTypes.bool.isRequired,
-	'searchResults': PropTypes.array.isRequired,
+	'searchResults': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
 	'auth': state.auth,
 	'searchTerm': state.page.searchTerm,
 	'searchComplete': state.page.searchComplete,

@@ -243,14 +243,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         self.remove_change_request(instance)
 
         instance.save()
-        return instance
+        #return instance
 
     @classmethod
     def reject_change(self, instance):
         self.remove_change_request(instance)
 
         instance.save()
-        return instance
+        #return instance
 
     @classmethod
     def remove_change_request(self, instance):
@@ -267,11 +267,12 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     def to_internal_value(self, data):
         """ intercept update data before it is validated
-        update may contain one of these change requests:
+        data may contain one of these updates:
          a change to is_public
          a new change request
-         a vote on a change request
-        # ensure only one, valid change request is passed through
+         cancel an existing change request
+         a vote on an existing change request
+        # ensure only one, valid update is passed through
         """
 
         #print('resuableItem to_internal_value received raw data:')
@@ -286,12 +287,16 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             change_type = 'is_public'
             count = count + 1
 
-        # if name, definition or link, a change request is proposed
+        # if name, definition or link, a change request is created
         for key in ReusableItemSerializer.editable_properties:
             if key in data:
                 change_type = 'change_request'
                 count = count + 1
                 break # don't count more than one
+
+        if 'cancel' in data:
+            change_type = 'cancel'
+            count = count + 1
 
         # if vote (yes / no), a vote is registered
         if 'vote' in data:
@@ -299,11 +304,11 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 change_type = 'vote'
                 count = count + 1
 
-        # there must be a change request
+        # there must be an update
         if count == 0:
             raise ValidationError({'reusable item error': 'no change request submitted'})
 
-        # only one type of change request is allowed
+        # only one type of update is allowed
         if count > 1:
             raise ValidationError({'reusable item error: you cannot submit more than one type of change in the same request'})
 
@@ -335,13 +340,13 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         and that the instance's change_type is correct for the change request. No other data will be processed.
         """
-        #print('***** update reusableItem *****')
+        # print('***** update reusableItem *****')
         #print(instance.name)
         # print(instance.__dict__) # all values of current reusableItem
 
         current_user = self.context['request'].user
         created_by_current_user = (current_user == getattr(instance, 'created_by'))
-        change_types = ['is_public','change_request','vote']
+        change_types = ['is_public', 'change_request', 'cancel', 'vote']
 
         # check permissions
         if not current_user.is_authenticated:
@@ -428,7 +433,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             # is this a private reusableItem?
             if not getattr(instance, 'is_public'):
                 if not created_by_current_user:
-                    raise ValidationError({'reusable item error: cannot update the private reusable item because it was not created by the current user'})
+                    raise ValidationError({'update reusable item error: cannot update the private reusable item because it was not created by the current user'})
 
             # set up a vote on the change request
             instance.change_request = change_request
@@ -440,11 +445,28 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.save()
             return instance
 
+        # cancel the change request
+        elif self.change_type == 'cancel':
+            # there must be a change_request
+            if instance.change_request is None:
+                raise ValidationError({'update reusable item error: there is no change request to cancel'})
+
+            # the user must have created the change request
+            if instance.change_request_by != current_user:
+                raise ValidationError({'update reusable item error: you cannot cancel a change request that you did not create'})
+            
+            self.reject_change(instance)
+            return instance
+
         # vote on a change request
         elif self.change_type == 'vote':
             # is this a private reusableItem?
             if not getattr(instance, 'is_public'):
-                raise ValidationError({'reusable item error: cannot vote on a private reusable item'})
+                raise ValidationError({'update reusable item error: you cannot vote on a private reusable item'})
+
+            # there must be a change_request
+            if instance.change_request is None:
+                raise ValidationError({'update reusable item error: there is no change request to vote on'})
 
             # if vote is '' then the user has withdrawn their vote already
             # if yes or no, add the vote

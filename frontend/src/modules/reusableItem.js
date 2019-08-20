@@ -183,7 +183,13 @@ export function fetchReusableItemDetail(id) {
 			// console.log('fetchReusableItemDetail response', response);
 			const normalizedData = normalize(response, [reusableItemSchema]);
 
-			dispatch(topTenListsReducer.fetchOrganizerData(getState().auth.user.id));
+			let userId;
+
+			if (getState().auth.isAuthenticated) {
+				userId = getState().auth.user.id;
+			}
+
+			dispatch(topTenListsReducer.fetchOrganizerData(userId));
 
 			return dispatch(receiveEntities(normalizedData));
 		}).catch((error) => {

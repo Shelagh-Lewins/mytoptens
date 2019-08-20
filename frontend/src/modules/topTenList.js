@@ -210,7 +210,6 @@ export function fetchOrganizerData(userId) {
 		}
 
 		return fetchAPI({
-			// 'url': `/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem&created_by=${userId}`,
 			'url': URL,
 			'method': 'GET',
 			'useAuth': useAuth,
@@ -583,14 +582,14 @@ export default function topTenList(state = initialTopTenListsState, action) {
 
 		case RECEIVE_ORGANIZER_DATA: {
 			// load topTenLists data into store
+
 			const { entities } = action.payload;
-			let topTenLists = {};
 
 			if (entities && entities.topTenList) {
-				topTenLists = entities.topTenList; // there is at least one topTenList
+				return updeep({ 'organizerData': updeep.constant(entities.topTenList), 'isLoading': false }, state);
 			}
 
-			return updeep({ 'organizerData': updeep.constant(topTenLists), 'isLoading': false }, state);
+			return updeep(state, state);
 		}
 
 		case FETCH_ORGANIZER_DATA_STARTED: {

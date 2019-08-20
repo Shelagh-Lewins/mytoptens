@@ -48,7 +48,8 @@ class ReusableItemDetails extends Component {
 		this.togglePopover = this.togglePopover.bind(this);
 		this.toggleChangeRequestForm = this.toggleChangeRequestForm.bind(this);
 		this.submitChangeRequestForm = this.submitChangeRequestForm.bind(this);
-		this.VoteOnChangeRequest = this.VoteOnChangeRequest.bind(this);
+		this.voteOnChangeRequest = this.voteOnChangeRequest.bind(this);
+		this.cancelChangeRequest = this.cancelChangeRequest.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -165,11 +166,24 @@ class ReusableItemDetails extends Component {
 		}
 	}
 
-	VoteOnChangeRequest(vote) {
+	voteOnChangeRequest(vote) {
 		const { id } = this.state;
 		const { dispatch } = this.props;
 
 		dispatch(reusableItemReducer.updateReusableItem(id, { vote }));
+	}
+
+	cancelChangeRequest() {
+		const { id } = this.state;
+		const { dispatch } = this.props;
+
+
+		const text = 'Are you sure you want to cancel the change request?';
+
+		if (confirm(text)) { // eslint-disable-line no-restricted-globals
+			// specifying 'cancel' with any value will cancel the change request
+			dispatch(reusableItemReducer.updateReusableItem(id, { 'cancel': '' }));
+		}
 	}
 
 	renderReusableItem() {
@@ -295,6 +309,9 @@ class ReusableItemDetails extends Component {
 				);
 			}
 		} else if (reusableItem.change_request) { // a proposed change request exists
+			const { auth } = this.props;
+			const { isAuthenticated, user } = auth;
+
 			changeRequest = (
 				<div className="proposed-change-request">
 					<Row>
@@ -321,7 +338,7 @@ class ReusableItemDetails extends Component {
 							{reusableItem.change_request && (
 								<React.Fragment>
 									<span>For: {reusableItem.change_request_votes_yes_count}</span>
-									<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('yes')}>Vote for change</button></span>
+									<span><button type="button" color="secondary" onClick={() => this.voteOnChangeRequest('yes')}>Vote for change</button></span>
 								</React.Fragment>
 							)}
 						</Col>
@@ -329,7 +346,7 @@ class ReusableItemDetails extends Component {
 							{reusableItem.change_request && (
 								<React.Fragment>
 									<span>Against: {reusableItem.change_request_votes_no_count}</span>
-									<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('no')}>Vote against change</button></span>
+									<span><button type="button" color="secondary" onClick={() => this.voteOnChangeRequest('no')}>Vote against change</button></span>
 								</React.Fragment>
 							)}
 						</Col>
@@ -341,9 +358,17 @@ class ReusableItemDetails extends Component {
 					</Row>
 					<Row>
 						<Col>
-							<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('')}>Withdraw my vote</button></span>
+							<span><button type="button" color="secondary" onClick={() => this.voteOnChangeRequest('')}>Withdraw my vote</button></span>
 						</Col>
 					</Row>
+					{isAuthenticated && reusableItem.change_request_by === user.id
+					&& (
+						<Row>
+							<Col>
+								<span><button type="button" color="danger" onClick={() => this.cancelChangeRequest()}>Cancel the change request</button></span>
+							</Col>
+						</Row>
+					)}
 				</div>
 			);
 		}
