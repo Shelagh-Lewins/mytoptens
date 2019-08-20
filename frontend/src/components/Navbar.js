@@ -23,16 +23,20 @@ class Navbar extends Component {
 	onLogout(e) {
 		e.preventDefault();
 
-		this.props.dispatch(authReducer.logoutUser(this.props.history));
+		const { dispatch, history } = this.props;
+
+		dispatch(authReducer.logoutUser(history));
 	}
 
-	onSearch = e => {
+	onSearch = (e) => {
 		// wait until the user stops typing before searching
 		const searchTerm = e.target.value;
+
+		const { dispatch } = this.props;
 		clearTimeout(this.searchTimeout);
 
 		this.searchTimeout = setTimeout(() => {
-			this.props.dispatch(pageReducer.searchHome(searchTerm));
+			dispatch(pageReducer.searchHome(searchTerm));
 		}, 500);
 	}
 
@@ -44,8 +48,9 @@ class Navbar extends Component {
 	}
 
 	render() {
-		const { auth } = this.props;
+		const { auth, searchComplete, searchResults, searchTerm } = this.props;
 		const { isAuthenticated, user } = auth;
+		const { showDropdown } = this.state;
 
 		const authLinks = (
 			<ul className="navbar-nav ml-auto">
@@ -63,21 +68,20 @@ class Navbar extends Component {
 				</li>
 			</ul>
 		);
-		return(
+		return (
 			<nav className="navbar navbar-expand-sm navbar-light bg-light">
 				<Link className="navbar-brand" to="/">My Top Tens</Link>
-				<button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-					onClick={(e) => {this.showDropdown(e);}} >
-					<span className="navbar-toggler-icon"></span>
+				<button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onClick={(e) => { this.showDropdown(e); }}>
+					<span className="navbar-toggler-icon" />
 				</button>
-				<div className={`collapse navbar-collapse ${this.state.showDropdown ? 'show' : ''}`} id="navbarSupportedContent">
+				<div className={`collapse navbar-collapse ${showDropdown ? 'show' : ''}`} id="navbarSupportedContent">
 					{isAuthenticated ? authLinks : guestLinks}
 					<Search
 						onChange={this.onSearch}
 						placeholder="Search lists and items..."
-						searchComplete={this.props.searchComplete}
-						searchResults={this.props.searchResults}
-						searchTerm={this.props.searchTerm}
+						searchComplete={searchComplete}
+						searchResults={searchResults}
+						searchTerm={searchTerm}
 					/>
 				</div>
 			</nav>
@@ -86,6 +90,8 @@ class Navbar extends Component {
 }
 Navbar.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'dispatch': PropTypes.func.isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'searchTerm': PropTypes.string.isRequired,
 	'searchComplete': PropTypes.bool.isRequired,
 	'searchResults': PropTypes.arrayOf(PropTypes.any).isRequired,

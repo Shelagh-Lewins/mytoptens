@@ -164,41 +164,42 @@ function fetchReusableItemDetailFailed() {
 	};
 }
 
-export function fetchReusableItemDetail(id) {
-	return (dispatch, getState) => {
-		dispatch(fetchReusableItemDetailStarted());
+export const fetchReusableItemDetail = id => (dispatch, getState) => {
+// export function fetchReusableItemDetail(id) {
+	// return (dispatch, getState) => {
+	dispatch(fetchReusableItemDetailStarted());
 
-		// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
-		let useAuth = false;
+	// if the user is not logged in, don't use auth. The server should return the reusableItem if a non-authenticated user should see it.
+	let useAuth = false;
 
-		if (getState().auth.user.token) {
-			useAuth = true;
+	if (getState().auth.user.token) {
+		useAuth = true;
+	}
+
+	return fetchAPI({
+		'url': `/api/v1/content/reusableitem/?id=${id}`,
+		'method': 'GET',
+		'useAuth': useAuth,
+	}).then((response) => {
+		// console.log('fetchReusableItemDetail response', response);
+		const normalizedData = normalize(response, [reusableItemSchema]);
+
+		let userId;
+
+		if (getState().auth.isAuthenticated) {
+			userId = getState().auth.user.id;
 		}
 
-		return fetchAPI({
-			'url': `/api/v1/content/reusableitem/?id=${id}`,
-			'method': 'GET',
-			'useAuth': useAuth,
-		}).then((response) => {
-			// console.log('fetchReusableItemDetail response', response);
-			const normalizedData = normalize(response, [reusableItemSchema]);
+		dispatch(topTenListsReducer.fetchOrganizerData(userId));
 
-			let userId;
+		return dispatch(receiveEntities(normalizedData));
+	}).catch((error) => {
+		dispatch(fetchReusableItemDetailFailed());
 
-			if (getState().auth.isAuthenticated) {
-				userId = getState().auth.user.id;
-			}
-
-			dispatch(topTenListsReducer.fetchOrganizerData(userId));
-
-			return dispatch(receiveEntities(normalizedData));
-		}).catch((error) => {
-			dispatch(fetchReusableItemDetailFailed());
-
-			return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
-		});
-	};
-}
+		return dispatch(getErrors({ 'fetch reusableItemDetail': error.message }));
+	});
+};
+// }
 
 // ////////////////////////////////
 // Search for Top Ten Items by name, but only those which have no reusableItem
@@ -304,7 +305,7 @@ function updateReusableItemFailed() {
 	};
 }
 
-export const updateReusableItem = (id, data) => (dispatch) => {
+export const updateReusableItem = (id, data) => (dispatch, getState) => {
 	// console.log('updateReusableItem', reusableItemId, data);
 	dispatch(updateReusableItemStarted());
 
@@ -318,6 +319,8 @@ export const updateReusableItem = (id, data) => (dispatch) => {
 		// console.log('updateReusableItem response', response);
 
 		const normalizedData = normalize([response], [reusableItemSchema]);
+
+		dispatch(topTenListsReducer.fetchOrganizerData(getState().auth.user.id));
 
 		return dispatch(receiveEntities(normalizedData));
 	}).catch((error) => {
@@ -546,7 +549,7 @@ export const getMyTopTenItemsForReusableItem = createSelector(
 				results.push(topTenItem.id);
 			}
 		});
-		return results;
+		return results.sort();
 	},
 );
 

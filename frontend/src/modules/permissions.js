@@ -16,23 +16,22 @@ import findObjectByProperty from './findObjectByProperty';
 
 export function canViewTopTenList(id) {
 	// a topTenList can be viewed if public or if created by user
-	//const property = Object.keys(identifier)[0];
-	//const value = identifier[property];
+
 	const state = store.getState();
 	const topTenLists = state.topTenList.things;
 	const userId = state.auth.user.id;
 
-	let canViewTopTenList = false;
+	let canView = false;
 
 	if (Object.keys(topTenLists).length > 0) {
-		let topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
+		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
 
 		if (topTenList && (topTenList.is_public || (topTenList.created_by === userId))) {
-			canViewTopTenList = true;
+			canView = true;
 		}
 	}
 
-	return canViewTopTenList;
+	return canView;
 }
 
 export function canEditTopTenList(id) {
@@ -41,17 +40,17 @@ export function canEditTopTenList(id) {
 	const topTenLists = state.topTenList.things;
 	const userId = state.auth.user.id;
 
-	let canEditTopTenList = false;
+	let canEdit = false;
 
 	if (Object.keys(topTenLists).length > 0) {
-		let topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
+		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
 
 		if (topTenList && (topTenList.created_by === userId)) {
-			canEditTopTenList = true;
+			canEdit = true;
 		}
 	}
 
-	return canEditTopTenList;
+	return canEdit;
 }
 
 export function canCreateTopTenList() {
@@ -61,26 +60,32 @@ export function canCreateTopTenList() {
 
 	if (state.auth.isAuthenticated && state.auth.user.emailVerified) {
 		return true;
-	} else {
-		return false;
 	}
+
+	return false;
 }
 
 export function canViewReusableItem(id) {
-	// all reusableItems are public
-	// so just check the reusableItem exists
+	// public reusableItems can be viewed
+	// plus private ones the user created
 	const state = store.getState();
 	const reusableItems = state.reusableItem.things;
 
-	let canViewReusableItem = false;
-
+	let canView = false;
+	console.log('testing permissions');
+	console.log('reusableItems', reusableItems);
 	if (Object.keys(reusableItems).length > 0) {
-		let topTenList = findObjectByProperty({ 'parentObject': reusableItems, 'property': 'id', 'value': id });
+		const reusableItem = findObjectByProperty({ 'parentObject': reusableItems, 'property': 'id', 'value': id });
 
-		if (topTenList) {
-			canViewReusableItem = true;
+		if (reusableItem.is_public) {
+			canView = true;
+			console.log('its public');
+		}
+
+		if (state.auth.isAuthenticated && (reusableItem.created_by === state.auth.user.id)) {
+			canView = true;
 		}
 	}
 
-	return canViewReusableItem;
+	return canView;
 }

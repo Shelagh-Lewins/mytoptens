@@ -58,17 +58,29 @@ class ReusableItemDetails extends Component {
 			match,
 			auth,
 			reusableItem,
+			topTenItems,
 			history,
 		} = this.props;
+
+		const { isAuthenticated, user } = auth;
+
 		let { id } = this.state;
-		// console.log('props', this.props);
+		console.log('props', this.props);
 		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this reusableItem
-			const canViewReusableItem = permissions.canViewReusableItem(id);
-
 			this.setState({
-				'canView': canViewReusableItem,
+				'canView': permissions.canViewReusableItem(id),
 			});
+
+			if (reusableItem) {
+				this.setState({
+					'isOwner': isAuthenticated && reusableItem.created_by === user.id,
+				});
+			} else {
+				this.setState({
+					'isOwner': false,
+				});
+			}
 		}
 
 		// user has navigated to a different reusableItem
@@ -77,6 +89,30 @@ class ReusableItemDetails extends Component {
 
 			this.setState({
 				id,
+			});
+		}
+
+		// have loaded a new list of the user's own topTenItems that reference this reusableItem
+		// this is a crude test, but we need to know if the array has different values
+
+		if (JSON.stringify(prevProps.topTenItems) !== JSON.stringify(topTenItems)) {
+			let changeRequestsAvailable = false;
+
+			if (reusableItem && reusableItem.created_by === user.id) {
+				changeRequestsAvailable = true; // you can create change requests if you own the item
+			} else if (reusableItem.is_public) {
+				if (topTenItems.length > 0) {
+					changeRequestsAvailable = true;
+				}
+				// or if it is public and you reference it in one of your lists
+			}
+
+			this.setState({
+				// can the user create and vote on change requests?
+				// they must be logged in
+				// and either own the reusableItem
+				// or it's a public reusableItem
+				'changeRequestsAvailable': changeRequestsAvailable,
 			});
 		}
 
@@ -176,8 +212,6 @@ class ReusableItemDetails extends Component {
 	cancelChangeRequest() {
 		const { id } = this.state;
 		const { dispatch } = this.props;
-
-
 		const text = 'Are you sure you want to cancel the change request?';
 
 		if (confirm(text)) { // eslint-disable-line no-restricted-globals
@@ -187,8 +221,10 @@ class ReusableItemDetails extends Component {
 	}
 
 	renderReusableItem() {
-		const { reusableItem } = this.props;
-		const { showChangeRequestForm } = this.state;
+		const { auth, reusableItem } = this.props;
+		const { isAuthenticated, user } = auth;
+
+		const { changeRequestsAvailable, isOwner, showChangeRequestForm } = this.state;
 
 		const reusableItemHelpId = this.popoverIds.reusableItemHelp;
 		const { [`popoverOpen${reusableItemHelpId}`]: popoverOpen } = this.state;
@@ -199,7 +235,7 @@ class ReusableItemDetails extends Component {
 				</Button>
 				<Popover placement="bottom" isOpen={popoverOpen} target={reusableItemHelpId} toggle={() => this.togglePopover(reusableItemHelpId)} html="true">
 					<PopoverBody>
-						<p>A Reusable Item is a shared Top Ten Item name that can be used in multiple lists.</p>
+						<p>A Reusable Item is a shared Top Ten Item name that can be used in multiple Top Ten Lists.</p>
 						<p>A Reusable Item is private by default, meaning that only its creator can see it.</p>
 						<p>If you make a Reusable Item public, other people will be able to use it in their Top Ten Lists and suggest changes to it, even if their lists are private.</p>
 						<p>You will never see another user&apos;s private Top Ten Lists, even if it includes a public Reusable Item</p>
@@ -209,10 +245,6 @@ class ReusableItemDetails extends Component {
 		);
 
 		let changeRequest;
-
-		// TODO if proposed change request exists, show it and allow vote if conditions met. Show votes and number required for resolution. Should this information come from the server?
-		// if no proposed change request exists, and user references reusableItem, allow them to propose a change request if verified
-		// props.topTenItems is array of my topTenItems that reference this reusableItem
 
 		const BasicChangeRequestForm = (props) => {
 			const {
@@ -279,7 +311,7 @@ class ReusableItemDetails extends Component {
 
 			'displayName': 'ChangeRequestForm',
 		})(BasicChangeRequestForm);
-
+		console.log('rendering. change_request', reusableItem.change_request);
 		// if no proposed change request exists already
 		if (!reusableItem.change_request) {
 			if (showChangeRequestForm) { // form to propose a change request
@@ -308,9 +340,9 @@ class ReusableItemDetails extends Component {
 					</div>
 				);
 			}
-		} else if (reusableItem.change_request) { // a proposed change request exists
-			const { auth } = this.props;
-			const { isAuthenticated, user } = auth;
+		} else { // a proposed change request exists
+			// const { auth } = this.props;
+			// const { isAuthenticated, user } = auth;
 
 			changeRequest = (
 				<div className="proposed-change-request">
@@ -381,7 +413,7 @@ class ReusableItemDetails extends Component {
 							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
 							{reusableItem.name}
 						</h2>
-						{true && (
+						{isOwner && (
 							<div className="reusableitem-summary-controls">
 								<IsPublicIndicator
 									targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
@@ -398,7 +430,7 @@ class ReusableItemDetails extends Component {
 						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
 					</Col>
 				</Row>
-				{changeRequest}
+				{changeRequestsAvailable && changeRequest}
 			</React.Fragment>
 		);
 	}
@@ -465,6 +497,7 @@ ReusableItemDetails.propTypes = {
 	'isLoading': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
+	'topTenItems': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => ({
