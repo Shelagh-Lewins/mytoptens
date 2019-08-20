@@ -336,7 +336,12 @@ class ReusableItemDetails extends Component {
 					</Row>
 					<Row>
 						<Col>
-							My vote: {reusableItem.my_vote}
+							My vote: {reusableItem.change_request_my_vote}
+						</Col>
+					</Row>
+					<Row>
+						<Col>
+							<span><button type="button" color="secondary" onClick={() => this.VoteOnChangeRequest('')}>Withdraw my vote</button></span>
 						</Col>
 					</Row>
 				</div>

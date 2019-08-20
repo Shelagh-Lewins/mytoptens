@@ -47,18 +47,18 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     # allows my_vote to be returned dynamically and not saved in the instance
     # see method get_my_vote
-    my_vote = serializers.SerializerMethodField()
-    votes_yes_count = serializers.SerializerMethodField()
-    votes_no_count = serializers.SerializerMethodField()
+    change_request_my_vote = serializers.SerializerMethodField()
+    change_request_votes_yes_count = serializers.SerializerMethodField()
+    change_request_votes_no_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ReusableItem
         # note that change_request_votes_yes and change_request_votes_no must not be returned
         # they are lists of user email addresses
-        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote')
+        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote')
 
     # magic method name
-    def get_my_vote(self, obj):
+    def get_change_request_my_vote(self, obj):
         # return the user's recorded vote, if any
         current_user = self.context['request'].user
 
@@ -71,12 +71,12 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         return ''
 
     # magic method name
-    def get_votes_yes_count(self, obj):
+    def get_change_request_votes_yes_count(self, obj):
         # return the number of users who have voted yes to a change request
         return obj.change_request_votes_yes.count()
 
     # magic method name
-    def get_votes_no_count(self, obj):
+    def get_change_request_votes_no_count(self, obj):
         # return the number of users who have voted no to a change request
             return obj.change_request_votes_no.count()
 
@@ -110,9 +110,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     # process votes on a reusableItem to see if a change request has been accepted or rejected
     @classmethod
     def count_votes(self, instance):
-        print('count_votes')
-        print('for', instance.change_request_votes_yes.count())
-        print('against', instance.change_request_votes_no.count())
+        # print('count_votes')
+        # print('for', instance.change_request_votes_yes.count())
+        # print('against', instance.change_request_votes_no.count())
 
         change_request_votes_yes = instance.change_request_votes_yes.count()
         change_request_votes_no = instance.change_request_votes_no.count()
@@ -134,8 +134,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         number_of_selected_users = selected_users.count()
 
-        print('selected users', selected_users.values('email'))
-        print('number of selected users', number_of_selected_users)
+        # print('selected users', selected_users.values('email'))
+        # print('number of selected users', number_of_selected_users)
 
         """ voting rules
         number_of_users: rule applies to reusableItem referenced by this number of users, or fewer
@@ -227,22 +227,22 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
     @classmethod
     def accept_change(self, instance):
-        print('accept change')
+        # print('accept change')
 
         for key in instance.change_request:
             setattr(instance, key, instance.change_request[key])
 
         instance.change_request_at = timezone.now()
         instance.change_request = None
-        print('instance', instance)
+        # print('instance', instance)
         instance.save()
         return instance
 
     @classmethod
     def reject_change(self, instance):
-        print('reject change')
+        # print('reject change')
         instance.change_request = None
-        print('instance', instance)
+        # print('instance', instance)
         instance.save()
         return instance
 
@@ -276,7 +276,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # if vote (yes / no), a vote is registered
         if 'vote' in data:
-            if data['vote'] in ['yes', 'no']:
+            if data['vote'] in ['yes', 'no', '']: # '' to withdraw vote
                 change_type = 'vote'
                 count = count + 1
 
@@ -432,7 +432,11 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 raise ValidationError({'reusable item error: cannot vote on a private reusable item'})
 
             self.remove_my_votes(instance, current_user)
-            self.cast_vote(instance, current_user, validated_data['vote'])
+
+            # if vote is '' then the user has withdrawn their vote already
+            # if yes or no, add the vote
+            if validated_data['vote'] in ['yes', 'no']:
+                self.cast_vote(instance, current_user, validated_data['vote'])
 
             instance.save()
             return instance
@@ -452,7 +456,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     # https://github.com/encode/django-rest-framework/issues/627
 
     expandable_fields = {
-        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'votes_yes_count', 'votes_no_count', 'my_vote']})
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote']})
     }
 
     class Meta:

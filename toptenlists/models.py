@@ -43,24 +43,24 @@ class ReusableItem(models.Model):
     definition = models.CharField(max_length=255, blank=True, default='')
     is_public = models.BooleanField(default=False, blank=True)
     link = models.CharField(max_length=255, blank=True, default='')
+
     modified_at = models.DateTimeField(auto_now_add=True)
     users_when_modified = models.IntegerField(default=0)
-    #change_request_votes_yes = JSONField(default=list, blank=True) # array of usernames.
-    #votes_no = JSONField(default=list, blank=True) # array of usernames.
-
-    change_request_votes_yes = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_yes')
-    change_request_votes_no = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_no')
-    
+    history = JSONField(default=list, blank=True) # array of version objects
+   
     change_request = JSONField(default=None, blank=True, null=True) # change request object
     change_request_at = models.DateTimeField(blank=True, null=True) # when the change request was submitted
     change_request_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
         blank=True, related_name='reusableItem_change_request_by') # user who submitted the change request
-    history = JSONField(default=list, blank=True) # array of version objects
 
-    # these should never be saved. It is only here to allow a user's vote to be returned to them, so the UI can display their vote
-    votes_yes_count = models.IntegerField(blank=True, null=True)
-    votes_no_count = models.IntegerField(blank=True, null=True)
-    my_vote = models.CharField(max_length=255, blank=True, null=True)
+    # These are lists of users and should never be returned by the API, because user emails must be kept private.
+    change_request_votes_yes = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_yes')
+    change_request_votes_no = models.ManyToManyField(USER, blank=True, related_name='reusableItem_votes_no')
+
+    # these should never be saved. They are generated dynamically by the serializer.
+    change_request_votes_yes_count = models.IntegerField(blank=True, null=True)
+    change_request_votes_no_count = models.IntegerField(blank=True, null=True)
+    change_request_my_vote = models.CharField(max_length=255, blank=True, null=True)
 
     # blank=True says the field is not required in forms. This is necessary for Django admin interface to work.
     # default=... provides a default value to the database.
