@@ -12,7 +12,6 @@
 // identifier should be like { 'id': 'efg' } i.e. an object with one property
 
 import store from '../store';
-import * as reusableItemReducer from './reusableItem';
 import findObjectByProperty from './findObjectByProperty';
 
 export function canViewTopTenList(id) {

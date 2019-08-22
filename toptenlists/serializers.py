@@ -58,31 +58,53 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote')
 
     # magic method name
-    def get_change_request_my_vote(self, obj):
+    def get_change_request_my_vote(cls, instance):
         # return the user's recorded vote, if any
-        current_user = self.context['request'].user
+        current_user = cls.context['request'].user
 
-        if current_user in obj.change_request_votes_yes.all():
+        if current_user in instance.change_request_votes_yes.all():
             return 'yes'
 
-        if current_user in obj.change_request_votes_no.all():
+        if current_user in instance.change_request_votes_no.all():
             return 'no'
 
         return ''
 
     # magic method name
-    def get_change_request_votes_yes_count(self, obj):
+    def get_change_request_votes_yes_count(cls, instance):
         # return the number of users who have voted yes to a change request
-        return obj.change_request_votes_yes.count()
+        return instance.change_request_votes_yes.count()
 
     # magic method name
-    def get_change_request_votes_no_count(self, obj):
+    def get_change_request_votes_no_count(cls, instance):
         # return the number of users who have voted no to a change request
-            return obj.change_request_votes_no.count()
+            return instance.change_request_votes_no.count()
 
-    @classmethod # required for self to be consistently passed automatically as the first parameter. Otherwise it depends on whether you call the method with 'self.remove_my_votes()' or 'ReusableItemSerializer.remove_my_votes()'
-    def remove_my_votes(self, instance, user):
-        # remove any previous vote by this user
+    @classmethod # required for cls to be consistently passed automatically as the first parameter. Otherwise it depends on whether you call the method with 'self.remove_my_votes()' or 'ReusableItemSerializer.remove_my_votes()'
+    # use cls instead of self for class methods for readability
+    def count_users(cls, instance):
+        """
+        find all users who reference this reusableItem in any topTenList
+        """
+
+        # find the topTenItems that reference this reusableItem
+        selected_toptenitems = TopTenItem.objects.filter(reusableItem=instance)
+
+        # and find the topTenLists to which those topTenItems belong
+        selected_toptenlist_ids = selected_toptenitems.values_list('topTenList_id', flat=True)
+        selected_toptenlists = TopTenList.objects.filter(id__in=selected_toptenlist_ids)
+
+        # print('selectedTopTenLists', selected_toptenlists.values())
+
+        # and finally select the users who created these topTenLists
+        selected_userids = selected_toptenlists.values_list('created_by', flat=True)
+        selected_users = USER.objects.filter(id__in=selected_userids)
+
+        return selected_users.count()
+
+    @classmethod
+    def remove_my_votes(cls, instance, user):
+        """ remove any previous vote by this user """
         try:
             instance.change_request_votes_yes.remove(user)
         except ValueError: # avoid error if user has not previously voted
@@ -94,14 +116,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             pass
 
     @classmethod
-    def cast_vote(self, instance, user, vote):
+    def cast_vote(cls, instance, user, vote):
         if instance.change_request is None:
             return
 
         # if vote is '' then the user has withdrawn their vote
         # if yes or no, add the vote
 
-        self.remove_my_votes(instance, user)
+        cls.remove_my_votes(instance, user)
 
         if vote == 'yes':
             instance.change_request_votes_yes.add(user)
@@ -109,11 +131,11 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         elif vote == 'no':
             instance.change_request_votes_no.add(user)
 
-        self.count_votes(instance)
+        cls.count_votes(instance)
 
     # process votes on a reusableItem to see if a change request has been accepted or rejected
     @classmethod
-    def count_votes(self, instance):
+    def count_votes(cls, instance):
         if instance.change_request is None:
             return
 
@@ -129,23 +151,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             return
 
         # find all users who reference this reusableItem in any topTenList
-        # find the topTenItems that reference this reusableItem
-        selected_toptenitems = TopTenItem.objects.filter(reusableItem=instance)
-
-        # and find the topTenLists to which those topTenItems belong
-        selected_toptenlist_ids = selected_toptenitems.values_list('topTenList_id', flat=True)
-        selected_toptenlists = TopTenList.objects.filter(id__in=selected_toptenlist_ids)
-
-        # print('selectedTopTenLists', selected_toptenlists.values())
-
-        # and finally select the users who created these topTenLists
-        selected_userids = selected_toptenlists.values_list('created_by', flat=True)
-        selected_users = USER.objects.filter(id__in=selected_userids)
-
-        number_of_selected_users = selected_users.count()
-
-        # print('selected users', selected_users.values('email'))
-        # print('number of selected users', number_of_selected_users)
+        number_of_selected_users = cls.count_users(instance)
 
         """ voting rules
         number_of_users: rule applies to reusableItem referenced by this number of users, or fewer
@@ -169,42 +175,42 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         'accept_percentage': 100,
         'voting_scheme': 'A'
         },
-        { # 2 users: 2 must vote
+        { # 3 users
         'number_of_users': 3,
         'accept_quorum': 2,
         'reject_quorum': 2,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
-        { # 4 or 5 users: 3 must vote
+        { # 4 or 5 users
         'number_of_users': 5,
         'accept_quorum': 3,
         'reject_quorum': 3,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
-        { # 6 - 10 users: 5 must vote
+        { # 6 - 10 users
         'number_of_users': 10,
         'accept_quorum': 5,
         'reject_quorum': 5,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
-        { # 11 - 20 users: 10 must vote
+        { # 11 - 20 users
         'number_of_users': 20,
         'accept_quorum': 10,
         'reject_quorum': 10,
         'accept_percentage': 80,
         'voting_scheme': 'A'
         },
-        { # 21 - 100 users: 10 must vote
+        { # 21 - 100 users
         'number_of_users': 100,
         'accept_quorum': 10,
         'reject_quorum': 20,
         'accept_percentage': 90,
         'voting_scheme': 'A'
         },
-        { # 101 - 1000 users: 10 must vote
+        { # 101 - 1000 users
         'number_of_users': 1000,
         'accept_quorum': 40,
         'reject_quorum': 80,
@@ -213,7 +219,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         }
         ]
 
-        selected_rule =  voting_rules[-1] # default will apply if more users than the last voting rule covers
+        selected_rule =  voting_rules[-1] # this default will apply if there are more users than the last voting rule covers
 
         for rule in voting_rules:
             if number_of_selected_users <= rule['number_of_users']:
@@ -225,43 +231,59 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         if percentage_yes >= selected_rule['accept_percentage']:
             if total_votes >= selected_rule['accept_quorum']:
-                self.accept_change(instance)
+                cls.accept_change(instance)
                 return
 
         # if the change hasn't been accepted with this number of votes, reject it
         elif total_votes >= selected_rule['reject_quorum']:
-            self.reject_change(instance)
+            cls.reject_change(instance)
             return
 
         return # we have not yet reached a quorum
 
     @classmethod
-    def accept_change(self, instance):
-        for key in instance.change_request:
-            setattr(instance, key, instance.change_request[key])
+    def accept_change(cls, instance):
+        history_entry = {}
 
-        self.remove_change_request(instance)
+        history_entry['is_public'] = getattr(instance, 'is_public')
 
+        for key, value in instance.change_request.items():
+            setattr(instance, key, value)
+            history_entry[key] = value
+
+        history_entry['change_request_votes_yes_count'] = cls.get_change_request_votes_yes_count(cls, instance)
+
+        history_entry['change_request_votes_no_count'] = cls.get_change_request_votes_no_count(cls, instance)
+
+        history_entry['number_of_users'] = cls.count_users(instance)
+
+        history_entry['changed_at'] = timezone.now().__str__()
+
+        history_entry['changed_by_id'] = getattr(instance, 'change_request_by').id.__str__()
+
+        instance.history.append(history_entry)
+
+        setattr(instance, 'modified_at', timezone.now().__str__())
+
+        cls.remove_change_request(instance)
         instance.save()
-        #return instance
 
     @classmethod
-    def reject_change(self, instance):
-        self.remove_change_request(instance)
+    def reject_change(cls, instance):
+        cls.remove_change_request(instance)
 
         instance.save()
-        #return instance
 
     @classmethod
-    def remove_change_request(self, instance):
+    def remove_change_request(cls, instance):
         instance.change_request = None
         instance.change_request_at = None
         instance.change_request_by = None
 
-        self.reset_change_votes(instance)
+        cls.reset_change_votes(instance)
 
     @classmethod
-    def reset_change_votes(self, instance):
+    def reset_change_votes(cls, instance):
         instance.change_request_votes_yes.clear()
         instance.change_request_votes_no.clear()
 
@@ -331,9 +353,24 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         self.change_type = change_type # change_type ought to be declared in __init__ but I can't get it to work in the serializer
         return validated_data
 
+    @classmethod
+    def create(cls, validated_data):
+        """
+        create an initial history entry as well as the obvious data
+        """
+        history_entry = {}
 
+        for key in cls.editable_properties:
+            if validated_data.get(key, None) is not None:
+                history_entry[key] = validated_data[key]
+
+        validated_data['history'] = [history_entry]
+
+        return ReusableItem.objects.create(**validated_data)
+
+    # @classmethod here breaks the function
     def update(self, instance, validated_data):
-        """ to_internal_value thas made sure there is exactly one change request which may be:
+        """ to_internal_value has made sure there is exactly one change request which may be:
         - a change to is_public
         - a proposed change request
         - a vote on an existing change request
@@ -391,7 +428,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 'created_by_username': current_user.username
                 }
 
-                newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                # newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                newReusableItem = ReusableItemSerializer.create(reusableItemData)
 
                 # all the user's topTenItems should reference the new reusableItem
                 for topTenItem in myTopTenItems:
@@ -417,8 +455,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
             for key in self.editable_properties:
                 if key in validated_data:
-                    print(key)
-                    print(getattr(instance, key))
+                    #print(key)
+                    #print(getattr(instance, key))
                     # only process new values
                     if getattr(instance, key) != validated_data[key]:
                         change_request[key] = validated_data[key]
@@ -544,7 +582,8 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         reusableItemData['created_by'] = self.context['request'].user
                         reusableItemData['created_by_username'] = self.context['request'].user.username
 
-                        newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                        # newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                        ReusableItemSerializer.create(reusableItemData)
                         topTenItem.reusableItem = newReusableItem
                         topTenItem.save()
 
@@ -561,12 +600,13 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                     reusableItemData['created_by_username'] = self.context['request'].user.username
 
                     if 'reusableItemDefinition' in data:
-                            reusableItemData['definition'] = data['reusableItemDefinition']
+                        reusableItemData['definition'] = data['reusableItemDefinition']
 
                     if 'reusableItemLink' in data:
-                            reusableItemData['link'] = data['reusableItemLink']
+                        reusableItemData['link'] = data['reusableItemLink']
 
-                    newReusableItem = ReusableItem.objects.create( **reusableItemData)
+                    newReusableItem = ReusableItemSerializer.create(reusableItemData)
+                    # newReusableItem = ReusableItem.objects.create( **reusableItemData)
 
                     internal_value['reusableItem'] = newReusableItem
 
@@ -667,8 +707,8 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
                 elif 'topTenItem_id' in topTenItem_data:
                     # create new reusableItem from topTenItem
-                    print('topTenItem_id')
-                    print(topTenItem_data['topTenItem_id'])
+                    #print('topTenItem_id')
+                    #print(topTenItem_data['topTenItem_id'])
 
                     try:
                         topTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
