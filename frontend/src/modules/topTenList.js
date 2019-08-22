@@ -349,6 +349,7 @@ const initialTopTenListsState = {
 	'next': '',
 	'previous': '',
 	'things': {},
+	'isLoadingOrganizerData': false,
 	'organizerData': {},
 };
 
@@ -475,7 +476,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 				count,
 				previous,
 				next,
-				entities
+				entities,
 			} = action.payload;
 
 			let things = {};
@@ -582,18 +583,17 @@ export default function topTenList(state = initialTopTenListsState, action) {
 
 		case RECEIVE_ORGANIZER_DATA: {
 			// load topTenLists data into store
+			const newEntities = action.payload.entities || {};
+			const organizerData = newEntities.topTenList || {};
 
-			const { entities } = action.payload;
-
-			if (entities && entities.topTenList) {
-				return updeep({ 'organizerData': updeep.constant(entities.topTenList), 'isLoading': false }, state);
-			}
-
-			return updeep(state, state);
+			return updeep({
+				'organizerData': updeep.constant(organizerData),
+				'isLoadingOrganizerData': false,
+			}, state);
 		}
 
 		case FETCH_ORGANIZER_DATA_STARTED: {
-			return updeep(state, state);
+			return updeep({ 'isLoadingOrganizerData': true	}, state);
 		}
 
 		case FETCH_ORGANIZER_DATA_FAILED: {

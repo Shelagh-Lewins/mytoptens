@@ -12,6 +12,7 @@
 // identifier should be like { 'id': 'efg' } i.e. an object with one property
 
 import store from '../store';
+import * as reusableItemReducer from './reusableItem';
 import findObjectByProperty from './findObjectByProperty';
 
 export function canViewTopTenList(id) {
@@ -65,27 +66,59 @@ export function canCreateTopTenList() {
 	return false;
 }
 
-export function canViewReusableItem(id) {
+export function canViewReusableItem(reusableItem) {
 	// public reusableItems can be viewed
-	// plus private ones the user created
-	const state = store.getState();
-	const reusableItems = state.reusableItem.things;
+	// also private ones the user created
+	const { auth } = store.getState();
 
-	let canView = false;
-	console.log('testing permissions');
-	console.log('reusableItems', reusableItems);
-	if (Object.keys(reusableItems).length > 0) {
-		const reusableItem = findObjectByProperty({ 'parentObject': reusableItems, 'property': 'id', 'value': id });
-
-		if (reusableItem.is_public) {
-			canView = true;
-			console.log('its public');
-		}
-
-		if (state.auth.isAuthenticated && (reusableItem.created_by === state.auth.user.id)) {
-			canView = true;
-		}
+	if (reusableItem.is_public) {
+		return true;
 	}
 
-	return canView;
+	if (auth.isAuthenticated && (reusableItem.created_by === auth.user.id)) {
+		return true;
+	}
+
+	return false;
+}
+
+// can the user view, create and vote on change requests?
+export function reusableItemChangeRequestsAvailable(reusableItem, myTopTenItems) {
+	const { auth } = store.getState();
+	const { isAuthenticated, user } = auth;
+
+	if (!reusableItem) {
+		return false;
+	}
+
+	if (!isAuthenticated) {
+		return false;
+	}
+
+	// user created the reusableItem
+	if (reusableItem.created_by === user.id) {
+		return true;
+	}
+
+	// reusableItem is public and user references it in one of their lists
+	if (reusableItem.is_public && myTopTenItems.length > 0) {
+		return true;
+	}
+
+	return false;
+}
+
+export function userCreatedReusableItem(reusableItem) {
+	const { auth } = store.getState();
+	const { isAuthenticated, user } = auth;
+
+	if (!reusableItem) {
+		return false;
+	}
+
+	if (isAuthenticated && reusableItem.created_by === user.id) {
+		return true;
+	}
+
+	return false;
 }

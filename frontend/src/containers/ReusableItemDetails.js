@@ -59,31 +59,29 @@ class ReusableItemDetails extends Component {
 			auth,
 			reusableItem,
 			topTenItems,
+			isLoadingOrganizerData,
 			history,
 		} = this.props;
 
-		const { isAuthenticated, user } = auth;
-
 		let { id } = this.state;
-		console.log('props', this.props);
-		if (prevProps.isLoading && !isLoading) {
-			// just finished loading; need to check if user should view this reusableItem
-			this.setState({
-				'canView': permissions.canViewReusableItem(id),
-			});
 
-			if (reusableItem) {
-				this.setState({
-					'isOwner': isAuthenticated && reusableItem.created_by === user.id,
-				});
-			} else {
-				this.setState({
-					'isOwner': false,
-				});
-			}
+		if (reusableItem && prevProps.isLoading && !isLoading) {
+			// loaded a reusableItem
+			this.setState({
+				'canView': permissions.canViewReusableItem(reusableItem),
+				'isOwner': permissions.userCreatedReusableItem(reusableItem),
+				'changeRequestsAvailable': false, // waiting for organizer data to load
+			});
 		}
 
-		// user has navigated to a different reusableItem
+		// loaded a new list of the user's own topTenItems that reference this reusableItem
+		if (reusableItem && prevProps.isLoadingOrganizerData && !isLoadingOrganizerData) {
+			this.setState({
+				'changeRequestsAvailable': permissions.reusableItemChangeRequestsAvailable(reusableItem, topTenItems),
+			});
+		}
+
+		// navigated to a different reusableItem
 		if (prevProps.match.params.id !== match.params.id) {
 			id = this.getReusableItemData(this.props);
 
@@ -92,37 +90,9 @@ class ReusableItemDetails extends Component {
 			});
 		}
 
-		// have loaded a new list of the user's own topTenItems that reference this reusableItem
-		// this is a crude test, but we need to know if the array has different values
-
-		if (JSON.stringify(prevProps.topTenItems) !== JSON.stringify(topTenItems)) {
-			let changeRequestsAvailable = false;
-
-			if (reusableItem && reusableItem.created_by === user.id) {
-				changeRequestsAvailable = true; // you can create change requests if you own the item
-			} else if (reusableItem.is_public) {
-				if (topTenItems.length > 0) {
-					changeRequestsAvailable = true;
-				}
-				// or if it is public and you reference it in one of your lists
-			}
-
-			this.setState({
-				// can the user create and vote on change requests?
-				// they must be logged in
-				// and either own the reusableItem
-				// or it's a public reusableItem
-				'changeRequestsAvailable': changeRequestsAvailable,
-			});
-		}
-
-		// user has just logged out
-		// store needs to be repopulated
-		if (prevProps.auth.isAuthenticated && !auth.isAuthenticated) {
-			id = this.getReusableItemData(this.props);
-			this.setState({
-				id,
-			});
+		// user has just logged in or out
+		if (prevProps.auth.isAuthenticated !== auth.isAuthenticated) {
+			this.getReusableItemData(this.props);
 		}
 
 		// the reusableItem has been replaced by a new one
@@ -143,7 +113,6 @@ class ReusableItemDetails extends Component {
 		props.dispatch(errorsReducer.clearErrors());
 		return reusableItemId;
 	}
-
 
 	onCloseFlashMessage = () => {
 		const { dispatch } = this.props;
@@ -169,7 +138,7 @@ class ReusableItemDetails extends Component {
 
 	togglePopover(popoverId) {
 		const { [`popoverOpen${popoverId}`]: popoverOpen } = this.state;
-		// const popoverOpen = this.state[`popoverOpen${popoverId}`];
+
 		this.setState({
 			[`popoverOpen${popoverId}`]: !popoverOpen,
 		});
@@ -311,7 +280,6 @@ class ReusableItemDetails extends Component {
 
 			'displayName': 'ChangeRequestForm',
 		})(BasicChangeRequestForm);
-		console.log('rendering. change_request', reusableItem.change_request);
 		// if no proposed change request exists already
 		if (!reusableItem.change_request) {
 			if (showChangeRequestForm) { // form to propose a change request
@@ -341,9 +309,6 @@ class ReusableItemDetails extends Component {
 				);
 			}
 		} else { // a proposed change request exists
-			// const { auth } = this.props;
-			// const { isAuthenticated, user } = auth;
-
 			changeRequest = (
 				<div className="proposed-change-request">
 					<Row>
@@ -495,6 +460,7 @@ ReusableItemDetails.propTypes = {
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
+	'isLoadingOrganizerData': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topTenItems': PropTypes.arrayOf(PropTypes.any).isRequired,
@@ -504,8 +470,9 @@ const mapStateToProps = (state, ownProps) => ({
 	'auth': state.auth,
 	'errors': state.errors,
 	'isLoading': state.reusableItem.isLoading,
+	'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
 	'reusableItem': state.reusableItem.things[ownProps.match.params.id],
-	'topTenItems': reusableItemReducer.getMyTopTenItemsForReusableItem(state, ownProps), // topTenItems that reference this reusableItem
+	'topTenItems': reusableItemReducer.getMyTopTenItemsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
 });
 
 export default connect(mapStateToProps)(ReusableItemDetails);
