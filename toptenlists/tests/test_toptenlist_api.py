@@ -1,5 +1,5 @@
 """
-Test the API for topTenLists and topTenItems
+Test the API for topTenLists and topTenItems api
 """
 
 import json
@@ -467,62 +467,3 @@ class DeleteTopTenListAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-"""
-Tests for ReusableItem
-"""
-
-class UpdateReusableItemAPITest(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Set up non-modified objects used by all test methods
-        cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
-        EmailAddress.objects.create(user=cls.user, 
-            email='person@example.com',
-            primary=True,
-            verified=True)
-
-    def setUp(self):
-        self.reusableItem = ReusableItem.objects.create(name='Test reusableItem', definition='A definition', created_by=self.user)
-
-    def test_modify_reusableitem(self):
-        """
-        a modification can be proposed if none exists already
-        """
-
-        self.client.force_authenticate(user=self.user)
-
-        edit_data = { 'name': 'A new name' }
-
-        reusableitem_detail_url = reverse('topTenLists:ReusableItems-detail', kwargs={'pk': self.reusableItem.id})
-
-        response = self.client.patch(reusableitem_detail_url, edit_data, format='json')
-
-        # the request should succeed
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    """
-    tests required:
-
-    basics:
-    must be verified user
-    cannot submit modification and vote together
-
-    is_public:
-    can only see public reusableItems and those they created
-    can make a reusableItem public if they created it
-    can make a reusableItem private if they created it and nobody else referencing it
-
-    propose modification:
-    cannot directly edit a reusableItem
-    can submit modification if none exists already, and user references the item, and new data
-    automatically vote after successfully proposing modification
-    cannot set name to empty string, but can set definition and link to empty string
-
-    vote:
-    can vote if modification exists and have not voted on it
-    vote must be 'yes' or 'no'
-    votes are processed and modification removed and reusable item updated if 'yes' passes
-    reusableItem history is updated
-    do we keep a record of failed modifications?
-
-    """
