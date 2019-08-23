@@ -541,7 +541,8 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         # intercept data before it is validated
         # to use fields like reusableItem_id which do not directly go into model
         internal_value = super(TopTenItemSerializer, self).to_internal_value(data)
-
+        # print('*** in TopTenItemSerializer ***')
+        # print('data', data)
         # the topTenItem references a reusableItem
         if 'reusableItem_id' in data:
             reusableItemId = data.pop('reusableItem_id', None)
@@ -672,6 +673,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
                     if topTenItem_data['newReusableItem'] == True:
                     # create new reusableItem from raw data
 
+                        print('data', topTenItem_data)
                         reusableItemData = {'name': topTenItem_data['name']}
 
                         if 'definition' in topTenItem_data:

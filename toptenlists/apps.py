@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-print('oi')
 
 class TopTenListsConfig(AppConfig):
 	name = 'toptenlists'
