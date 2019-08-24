@@ -208,9 +208,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         create_reusable_item_1(self, toptenitem_1_id, **reusableitem_1_data)
 
-    # can view if public
-    # can view if owned by user
-
     def test_get_reusableitem_api_not_public(self):
         """
         Can the user see a private reusable item?
@@ -245,7 +242,7 @@ class ModifyReusableItemAPITest(APITestCase):
         """
         This should succeeed because the reusable item is public
         """
-        
+
         self.reusableitem_1.is_public = True
         self.reusableitem_1.save()
 
@@ -268,42 +265,39 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-    #def test_modify_reusableitem(self):
+    def test_modify_reusableitem_is_public_owner(self):
         """
-        a modification can be proposed if none exists already
+        Only the owner can make a reusable item public
+        Making a reusable item private actually creates a clone that is referenced by the user's own Top Ten Items
+
         """
 
-        #self.client.force_authenticate(user=self.user)
+        # ensure is_public is false to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = False
+        original_reusableitem.save()
 
-        #edit_data = { 'name': 'A new name' }
+        check_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        self.assertEqual(check_object.is_public, False)
 
-        #reusableitem_detail_url = reverse('topTenLists:ReusableItems-detail', kwargs={'pk': self.reusableItem.id})
+        self.client.force_authenticate(user=self.user_1)
+        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
+        response = self.client.patch(reusableitem_url, {'is_public': True}, format='json')
 
-        #response = self.client.patch(reusableitem_detail_url, edit_data, format='json')
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
         # the request should succeed
-        #self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the value should be updated
+        self.assertEqual(updated_object.is_public, True)
 
     """
     tests required:
 
-    basics:
-    permissions -
-    user must be logged in
-    user's email address must be verified
-    reusable item is public or owned by user
-
-    ensure delete via api fails
-
     ensure reusable item is deleted if no longer referenced
 
     must submit one valid modification
-
-    is_public:
-    can only see public reusableItems and those they created
-    can make a reusableItem public if they created it
-    can make a reusableItem private if they created it and nobody else referencing it
 
     propose modification:
     cannot directly edit a reusableItem
