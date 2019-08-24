@@ -208,7 +208,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         create_reusable_item_1(self, toptenitem_1_id, **reusableitem_1_data)
 
-    # cannot view if not public or owned by user
     # can view if public
     # can view if owned by user
 
@@ -242,11 +241,15 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_reusableitem_api_owned_by_user(self):
+    def test_get_reusableitem_api_public(self):
         """
-        This should succeeed because the user created the reusable item
+        This should succeeed because the reusable item is public
         """
-        self.client.force_authenticate(user=self.user_1)
+        
+        self.reusableitem_1.is_public = True
+        self.reusableitem_1.save()
+
+        self.client.force_authenticate(user=self.user_2)
 
         reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
         response = self.client.get(reusableitem_url)
