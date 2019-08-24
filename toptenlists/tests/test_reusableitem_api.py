@@ -30,53 +30,69 @@ toptenlist_data_1 = {'name': 'Writers', 'description':'My favourite writers',
 # Reusable Items
 reusableitem_1_data = {'name': 'Jane Austen', 'reusableItemDefinition': 'A definition', 'reusableItemLink': 'A link', 'newReusableItem': True}
 
-# 'topTenLists' is the app_name set in endpoints.py
+# 'topTenLists' is the app_name set in endpoints.py and is common to top ten lists, top ten items and reusable items because they are all defined in the same app
 # 'TopTenLists' is the base_name set for the topTenList route in endpoints.py
 # '-list' is a standard api command to list a model. It is unrelated to our topTenList object name
+
 create_list_url = reverse('topTenLists:TopTenLists-list')
 
-def create_reusable_item(api_test_case, toptenitem_id, **kwargs):
-    """
-    Use the api to create a new Reusable Item from the kwargs data.
-    This Reusable Item will be referenced by the specified Top Ten Item.
-    """
-    item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': toptenitem_id})
-
-    response = api_test_case.client.patch(item_detail_url, kwargs, format='json')
-
-    try:
-        newreusableitem_id = json.loads(response.content)['reusableItem']['id']
-        newreusableitem = ReusableItem.objects.get(pk=newreusableitem_id)
-        return {'response': response, 'reusableitem': newreusableitem}
-
-    except:
-        return {'response': response}
-
-class CreateReusableItemAPITest(APITestCase):
-    @classmethod
-    def setUpTestData(cls):
-        # Set up non-modified objects used by all test methods
-        cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
-        EmailAddress.objects.create(user=cls.user, 
+def create_user_1(self):
+    self.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
+    EmailAddress.objects.create(user=self.user, 
             email='person@example.com',
             primary=True,
             verified=True)
 
-    def setUp(self):
-        # use the api to create a Top Ten List and its Top Ten Items
-        self.client.force_authenticate(user=self.user)
-        response = self.client.post(create_list_url, toptenlist_data_1, format='json')
-        toptenlist_1_id = json.loads(response.content)['id']
+def create_toptenlist_1(self):
+    """
+    # use the api to create a Top Ten List and its Top Ten Items
+    # The user is automatically authenticted because this is part of setup and should not fail
+    """
+    self.client.force_authenticate(user=self.user)
+    response = self.client.post(create_list_url, toptenlist_data_1, format='json')
+    toptenlist_1_id = json.loads(response.content)['id']
 
-        self.toptenlist_1 = TopTenList.objects.get(pk=toptenlist_1_id)
+    self.toptenlist_1 = TopTenList.objects.get(pk=toptenlist_1_id)
 
-        # the request should succeed
+    # the request should succeed
+    self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    
+    # there should now be 1 TopTenList in the database
+    self.assertEqual(TopTenList.objects.count(), 1)
+
+    self.client.logout()
+
+
+def create_reusable_item(self, toptenitem_id, **kwargs):
+    """
+    Use the api to create a new Reusable Item from the kwargs data.
+    This Reusable Item will be referenced by the specified Top Ten Item.
+    Note that the user is not automatically authenticated, because we want to test failure as well as success
+    """
+    item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': toptenitem_id})
+
+    response = self.client.patch(item_detail_url, kwargs, format='json')
+
+    try:
+        newreusableitem_id = json.loads(response.content)['reusableItem']['id']
+
+        self.reusableitem_1 = ReusableItem.objects.get(pk=newreusableitem_id)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        
-        # there should now be 1 TopTenList in the database
-        self.assertEqual(TopTenList.objects.count(), 1)
-
+        self.assertEqual(ReusableItem.objects.count(), 1)
         self.client.logout()
+
+    except:
+        self.client.logout()
+
+    return response
+
+class CreateReusableItemAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        create_user_1(cls)
+
+    def setUp(self):
+        create_toptenlist_1(self)
 
     def test_create_reusableitem_api_fails(self):
         """
@@ -101,9 +117,9 @@ class CreateReusableItemAPITest(APITestCase):
         toptenitems = self.toptenlist_1.topTenItem.all()
         toptenitem_1_id = toptenitems[0].id
 
-        result = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
+        response = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
 
-        response = result['response']
+        #response = result['response']
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -122,9 +138,9 @@ class CreateReusableItemAPITest(APITestCase):
         toptenitems = self.toptenlist_1.topTenItem.all()
         toptenitem_1_id = toptenitems[0].id
 
-        result = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
+        response = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
 
-        response = result['response']
+        #response = result['response']
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -147,9 +163,9 @@ class CreateReusableItemAPITest(APITestCase):
         toptenitems = self.toptenlist_1.topTenItem.all()
         toptenitem_1_id = toptenitems[0].id
 
-        result = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
+        response = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
 
-        response = result['response']
+        #response = result['response']
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -165,10 +181,11 @@ class CreateReusableItemAPITest(APITestCase):
         toptenitems = self.toptenlist_1.topTenItem.all()
         toptenitem_1_id = toptenitems[0].id
 
-        result = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
+        response = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
 
-        newreusableitem = result['reusableitem']
-        response = result['response']
+        #newreusableitem = result['reusableitem']
+        #response = result['response']
+        newreusableitem = self.reusableitem_1
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(ReusableItem.objects.count(), 1)
@@ -178,6 +195,27 @@ class CreateReusableItemAPITest(APITestCase):
         self.assertEqual(newreusableitem.definition, reusableitem_1_data['reusableItemDefinition'])
         self.assertEqual(newreusableitem.link, reusableitem_1_data['reusableItemLink'])
 
+class ModifyReusableItemAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Set up non-modified objects used by all test methods
+        create_user_1(cls)
+
+    def setUp(self):
+        # use the api to create a Top Ten List and its Top Ten Items
+        create_toptenlist_1(self)
+
+        # use the api to create a a Reusable Item
+        self.client.force_authenticate(user=self.user)
+        toptenitems = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems[0].id
+
+        create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
+
+    # cannot view if not public or owned by user
+    # can view if public
+    # can view if owned by user
+
     def test_delete_reusableitem_api_fails(self):
         """
         This should fail because Reusable Items cannot be created directly via the API
@@ -185,19 +223,7 @@ class CreateReusableItemAPITest(APITestCase):
         """
         self.client.force_authenticate(user=self.user)
 
-        # create a Reusable Item
-        toptenitems = self.toptenlist_1.topTenItem.all()
-        toptenitem_1_id = toptenitems[0].id
-
-        result = create_reusable_item(self, toptenitem_1_id, **reusableitem_1_data)
-
-        newreusableitem = result['reusableitem']
-        response = result['response']
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(ReusableItem.objects.count(), 1)
-
-        delete_reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': newreusableitem.id})
+        delete_reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
         response = self.client.delete(delete_reusableitem_url)
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
