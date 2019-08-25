@@ -11,6 +11,14 @@ from users.models import CustomUser
 from allauth.account.models import EmailAddress 
 from toptenlists.models import TopTenList, TopTenItem, ReusableItem
 
+# disable throttling for testing
+from toptenlists.api import TopTenListViewSet, TopTenItemViewSet, TopTenListDetailViewSet, ReusableItemViewSet
+
+TopTenListViewSet.throttle_classes = ()
+TopTenItemViewSet.throttle_classes = ()
+TopTenListDetailViewSet.throttle_classes = ()
+ReusableItemViewSet.throttle_classes = ()
+
 # data
 # Top Ten Lists
 toptenlist_data_1 = {'name': 'Writers', 'description':'My favourite writers',
@@ -35,6 +43,9 @@ reusableitem_1_data = {'name': 'Jane Austen', 'reusableItemDefinition': 'A defin
 # '-list' is a standard api command to list a model. It is unrelated to our topTenList object name
 
 create_list_url = reverse('topTenLists:TopTenLists-list')
+
+def get_reusable_item_1_url(self):
+    return reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
 
 def create_user(self, index):
     user_ref = 'user_' + str(index) # refer to user by self.user_1 etc
@@ -69,6 +80,7 @@ def create_toptenlist(self, user_ref, index):
 def create_reusable_item_1(self, toptenitem_id, **kwargs):
     """
     Use the api to create a new Reusable Item from the kwargs data.
+    Warning! It is referenced from 'self' and there can be only one.
     This item will belong to whatever toptenitem is specified
     To succeed, authenticate the owner of that toptenitem before calling this function
     This Reusable Item will be referenced by the specified Top Ten Item.
@@ -140,8 +152,6 @@ class CreateReusableItemAPITest(APITestCase):
 
         response = create_reusable_item_1(self, toptenitem_1_id, **reusableitem_1_data)
 
-        #response = result['response']
-
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -194,8 +204,6 @@ class CreateReusableItemAPITest(APITestCase):
 
         response = create_reusable_item_1(self, toptenitem_1_id, **reusableitem_1_data)
 
-        #newreusableitem = result['reusableitem']
-        #response = result['response']
         newreusableitem = self.reusableitem_1
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -235,16 +243,14 @@ class ModifyReusableItemAPITest(APITestCase):
         # user not logged in
         self.client.logout()
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.get(reusableitem_url)
+        response = self.client.get(get_reusable_item_1_url(self))
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
         # user logged in and created the Reusable Item
         self.client.force_authenticate(user=self.user_1)
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.get(reusableitem_url)
+        response = self.client.get(get_reusable_item_1_url(self))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -252,8 +258,7 @@ class ModifyReusableItemAPITest(APITestCase):
         self.client.logout()
         self.client.force_authenticate(user=self.user_2)
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.get(reusableitem_url)
+        response = self.client.get(get_reusable_item_1_url(self))
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -267,8 +272,8 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.client.logout()
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.get(reusableitem_url)
+
+        response = self.client.get(get_reusable_item_1_url(self))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -279,8 +284,7 @@ class ModifyReusableItemAPITest(APITestCase):
         """
         self.client.force_authenticate(user=self.user_1)
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.delete(reusableitem_url)
+        response = self.client.delete(get_reusable_item_1_url(self))
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -290,8 +294,7 @@ class ModifyReusableItemAPITest(APITestCase):
         """
         self.client.logout()
         
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.patch(reusableitem_url, {}, format='json')
+        response = self.client.patch(get_reusable_item_1_url(self), {}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -305,8 +308,7 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.client.force_authenticate(user=self.user_1)
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.patch(reusableitem_url, {}, format='json')
+        response = self.client.patch(get_reusable_item_1_url(self), {}, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -319,8 +321,7 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.client.force_authenticate(user=self.user_1)
 
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.patch(reusableitem_url, {'change_request': 'Some text'}, format='json')
+        response = self.client.patch(get_reusable_item_1_url(self), {'change_request': 'Some text'}, format='json')
 
         updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
@@ -339,8 +340,8 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem.save()
 
         self.client.force_authenticate(user=self.user_1)
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.patch(reusableitem_url, {'is_public': True}, format='json')
+
+        response = self.client.patch(get_reusable_item_1_url(self), {'is_public': True}, format='json')
 
         updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
@@ -362,17 +363,16 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem.save()
 
         self.client.force_authenticate(user=self.user_2)
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.patch(reusableitem_url, {'is_public': True}, format='json')
+
+        response = self.client.patch(get_reusable_item_1_url(self), {'is_public': True}, format='json')
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_make_reusableitem_private(self):
+    def test_make_reusableitem_private_owner(self):
         """
         This should create a private clone of the original public reusable item
         And leave the original as is
-        It should be the same for the owner and any other user who references the Reusable Item
         """
 
         # ensure is_public is true to start with
@@ -381,37 +381,195 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem.save()
 
         # make another user reference the Reusable Item, so it won't be deleted
-        #self.client.force_authenticate(user=self.user_2)
+        toptenitems_2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[0].id
 
-        toptenitems = self.toptenlist_2.topTenItem.all()
-        toptenitem_1_id = toptenitems[0].id
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
 
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_1_id)
-
+        # user 1 makes the reusable item private
         self.client.force_authenticate(user=self.user_1)
-        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
-        response = self.client.patch(reusableitem_url, {'is_public': False}, format='json')
 
-        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        response = self.client.patch(get_reusable_item_1_url(self), {'is_public': False}, format='json')
+
+        # find user 1's top ten item that references this reusable item
+        toptenitems_1 = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems_1[0].id
+
+        # get the original reusable item again so we can check it hasn't changed
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # the value should not be updated
-        self.assertEqual(updated_object.is_public, True)
+        # the original reusable item should still be public
+        self.assertEqual(updated_reusableitem.is_public, True)
 
-        # TODO check the new reusable item exists, is private and created by user 2, and referenced by their toptenitem
+        # the new reusable item exists, is private and created by user 
+        toptenitem_1 = TopTenItem.objects.get(pk=toptenitem_1_id)
+        new_reusableitem = toptenitem_1.reusableItem
 
+        # toptenitem_1 now references a new reusable item
+        self.assertNotEqual(original_reusableitem, new_reusableitem)
+        self.assertEqual(new_reusableitem.created_by, self.user_1)
+
+        self.assertEqual(original_reusableitem.is_public, True)
+        self.assertEqual(new_reusableitem.is_public, False)
+
+        # user 2's top ten item should still reference the original reusable item
+        toptenitem_2 = TopTenItem.objects.get(pk=toptenitem_2_id)
+        self.assertEqual(original_reusableitem.id, toptenitem_2.reusableItem_id)
+
+        # name, definition, link should be the same for all reusable items
+        self.assertEqual(original_reusableitem.name, new_reusableitem.name)
+        self.assertEqual(original_reusableitem.definition, new_reusableitem.definition)
+        self.assertEqual(original_reusableitem.link, new_reusableitem.link)
+
+        self.assertEqual(original_reusableitem.name, updated_reusableitem.name)
+        self.assertEqual(original_reusableitem.definition, updated_reusableitem.definition)
+        self.assertEqual(original_reusableitem.link, updated_reusableitem.link)
+
+    def test_make_reusableitem_private_not_owner(self):
+        """
+        This should create a private clone of the original public reusable item
+        And leave the original as is
+        """
+
+        # ensure is_public is true to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = True
+        original_reusableitem.save()
+
+        # make another user reference the Reusable Item, so it won't be deleted
+        toptenitems_2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[0].id
+
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+
+        # user 2 makes the reusable item private
+        self.client.force_authenticate(user=self.user_2)
+
+        response = self.client.patch(get_reusable_item_1_url(self), {'is_public': False}, format='json')
+
+        # find user 2's top ten item that references this reusable item
+        toptenitems_2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[0].id
+
+        # get the original reusable item again so we can check it hasn't changed
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the original reusable item should still be public
+        self.assertEqual(updated_reusableitem.is_public, True)
+
+        # the new reusable item exists, is private and created by user 
+        toptenitem_2 = TopTenItem.objects.get(pk=toptenitem_2_id)
+        new_reusableitem = toptenitem_2.reusableItem
+
+        # toptenitem_2 now references a new reusable item
+        self.assertNotEqual(original_reusableitem, new_reusableitem)
+        self.assertEqual(new_reusableitem.created_by, self.user_2)
+
+        self.assertEqual(original_reusableitem.is_public, True)
+        self.assertEqual(new_reusableitem.is_public, False)
+
+        # find user 1's top ten item that references this reusable item
+        toptenitems_1 = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems_1[0].id
+        toptenitem_1 = TopTenItem.objects.get(pk=toptenitem_1_id)
+
+        # user 1's top ten item should still reference the original reusable item
+        self.assertEqual(original_reusableitem.id, toptenitem_1.reusableItem_id)
+
+        # name, definition, link should be the same for both reusable items
+        self.assertEqual(original_reusableitem.name, new_reusableitem.name)
+        self.assertEqual(original_reusableitem.definition, new_reusableitem.definition)
+        self.assertEqual(original_reusableitem.link, new_reusableitem.link)
+
+        self.assertEqual(original_reusableitem.name, updated_reusableitem.name)
+        self.assertEqual(original_reusableitem.definition, updated_reusableitem.definition)
+        self.assertEqual(original_reusableitem.link, updated_reusableitem.link)
         # TODO three users should reference the ReusableItem so it is not deleted
         # TODO loop to create 10 users each with a Top Ten List
 
+    def test_dereference_reusableitem(self):
+        """
+        if no top ten item references a reusable item, the reusable item should be deleted
+        """
+
+        original_reusableitem = ReusableItem.objects.filter(pk=self.reusableitem_1.id).first()
+
+        self.assertNotEqual(original_reusableitem, None) 
+
+        toptenitems_1 = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems_1[0].id
+
+        reference_reusable_item(self, 'user_1', None, toptenitem_1_id)
+
+        check_reusableitem = ReusableItem.objects.filter(pk=self.reusableitem_1.id).first()
+
+        self.assertEqual(check_reusableitem, None)
+
+    def test_reusableitem_changerequest_bad_data(self):
+        """
+        Name cannot be set to empty string or None
+
+        """
+
+        self.client.force_authenticate(user=self.user_1)
+
+        # name is empty string
+        response = self.client.patch(get_reusable_item_1_url(self), {'name': '', 'link': 'hello'}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # name is None
+        response = self.client.patch(get_reusable_item_1_url(self), {'name': None, 'link': 'hello'}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # no values
+        response = self.client.patch(get_reusable_item_1_url(self), {}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # no new values
+        response = self.client.patch(get_reusable_item_1_url(self), {'name': self.reusableitem_1.name}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_resuableitem_submit_changerequest(self):
+        self.client.force_authenticate(user=self.user_1)
+
+        # TODO
+        """
+        reusable item is not public and different user
+        user does not reference reusable item even if it is public
+        change request already exists
+        success by owner
+        success by other user
+        immediate update if only user
+        """
+
+        # name is empty string
+        response = self.client.patch(get_reusable_item_1_url(self), {'name': '', 'link': 'hello'}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     """
     tests required:
 
-    ensure reusable item is deleted if no longer referenced
-
-    change is_public
     submit change request
     vote on change request
     cancel change request

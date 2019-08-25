@@ -235,8 +235,8 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
                 topTenList__created_by=self.request.user).select_related('topTenList')
 
             if myTopTenItemsUsingReusableItem.count() == 0:
-                print('no longer using reusableItem')
-                print(current_reusable_item.name)
+                #print('no longer using reusableItem')
+                #print(current_reusable_item.name)
 
                 ReusableItemSerializer.remove_my_votes(current_reusable_item, self.request.user)
                 ReusableItemSerializer.count_votes(current_reusable_item)

@@ -290,11 +290,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     def to_internal_value(self, data):
         """ intercept update data before it is validated
         data may contain one of these updates:
+
          a change to is_public
          a new change request
          cancel an existing change request
          a vote on an existing change request
-        # ensure only one, valid update is passed through
+        
+        ensure only one, valid update is passed through
+        ValidationError here seems to cause problems with the api return
         """
 
         #print('resuableItem to_internal_value received raw data:')
@@ -328,18 +331,25 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # there must be an update
         if count == 0:
-            raise ValidationError({'reusable item error': 'no change request submitted'})
+            validated_data = {}
+            # raise ValidationError({'reusable item error': 'no change request submitted'})
 
         # only one type of update is allowed
         if count > 1:
-            raise ValidationError({'reusable item error: you cannot submit more than one type of change in the same request'})
+            validated_data = {}
+            # raise ValidationError({'reusable item error: you cannot submit more than one type of change in the same request'})
 
         # do not accept empty string for name
         if change_type == 'change_request':
             for key in ReusableItemSerializer.editable_properties:
                 if key in data:
-                    if key is 'name' and not data[key]: # empty string
-                        raise ValidationError({'reusable item error: name cannot be empty string'})
+                    if data[key] is None:
+                        validated_data = {}
+                        break
+
+                    elif key is 'name' and not data[key].strip(): # empty string
+                        validated_data = {}
+                        break
 
                     else:
                         validated_data[key] = data[key]
@@ -393,7 +403,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             email_address = EmailAddress.objects.get(user_id=current_user.id)
 
             if not email_address.verified:
-                raise ValidationError({'update reusable item error: user idoes not have a verified email address'})
+                raise ValidationError({'update reusable item error: user does not have a verified email address'})
 
         except:
             raise ValidationError({'update reusable item error: error getting email_address'})
@@ -673,7 +683,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
                     if topTenItem_data['newReusableItem'] == True:
                     # create new reusableItem from raw data
 
-                        print('data', topTenItem_data)
+                        # print('data', topTenItem_data)
                         reusableItemData = {'name': topTenItem_data['name']}
 
                         if 'definition' in topTenItem_data:

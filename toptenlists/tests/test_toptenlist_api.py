@@ -9,7 +9,15 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
 from allauth.account.models import EmailAddress 
-from toptenlists.models import TopTenList, TopTenItem, ReusableItem
+from toptenlists.models import TopTenList, TopTenItem
+
+# disable throttling for testing
+from toptenlists.api import TopTenListViewSet, TopTenItemViewSet, TopTenListDetailViewSet, ReusableItemViewSet
+
+TopTenListViewSet.throttle_classes = ()
+TopTenItemViewSet.throttle_classes = ()
+TopTenListDetailViewSet.throttle_classes = ()
+
 
 new_list_data = {'name': 'Tasty food', 'description':'My favourite foods', 'topTenItem': [
     {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1},
