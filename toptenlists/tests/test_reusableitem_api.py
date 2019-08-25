@@ -69,6 +69,8 @@ def create_toptenlist(self, user_ref, index):
 def create_reusable_item_1(self, toptenitem_id, **kwargs):
     """
     Use the api to create a new Reusable Item from the kwargs data.
+    This item will belong to whatever toptenitem is specified
+    To succeed, authenticate the owner of that toptenitem before calling this function
     This Reusable Item will be referenced by the specified Top Ten Item.
     Note that the user is not automatically authenticated, because we want to test failure as well as success
     """
@@ -89,13 +91,17 @@ def create_reusable_item_1(self, toptenitem_id, **kwargs):
 
     return response
 
-def reference_reusable_item(self, reusableitem_id, toptenitem_id):
+def reference_reusable_item(self, user_ref, reusableitem_id, toptenitem_id):
     """
     Set a top ten item to reference a reusable item
     """
 
+    self.client.force_authenticate(user=getattr(self, user_ref))
+
     item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': toptenitem_id})
     response = self.client.patch(item_detail_url, {'reusableItem_id': reusableitem_id}, format='json')
+
+    self.client.logout()
 
     return response
 
@@ -323,7 +329,7 @@ class ModifyReusableItemAPITest(APITestCase):
 
     def test_make_reusableitem_public_owner(self):
         """
-        Only the owner can make a reusable item public
+        The owner can make a reusable item public
 
         """
 
@@ -346,7 +352,8 @@ class ModifyReusableItemAPITest(APITestCase):
 
     def test_make_reusableitem_public_not_owner(self):
         """
-        Making a reusable item private creates a clone that is referenced by the user's own Top Ten Items
+        You can't make a reusable item public if you don't own it
+        TODO make user_2 reference the reusable item
         """
 
         # ensure is_public is false to start with
@@ -374,12 +381,12 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem.save()
 
         # make another user reference the Reusable Item, so it won't be deleted
-        self.client.force_authenticate(user=self.user_2)
+        #self.client.force_authenticate(user=self.user_2)
 
         toptenitems = self.toptenlist_2.topTenItem.all()
         toptenitem_1_id = toptenitems[0].id
 
-        reference_reusable_item(self, self.reusableitem_1.id, toptenitem_1_id)
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_1_id)
 
         self.client.force_authenticate(user=self.user_1)
         reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
