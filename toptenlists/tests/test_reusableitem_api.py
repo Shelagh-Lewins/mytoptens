@@ -36,36 +36,33 @@ reusableitem_1_data = {'name': 'Jane Austen', 'reusableItemDefinition': 'A defin
 
 create_list_url = reverse('topTenLists:TopTenLists-list')
 
-def create_users(self):
-    self.user_1 = CustomUser.objects.create_user('Test user 1', 'person_1@example.com', '12345')
-    EmailAddress.objects.create(user=self.user_1, 
-            email='person_1@example.com',
+def create_user(self, index):
+    user_ref = 'user_' + str(index) # refer to user by self.user_1 etc
+    username = 'Test user ' + str(index)
+    email_address = 'person_' + str(index) + '@example.com'
+    password = str(index) + str(index) + str(index) + str(index) + str(index)
+
+    setattr(self, user_ref, CustomUser.objects.create_user(username, email_address, email_address))
+    EmailAddress.objects.create(user=getattr(self, user_ref), 
+            email=email_address,
             primary=True,
             verified=True)
 
-    self.user_2 = CustomUser.objects.create_user('Test user 2', 'person_2@example.com', '12345')
-    EmailAddress.objects.create(user=self.user_2, 
-            email='person_2@example.com',
-            primary=True,
-            verified=True)
-
-def create_toptenlist_1(self):
+def create_toptenlist(self, user_ref, index):
     """
     # use the api to create a Top Ten List and its Top Ten Items
-    # user_1 is automatically authenticted because this is part of setup and should not fail
+    # users are automatically authenticted because this is part of setup and should not fail
     """
-    self.client.force_authenticate(user=self.user_1)
+    self.client.force_authenticate(user=getattr(self, user_ref))
     response = self.client.post(create_list_url, toptenlist_data_1, format='json')
-    toptenlist_1_id = json.loads(response.content)['id']
+    toptenlist_id = json.loads(response.content)['id']
 
-    self.toptenlist_1 = TopTenList.objects.get(pk=toptenlist_1_id)
+    toptenlist_ref = 'toptenlist_' + str(index) # refer to toptenlist by self.toptenlist_1 etc
+
+    setattr(self, toptenlist_ref, TopTenList.objects.get(pk=toptenlist_id))
 
     # the request should succeed
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    
-    # there should now be 1 TopTenList in the database
-    self.assertEqual(TopTenList.objects.count(), 1)
-
     self.client.logout()
 
 
@@ -92,13 +89,25 @@ def create_reusable_item_1(self, toptenitem_id, **kwargs):
 
     return response
 
+def reference_reusable_item(self, reusableitem_id, toptenitem_id):
+    """
+    Set a top ten item to reference a reusable item
+    """
+
+    item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': toptenitem_id})
+    response = self.client.patch(item_detail_url, {'reusableItem_id': reusableitem_id}, format='json')
+
+    return response
+
+
 class CreateReusableItemAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        create_users(cls)
+        create_user(cls, 1)
+        create_user(cls, 2)
 
     def setUp(self):
-        create_toptenlist_1(self)
+        create_toptenlist(self, 'user_1', 1)
 
     def test_create_reusableitem_api_fails(self):
         """
@@ -150,7 +159,7 @@ class CreateReusableItemAPITest(APITestCase):
         # but cannot change it because their email address is not verified
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_create_reusableitem_not_owner(self):
+    def test_create_reusableitem_not_toptenlist_owner(self):
         """
         create a Reusable Item should fail if the user didn't create the Top Ten List
         """
@@ -195,11 +204,15 @@ class ModifyReusableItemAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        create_users(cls)
+        # create_users(cls)
+        create_user(cls, 1)
+        create_user(cls, 2)
 
     def setUp(self):
         # use the api to create a Top Ten List and its Top Ten Items
-        create_toptenlist_1(self)
+        #create_toptenlist_1(self)
+        create_toptenlist(self, 'user_1', 1)
+        create_toptenlist(self, 'user_2', 2)
 
         # use the api to create a a Reusable Item
         self.client.force_authenticate(user=self.user_1)
@@ -246,7 +259,7 @@ class ModifyReusableItemAPITest(APITestCase):
         self.reusableitem_1.is_public = True
         self.reusableitem_1.save()
 
-        self.client.force_authenticate(user=self.user_2)
+        self.client.logout()
 
         reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
         response = self.client.get(reusableitem_url)
@@ -265,10 +278,52 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def test_modify_reusableitem_is_public_owner(self):
+    def test_modify_reusableitem_not_authenticated(self):
+        """
+        modify a Reusable Item should fail if user is not logged in
+        """
+        self.client.logout()
+        
+        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
+        response = self.client.patch(reusableitem_url, {}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_modify_reusableitem_not_verified(self):
+        """
+        modify a Reusable Item should fail if user's email address is not verified
+        """
+        email_address = EmailAddress.objects.get(user_id=self.user_1.id)
+        email_address.verified = False
+        email_address.save()
+
+        self.client.force_authenticate(user=self.user_1)
+
+        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
+        response = self.client.patch(reusableitem_url, {}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_reusableitem_unsupported_modification(self):
+        """
+        Only certain modifications are allowed
+        The api cannot modify a forbidden property
+
+        """
+
+        self.client.force_authenticate(user=self.user_1)
+
+        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
+        response = self.client.patch(reusableitem_url, {'change_request': 'Some text'}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_make_reusableitem_public_owner(self):
         """
         Only the owner can make a reusable item public
-        Making a reusable item private actually creates a clone that is referenced by the user's own Top Ten Items
 
         """
 
@@ -276,9 +331,6 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
         original_reusableitem.is_public = False
         original_reusableitem.save()
-
-        check_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-        self.assertEqual(check_object.is_public, False)
 
         self.client.force_authenticate(user=self.user_1)
         reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
@@ -292,24 +344,82 @@ class ModifyReusableItemAPITest(APITestCase):
         # the value should be updated
         self.assertEqual(updated_object.is_public, True)
 
+    def test_make_reusableitem_public_not_owner(self):
+        """
+        Making a reusable item private creates a clone that is referenced by the user's own Top Ten Items
+        """
+
+        # ensure is_public is false to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = False
+        original_reusableitem.save()
+
+        self.client.force_authenticate(user=self.user_2)
+        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
+        response = self.client.patch(reusableitem_url, {'is_public': True}, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_make_reusableitem_private(self):
+        """
+        This should create a private clone of the original public reusable item
+        And leave the original as is
+        It should be the same for the owner and any other user who references the Reusable Item
+        """
+
+        # ensure is_public is true to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = True
+        original_reusableitem.save()
+
+        # make another user reference the Reusable Item, so it won't be deleted
+        self.client.force_authenticate(user=self.user_2)
+
+        toptenitems = self.toptenlist_2.topTenItem.all()
+        toptenitem_1_id = toptenitems[0].id
+
+        reference_reusable_item(self, self.reusableitem_1.id, toptenitem_1_id)
+
+        self.client.force_authenticate(user=self.user_1)
+        reusableitem_url = reverse('topTenLists:ReusableItems-detail',  kwargs={'pk': self.reusableitem_1.id})
+        response = self.client.patch(reusableitem_url, {'is_public': False}, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the value should not be updated
+        self.assertEqual(updated_object.is_public, True)
+
+        # TODO check the new reusable item exists, is private and created by user 2, and referenced by their toptenitem
+
+        # TODO three users should reference the ReusableItem so it is not deleted
+        # TODO loop to create 10 users each with a Top Ten List
+
+
     """
     tests required:
 
     ensure reusable item is deleted if no longer referenced
 
-    must submit one valid modification
+    change is_public
+    submit change request
+    vote on change request
+    cancel change request
 
-    propose modification:
+    propose change request:
     cannot directly edit a reusableItem
-    can submit modification if none exists already, and user references the item, and new data
-    automatically vote after successfully proposing modification
+    can submit change request if none exists already, and user references the item, and new data
+    automatically vote after successfully proposing change request
     cannot set name to empty string, but can set definition and link to empty string
 
     vote:
-    can vote if modification exists and have not voted on it
+    can vote if change request exists and user references it
     vote must be 'yes' or 'no'
-    votes are processed and modification removed and reusable item updated if 'yes' passes
+    votes are processed and change request removed and reusable item updated if 'yes' passes
     reusableItem history is updated
-    do we keep a record of failed modifications?
+    do we keep a record of failed change requests?
 
     """
