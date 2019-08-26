@@ -194,7 +194,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         'number_of_users': 10,
         'accept_quorum': 4,
         'reject_quorum': 6,
-        'accept_percentage': 80,
+        'accept_percentage': 70,
         'voting_scheme': 'A'
         },
         { # 11 - 20 users
@@ -228,6 +228,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 break
 
         #print('got rule: ', selected_rule)
+        #print('total_votes', total_votes)
         percentage_yes = 100 * change_request_votes_yes / total_votes # note this is percentage of users who have already voted
 
         # is it still possible for the change request to be accepted?
@@ -250,9 +251,21 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # if the change hasn't been accepted with this number of votes, reject it
         elif total_votes >= selected_rule['reject_quorum']:
             cls.reject_change(instance, 'rejected')
-            #print('rejecting: not accepted')
+            #print('rejecting: not accepted at reject quorum')
             return
         #print('total_votes', total_votes);
+
+        # even if all remaining users vote 'yes', the accept percentage cannot be reached before reaching the reject quorum
+        # if a 'yes' vote taking us over the reject quorum and trigger reject, we should reject now
+        possible_votes_yes = change_request_votes_yes + (selected_rule['reject_quorum'] - total_votes)
+        
+        #print('change_request_votes_yes', change_request_votes_yes)
+        #print('possible_votes_yes', possible_votes_yes)
+        if 100 * possible_votes_yes / selected_rule['reject_quorum'] < selected_rule['accept_percentage']:
+            cls.reject_change(instance, 'rejected')
+            #print('rejecting: cannot reach accept percentage within reject quorum')
+            return
+        #print('carrying on')
         return # we have not yet reached a quorum
 
     @classmethod
