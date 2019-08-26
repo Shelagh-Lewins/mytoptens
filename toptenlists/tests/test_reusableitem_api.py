@@ -601,7 +601,10 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_resuableitem_submit_changerequest_public(self):
+    def test_resuableitem_submit_changerequest_public_owner(self):
+        """
+        The owner can submit a change request to a public reusable item
+        """
         # ensure is_public is true to start with
         original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
         original_reusableitem.is_public = True
@@ -617,6 +620,19 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(updated_reusableitem.name, data1['name'])
+
+        # history has been updated
+        history_entry = updated_reusableitem.history[-1]
+        self.assertNotEqual(history_entry, None)
+        self.assertNotEqual(history_entry['changed_at'], None)
+        self.assertEqual(history_entry['changed_by_id'], self.user_1.id.__str__())
+        self.assertEqual(history_entry['number_of_users'], 1)
+        self.assertEqual(history_entry['change_request_votes_yes_count'], 1)
+        self.assertEqual(history_entry['change_request_votes_no_count'], 0)
+
+        self.assertEqual(history_entry['name'], data1['name'])
+        self.assertEqual(history_entry['definition'], data1['definition'])
+        self.assertEqual(history_entry['link'], data1['link'])
 
         # add a second reference to this reusable item, by a different user
         toptenitems_2 = self.toptenlist_2.topTenItem.all()
@@ -669,17 +685,94 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem.link, data2['link'])
 
         # history has been updated
-        print(updated_reusableitem.history[1])
-        self.assertNotEqual(updated_reusableitem.history[1], None)
+        history_entry = updated_reusableitem.history[-1]
+        self.assertNotEqual(history_entry, None)
+        self.assertNotEqual(history_entry['changed_at'], None)
+        self.assertEqual(history_entry['changed_by_id'], self.user_1.id.__str__())
+        self.assertEqual(history_entry['number_of_users'], 2)
+        self.assertEqual(history_entry['change_request_votes_yes_count'], 2)
+        self.assertEqual(history_entry['change_request_votes_no_count'], 0)
+
+        self.assertEqual(history_entry['name'], data2['name'])
+        self.assertEqual(history_entry['definition'], data2['definition'])
+        self.assertEqual(history_entry['link'], data2['link'])
+
+    def test_resuableitem_submit_changerequest_public_not_owner(self):
+        """
+        Another user can submit a change request to a public reusable item
+        """
+        # ensure is_public is true to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = True
+        original_reusableitem.save()
+
+        # add a second reference to this reusable item, by user 2
+        toptenitems_2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[0].id
+
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+
+        # user 2 can propose a change request
+        # it does not update immediately
+        self.client.force_authenticate(user=self.user_2)
+        data = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
+        response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # editable properties unchanged
+        self.assertEqual(updated_reusableitem.name, original_reusableitem.name)
+        self.assertEqual(updated_reusableitem.definition, original_reusableitem.definition)
+        self.assertEqual(updated_reusableitem.link, original_reusableitem.link)
+
+        # change request created
+        self.assertEqual(updated_reusableitem.change_request['name'], data['name'])
+        self.assertEqual(updated_reusableitem.change_request['definition'], data['definition'])
+        self.assertEqual(updated_reusableitem.change_request['link'], data['link'])
+
+        # user 2 has voted for it
+        self.assertEqual(updated_reusableitem.change_request_votes_no.count(), 0)
+        self.assertEqual(updated_reusableitem.change_request_votes_yes.count(), 1)
+        self.assertEqual(updated_reusableitem.change_request_votes_yes.first(), self.user_2)
+
+        # user 1 now votes for the change request
+        self.client.force_authenticate(user=self.user_1)
+
+        data3 = {'vote': 'yes'}
+        response = self.client.patch(get_reusable_item_1_url(self), data3, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # it should be resolved
+        self.assertEqual(updated_reusableitem.change_request, None)
+        self.assertEqual(updated_reusableitem.change_request_votes_no.count(), 0)
+        self.assertEqual(updated_reusableitem.change_request_votes_yes.count(), 0)
+
+        self.assertEqual(updated_reusableitem.name, data['name'])
+        self.assertEqual(updated_reusableitem.definition, data['definition'])
+        self.assertEqual(updated_reusableitem.link, data['link'])
+
+        # history has been updated
+        history_entry = updated_reusableitem.history[-1]
+        self.assertNotEqual(history_entry, None)
+        self.assertNotEqual(history_entry['changed_at'], None)
+        self.assertEqual(history_entry['changed_by_id'], self.user_2.id.__str__())
+        self.assertEqual(history_entry['number_of_users'], 2)
+        self.assertEqual(history_entry['change_request_votes_yes_count'], 2)
+        self.assertEqual(history_entry['change_request_votes_no_count'], 0)
+
+        self.assertEqual(history_entry['name'], data['name'])
+        self.assertEqual(history_entry['definition'], data['definition'])
+        self.assertEqual(history_entry['link'], data['link'])
 
         # TODO
         """
         reusable item is not public and different user
         user does not reference reusable item even if it is public
-        change request already exists
-        success by owner
-        success by other user
-        immediate update if only user
         """
 
     """
