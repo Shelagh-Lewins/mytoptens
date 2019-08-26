@@ -120,12 +120,48 @@ def reference_reusable_item(self, user_ref, reusableitem_id, toptenitem_id):
 
     return response
 
+def setup_public_reusable_item_1(self):
+    """
+    Make self.reusableitem_1 public
+    Make another user reference it
+    So that when a change request is submitted, it will not update automatically
+    """
+
+    # ensure reusable item is public
+    reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+    reusableitem.is_public = True
+    reusableitem.save()
+
+    # add a reference to this reusable item by user 2
+    toptenitems_2 = self.toptenlist_2.topTenItem.all()
+    toptenitem_2_id = toptenitems_2[0].id
+
+    reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+
+    return reusableitem
+
+def submit_change_request_1(self, user):
+    """
+    Submit a valid change request to the public reusable item set up in setup_public_reusable_item_1() 
+
+    """
+
+    # a user proposes a change request
+    self.client.force_authenticate(user=user)
+    change_request = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
+    response = self.client.patch(get_reusable_item_1_url(self), change_request, format='json')
+
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    self.client.logout()
+
+    return change_request
 
 class CreateReusableItemAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        create_user(cls, 1)
-        create_user(cls, 2)
+        for index in range(1, 3): # user_1 to user_2
+            create_user(cls, index)
 
     def setUp(self):
         create_toptenlist(self, 'user_1', 1)
@@ -221,15 +257,13 @@ class ModifyReusableItemAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        # create_users(cls)
-        create_user(cls, 1)
-        create_user(cls, 2)
+        for index in range(1, 11): # user_1 to user_10
+            create_user(cls, index)
 
     def setUp(self):
-        # use the api to create a Top Ten List and its Top Ten Items
-        #create_toptenlist_1(self)
-        create_toptenlist(self, 'user_1', 1)
-        create_toptenlist(self, 'user_2', 2)
+        # for each test user, use the api to create a Top Ten List and its Top Ten Items
+        for index in range(1, 11): # user_1 to user_10
+            create_toptenlist(self, 'user_' + index.__str__(), index)
 
         # use the api to create a a Reusable Item
         self.client.force_authenticate(user=self.user_1)
@@ -610,15 +644,17 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem.is_public = True
         original_reusableitem.save()
 
-        self.client.force_authenticate(user=self.user_1)
+        #self.client.force_authenticate(user=self.user_1)
 
         # owner can change name directly when nobody else references the reusable item
-        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
-        response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
-
+        #data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
+        #response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
+        data1 = submit_change_request_1(self, self.user_1)
         updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        #self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        
 
         # editable values have been updated
         self.assertEqual(updated_reusableitem.name, data1['name'])
@@ -707,26 +743,14 @@ class ModifyReusableItemAPITest(APITestCase):
         """
         Another user can submit a change request to a public reusable item
         """
-        # ensure is_public is true to start with
-        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-        original_reusableitem.is_public = True
-        original_reusableitem.save()
 
-        # add a second reference to this reusable item, by user 2
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
         # user 2 can propose a change request
         # it does not update immediately
-        self.client.force_authenticate(user=self.user_2)
-        data = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
-        response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
-
+        data = submit_change_request_1(self, self.user_2)
+        
         updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # editable properties unchanged
         self.assertEqual(updated_reusableitem.name, original_reusableitem.name)
@@ -780,24 +804,8 @@ class ModifyReusableItemAPITest(APITestCase):
         """
         The owner can submit a change request to a public reusable item
         """
-        # ensure reusable item is true
-        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-        original_reusableitem.is_public = True
-        original_reusableitem.save()
-
-        self.client.force_authenticate(user=self.user_1)
-
-        # add a second reference to this reusable item, by a different user
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
-
-        # owner can propose a change request
-        # it does not update immediately
-        self.client.force_authenticate(user=self.user_1)
-        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
-        response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
+        original_reusableitem = setup_public_reusable_item_1(self)
+        data1 = submit_change_request_1(self, self.user_1)
 
         # user 2 now votes against the change request
         self.client.force_authenticate(user=self.user_2)
@@ -855,26 +863,11 @@ class ModifyReusableItemAPITest(APITestCase):
         The submitter can cancel a change request
         """
 
-        # ensure reusable item is true
-        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-        original_reusableitem.is_public = True
-        original_reusableitem.save()
-
-        self.client.force_authenticate(user=self.user_1)
-
-        # add a second reference to this reusable item, by a different user
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
-
-        # owner can propose a change request
-        # it does not update immediately
-        self.client.force_authenticate(user=self.user_1)
-        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
-        response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
+        original_reusableitem = setup_public_reusable_item_1(self)
+        data1 = submit_change_request_1(self, self.user_1)
 
         # user 1 now cancels the change request
+        self.client.force_authenticate(user=self.user_1)
         data2 = {'cancel': 'true'}
         response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
 
@@ -907,33 +900,50 @@ class ModifyReusableItemAPITest(APITestCase):
         The submitter can cancel a change request
         """
 
-        # ensure reusable item is true
-        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-        original_reusableitem.is_public = True
-        original_reusableitem.save()
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        self.client.force_authenticate(user=self.user_1)
-
-        # add a second reference to this reusable item, by a different user
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
-
-        # owner can propose a change request
-        # it does not update immediately
-        self.client.force_authenticate(user=self.user_1)
-        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
-        response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
+        # user 2 proposes a change request
+        data1 = submit_change_request_1(self, self.user_2)
 
         # user 2 now cancels the change request
-        self.client.force_authenticate(user=self.user_2)
+        self.client.force_authenticate(user=self.user_1)
 
         data2 = {'cancel': 'true'}
         response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_resuableitem_invalid_vote(self):
+        """
+        Vote must be 'yes' or 'no'
+        """
+
+        original_reusableitem = setup_public_reusable_item_1(self)
+        data1 = submit_change_request_1(self, self.user_1)
+
+        # user 2 now submits an invalid vote
+        self.client.force_authenticate(user=self.user_2)
+
+        data2 = {'vote': 'banana'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_resuableitem_vote_not_referenced(self):
+        """
+        You cannot vote on a change request if you do not reference the reusable item
+        """
+
+        original_reusableitem = setup_public_reusable_item_1(self)
+        data1 = submit_change_request_1(self, self.user_1)
+
+        # user 3 now submits a vote
+        self.client.force_authenticate(user=self.user_3)
+
+        data2 = {'vote': 'banana'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     """
     tests required:
@@ -941,11 +951,8 @@ class ModifyReusableItemAPITest(APITestCase):
     vote on change request
 
     vote:
-    can vote if change request exists and user references it
-    vote must be 'yes' or 'no'
     votes are processed and change request removed and reusable item updated if 'yes' passes
     handle change request rejected
-    reusableItem history is updated
 
 
     """
