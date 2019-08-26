@@ -70,6 +70,9 @@ def create_toptenlist(self, user_ref, index):
 
     toptenlist_ref = 'toptenlist_' + str(index) # refer to toptenlist by self.toptenlist_1 etc
 
+    # this allows us to reference the originial toptenlist from self
+    # self.toptenlist_1 etc
+    # this is not safe for properties like name, but is safe for getting toptenlist and toptenitem id because these do not change
     setattr(self, toptenlist_ref, TopTenList.objects.get(pk=toptenlist_id))
 
     # the request should succeed
@@ -547,8 +550,127 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_resuableitem_submit_changerequest(self):
+    def test_resuableitem_submit_changerequest_private(self):
+        """
+        If a reusable item is private, and referenced only by its owner (but in more than one top ten item), they can update it directly
+        """
+        # add a second reference to this reusable item, by the same user
+        toptenitems_2 = self.toptenlist_1.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[1].id
+
+        reference_reusable_item(self, 'user_1', self.reusableitem_1.id, toptenitem_2_id)
+
         self.client.force_authenticate(user=self.user_1)
+
+        # ensure is_public is false to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = False
+        original_reusableitem.save()
+        
+        # owner can change name directly when nobody else references the reusable item
+        data = {'name': 'Agatha Christie'}
+        response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_reusableitem.name, data['name'])
+
+        # owner can change definition, link directly
+        data = {'definition': 'A writer', 'link': 'someurl'}
+        response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
+
+        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_object.definition, data['definition'])
+        self.assertEqual(updated_object.link, data['link'])
+
+        # there should never be an existing change request for a reusable item referenced by only one user
+        # it should have been resolved
+        # should this occur through some bug, the user could withdraw their vote and then revote, that should trigger a count
+
+        # other user cannot add change request
+        self.client.force_authenticate(user=self.user_2)
+
+        data = {'name': 'Agatha Christie'}
+
+        response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_resuableitem_submit_changerequest_public(self):
+        # ensure is_public is true to start with
+        original_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        original_reusableitem.is_public = True
+        original_reusableitem.save()
+
+        self.client.force_authenticate(user=self.user_1)
+
+        # owner can change name directly when nobody else references the reusable item
+        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
+        response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(updated_reusableitem.name, data1['name'])
+
+        # add a second reference to this reusable item, by a different user
+        toptenitems_2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[0].id
+
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+
+        # owner can propose a change request
+        # it does not update immediately
+        self.client.force_authenticate(user=self.user_1)
+        data2 = {'name': 'Agatha Christie 2', 'definition': 'A writer 2', 'link': 'someurl2'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # editable properties unchanged
+        self.assertEqual(updated_reusableitem.name, data1['name'])
+        self.assertEqual(updated_reusableitem.definition, data1['definition'])
+        self.assertEqual(updated_reusableitem.link, data1['link'])
+
+        # change request created
+        self.assertEqual(updated_reusableitem.change_request['name'], data2['name'])
+        self.assertEqual(updated_reusableitem.change_request['definition'], data2['definition'])
+        self.assertEqual(updated_reusableitem.change_request['link'], data2['link'])
+
+        # user 1 has voted for it
+        self.assertEqual(updated_reusableitem.change_request_votes_no.count(), 0)
+        self.assertEqual(updated_reusableitem.change_request_votes_yes.count(), 1)
+        self.assertEqual(updated_reusableitem.change_request_votes_yes.first(), self.user_1)
+
+        # user 2 now votes for the change request
+        self.client.force_authenticate(user=self.user_2)
+
+        data3 = {'vote': 'yes'}
+        response = self.client.patch(get_reusable_item_1_url(self), data3, format='json')
+
+        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # it should be resolved
+        self.assertEqual(updated_reusableitem.change_request, None)
+        self.assertEqual(updated_reusableitem.change_request_votes_no.count(), 0)
+        self.assertEqual(updated_reusableitem.change_request_votes_yes.count(), 0)
+
+        self.assertEqual(updated_reusableitem.name, data2['name'])
+        self.assertEqual(updated_reusableitem.definition, data2['definition'])
+        self.assertEqual(updated_reusableitem.link, data2['link'])
+
+        # history has been updated
+        print(updated_reusableitem.history[1])
+        self.assertNotEqual(updated_reusableitem.history[1], None)
 
         # TODO
         """
@@ -559,13 +681,6 @@ class ModifyReusableItemAPITest(APITestCase):
         success by other user
         immediate update if only user
         """
-
-        # name is empty string
-        response = self.client.patch(get_reusable_item_1_url(self), {'name': '', 'link': 'hello'}, format='json')
-
-        updated_object = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     """
     tests required:
@@ -584,7 +699,8 @@ class ModifyReusableItemAPITest(APITestCase):
     can vote if change request exists and user references it
     vote must be 'yes' or 'no'
     votes are processed and change request removed and reusable item updated if 'yes' passes
+    handle change request rejected
     reusableItem history is updated
-    do we keep a record of failed change requests?
+    do we keep a record of failed change requests? Not at present, no.
 
     """
