@@ -796,7 +796,7 @@ class ModifyReusableItemAPITest(APITestCase):
         # owner can propose a change request
         # it does not update immediately
         self.client.force_authenticate(user=self.user_1)
-        data1 = {'name': 'Agatha Christie 2', 'definition': 'A writer 2', 'link': 'someurl2'}
+        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
         response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
 
         # user 2 now votes against the change request
@@ -871,7 +871,7 @@ class ModifyReusableItemAPITest(APITestCase):
         # owner can propose a change request
         # it does not update immediately
         self.client.force_authenticate(user=self.user_1)
-        data1 = {'name': 'Agatha Christie 2', 'definition': 'A writer 2', 'link': 'someurl2'}
+        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
         response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
 
         # user 1 now cancels the change request
@@ -923,7 +923,7 @@ class ModifyReusableItemAPITest(APITestCase):
         # owner can propose a change request
         # it does not update immediately
         self.client.force_authenticate(user=self.user_1)
-        data1 = {'name': 'Agatha Christie 2', 'definition': 'A writer 2', 'link': 'someurl2'}
+        data1 = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
         response = self.client.patch(get_reusable_item_1_url(self), data1, format='json')
 
         # user 2 now cancels the change request
@@ -937,10 +937,8 @@ class ModifyReusableItemAPITest(APITestCase):
 
     """
     tests required:
-
+    
     vote on change request
-    cancel change request
-
 
     vote:
     can vote if change request exists and user references it
