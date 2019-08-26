@@ -106,12 +106,15 @@ def create_reusable_item_1(self, toptenitem_id, **kwargs):
 
     return response
 
-def reference_reusable_item(self, user_ref, reusableitem_id, toptenitem_id):
+def reference_reusable_item(self, user_ref, reusableitem_id, toptenlist_ref, index):
     """
     Set a top ten item to reference a reusable item
     """
 
     self.client.force_authenticate(user=getattr(self, user_ref))
+
+    toptenitems = getattr(self, toptenlist_ref).topTenItem.all()
+    toptenitem_id = toptenitems[index].id
 
     item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': toptenitem_id})
     response = self.client.patch(item_detail_url, {'reusableItem_id': reusableitem_id}, format='json')
@@ -133,10 +136,7 @@ def setup_public_reusable_item_1(self):
     reusableitem.save()
 
     # add a reference to this reusable item by user 2
-    toptenitems_2 = self.toptenlist_2.topTenItem.all()
-    toptenitem_2_id = toptenitems_2[0].id
-
-    reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+    reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
 
     return reusableitem
 
@@ -148,7 +148,7 @@ def submit_change_request_1(self, user):
 
     # a user proposes a change request
     self.client.force_authenticate(user=user)
-    change_request = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
+    change_request = {'name': 'Not Jane Austen', 'definition': 'A writer', 'link': 'someurl'}
     response = self.client.patch(get_reusable_item_1_url(self), change_request, format='json')
 
     self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -426,10 +426,7 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
 
         # make another user reference the Reusable Item, so it won't be deleted
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
 
         # user 1 makes the reusable item private
         self.client.force_authenticate(user=self.user_1)
@@ -461,6 +458,9 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(new_reusableitem.is_public, False)
 
         # user 2's top ten item should still reference the original reusable item
+        toptenitems_2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems_2[0].id
+
         toptenitem_2 = TopTenItem.objects.get(pk=toptenitem_2_id)
         self.assertEqual(original_reusableitem.id, toptenitem_2.reusableItem_id)
 
@@ -482,10 +482,7 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
 
         # make another user reference the Reusable Item, so it won't be deleted
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
 
         # user 2 makes the reusable item private
         self.client.force_authenticate(user=self.user_2)
@@ -544,10 +541,10 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertNotEqual(original_reusableitem, None) 
 
+        reference_reusable_item(self, 'user_1', None, 'toptenlist_1', 0)
+
         toptenitems_1 = self.toptenlist_1.topTenItem.all()
         toptenitem_1_id = toptenitems_1[0].id
-
-        reference_reusable_item(self, 'user_1', None, toptenitem_1_id)
 
         check_reusableitem = ReusableItem.objects.filter(pk=self.reusableitem_1.id).first()
 
@@ -594,10 +591,7 @@ class ModifyReusableItemAPITest(APITestCase):
         If a reusable item is private, and referenced only by its owner (but in more than one top ten item), they can update it directly
         """
         # add a second reference to this reusable item, by the same user
-        toptenitems_2 = self.toptenlist_1.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[1].id
-
-        reference_reusable_item(self, 'user_1', self.reusableitem_1.id, toptenitem_2_id)
+        reference_reusable_item(self, 'user_1', self.reusableitem_1.id, 'toptenlist_1', 1)
 
         self.client.force_authenticate(user=self.user_1)
 
@@ -607,7 +601,7 @@ class ModifyReusableItemAPITest(APITestCase):
         original_reusableitem.save()
         
         # owner can change name directly when nobody else references the reusable item
-        data = {'name': 'Agatha Christie'}
+        data = {'name': 'Not Jane Austen'}
         response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
 
         updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
@@ -632,7 +626,7 @@ class ModifyReusableItemAPITest(APITestCase):
         # other user cannot add change request
         self.client.force_authenticate(user=self.user_2)
 
-        data = {'name': 'Agatha Christie'}
+        data = {'name': 'Not Jane Austen'}
 
         response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
 
@@ -652,10 +646,7 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # And set one of its items to reference the reusable item
         # This allows the count of users to be checked
-        toptenitems_2 = self.toptenlist_1_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[4].id
-
-        reference_reusable_item(self, 'user_1', self.reusableitem_1.id, toptenitem_2_id)
+        reference_reusable_item(self, 'user_1', self.reusableitem_1.id, 'toptenlist_1_2', 4)
 
         # submit the change request
         data1 = submit_change_request_1(self, self.user_1)
@@ -681,10 +672,7 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(history_entry['change_request']['link'], data1['link'])
 
         # add a second reference to this reusable item, by a different user
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
-
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
 
         # owner can propose a change request
         # it does not update immediately
@@ -857,7 +845,7 @@ class ModifyReusableItemAPITest(APITestCase):
         self.client.force_authenticate(user=self.user_2)
 
         # user 2 tries to submit a change request to a reusable item they do not reference in their top ten lists
-        data = {'name': 'Agatha Christie', 'definition': 'A writer', 'link': 'someurl'}
+        data = {'name': 'Not Jane Austen', 'definition': 'A writer', 'link': 'someurl'}
         response = self.client.patch(get_reusable_item_1_url(self), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -918,7 +906,7 @@ class ModifyReusableItemAPITest(APITestCase):
 
     def test_resuableitem_invalid_vote(self):
         """
-        Vote must be 'yes' or 'no'
+        Vote must be 'yes', 'no' or '' (to withdraw vote)
         """
 
         original_reusableitem = setup_public_reusable_item_1(self)
@@ -948,25 +936,343 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_reusableitem_withdraw_vote(self):
+        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+
+        # user 2 references it
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+
+        # submit the change request
+        data1 = submit_change_request_1(self, self.user_1)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(updated_reusableitem1.change_request_votes_yes.first(), self.user_1)
+        self.assertEqual(updated_reusableitem1.change_request_votes_yes.count(), 1)
+
+        # User 1 withdraws their vote
+        self.client.force_authenticate(user=self.user_1)
+        data2 = {'vote': ''}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(updated_reusableitem2.change_request_votes_yes.count(), 0)
+
     def test_reusableitem_vote_user_count_3_accept(self):
         """
         Test voting when 3 users reference a top ten item
-        And vote for it
+        And 2 vote for it
         """
 
         original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
 
         # user 2 and user 3 reference it
-        toptenitems_2 = self.toptenlist_2.topTenItem.all()
-        toptenitem_2_id = toptenitems_2[0].id
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        reference_reusable_item(self, 'user_3', self.reusableitem_1.id, 'toptenlist_3', 0)
 
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, toptenitem_2_id)
+        # submit the change request
+        #print('===============')
+        data1 = submit_change_request_1(self, self.user_1)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        self.assertEqual(updated_reusableitem1.change_request_votes_yes.first(), self.user_1)
+        self.assertEqual(updated_reusableitem1.change_request_votes_yes.count(), 1)
+
+        # User 2 votes against
+        #print('*******')
+        self.client.force_authenticate(user=self.user_2)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        #print('updated_reusableitem2.change_request_votes_yes.first()', updated_reusableitem2.change_request_votes_yes.first())
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem2.change_request, None)
+
+        self.assertEqual(updated_reusableitem2.change_request_votes_yes.first(), self.user_1)
+        self.assertEqual(updated_reusableitem2.change_request_votes_yes.count(), 1)
+
+        self.assertEqual(updated_reusableitem2.change_request_votes_no.first(), self.user_2)
+        self.assertEqual(updated_reusableitem2.change_request_votes_no.count(), 1)
+
+       # User 3 votes for
+        #print('*******222')
+        self.client.force_authenticate(user=self.user_3)
+        data3 = {'vote': 'yes'}
+        response = self.client.patch(get_reusable_item_1_url(self), data3, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        #print('updated_reusableitem3', updated_reusableitem3.__dict__)
+        # it should be resolved
+        self.assertEqual(updated_reusableitem3.change_request, None)
+        self.assertEqual(updated_reusableitem3.change_request_votes_no.count(), 0)
+        self.assertEqual(updated_reusableitem3.change_request_votes_yes.count(), 0)
+
+        self.assertEqual(updated_reusableitem3.name, data1['name'])
+        self.assertEqual(updated_reusableitem3.definition, data1['definition'])
+        self.assertEqual(updated_reusableitem3.link, data1['link'])
+
+    def test_reusableitem_vote_user_count_3_reject(self):
+        """
+        Test voting when 3 users reference a top ten item
+        And 2 vote against
+        """
+
+        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+
+        # user 2 and user 3 reference it
+        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        reference_reusable_item(self, 'user_3', self.reusableitem_1.id, 'toptenlist_3', 0)
 
         # submit the change request
         data1 = submit_change_request_1(self, self.user_1)
-        updated_reusableitem = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
-        print('updated_reusableitem', updated_reusableitem)
+        self.assertEqual(updated_reusableitem1.change_request_votes_yes.first(), self.user_1)
+        self.assertEqual(updated_reusableitem1.change_request_votes_yes.count(), 1)
+
+        # User 2 votes against
+        self.client.force_authenticate(user=self.user_2)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem2.change_request, None)
+
+       # User 3 votes against
+        self.client.force_authenticate(user=self.user_3)
+        data3 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data3, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # it should be rejected
+        #print('********')
+        self.assertEqual(updated_reusableitem3.change_request, None)
+        history_entry = updated_reusableitem3.history[1]
+        self.assertEqual(history_entry['change_request_resolution'], 'rejected')
+
+    def test_reusableitem_vote_user_count_4_reject(self):
+        """
+        Test voting when 4 users reference a top ten item
+        """
+
+        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+
+        for index in range(2, 5): # users 2 to 4
+            reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
+
+        # submit the change request
+        data1 = submit_change_request_1(self, self.user_1)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        #print('*****')
+        # User 2 votes against
+        self.client.force_authenticate(user=self.user_2)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem2.change_request, None)
+
+        # User 3 votes against
+        self.client.force_authenticate(user=self.user_3)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should be resolved
+        self.assertEqual(updated_reusableitem3.change_request, None)
+
+        # it should be rejected
+        history_entry = updated_reusableitem3.history[-1]
+        self.assertEqual(history_entry['change_request_resolution'], 'rejected')
+
+    def test_reusableitem_vote_user_count_4_accept(self):
+        """
+        Test voting when 4 users reference a top ten item
+        """
+
+        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+
+        for index in range(2, 5): # users 2 to 4
+            reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
+
+        # submit the change request
+        data1 = submit_change_request_1(self, self.user_1)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # User 2 votes against
+        self.client.force_authenticate(user=self.user_2)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem2.change_request, None)
+
+        # User 3 votes for
+        self.client.force_authenticate(user=self.user_3)
+        data2 = {'vote': 'yes'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should be resolved
+        self.assertEqual(updated_reusableitem3.change_request, None)
+
+        # it should be accepted
+        history_entry = updated_reusableitem3.history[-1]
+        self.assertEqual(history_entry['change_request_resolution'], 'accepted')
+
+    def test_reusableitem_vote_user_count_5_accept(self):
+        """
+        Test voting when 5 users reference a top ten item
+        """
+
+        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+
+        for index in range(2, 6): # users 2 to 5
+            reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
+
+        # submit the change request
+        data1 = submit_change_request_1(self, self.user_1)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        #print('*****')
+        # User 2 votes against
+        self.client.force_authenticate(user=self.user_2)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem2.change_request, None)
+
+        # User 3 votes against
+        self.client.force_authenticate(user=self.user_3)
+        data3 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data3, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem3.change_request, None)
+
+        # User 4 votes for
+        self.client.force_authenticate(user=self.user_4)
+        data4 = {'vote': 'yes'}
+        response = self.client.patch(get_reusable_item_1_url(self), data4, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem4 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem4.change_request, None)
+
+        # User 5 votes for
+        self.client.force_authenticate(user=self.user_5)
+        data5 = {'vote': 'yes'}
+        response = self.client.patch(get_reusable_item_1_url(self), data5, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem5 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should be resolved
+        self.assertEqual(updated_reusableitem5.change_request, None)
+
+        # it should be accepted
+        history_entry = updated_reusableitem5.history[-1]
+        self.assertEqual(history_entry['change_request_resolution'], 'accepted')
+    
+    def test_reusableitem_vote_user_count_5_reject(self):
+        """
+        Test voting when 3 users reference a top ten item
+        And 2 vote against
+        """
+
+        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+
+        for index in range(2, 6): # users 2 to 5
+            reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
+
+        # submit the change request
+        data1 = submit_change_request_1(self, self.user_1)
+        updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        #print('*****')
+        # User 2 votes against
+        self.client.force_authenticate(user=self.user_2)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem2.change_request, None)
+
+        # User 3 votes against
+        self.client.force_authenticate(user=self.user_3)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertNotEqual(updated_reusableitem3.change_request, None)
+
+        # User 4 votes for
+        self.client.force_authenticate(user=self.user_4)
+        data2 = {'vote': 'no'}
+        response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_reusableitem4 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
+
+        # the change request should not be resolved
+        self.assertEqual(updated_reusableitem4.change_request, None)
+
+        # it should be accepted
+        history_entry = updated_reusableitem4.history[-1]
+        self.assertEqual(history_entry['change_request_resolution'], 'rejected')
+
 
     """
     tests required:

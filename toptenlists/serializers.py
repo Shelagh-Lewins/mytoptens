@@ -139,9 +139,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if instance.change_request is None:
             return
 
-        # print('count_votes')
-        # print('for', instance.change_request_votes_yes.count())
-        # print('against', instance.change_request_votes_no.count())
+        #print('count_votes')
+        #print('for', instance.change_request_votes_yes.count())
+        #print('against', instance.change_request_votes_no.count())
 
         change_request_votes_yes = instance.change_request_votes_yes.count()
         change_request_votes_no = instance.change_request_votes_no.count()
@@ -152,6 +152,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # find all users who reference this reusableItem in any topTenList
         number_of_selected_users = cls.count_users(instance)
+        #print('number_of_selected_users', number_of_selected_users)
 
         """ voting rules
         number_of_users: rule applies to reusableItem referenced by this number of users, or fewer
@@ -178,27 +179,27 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         { # 3 users
         'number_of_users': 3,
         'accept_quorum': 2,
-        'reject_quorum': 2,
+        'reject_quorum': 3,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
         { # 4 or 5 users
         'number_of_users': 5,
         'accept_quorum': 3,
-        'reject_quorum': 3,
+        'reject_quorum': 5,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
         { # 6 - 10 users
         'number_of_users': 10,
-        'accept_quorum': 5,
-        'reject_quorum': 5,
-        'accept_percentage': 60,
+        'accept_quorum': 4,
+        'reject_quorum': 6,
+        'accept_percentage': 80,
         'voting_scheme': 'A'
         },
         { # 11 - 20 users
         'number_of_users': 20,
-        'accept_quorum': 10,
+        'accept_quorum': 6,
         'reject_quorum': 10,
         'accept_percentage': 80,
         'voting_scheme': 'A'
@@ -206,15 +207,15 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         { # 21 - 100 users
         'number_of_users': 100,
         'accept_quorum': 10,
-        'reject_quorum': 20,
-        'accept_percentage': 90,
+        'reject_quorum': 15,
+        'accept_percentage': 80,
         'voting_scheme': 'A'
         },
         { # 101 - 1000 users
         'number_of_users': 1000,
-        'accept_quorum': 40,
-        'reject_quorum': 80,
-        'accept_percentage': 90,
+        'accept_quorum': 20,
+        'reject_quorum': 30,
+        'accept_percentage': 80,
         'voting_scheme': 'A'
         }
         ]
@@ -226,19 +227,32 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 selected_rule = rule
                 break
 
-        # print('got rule: ', selected_rule)
-        percentage_yes = 100 * change_request_votes_yes / total_votes
+        #print('got rule: ', selected_rule)
+        percentage_yes = 100 * change_request_votes_yes / total_votes # note this is percentage of users who have already voted
+
+        # is it still possible for the change request to be accepted?
+        # this applies mainly to small numbers of users
+        reject_percentage = 100 - selected_rule['accept_percentage']
+        percentage_no = 100 * change_request_votes_no / number_of_selected_users # note this is ALL users who reference the reusable item, not just those who have already voted
+
+        #print('percentage_no', percentage_no)
+        if percentage_no > reject_percentage:
+            cls.reject_change(instance, 'rejected')
+            #print('rejecting: cannot be accepted')
+            return
 
         if percentage_yes >= selected_rule['accept_percentage']:
             if total_votes >= selected_rule['accept_quorum']:
+                #print('accepting')
                 cls.accept_change(instance)
                 return
 
         # if the change hasn't been accepted with this number of votes, reject it
         elif total_votes >= selected_rule['reject_quorum']:
             cls.reject_change(instance, 'rejected')
+            #print('rejecting: not accepted')
             return
-
+        #print('total_votes', total_votes);
         return # we have not yet reached a quorum
 
     @classmethod
