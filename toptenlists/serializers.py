@@ -236,30 +236,33 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # if the change hasn't been accepted with this number of votes, reject it
         elif total_votes >= selected_rule['reject_quorum']:
-            cls.reject_change(instance)
+            cls.reject_change(instance, 'rejected')
             return
 
         return # we have not yet reached a quorum
 
     @classmethod
     def accept_change(cls, instance):
+        """
+        update the reusable item and record the change request in history
+        """
         history_entry = {}
 
         history_entry['is_public'] = getattr(instance, 'is_public')
 
+        history_entry['change_request'] = {}
+
         for key, value in instance.change_request.items():
             setattr(instance, key, value)
-            history_entry[key] = value
+            history_entry['change_request'][key] = value
+
+        history_entry['changed_request_submitted_by_id'] = getattr(instance, 'change_request_by').id.__str__()
+        history_entry['change_request_resolution'] = 'accepted'
+        history_entry['changed_request_resolved_at'] = timezone.now().__str__()
 
         history_entry['change_request_votes_yes_count'] = cls.get_change_request_votes_yes_count(cls, instance)
-
         history_entry['change_request_votes_no_count'] = cls.get_change_request_votes_no_count(cls, instance)
-
         history_entry['number_of_users'] = cls.count_users(instance)
-
-        history_entry['changed_at'] = timezone.now().__str__()
-
-        history_entry['changed_by_id'] = getattr(instance, 'change_request_by').id.__str__()
 
         instance.history.append(history_entry)
 
@@ -269,9 +272,30 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         instance.save()
 
     @classmethod
-    def reject_change(cls, instance):
-        cls.remove_change_request(instance)
+    def reject_change(cls, instance, reason):
+        """
+        record the change request in history but do not update the editable values
+        """
+        history_entry = {}
 
+        history_entry['is_public'] = getattr(instance, 'is_public')
+
+        history_entry['change_request'] = {}
+
+        for key, value in instance.change_request.items():
+            history_entry['change_request'][key] = value
+
+        history_entry['changed_request_submitted_by_id'] = getattr(instance, 'change_request_by').id.__str__()
+        history_entry['change_request_resolution'] = reason
+        history_entry['changed_request_resolved_at'] = timezone.now().__str__()
+
+        history_entry['change_request_votes_yes_count'] = cls.get_change_request_votes_yes_count(cls, instance)
+        history_entry['change_request_votes_no_count'] = cls.get_change_request_votes_no_count(cls, instance)
+        history_entry['number_of_users'] = cls.count_users(instance)
+
+        instance.history.append(history_entry)
+
+        cls.remove_change_request(instance)
         instance.save()
 
     @classmethod
@@ -503,7 +527,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             if instance.change_request_by != current_user:
                 raise ValidationError({'update reusable item error: you cannot cancel a change request that you did not create'})
             
-            self.reject_change(instance)
+            self.reject_change(instance, 'cancelled')
             return instance
 
         # vote on a change request
