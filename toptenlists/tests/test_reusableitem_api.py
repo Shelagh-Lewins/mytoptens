@@ -125,6 +125,7 @@ def reference_reusable_item(self, user_ref, reusableitem_id, toptenlist_ref, ind
 
 def setup_public_reusable_item_1(self):
     """
+    This creates self.toptenlist_2 for user 2
     Make self.reusableitem_1 public
     Make another user reference it
     So that when a change request is submitted, it will not update automatically
@@ -136,6 +137,7 @@ def setup_public_reusable_item_1(self):
     reusableitem.save()
 
     # add a reference to this reusable item by user 2
+    create_toptenlist(self, 'user_2', 2) # create a list for user 2
     reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
 
     return reusableitem
@@ -268,13 +270,11 @@ class ModifyReusableItemAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        for index in range(1, 101): # user_1 to user_10
+        for index in range(1, 101): # user_1 etc
             create_user(cls, index)
 
     def setUp(self):
-        # for each test user, use the api to create a Top Ten List and its Top Ten Items
-        for index in range(1, 101): # user_1 to user_10
-            create_toptenlist(self, 'user_' + index.__str__(), index)
+        create_toptenlist(self, 'user_1', 1) # create toptenlist_1 belonging to user_1
 
         # use the api to create a a Reusable Item
         self.client.force_authenticate(user=self.user_1)
@@ -402,7 +402,6 @@ class ModifyReusableItemAPITest(APITestCase):
     def test_make_reusableitem_public_not_owner(self):
         """
         You can't make a reusable item public if you don't own it
-        TODO make user_2 reference the reusable item
         """
 
         # ensure is_public is false to start with
@@ -423,10 +422,7 @@ class ModifyReusableItemAPITest(APITestCase):
         And leave the original as is
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
-
-        # make another user reference the Reusable Item, so it won't be deleted
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
         # user 1 makes the reusable item private
         self.client.force_authenticate(user=self.user_1)
@@ -479,10 +475,7 @@ class ModifyReusableItemAPITest(APITestCase):
         And leave the original as is
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
-
-        # make another user reference the Reusable Item, so it won't be deleted
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
         # user 2 makes the reusable item private
         self.client.force_authenticate(user=self.user_2)
@@ -672,6 +665,7 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(history_entry['change_request']['link'], data1['link'])
 
         # add a second reference to this reusable item, by a different user
+        create_toptenlist(self, 'user_2', 2)
         reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
 
         # owner can propose a change request
@@ -735,6 +729,7 @@ class ModifyReusableItemAPITest(APITestCase):
     def test_resuableitem_submit_changerequest_public_not_owner_accept(self):
         """
         Another user can submit a change request to a public reusable item
+        If they reference it
         """
 
         original_reusableitem = setup_public_reusable_item_1(self)
@@ -937,10 +932,11 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reusableitem_withdraw_vote(self):
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        #original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
 
         # user 2 references it
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        #reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
         # submit the change request
         data1 = submit_change_request_1(self, self.user_1)
@@ -966,14 +962,11 @@ class ModifyReusableItemAPITest(APITestCase):
         And 2 vote for it
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
-
-        # user 2 and user 3 reference it
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        original_reusableitem = setup_public_reusable_item_1(self)
+        create_toptenlist(self, 'user_3', 3)
         reference_reusable_item(self, 'user_3', self.reusableitem_1.id, 'toptenlist_3', 0)
 
         # submit the change request
-        #print('===============')
         data1 = submit_change_request_1(self, self.user_1)
         updated_reusableitem1 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
@@ -981,7 +974,6 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem1.change_request_votes_yes.count(), 1)
 
         # User 2 votes against
-        #print('*******')
         self.client.force_authenticate(user=self.user_2)
         data2 = {'vote': 'no'}
         response = self.client.patch(get_reusable_item_1_url(self), data2, format='json')
@@ -990,7 +982,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         updated_reusableitem2 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
-        #print('updated_reusableitem2.change_request_votes_yes.first()', updated_reusableitem2.change_request_votes_yes.first())
         # the change request should not be resolved
         self.assertNotEqual(updated_reusableitem2.change_request, None)
 
@@ -1001,7 +992,6 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem2.change_request_votes_no.count(), 1)
 
        # User 3 votes for
-        #print('*******222')
         self.client.force_authenticate(user=self.user_3)
         data3 = {'vote': 'yes'}
         response = self.client.patch(get_reusable_item_1_url(self), data3, format='json')
@@ -1009,7 +999,7 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
-        #print('updated_reusableitem3', updated_reusableitem3.__dict__)
+
         # it should be resolved
         self.assertEqual(updated_reusableitem3.change_request, None)
         self.assertEqual(updated_reusableitem3.change_request_votes_no.count(), 0)
@@ -1025,10 +1015,8 @@ class ModifyReusableItemAPITest(APITestCase):
         And 2 vote against
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
-
-        # user 2 and user 3 reference it
-        reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
+        original_reusableitem = setup_public_reusable_item_1(self)
+        create_toptenlist(self, 'user_3', 3)
         reference_reusable_item(self, 'user_3', self.reusableitem_1.id, 'toptenlist_3', 0)
 
         # submit the change request
@@ -1060,7 +1048,6 @@ class ModifyReusableItemAPITest(APITestCase):
         updated_reusableitem3 = ReusableItem.objects.get(pk=self.reusableitem_1.id)
 
         # it should be rejected
-        #print('********')
         self.assertEqual(updated_reusableitem3.change_request, None)
         history_entry = updated_reusableitem3.history[1]
         self.assertEqual(history_entry['change_request_resolution'], 'rejected')
@@ -1070,9 +1057,10 @@ class ModifyReusableItemAPITest(APITestCase):
         Test voting when 4 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 5): # users 2 to 4
+        for index in range(2, 5):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1112,9 +1100,10 @@ class ModifyReusableItemAPITest(APITestCase):
         Test voting when 4 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 5): # users 2 to 4
+        for index in range(2, 5):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1154,9 +1143,10 @@ class ModifyReusableItemAPITest(APITestCase):
         Test voting when 5 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 6): # users 2 to 5
+        for index in range(3, 6):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1220,9 +1210,10 @@ class ModifyReusableItemAPITest(APITestCase):
         5 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 6): # users 2 to 5
+        for index in range(3, 6):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1274,9 +1265,10 @@ class ModifyReusableItemAPITest(APITestCase):
         7 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 8): # users 2 to 7
+        for index in range(3, 8):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1329,9 +1321,10 @@ class ModifyReusableItemAPITest(APITestCase):
         2 users vote against, meaning the change request cannot be accepted before reaching the reject quorum
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 8): # users 2 to 7
+        for index in range(3, 8):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1371,9 +1364,10 @@ class ModifyReusableItemAPITest(APITestCase):
         order of voting is different, so different reject criterion is triggered
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 8): # users 2 to 7
+        for index in range(3, 8):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1425,9 +1419,10 @@ class ModifyReusableItemAPITest(APITestCase):
         20 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 21): # users 2 to 20
+        for index in range(3, 21):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1465,9 +1460,10 @@ class ModifyReusableItemAPITest(APITestCase):
         20 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 21): # users 2 to 20
+        for index in range(3, 21):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1476,7 +1472,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # users vote for
         for index in range(2, 5):
-            #print('INDEX for:', index)
             self.client.force_authenticate(user=getattr(self, 'user_' + index.__str__()))
             response = self.client.patch(get_reusable_item_1_url(self), {'vote': 'yes'}, format='json')
 
@@ -1484,7 +1479,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # users vote against
         for index in range(5, 8):
-            #print('INDEX against:', index)
             self.client.force_authenticate(user=getattr(self, 'user_' + index.__str__()))
             response = self.client.patch(get_reusable_item_1_url(self), {'vote': 'no'}, format='json')
 
@@ -1504,9 +1498,10 @@ class ModifyReusableItemAPITest(APITestCase):
         80 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 81):
+        for index in range(3, 81):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1515,7 +1510,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # users vote against
         for index in range(2, 4):
-            #print('INDEX against:', index)
             self.client.force_authenticate(user=getattr(self, 'user_' + index.__str__()))
             response = self.client.patch(get_reusable_item_1_url(self), {'vote': 'no'}, format='json')
 
@@ -1523,7 +1517,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # users vote for
         for index in range(4, 11):
-            #print('INDEX for 1:', index)
             self.client.force_authenticate(user=getattr(self, 'user_' + index.__str__()))
             response = self.client.patch(get_reusable_item_1_url(self), {'vote': 'yes'}, format='json')
 
@@ -1543,9 +1536,10 @@ class ModifyReusableItemAPITest(APITestCase):
         80 users reference a top ten item
         """
 
-        original_reusableitem = make_reusable_item_public(self.reusableitem_1.id)
+        original_reusableitem = setup_public_reusable_item_1(self)
 
-        for index in range(2, 81):
+        for index in range(3, 81):
+            create_toptenlist(self, 'user_' + index.__str__(), index)
             reference_reusable_item(self, 'user_' + index.__str__(), self.reusableitem_1.id, 'toptenlist_' + index.__str__(), 0)
 
         # submit the change request
@@ -1554,7 +1548,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # users vote against
         for index in range(2, 5):
-            #print('INDEX for:', index)
             self.client.force_authenticate(user=getattr(self, 'user_' + index.__str__()))
             response = self.client.patch(get_reusable_item_1_url(self), {'vote': 'no'}, format='json')
 
@@ -1562,7 +1555,6 @@ class ModifyReusableItemAPITest(APITestCase):
 
         # users vote for
         for index in range(5, 16):
-            #print('INDEX for 2:', index)
             self.client.force_authenticate(user=getattr(self, 'user_' + index.__str__()))
             response = self.client.patch(get_reusable_item_1_url(self), {'vote': 'yes'}, format='json')
 
