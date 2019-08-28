@@ -155,66 +155,65 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         #print('number_of_selected_users', number_of_selected_users)
 
         """ voting rules
+        Once a quorum is reached, the change request is approved if enough users have voted for it, otherwise it is rejected.
+
         number_of_users: rule applies to reusableItem referenced by this number of users, or fewer
-        accept_quorum: number of votes that must be cast to evaluate change acceptance
-        reject_quorum: number of votes that must be cast to evaluate change refusal
+        quorum: number of votes that must be cast to resolve change request
         accept_percentage: this % of votes must be cast for the change, for it to be accepted
         elibibility_scheme: who is eligible to vote. Initially just 'A', but with the potential to have different schemes depending on the popularity of the reusableItem ('B', 'C' etc). For example, can people vote even if they only reference the reusableItem in private topTenLists?
         """
         voting_rules = [
         { # one user so change will happen immediately
         'number_of_users': 1,
-        'accept_quorum': 1,
-        'reject_quorum': 1,
+        'quorum': 1,
         'accept_percentage': 100,
         'voting_scheme': 'A'
         },
         { # 2 users: all must vote
         'number_of_users': 2,
-        'accept_quorum': 2,
-        'reject_quorum': 1,
+        'quorum': 2,
         'accept_percentage': 100,
         'voting_scheme': 'A'
         },
         { # 3 users
         'number_of_users': 3,
-        'accept_quorum': 2,
-        'reject_quorum': 3,
+        'quorum': 3,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
         { # 4 or 5 users
         'number_of_users': 5,
-        'accept_quorum': 3,
-        'reject_quorum': 5,
+        'quorum': 3,
         'accept_percentage': 60,
         'voting_scheme': 'A'
         },
         { # 6 - 10 users
         'number_of_users': 10,
-        'accept_quorum': 4,
-        'reject_quorum': 6,
+        'quorum': 4,
         'accept_percentage': 70,
         'voting_scheme': 'A'
         },
         { # 11 - 20 users
         'number_of_users': 20,
-        'accept_quorum': 6,
-        'reject_quorum': 10,
+        'quorum': 6,
         'accept_percentage': 80,
         'voting_scheme': 'A'
         },
         { # 21 - 100 users
         'number_of_users': 100,
-        'accept_quorum': 10,
-        'reject_quorum': 15,
+        'quorum': 10,
         'accept_percentage': 80,
         'voting_scheme': 'A'
         },
         { # 101 - 1000 users
         'number_of_users': 1000,
-        'accept_quorum': 20,
-        'reject_quorum': 30,
+        'quorum': 20,
+        'accept_percentage': 80,
+        'voting_scheme': 'A'
+        },
+        { # 1001 - 5000 users
+        'number_of_users': 5000,
+        'quorum': 30,
         'accept_percentage': 80,
         'voting_scheme': 'A'
         }
@@ -229,44 +228,23 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         #print('got rule: ', selected_rule)
         #print('total_votes', total_votes)
-        percentage_yes = 100 * change_request_votes_yes / total_votes # note this is percentage of users who have already voted
 
-        # is it still possible for the change request to be accepted?
-        # this applies mainly to small numbers of users
-        reject_percentage = 100 - selected_rule['accept_percentage']
-        percentage_no = 100 * change_request_votes_no / number_of_selected_users # note this is ALL users who reference the reusable item, not just those who have already voted
+        # if total_votes is > quorum
+        # use % of votes not of quorum
+        # in case for example people have defererenced a reusable item with a pending change request
+        # I'm not sure this can happen, but it seems best to cover for it
 
-        #print('percentage_no', percentage_no)
-        if percentage_no > reject_percentage:
+        max_votes = max(total_votes, selected_rule['quorum'])
+
+        # enough have voted 'yes'
+        if 100 * change_request_votes_yes / max_votes >= selected_rule['accept_percentage']:
+            cls.accept_change(instance)
+
+        # even if all remaining users vote 'yes', the accept percentage cannot be reached
+        elif 100 * change_request_votes_no / max_votes > 100 - selected_rule['accept_percentage']:
             cls.reject_change(instance, 'rejected')
-            #print('rejecting: cannot be accepted')
-            return
 
-        if percentage_yes >= selected_rule['accept_percentage']:
-            if total_votes >= selected_rule['accept_quorum']:
-                #print('accepting')
-                cls.accept_change(instance)
-                return
-
-        # if the change hasn't been accepted with this number of votes, reject it
-        elif total_votes >= selected_rule['reject_quorum']:
-            cls.reject_change(instance, 'rejected')
-            #print('rejecting: not accepted at reject quorum')
-            return
-        #print('total_votes', total_votes);
-
-        # even if all remaining users vote 'yes', the accept percentage cannot be reached before reaching the reject quorum
-        # if a 'yes' vote taking us over the reject quorum and trigger reject, we should reject now
-        possible_votes_yes = change_request_votes_yes + (selected_rule['reject_quorum'] - total_votes)
-        
-        #print('change_request_votes_yes', change_request_votes_yes)
-        #print('possible_votes_yes', possible_votes_yes)
-        if 100 * possible_votes_yes / selected_rule['reject_quorum'] < selected_rule['accept_percentage']:
-            cls.reject_change(instance, 'rejected')
-            #print('rejecting: cannot reach accept percentage within reject quorum')
-            return
-        #print('carrying on')
-        return # we have not yet reached a quorum
+        return
 
     @classmethod
     def accept_change(cls, instance):
