@@ -1,8 +1,8 @@
 # users/urls.py
 from django.urls import include, path
 
-from . import views
-
+from . import api
+#app_name = 'users' # namespace for reverse
 urlpatterns = [
-    path('', views.UserListView.as_view()),
+    path('', api.UserListView.as_view(), name='UsersPath'),
 ]

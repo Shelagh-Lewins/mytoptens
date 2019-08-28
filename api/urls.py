@@ -6,10 +6,11 @@ from .forms import SetPasswordFormCustom
 from .serializers import PasswordResetViewCustom
 from allauth.account.views import confirm_email
 
-from users.views import EmailConfirmation
+from users.api import EmailConfirmation
 
 
 #full_string_regex = "(?P<key>[\s\d\w().+-_',:&]+)/$."
+#app_name = 'myTopTens' # namespace for reverse
 
 urlpatterns = [
     #url(r"^rest-auth/registration/account-confirm-email/(?P<key>[\s\d\w().+-_',:&]+)/$", confirm_email,
@@ -21,7 +22,7 @@ urlpatterns = [
     path('rest-auth/password/reset/', PasswordResetViewCustom.as_view()), # must come before rest-auth includes or custom view is not used
     path('rest-auth/', include('rest_auth.urls')),
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
-    path('users/', include('users.urls')),
+    path('users/', include('users.urls'), name='UsersURLS'),
     path('reset/<uidb64>/<token>/',
     	views.PasswordResetConfirmView.as_view(template_name='account/password_reset_confirm.html', form_class=SetPasswordFormCustom),
     	name='password_reset_confirm'),

@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.CustomUser
-        fields = ('email', 'username', 'id', 'email_verified')
+        fields = ('email', 'username', 'id', 'email_verified', 'notifications')
 
     def get_email_verified(self, obj):
         try:
