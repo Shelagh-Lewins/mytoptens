@@ -348,16 +348,20 @@ class ReusableItemDetails extends Component {
 							)}
 						</Col>
 					</Row>
-					<Row>
-						<Col>
-							My vote: {reusableItem.change_request_my_vote}
-						</Col>
-					</Row>
-					<Row>
-						<Col>
-							<span><button type="button" color="secondary" onClick={() => this.voteOnChangeRequest('')}>Withdraw my vote</button></span>
-						</Col>
-					</Row>
+					{reusableItem.change_request_my_vote && (
+						<React.Fragment>
+							<Row>
+								<Col>
+									My vote: {reusableItem.change_request_my_vote}
+								</Col>
+							</Row>
+							<Row>
+								<Col>
+									<span><button type="button" color="secondary" onClick={() => this.voteOnChangeRequest('')}>Withdraw my vote</button></span>
+								</Col>
+							</Row>
+						</React.Fragment>
+					)}
 					{isAuthenticated && reusableItem.change_request_by === user.id
 					&& (
 						<Row>
