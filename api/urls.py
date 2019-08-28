@@ -10,7 +10,6 @@ from users.api import EmailConfirmation
 
 
 #full_string_regex = "(?P<key>[\s\d\w().+-_',:&]+)/$."
-#app_name = 'myTopTens' # namespace for reverse
 
 urlpatterns = [
     #url(r"^rest-auth/registration/account-confirm-email/(?P<key>[\s\d\w().+-_',:&]+)/$", confirm_email,
