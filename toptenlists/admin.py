@@ -12,3 +12,7 @@ admin.site.register(TopTenItem)
 from . models import ReusableItem
 
 admin.site.register(ReusableItem)
+
+from . models import Notification
+
+admin.site.register(Notification)

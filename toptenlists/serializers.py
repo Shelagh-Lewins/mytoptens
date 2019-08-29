@@ -16,7 +16,7 @@ from dynamic_rest.serializers import DynamicModelSerializer
 
 from rest_flex_fields import FlexFieldsModelSerializer
 
-from .models import TopTenList, TopTenItem, ReusableItem
+from .models import TopTenList, TopTenItem, ReusableItem, Notification
 
 from dynamic_rest.fields import (
     CountField,
@@ -811,3 +811,13 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
         TopTenItem.objects.bulk_create(itemObjs)
 
         return newTopTenList
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for notifications
+    """
+
+    class Meta:
+        model = Notification
+
+        fields = ('id', 'created_at', 'context', 'event', 'reusableItem_id', 'created_by', 'unread')

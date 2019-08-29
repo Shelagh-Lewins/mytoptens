@@ -6,8 +6,8 @@ from rest_framework import filters
 from rest_framework.exceptions import APIException
 from allauth.account.models import EmailAddress 
 
-from .models import TopTenList, TopTenItem, ReusableItem
-from .serializers import TopTenListSerializer, TopTenItemSerializer, ReusableItemSerializer
+from .models import TopTenList, TopTenItem, ReusableItem, Notification
+from .serializers import TopTenListSerializer, TopTenItemSerializer, ReusableItemSerializer, NotificationSerializer
 from django.db.models import Q
 
 from rest_flex_fields import FlexFieldsModelViewSet
@@ -17,6 +17,12 @@ from rest_framework.pagination import LimitOffsetPagination
 from drf_multiple_model.viewsets import FlatMultipleModelAPIViewSet
 from drf_multiple_model.pagination import MultipleModelLimitOffsetPagination
 
+
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Only the owner can view or edit
+        if hasattr(obj, 'created_by'):
+            return obj.created_by == request.user
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -388,3 +394,16 @@ class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=to
         #print(querylist)
 
         return querylist
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    """
+    Although Notifications are retrieved as part of a user request, they are edited through this viewset
+    """
+    permission_classes = [IsOwner] 
+    model = Notification
+    serializer_class = NotificationSerializer
+
+    def perform_create(self, serializer):
+        # do not allow a notification to be created by the API
+        # notifications are created as required by the server
+        raise APIException("Notification may not be created via API")

@@ -85,5 +85,25 @@ class TopTenItem(models.Model):
     def __unicode__(self):
         return '%d: %s' % (self.order, self.name)
 
+class Notification(models.Model):
+    """
+    Notifications to users
+    Each notification must belong to one user
+    A user may have many notifications
+    Only 'unread' may be modified
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
+    context = models.CharField(max_length=255, editable=False, blank=True, default='') # e.g. 'reusableItem', 'user', 'topTenList'. Whatever the notification is about.
+
+    event = models.CharField(max_length=5000, editable=False, blank=True, default='') # e.g. 'changeRequestCreated', 'changeRequestRejected', 'changeRequestAccepted', 'changeRequestCancelled'
+
+    reusableItem = models.ForeignKey(ReusableItem, editable=False, on_delete=models.SET_NULL,  blank=True, null=True, related_name='reusableItem') # notification may reference a reusableItem
+    # in future, notifications may be added that relate to Top Ten Items, Top Ten Lists, or other Users. But for now, notifications are only about change requests to reusable items.
+
+    created_by = models.ForeignKey(USER, on_delete=models.CASCADE, related_name='notification_created_by', editable=False) # A notification must belong to a user. If the user is deleted, all their notications are deleted
+    # This field is more 'created for' than 'created by', but I think it's more consistent e.g. with permissions, to use this label for 'owner'.
+
+    unread = models.BooleanField(default=True)
 
