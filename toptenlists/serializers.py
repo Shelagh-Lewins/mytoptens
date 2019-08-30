@@ -57,7 +57,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # they are lists of user email addresses
         fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote')
 
-    # magic method name
+    # magic method name to return calculated field
     def get_change_request_my_vote(cls, instance):
         # return the user's recorded vote, if any
         current_user = cls.context['request'].user
@@ -101,6 +101,14 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         selected_users = USER.objects.filter(id__in=selected_userids)
 
         return selected_users.count()
+
+    @classmethod
+    def create_notification(cls, instance, user):
+        """
+        Crete a notification, e.g. because a change request has been submitted
+        """
+        Notification.objects.create( **notificationData)
+
 
     @classmethod
     def remove_my_votes(cls, instance, user):
@@ -231,8 +239,8 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # if total_votes is > quorum
         # use % of votes not of quorum
-        # in case for example people have defererenced a reusable item with a pending change request
-        # I'm not sure this can happen, but it seems best to cover for it
+        # in case for example people dereference a reusable item with a pending change request
+        # I'm not sure this will happen, but it seems best to cover for it
 
         max_votes = max(total_votes, selected_rule['quorum'])
 
@@ -604,10 +612,13 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
 
         if 'newReusableItem' in data:
             if data['newReusableItem'] == True:
-                # create a new reusableItem with the same name as the topTenItem
+                # create a new reusableItem
+                # assign the new reusableItem to that topTenItem
 
-                # and assign the new reusableItem to that topTenItem also
                 if 'topTenItemForNewReusableItem' in data:
+                # create the reusable item from an existing topTenItem
+                # This may belong to the user, or be another user's public topTenItem
+                # this is to encourage reusableItems when people enter the same name
                     try:
                         topTenItem = TopTenItem.objects.get(id=data['topTenItemForNewReusableItem'])
 
@@ -622,15 +633,15 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         reusableItemData['created_by'] = self.context['request'].user
                         reusableItemData['created_by_username'] = self.context['request'].user.username
 
-                        # newReusableItem = ReusableItem.objects.create( **reusableItemData)
-                        ReusableItemSerializer.create(reusableItemData)
-                        topTenItem.reusableItem = newReusableItem
-                        topTenItem.save()
+                        newReusableItem = ReusableItemSerializer.create(reusableItemData)
 
                         internal_value['reusableItem'] = newReusableItem
 
                     except:
                         print('error attempting to use non-existent topTenItem as basis for new reusableItem')
+
+                    # TODO if the existing topTenItem belongs to the user, make that use the new reusableItem also
+                    # TODO test this
 
                 # create a new reusableItem from the entered name
                 else:
