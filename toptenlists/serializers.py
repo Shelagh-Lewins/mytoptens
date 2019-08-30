@@ -588,8 +588,8 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         # intercept data before it is validated
         # to use fields like reusableItem_id which do not directly go into model
         internal_value = super(TopTenItemSerializer, self).to_internal_value(data)
-        # print('*** in TopTenItemSerializer ***')
-        # print('data', data)
+        print('*** in TopTenItemSerializer ***')
+        print('data', data)
         # the topTenItem references a reusableItem
         if 'reusableItem_id' in data:
             reusableItemId = data.pop('reusableItem_id', None)
@@ -614,6 +614,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
             if data['newReusableItem'] == True:
                 # create a new reusableItem
                 # assign the new reusableItem to that topTenItem
+                print('newReusableItem')
 
                 if 'topTenItemForNewReusableItem' in data:
                 # create the reusable item from an existing topTenItem
@@ -634,11 +635,17 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         reusableItemData['created_by_username'] = self.context['request'].user.username
 
                         newReusableItem = ReusableItemSerializer.create(reusableItemData)
+                        print('newReusableItem', newReusableItem)
+
+                        # Does this toTenItem belong to the user?
+                        if topTenItem.topTenList.created_by == self.context['request'].user:
+                            # The source topTenItem should also reference the new reusable item
+                            self.update(topTenItem, { 'reusableItem': newReusableItem })
 
                         internal_value['reusableItem'] = newReusableItem
 
                     except:
-                        print('error attempting to use non-existent topTenItem as basis for new reusableItem')
+                        print('error attempting to use existing topTenItem as basis for new reusableItem')
 
                     # TODO if the existing topTenItem belongs to the user, make that use the new reusableItem also
                     # TODO test this

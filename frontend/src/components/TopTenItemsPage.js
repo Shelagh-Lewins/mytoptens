@@ -146,6 +146,7 @@ class TopTenItemsPage extends Component {
 	}
 
 	handleNewValue = (element) => {
+		console.log('handleNewValue');
 		const { dispatch } = this.props;
 		const { state } = this;
 		const topTenItemId = element.dataset.entityid;
@@ -173,7 +174,7 @@ class TopTenItemsPage extends Component {
 				}
 				return;
 			}
-			// const name = this.state[`${order}_name`];
+
 			const newReusableItem = state[`${order}_name_newReusableItem`];
 			const topTenItemForNewReusableItem = state[`${order}_name_topTenItemForNewReusableItem`];
 			const reusableItemId = state[`${order}_name_reusableItemId`];
@@ -193,22 +194,16 @@ class TopTenItemsPage extends Component {
 					data.newReusableItem = true;
 					// base the reusableItem on an existing topTenItem
 					if (topTenItemForNewReusableItem) {
-						console.log('using existing topTenItem');
 						data.topTenItemForNewReusableItem = topTenItemForNewReusableItem;
-						// use the topTenItem name
-					} else {
-						// use the entered name text
-						console.log('use entered text');
 					}
 					data.reusableItemDefinition = definition;
 					data.reusableItemLink = link;
 					// make the reusableItem from scratch from a text name
 				}
-
-				dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
-
-				return;
 			}
+
+			dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
+			return;
 		}
 
 		dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, { [propertyName]: value }));
