@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Row, Col, Label } from 'reactstrap';
+import PropTypes from 'prop-types';
 
 import Combobox from 'react-widgets/lib/Combobox';
 import 'react-widgets/dist/css/react-widgets.css';
@@ -70,7 +71,19 @@ function ReusableItemComboBox(props) {
 		);
 	};
 
-	const { widgetId, labelText, data, defaultValue, inputProps } = props;
+	const {
+		data,
+		defaultValue,
+		inputProps,
+		labelText,
+		newReusableItem,
+		onChange,
+		onDetailsChange,
+		onSelect,
+		reusableItem,
+		topTenItem,
+		widgetId,
+	} = props;
 
 	return (
 		<Row>
@@ -89,24 +102,38 @@ function ReusableItemComboBox(props) {
 					textField="name"
 					itemComponent={ComboboxItem}
 					placeholder="Enter the Top Ten item name"
-					onChange={param => props.onChange(param, widgetId)}
-					onSelect={param => props.onSelect(param, widgetId)}
+					onChange={param => onChange(param, widgetId)}
+					onSelect={param => onSelect(param, widgetId)}
 					inputProps={inputProps}
 					autoFocus
 				/>
 				<div className="invalid-feedback" />
 
 				<ReusableItemFormControls
-					newReusableItem={props.newReusableItem}
-					reusableItem={props.reusableItem}
-					topTenItem={props.topTenItem}
-					identifier={props.widgetId}
-					onChange={props.onDetailsChange}
-					data-entityid={props.inputProps ? props.inputProps['data-entityid'] : undefined}
+					newReusableItem={newReusableItem}
+					reusableItem={reusableItem}
+					topTenItem={topTenItem}
+					identifier={widgetId}
+					onChange={onDetailsChange}
+					data-entityid={inputProps ? inputProps['data-entityid'] : undefined}
 				/>
 			</Col>
 		</Row>
 	);
 }
+
+ReusableItemComboBox.propTypes = {
+	'data': PropTypes.arrayOf(PropTypes.any),
+	'defaultValue': PropTypes.string.isRequired,
+	'inputProps': PropTypes.objectOf(PropTypes.any).isRequired,
+	'labelText': PropTypes.string.isRequired,
+	'newReusableItem': PropTypes.objectOf(PropTypes.any),
+	'onChange': PropTypes.func.isRequired,
+	'onDetailsChange': PropTypes.func.isRequired,
+	'onSelect': PropTypes.func.isRequired,
+	'reusableItem': PropTypes.objectOf(PropTypes.any),
+	'topTenItem': PropTypes.objectOf(PropTypes.any),
+	'widgetId': PropTypes.string.isRequired,
+};
 
 export default ReusableItemComboBox;

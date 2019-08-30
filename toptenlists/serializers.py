@@ -144,9 +144,15 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     # process votes on a reusableItem to see if a change request has been accepted or rejected
     @classmethod
     def count_votes(cls, instance):
+        
+        # print('count_votes instance')
+        if not hasattr(instance, 'change_request'):
+            print('doesnt exist', instance)
+
         if instance.change_request is None:
             return
 
+        #print('count_votes instance', instance.change_request)
         #print('count_votes')
         #print('for', instance.change_request_votes_yes.count())
         #print('against', instance.change_request_votes_no.count())
@@ -588,8 +594,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         # intercept data before it is validated
         # to use fields like reusableItem_id which do not directly go into model
         internal_value = super(TopTenItemSerializer, self).to_internal_value(data)
-        print('*** in TopTenItemSerializer ***')
-        print('data', data)
+
         # the topTenItem references a reusableItem
         if 'reusableItem_id' in data:
             reusableItemId = data.pop('reusableItem_id', None)
@@ -614,7 +619,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
             if data['newReusableItem'] == True:
                 # create a new reusableItem
                 # assign the new reusableItem to that topTenItem
-                print('newReusableItem')
+                # print('newReusableItem')
 
                 if 'topTenItemForNewReusableItem' in data:
                 # create the reusable item from an existing topTenItem
@@ -635,7 +640,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         reusableItemData['created_by_username'] = self.context['request'].user.username
 
                         newReusableItem = ReusableItemSerializer.create(reusableItemData)
-                        print('newReusableItem', newReusableItem)
+                        # print('newReusableItem', newReusableItem)
 
                         # Does this toTenItem belong to the user?
                         if topTenItem.topTenList.created_by == self.context['request'].user:
@@ -646,9 +651,6 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
 
                     except:
                         print('error attempting to use existing topTenItem as basis for new reusableItem')
-
-                    # TODO if the existing topTenItem belongs to the user, make that use the new reusableItem also
-                    # TODO test this
 
                 # create a new reusableItem from the entered name
                 else:
@@ -664,7 +666,6 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         reusableItemData['link'] = data['reusableItemLink']
 
                     newReusableItem = ReusableItemSerializer.create(reusableItemData)
-                    # newReusableItem = ReusableItem.objects.create( **reusableItemData)
 
                     internal_value['reusableItem'] = newReusableItem
 
@@ -673,7 +674,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     def update(self, instance, validated_data):
         current_reusableitem = instance.reusableItem
         new_reusableitem = None
-
+        # print('update reusable item', instance)
         if 'reusableItem' in validated_data:
             new_reusableitem = validated_data['reusableItem']
 
@@ -681,9 +682,11 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
             # recount votes in case a change request should be resolved
 
             if current_reusableitem is not None:
+                #print('current_reusableitem', current_reusableitem)
                 ReusableItemSerializer.count_votes(current_reusableitem)
 
             if new_reusableitem is not None:
+                #print('new_reusableitem', new_reusableitem)
                 ReusableItemSerializer.count_votes(new_reusableitem)
 
         return super(TopTenItemSerializer, self).update(instance, validated_data)
@@ -730,7 +733,6 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
                     if topTenItem_data['newReusableItem'] == True:
                     # create new reusableItem from raw data
 
-                        # print('data', topTenItem_data)
                         reusableItemData = {'name': topTenItem_data['name']}
 
                         if 'definition' in topTenItem_data:

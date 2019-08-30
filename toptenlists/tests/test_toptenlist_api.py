@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
 from allauth.account.models import EmailAddress 
-from toptenlists.models import TopTenList, TopTenItem
+from toptenlists.models import TopTenList, TopTenItem, ReusableItem
 
 # disable throttling for testing
 from toptenlists.api import TopTenListViewSet, TopTenItemViewSet, TopTenListDetailViewSet, ReusableItemViewSet
@@ -49,6 +49,16 @@ second_list_data = {'name': 'Drinks', 'description':'Things to driink', 'topTenI
 # 'TopTenLists' is the base_name set for the topTenList route in endpoints.py
 # '-list' is a standard api command to list a model. It is unrelated to our topTenList object name
 create_list_url = reverse('topTenLists:TopTenLists-list')
+
+def create_reusable_item(self, topTenItem):
+    self.reusableItem = ReusableItem.objects.create(name='Jane Austen',
+        definition='A writer',
+        link='link@here.com',
+        created_by=self.user)
+
+    # 
+    topTenItem.reusableItem = self.reusableItem
+    topTenItem.save()
 
 
 class CreateTopTenListAPITest(APITestCase):
@@ -420,6 +430,33 @@ class EditTopTenItemAPITest(APITestCase):
 
         # the request should fail
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_edit_topTenItem_set_reusableItem(self):
+        """
+        The user can assign a reusable item to a top ten item
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        create_reusable_item(self, topTenItems[1]) # assign the reusable item to a different top ten item
+ 
+        test = ReusableItem.objects.get(id=self.reusableItem.id)
+
+        data = {'reusableItem_id': self.reusableItem.id}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the reusableItem should have changed
+        self.assertEqual(topTenItems[0].reusableItem.name, self.reusableItem.name)
+        # TODO test create new reusable item from raw data, from other top ten item (user's and another user's)
+        # TODO test dereference reusable item
+
 
 class DeleteTopTenListAPITest(APITestCase):
     @classmethod
