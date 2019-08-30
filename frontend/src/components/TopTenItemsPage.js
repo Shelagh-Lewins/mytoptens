@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'reactstrap';
+import PropTypes from 'prop-types';
 
 import * as topTenItemsReducer from '../modules/topTenItem';
 import * as reusableItemReducer from '../modules/reusableItem';
@@ -17,18 +18,18 @@ class TopTenItemsPage extends Component {
 		// set up the state to hold each topTenItem's name and description
 		// coded by order
 		// this is not elegant but keeps state flat
-		for (let i=1; i<= MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			this.state[`${i}_name`] = '';
 			this.state[`${i}_description`] = '';
 		}
 
 		// build the topTenItems
 		// each topTenItem's order and the field to update are coded in the 'state' data e.g. '1_name'
-		const topTenItems = this.props.topTenItems;
+		const { topTenItems } = this.props;
 
 		Object.keys(topTenItems).forEach((key) => {
 			if (topTenItems[key].order && topTenItems[key].order <= MAX_TOPTENITEMS_IN_TOPTENLIST) {
-				const order = topTenItems[key].order;
+				const { order } = topTenItems[key];
 
 				this.state[`${order}_id`] = topTenItems[key].id;
 				this.state[`${order}_name`] = topTenItems[key].name;
@@ -54,24 +55,17 @@ class TopTenItemsPage extends Component {
 		this.onSelectItemName = this.onSelectItemName.bind(this);
 	}
 
-	onMoveTopTenItemUp = (topTenItemId) => {
-		this.props.dispatch(topTenItemsReducer.moveTopTenItemUp({ topTenItemId }));
-	}
-
-	onMoveTopTenItemDown = (topTenItemId) => {
-		this.props.dispatch(topTenItemsReducer.moveTopTenItemDown({ topTenItemId }));
-	}
-
 	componentDidUpdate(prevProps) {
-		let update = {};
-		for (let i=0; i<this.props.topTenItems.length; i++) {
-			const topTenItem = this.props.topTenItems[i];
+		const update = {};
+		const { topTenItems } = this.props;
+		for (let i = 0; i < topTenItems.length; i += 1) {
+			const topTenItem = topTenItems[i];
 
 			// first the topTenList is loaded and this just gives ids
 			// only when the full data are loaded and getTopTenItemsForTopTenList recalculated do we find the childTopTenList
-			if (prevProps.topTenItems[i].id !== this.props.topTenItems[i].id ||
-				prevProps.topTenItems[i].childTopTenList !== this.props.topTenItems[i].childTopTenList) {
-				const order = topTenItem.order;
+			if (prevProps.topTenItems[i].id !== topTenItems[i].id
+				|| prevProps.topTenItems[i].childTopTenList !== topTenItems[i].childTopTenList) {
+				const { order } = topTenItem;
 
 				// update topTenItem properties
 				update[`${order}_id`] = topTenItem.id;
@@ -90,106 +84,23 @@ class TopTenItemsPage extends Component {
 		}
 	}
 
-	handleInputChange = (e) => {
-		this.setState({
-			[e.target.dataset.state]: e.target.value,
-		});
+	onMoveTopTenItemUp = (topTenItemId) => {
+		const { dispatch } = this.props;
+
+		dispatch(topTenItemsReducer.moveTopTenItemUp({ topTenItemId }));
 	}
 
-	handleNewValue = (element) => {
-		const topTenItemId = element.dataset.entityid;
 
+	onMoveTopTenItemDown = (topTenItemId) => {
+		const { dispatch } = this.props;
 
-		// the topTenItem's order and the field to update are coded in the 'state' data e.g. '1_name'
-		//const identifiers = elementId.split('_');
-		const identifiers = element.dataset.state.split('_');
-		const order = identifiers[0];
-		const propertyName = identifiers[1];
-		const value = element.value;
-
-		// if name is deleted, then description will also be removed
-		if (propertyName === 'name') {
-			if (value === '') {
-				if (confirm('Do you want to delete this item?')) {// eslint-disable-line no-restricted-globals
-					const data = {
-						'name': value,
-						'description': '',
-						'reusableItem_id': null,
-					};
-					this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
-					this.setState({
-						[`${order}_description`]: '',
-						[`${order}_name_reusableItem_id`]: undefined,
-					});
-				}
-				return;
-			} else {
-				// const name = this.state[`${order}_name`];
-				const newReusableItem = this.state[`${order}_name_newReusableItem`];
-				const topTenItemForNewReusableItem = this.state[`${order}_name_topTenItemForNewReusableItem`];
-				const reusableItemId = this.state[`${order}_name_reusableItemId`];
-				const definition = this.state[`${order}_name_definition`];
-				const link = this.state[`${order}_name_link`];
-
-				const data = {
-					'name': value,
-				};
-
-				if (reusableItemId) { // 
-					data.reusableItem_id = reusableItemId;
-				} else {
-					data.reusableItem_id = null;
-
-					if (newReusableItem) {
-						data.newReusableItem = true;
-						// base the reusableItem on an existing topTenItem
-						if (topTenItemForNewReusableItem) {
-							data.topTenItemForNewReusableItem = topTenItemForNewReusableItem;
-							// use the topTenItem name
-						} else {
-							// use the entered name text
-						}
-						data.reusableItemDefinition = definition;
-						data.reusableItemLink = link;
-						// make the reusableItem from scratch from a text name
-					}
-				}
-
-				this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
-
-				return;
-			}
-		}
-
-		this.props.dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, { [propertyName]: value }));
-	}
-
-	// user types in an item name combobox.
-	handleComboboxChange(e, widgetId) {
-		clearTimeout(this.itemNameTimeout);
-		this.itemNameTimeout = setTimeout(() => {
-			if (typeof e === 'string') {
-				// the combobox change function fires when an item is selected from the dropdown
-				// and the passed event is the selected item - an object - not the entered text
-				// so, only update the search string if the user has typed text
-				// not if they have made a selection
-
-				// the dropdown list will be rebuilt.
-				// We need to remove the selection from state to avoid confusion.
-				// value must be selected from list.
-				this.setState({
-					[`${widgetId}`]: e, // use the entered text directly if the user hasn't made a selection
-					[`${widgetId}_reusableItemId`]: undefined,
-				});
-
-				this.props.dispatch(reusableItemReducer.suggestReusableItems(e, widgetId));
-			}
-		}, 300);
+		dispatch(topTenItemsReducer.moveTopTenItemDown({ topTenItemId }));
 	}
 
 	// user selects an item name from a dropdown list. This can be to use text directly, or to use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
 		// we expect a widgetId like 1_name, 2_name
+		console.log('onSelectItemName. type', e.type);
 		this.setState({
 			[`${widgetId}`]: e.name,
 		});
@@ -228,40 +139,151 @@ class TopTenItemsPage extends Component {
 		}
 	}
 
+	handleInputChange = (e) => {
+		this.setState({
+			[e.target.dataset.state]: e.target.value,
+		});
+	}
+
+	handleNewValue = (element) => {
+		const { dispatch } = this.props;
+		const { state } = this;
+		const topTenItemId = element.dataset.entityid;
+
+		// the topTenItem's order and the field to update are coded in the 'state' data e.g. '1_name'
+		const identifiers = element.dataset.state.split('_');
+		const order = identifiers[0];
+		const propertyName = identifiers[1];
+		const { value } = element;
+
+		// if name is deleted, then description will also be removed
+		if (propertyName === 'name') {
+			if (value === '') {
+				if (confirm('Do you want to delete this item?')) { // eslint-disable-line no-restricted-globals
+					const data = {
+						'name': value,
+						'description': '',
+						'reusableItem_id': null,
+					};
+					dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
+					this.setState({
+						[`${order}_description`]: '',
+						[`${order}_name_reusableItem_id`]: undefined,
+					});
+				}
+				return;
+			}
+			// const name = this.state[`${order}_name`];
+			const newReusableItem = state[`${order}_name_newReusableItem`];
+			const topTenItemForNewReusableItem = state[`${order}_name_topTenItemForNewReusableItem`];
+			const reusableItemId = state[`${order}_name_reusableItemId`];
+			const definition = state[`${order}_name_definition`];
+			const link = state[`${order}_name_link`];
+
+			const data = {
+				'name': value,
+			};
+
+			if (reusableItemId) {
+				data.reusableItem_id = reusableItemId;
+			} else {
+				data.reusableItem_id = null;
+
+				if (newReusableItem) {
+					data.newReusableItem = true;
+					// base the reusableItem on an existing topTenItem
+					if (topTenItemForNewReusableItem) {
+						console.log('using existing topTenItem');
+						data.topTenItemForNewReusableItem = topTenItemForNewReusableItem;
+						// use the topTenItem name
+					} else {
+						// use the entered name text
+						console.log('use entered text');
+					}
+					data.reusableItemDefinition = definition;
+					data.reusableItemLink = link;
+					// make the reusableItem from scratch from a text name
+				}
+
+				dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, data));
+
+				return;
+			}
+		}
+
+		dispatch(topTenItemsReducer.updateTopTenItem(topTenItemId, { [propertyName]: value }));
+	}
+
 	toggleForm = () => {
-		this.setState({ 'showNewTopTenItemForm': !this.state.showNewTopTenItemForm });
+		const { showNewTopTenItemForm } = this.state;
+
+		this.setState({ 'showNewTopTenItemForm': !showNewTopTenItemForm });
+	}
+
+	// user types in an item name combobox.
+	handleComboboxChange(e, widgetId) {
+		const { dispatch } = this.props;
+
+		clearTimeout(this.itemNameTimeout);
+		this.itemNameTimeout = setTimeout(() => {
+			if (typeof e === 'string') {
+				// the combobox change function fires when an item is selected from the dropdown
+				// and the passed event is the selected item - an object - not the entered text
+				// so, only update the search string if the user has typed text
+				// not if they have made a selection
+
+				// the dropdown list will be rebuilt.
+				// We need to remove the selection from state to avoid confusion.
+				// value must be selected from list.
+				this.setState({
+					[`${widgetId}`]: e, // use the entered text directly if the user hasn't made a selection
+					[`${widgetId}_reusableItemId`]: undefined,
+				});
+
+				dispatch(reusableItemReducer.suggestReusableItems(e, widgetId));
+			}
+		}, 300);
 	}
 
 	renderTopTenItemsList() {
-		let elements = [];
-		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
-			const identifier = `${i}_name`;
-			const name = this.state[`${i}_name`];
+		const elements = [];
+		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
+			const {
+				canEdit,
+				topTenList,
+				onCreateChildTopTenList,
+				reusableItems,
+				reusableItemSuggestions,
+			} = this.props;
 
-			const canEdit = this.props.canEdit;
+			const { state } = this;
+
+			const identifier = `${i}_name`;
+			const name = state[`${i}_name`];
+
 			if (name || canEdit) {
 				// has the user selected an existing topTenItem?
-				const topTenItemId = this.state[`${identifier}_topTenItemForNewReusableItem`];
+				const topTenItemId = state[`${identifier}_topTenItemForNewReusableItem`];
 
 				let newReusableItem;
 				let topTenItem;
 				let reusableItem;
-				const reusableItemSuggestions = this.props.reusableItemSuggestions[`${i}_name`];
+				const reusableItemSuggestionsForName = reusableItemSuggestions[`${i}_name`];
 
 				// create a new reusableItem based on the name the user typed
-				if (this.state[`${identifier}_newReusableItem`]) {
-					newReusableItem = { 'name': this.state[`${identifier}`] };
+				if (state[`${identifier}_newReusableItem`]) {
+					newReusableItem = { 'name': state[`${identifier}`] };
 				} else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
-					topTenItem = reusableItemSuggestions.find(item => item.id === topTenItemId);
+					topTenItem = reusableItemSuggestionsForName.find(item => item.id === topTenItemId);
 				} else {
 					// use an existing reusableItem
-					const reusableItemId = this.state[`${identifier}_reusableItemId`];
+					const reusableItemId = state[`${identifier}_reusableItemId`];
 
 					if (reusableItemId) {
-						if (reusableItemSuggestions) {
-							reusableItem = reusableItemSuggestions.find(item => item.id === reusableItemId);
+						if (reusableItemSuggestionsForName) {
+							reusableItem = reusableItemSuggestionsForName.find(item => item.id === reusableItemId);
 						} else {
-							reusableItem = this.props.reusableItems[this.state[`${identifier}_reusableItemId`]];
+							reusableItem = reusableItems[state[`${identifier}_reusableItemId`]];
 						}
 					}
 				}
@@ -272,29 +294,29 @@ class TopTenItemsPage extends Component {
 							<TopTenItem
 								key={`topTenItem${i}`}
 								topTenItem={{
-									'id': this.state[`${i}_id`],
+									'id': state[`${i}_id`],
 									'order': i,
 									'name': name,
-									'description': this.state[`${i}_description`],
-									'childTopTenList': this.state[`${i}_childTopTenList`],
-									'reusableItem': this.state[`${i}_name_reusableItemId`],
+									'description': state[`${i}_description`],
+									'childTopTenList': state[`${i}_childTopTenList`],
+									'reusableItem': state[`${i}_name_reusableItemId`],
 								}}
 								handleInputChange={this.handleInputChange}
 								handleComboboxChange={this.handleComboboxChange}
 								handleNewValue={this.handleNewValue}
 								onSelectItemName={this.onSelectItemName}
-								topTenList={this.props.topTenList}
+								topTenList={topTenList}
 								canEdit={canEdit}
-								onCreateChildTopTenList={this.props.onCreateChildTopTenList}
+								onCreateChildTopTenList={onCreateChildTopTenList}
 								onMoveTopTenItemUp={this.onMoveTopTenItemUp}
 								onMoveTopTenItemDown={this.onMoveTopTenItemDown}
-								reusableItemSuggestions={this.props.reusableItemSuggestions}
+								reusableItemSuggestions={reusableItemSuggestions}
 								newReusableItem={newReusableItem}
 								reusableItem={reusableItem}
 								topTenItemForReusableItem={topTenItem}
 							/>
 						</Col>
-					</Row>
+					</Row>,
 				);
 			}
 		}
@@ -309,5 +331,15 @@ class TopTenItemsPage extends Component {
 		);
 	}
 }
+
+TopTenItemsPage.propTypes = {
+	'canEdit': PropTypes.bool.isRequired,
+	'dispatch': PropTypes.func.isRequired,
+	'onCreateChildTopTenList': PropTypes.func.isRequired,
+	'reusableItems': PropTypes.objectOf(PropTypes.any),
+	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any),
+	'topTenItems': PropTypes.arrayOf(PropTypes.any),
+	'topTenList': PropTypes.string.isRequired,
+};
 
 export default connect()(TopTenItemsPage);
