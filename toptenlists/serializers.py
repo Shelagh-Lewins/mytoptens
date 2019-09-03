@@ -608,12 +608,16 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                 try:
                     reusableItem = ReusableItem.objects.get(id=reusableItemId)
 
+                    # if the reusable item is not owned by the user, it must be public
+                    if reusableItem.created_by != self.context['request'].user and reusableItem.is_public != True:
+                        raise ValidationError({'reusable item error': 'error attempting to use private reusableItem for patched topTenItem'})
+
                     internal_value['reusableItem'] = reusableItem
 
                     return internal_value
 
-                except reusableItem.DoesNotExist:
-                    print('error attempting to use non-existent reusableItem for patched topTenItem')
+                except:
+                    raise ValidationError({'reusable item error': 'error attempting to use non-existent reusableItem for patched topTenItem'})
 
         if 'newReusableItem' in data:
             if data['newReusableItem'] == True:
@@ -627,6 +631,11 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                 # this is to encourage reusableItems when people enter the same name
                     try:
                         topTenItem = TopTenItem.objects.get(id=data['topTenItemForNewReusableItem'])
+
+                        topTenList = topTenItem.topTenList
+                        # if the top ten item is not owned by the user, it must be public
+                        if topTenList.created_by != self.context['request'].user and topTenList.is_public != True:
+                            raise ValidationError({'reusable item error': 'error attempting to use private topTenItem for patched topTenItem'})
 
                         reusableItemData = {'name': topTenItem.name}
 
@@ -643,17 +652,23 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         # print('newReusableItem', newReusableItem)
 
                         # Does this toTenItem belong to the user?
-                        if topTenItem.topTenList.created_by == self.context['request'].user:
+                        if topTenList.created_by == self.context['request'].user:
                             # The source topTenItem should also reference the new reusable item
                             self.update(topTenItem, { 'reusableItem': newReusableItem })
 
                         internal_value['reusableItem'] = newReusableItem
 
                     except:
-                        print('error attempting to use existing topTenItem as basis for new reusableItem')
+                        raise ValidationError({'reusable item error': 'referenced topTenItem does not exist'})
 
                 # create a new reusableItem from the entered name
                 else:
+                    if not 'name' in data:
+                        raise ValidationError({'reusable item error': 'no name provided'})
+
+                    if not data['name'].strip():
+                        raise ValidationError({'reusable item error': 'name cannot be empty string'})
+
                     reusableItemData = {'name': data['name']}
 
                     reusableItemData['created_by'] = self.context['request'].user

@@ -3,6 +3,7 @@ Test the API for topTenLists and topTenItems api
 """
 
 import json
+import uuid
 
 from django.urls import reverse
 from rest_framework import status
@@ -66,7 +67,7 @@ class CreateTopTenListAPITest(APITestCase):
     def setUpTestData(cls):
         # Set up objects used by all test methods
         cls.user = CustomUser.objects.create_user('Test user', 'person@example.com', '12345')
-        EmailAddress.objects.create(user=cls.user, 
+        EmailAddress.objects.create(user=cls.user,
             email='person@example.com',
             primary=True,
             verified=True)
@@ -257,8 +258,8 @@ class EditTopTenItemAPITest(APITestCase):
     def setUp(self):
         # create a new toptenlist
         self.client.force_authenticate(user=self.user)
-        self.response = self.client.post(create_list_url, new_list_data, format='json')
-        self.topTenList_id = json.loads(self.response.content)['id']
+        response = self.client.post(create_list_url, new_list_data, format='json')
+        self.topTenList_id = json.loads(response.content)['id']
         self.topTenList = TopTenList.objects.get(pk=self.topTenList_id)
 
     def test_edit_topTenItem_by_owner(self):
@@ -441,10 +442,8 @@ class EditTopTenItemAPITest(APITestCase):
 
         item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
 
-        create_reusable_item(self, topTenItems[1]) # assign the reusable item to a different top ten item
+        create_reusable_item(self, topTenItems[1]) # create a reusable item, referenced by a different top ten item
  
-        test = ReusableItem.objects.get(id=self.reusableItem.id)
-
         data = {'reusableItem_id': self.reusableItem.id}
 
         response = self.client.patch(item_detail_url, data, format='json')
@@ -452,11 +451,325 @@ class EditTopTenItemAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # the reusableItem should have changed
-        self.assertEqual(topTenItems[0].reusableItem.name, self.reusableItem.name)
-        # TODO test create new reusable item from raw data, from other top ten item (user's and another user's)
-        # TODO test dereference reusable item
+        updated_toptenitem = TopTenItem.objects.get(id=item_1_id)
 
+        # the reusableItem should have changed
+        self.assertEqual(isinstance(updated_toptenitem.reusableItem.name, str), True)
+        self.assertNotEqual(updated_toptenitem.reusableItem.name, '')
+        self.assertEqual(updated_toptenitem.reusableItem.name, self.reusableItem.name)
+        self.assertEqual(updated_toptenitem.reusableItem.id, self.reusableItem.id)
+
+    def test_edit_topTenItem_set_reusableItem_not_exists(self):
+        """
+        The reusable item must exist
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'reusableItem_id': uuid.uuid4()} # a non-existent reusable item
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_edit_topTenItem_set_reusableItem_public(self):
+        """
+        If not created by the user, succeeds if the reusable item is public
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+
+        create_reusable_item(self, topTenItems[1])
+
+        # make sure the reusable item is private
+        reusableItem = ReusableItem.objects.get(pk=self.reusableItem.id)
+        reusableItem.is_public = True
+        reusableItem.save()
+
+        # set up another user
+        self.user2 = CustomUser.objects.create_user('Test user 2', 'person2@example.com', '12345')
+        EmailAddress.objects.create(user=self.user2,
+            email='person2@example.com',
+            primary=True,
+            verified=True)
+
+        self.client.force_authenticate(user=self.user2)
+
+        # create a top ten list for user 2
+        response1 = self.client.post(create_list_url, second_list_data, format='json')
+        topTenList2_id = json.loads(response1.content)['id']
+        topTenList2 = TopTenList.objects.get(pk=topTenList2_id)
+        topTenItems2 = topTenList2.topTenItem.all()
+
+        # and assign the reusable item to a top ten item belonging to user 2
+        item_1_id = topTenItems2[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'reusableItem_id': self.reusableItem.id}
+
+        response2 = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
+
+    def test_edit_topTenItem_set_reusableItem_not_public(self):
+        """
+        If not created by the user, fails if the reusable item is not public
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+
+        create_reusable_item(self, topTenItems[1])
+
+        # make sure the reusable item is private
+        reusableItem = ReusableItem.objects.get(pk=self.reusableItem.id)
+        reusableItem.is_public = False
+        reusableItem.save()
+
+        # set up another user
+        self.user2 = CustomUser.objects.create_user('Test user 2', 'person2@example.com', '12345')
+        EmailAddress.objects.create(user=self.user2, 
+            email='person2@example.com',
+            primary=True,
+            verified=True)
+
+        self.client.force_authenticate(user=self.user2)
+
+        # create a top ten list for user 2
+        response1 = self.client.post(create_list_url, second_list_data, format='json')
+        topTenList2_id = json.loads(response1.content)['id']
+        topTenList2 = TopTenList.objects.get(pk=topTenList2_id)
+        topTenItems2 = topTenList2.topTenItem.all()
+
+        # and assign the reusable item to a top ten item belonging to user 2
+        item_1_id = topTenItems2[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'reusableItem_id': self.reusableItem.id}
+
+        response2 = self.client.patch(item_detail_url, data, format='json')
+      
+
+        # the request should fail
+        self.assertEqual(response2.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_reusable_item_from_data(self):
+        """
+        Create a new reusable item from raw data and assign it to a top ten item
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'newReusableItem': True, 'name': 'fruit', 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_toptenitem = TopTenItem.objects.get(id=item_1_id)
+
+        # there should be a new reusable item based on the data provided
+        self.assertEqual(isinstance(updated_toptenitem.reusableItem.name, str), True)
+        self.assertNotEqual(updated_toptenitem.reusableItem.name, '')
+        self.assertEqual(updated_toptenitem.reusableItem.name, data['name'])
+        self.assertEqual(updated_toptenitem.reusableItem.definition, data['reusableItemDefinition'])
+        self.assertEqual(updated_toptenitem.reusableItem.link, data['reusableItemLink'])
+
+    def test_create_reusable_item_from_data_no_name(self):
+        """
+        Create a new reusable item from raw data should fail if no name provided
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'newReusableItem': True, 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_reusable_item_from_data_name_empty_string(self):
+        """
+        Create a new reusable item from raw data should fail if no name provided
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'newReusableItem': True, 'name': '', 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_reusable_item_from_own_toptenitem(self):
+        """
+        Create a new reusable item from an existing top ten item belonging to the user, and assign it to another top ten item
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+        item_2_id = topTenItems[1].id # use this to create new reusable item
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'newReusableItem': True, 'topTenItemForNewReusableItem': item_2_id, 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_toptenitem = TopTenItem.objects.get(id=item_1_id)
+
+        # there should be a new reusable item based on top ten item 2
+        self.assertEqual(isinstance(updated_toptenitem.reusableItem.name, str), True)
+        self.assertNotEqual(updated_toptenitem.reusableItem.name, '')
+        self.assertEqual(updated_toptenitem.reusableItem.name, topTenItems[1].name)
+        self.assertEqual(updated_toptenitem.reusableItem.definition, data['reusableItemDefinition'])
+        self.assertEqual(updated_toptenitem.reusableItem.link, data['reusableItemLink'])
+
+    def test_create_reusable_item_from_own_toptenitem_fails(self):
+        """
+        The top ten item from which the reusable item is to be created, must exist
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+        item_2_id = uuid.uuid4() # non-existent top ten item
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        data = {'newReusableItem': True, 'topTenItemForNewReusableItem': item_2_id, 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_reusable_item_from_others_public_toptenitem(self):
+        """
+        Create a new reusable item from an existing top ten item belonging to anothere user, and assign it to own top ten item
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id # use this to create new reusable item
+        
+        # make sure the top ten item is private
+        topTenList = TopTenList.objects.get(pk=self.topTenList.id)
+        #topTenItems = TopTenItem.objects.get(pk=item_1_id)
+        topTenList.is_public = True
+        topTenList.save()
+
+        # set up another user
+        self.user2 = CustomUser.objects.create_user('Test user 2', 'person2@example.com', '12345')
+        EmailAddress.objects.create(user=self.user2,
+            email='person2@example.com',
+            primary=True,
+            verified=True)
+
+        self.client.force_authenticate(user=self.user2)
+
+        # create a top ten list for user 2
+        response1 = self.client.post(create_list_url, second_list_data, format='json')
+        topTenList2_id = json.loads(response1.content)['id']
+        topTenList2 = TopTenList.objects.get(pk=topTenList2_id)
+        topTenItems2 = topTenList2.topTenItem.all()
+
+        item_2_id = topTenItems2[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_2_id})
+
+        data = {'newReusableItem': True, 'topTenItemForNewReusableItem': item_1_id, 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_create_reusable_item_from_others_private_toptenitem(self):
+        """
+        Create a new reusable item from an existing top ten item belonging to anothere user, and assign it to own top ten item
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id # use this to create new reusable item
+        
+        # make sure the top ten item is private
+        topTenList = TopTenList.objects.get(pk=self.topTenList.id)
+        #topTenItems = TopTenItem.objects.get(pk=item_1_id)
+        topTenList.is_public = False
+        topTenList.save()
+
+        # set up another user
+        self.user2 = CustomUser.objects.create_user('Test user 2', 'person2@example.com', '12345')
+        EmailAddress.objects.create(user=self.user2,
+            email='person2@example.com',
+            primary=True,
+            verified=True)
+
+        self.client.force_authenticate(user=self.user2)
+
+        # create a top ten list for user 2
+        response1 = self.client.post(create_list_url, second_list_data, format='json')
+        topTenList2_id = json.loads(response1.content)['id']
+        topTenList2 = TopTenList.objects.get(pk=topTenList2_id)
+        topTenItems2 = topTenList2.topTenItem.all()
+
+        item_2_id = topTenItems2[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_2_id})
+
+        data = {'newReusableItem': True, 'topTenItemForNewReusableItem': item_1_id, 'reusableItemDefinition': 'a definition', 'reusableItemLink': 'here@there.com'}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_edit_topTenItem_dereference_reusableItem(self):
+        """
+        If the user dereferences a reusable item, it is deleted
+        """
+
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_1_id})
+
+        create_reusable_item(self, topTenItems[0]) # create a reusable item, referenced by this top ten item
+
+        # there should be one reusable item to start with
+        self.assertEqual(TopTenItem.objects.get(id=item_1_id).reusableItem, ReusableItem.objects.get(pk=self.reusableItem.id))
+        self.assertEqual(ReusableItem.objects.filter(pk=self.reusableItem.id).count(), 1)
+
+        data = {'reusableItem_id': None}
+
+        response = self.client.patch(item_detail_url, data, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # the reusable item should have been deleted
+        self.assertEqual(TopTenItem.objects.get(id=item_1_id).reusableItem, None)
+        self.assertEqual(ReusableItem.objects.filter(pk=self.reusableItem.id).count(), 0)
 
 class DeleteTopTenListAPITest(APITestCase):
     @classmethod
