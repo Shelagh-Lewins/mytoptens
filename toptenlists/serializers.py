@@ -103,11 +103,19 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         return selected_users.count()
 
     @classmethod
-    def create_notification(cls, instance, user):
+    def create_notification(cls, instance, user, data):
         """
         Crete a notification, e.g. because a change request has been submitted
         """
-        Notification.objects.create( **notificationData)
+
+        notificationData = {
+        'context': data['context'],
+        'event': data['event'],
+        'created_by': user,
+        'reusableItem': instance
+        }
+
+        Notification.objects.create(**notificationData)
 
 
     @classmethod
@@ -148,6 +156,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         # print('count_votes instance')
         if not hasattr(instance, 'change_request'):
             print('doesnt exist', instance)
+            return
 
         if instance.change_request is None:
             return
@@ -532,6 +541,13 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             instance.change_request_by = current_user
             self.reset_change_votes(instance)
             self.cast_vote(instance, current_user, 'yes')
+
+            # TODO only notify if change not immediately accepted
+            notificationData = {
+            'context': 'reusableItem',
+            'event': 'changeRequestCreated'
+            }
+            self.create_notification(instance, current_user, notificationData)
 
             instance.save()
             return instance
