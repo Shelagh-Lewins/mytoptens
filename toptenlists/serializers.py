@@ -286,7 +286,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 'event': 'changeRequestAccepted'
                 }
                 
-            cls.create_notification(instance, users, notificationData)
+                cls.create_notification(instance, users, notificationData)
 
         # even if all remaining users vote 'yes', the accept percentage cannot be reached
         elif 100 * change_request_votes_no / max_votes > 100 - selected_rule['accept_percentage']:

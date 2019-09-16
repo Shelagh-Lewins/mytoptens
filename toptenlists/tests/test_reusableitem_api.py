@@ -62,7 +62,7 @@ def create_user(self, index):
 def create_toptenlist(self, user_ref, index):
     """
     # use the api to create a Top Ten List and its Top Ten Items
-    # users are automatically authenticted because this is part of setup and should not fail
+    # users are automatically authenticated because this is part of setup and should not fail
     """
     self.client.force_authenticate(user=getattr(self, user_ref))
     response = self.client.post(create_list_url, toptenlist_data_1, format='json')

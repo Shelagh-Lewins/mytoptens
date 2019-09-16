@@ -403,7 +403,20 @@ class NotificationViewSet(viewsets.ModelViewSet):
     model = Notification
     serializer_class = NotificationSerializer
 
+    def get_queryset(self):
+        # can only view own notifications
+        if self.request.user.is_authenticated:
+            return Notification.objects.filter(created_by=self.request.user)
+
+        return None
+
     def perform_create(self, serializer):
         # do not allow a notification to be created by the API
-        # notifications are created as required by the server
+        # notifications are created by the server
         raise APIException("Notification may not be created via API")
+
+    def perform_update(self, serializer):
+        for key, value in serializer.validated_data:
+            print('****')
+            print('key', key)
+            print('value', value)
