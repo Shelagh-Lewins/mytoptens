@@ -81,8 +81,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             return instance.change_request_votes_no.count()
 
     @classmethod # required for cls to be consistently passed automatically as the first parameter. Otherwise it depends on whether you call the method with 'self.remove_my_votes()' or 'ReusableItemSerializer.remove_my_votes()'
+
     # use cls instead of self for class methods for readability
-    def count_users(cls, instance):
+    def find_users(cls, instance):
         """
         find all users who reference this reusableItem in any topTenList
         """
@@ -98,25 +99,37 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         # and finally select the users who created these topTenLists
         selected_userids = selected_toptenlists.values_list('created_by', flat=True)
-        selected_users = USER.objects.filter(id__in=selected_userids)
 
-        return selected_users.count()
+        return USER.objects.filter(id__in=selected_userids)
 
     @classmethod
-    def create_notification(cls, instance, user, data):
+    def count_users(cls, instance):
         """
-        Crete a notification, e.g. because a change request has been submitted
+        count the users who reference this reusableItem in any topTenList
         """
 
-        notificationData = {
-        'context': data['context'],
-        'event': data['event'],
-        'created_by': user,
-        'reusableItem': instance
-        }
+        return cls.find_users(instance).count()
 
-        Notification.objects.create(**notificationData)
+    @classmethod
+    def create_notification(cls, instance, users, data):
+        """
+        Create a notification, e.g. because a change request has been submitted
+        Create it for every user in users
+        """
 
+        notificationObjs = []
+
+        for user in users:
+            NewNotificationObj = Notification(
+                context=data['context'],
+                event=data['event'],
+                created_by=user,
+                reusableItem=instance
+            )
+
+            notificationObjs.append(NewNotificationObj)
+
+        Notification.objects.bulk_create(notificationObjs)
 
     @classmethod
     def remove_my_votes(cls, instance, user):
@@ -173,7 +186,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if total_votes == 0:
             return
 
-        # find all users who reference this reusableItem in any topTenList
+        # count the users who reference this reusableItem in any topTenList
         number_of_selected_users = cls.count_users(instance)
         #print('number_of_selected_users', number_of_selected_users)
 
@@ -263,9 +276,33 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         if 100 * change_request_votes_yes / max_votes >= selected_rule['accept_percentage']:
             cls.accept_change(instance)
 
+            # notify users who use this reusable item
+            users = cls.find_users(instance)
+
+            # only notify if more than one user - do not notify if only one user because it will be accepted as soon as created
+            if users.count() > 1:
+                notificationData = {
+                'context': 'reusableItem',
+                'event': 'changeRequestAccepted'
+                }
+                
+            cls.create_notification(instance, users, notificationData)
+
         # even if all remaining users vote 'yes', the accept percentage cannot be reached
         elif 100 * change_request_votes_no / max_votes > 100 - selected_rule['accept_percentage']:
             cls.reject_change(instance, 'rejected')
+
+            # notify users who use this reusable item
+            users = cls.find_users(instance)
+
+            # only notify if more than one user - do not notify if only one user because it will be accepted as soon as created
+            if users.count() > 1:
+                notificationData = {
+                'context': 'reusableItem',
+                'event': 'changeRequestRejected'
+                }
+                
+            cls.create_notification(instance, users, notificationData)
 
         return
 
@@ -297,6 +334,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         setattr(instance, 'modified_at', timezone.now().__str__())
 
         cls.remove_change_request(instance)
+
         instance.save()
 
     @classmethod
@@ -439,9 +477,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
 
         and that the instance's change_type is correct for the change request. No other data will be processed.
         """
-        # print('***** update reusableItem *****')
-        #print(instance.name)
-        # print(instance.__dict__) # all values of current reusableItem
 
         current_user = self.context['request'].user
         created_by_current_user = (current_user == getattr(instance, 'created_by'))
@@ -490,7 +525,6 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 'created_by_username': current_user.username
                 }
 
-                # newReusableItem = ReusableItem.objects.create( **reusableItemData)
                 newReusableItem = ReusableItemSerializer.create(reusableItemData)
 
                 # all the user's topTenItems should reference the new reusableItem
@@ -542,14 +576,19 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             self.reset_change_votes(instance)
             self.cast_vote(instance, current_user, 'yes')
 
-            # TODO only notify if change not immediately accepted
-            notificationData = {
-            'context': 'reusableItem',
-            'event': 'changeRequestCreated'
-            }
-            self.create_notification(instance, current_user, notificationData)
-
             instance.save()
+
+            # notify other users who use this reusable item
+            users = self.find_users(instance).exclude(pk=current_user.pk)
+
+            if users.count() > 0:
+                notificationData = {
+                'context': 'reusableItem',
+                'event': 'changeRequestCreated'
+                }
+
+                self.create_notification(instance, users, notificationData)
+
             return instance
 
         # cancel the change request
@@ -563,6 +602,18 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
                 raise ValidationError({'update reusable item error: you cannot cancel a change request that you did not create'})
             
             self.reject_change(instance, 'cancelled')
+
+            # notify other users who use this reusable item
+            users = self.find_users(instance).exclude(pk=current_user.pk)
+
+            if users.count() > 0:
+                notificationData = {
+                'context': 'reusableItem',
+                'event': 'changeRequestCancelled'
+                }
+
+                self.create_notification(instance, users, notificationData)
+
             return instance
 
         # vote on a change request

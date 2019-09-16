@@ -97,7 +97,7 @@ class Notification(models.Model):
 
     context = models.CharField(max_length=255, editable=False, blank=True, default='') # e.g. 'reusableItem', 'user', 'topTenList'. Whatever the notification is about.
 
-    event = models.CharField(max_length=5000, editable=False, blank=True, default='') # e.g. 'changeRequestCreated', 'changeRequestRejected', 'changeRequestAccepted', 'changeRequestCancelled'
+    event = models.CharField(max_length=5000, editable=False, blank=True, default='') # e.g. 'changeRequestCreated ', 'changeRequestRejected', 'changeRequestAccepted', 'changeRequestCancelled'
 
     reusableItem = models.ForeignKey(ReusableItem, editable=False, on_delete=models.SET_NULL,  blank=True, null=True, related_name='reusableItem') # notification may reference a reusableItem
     # in future, notifications may be added that relate to Top Ten Items, Top Ten Lists, or other Users. But for now, notifications are only about change requests to reusable items.
