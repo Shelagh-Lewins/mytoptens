@@ -97,10 +97,13 @@ class Notification(models.Model):
 
     context = models.CharField(max_length=255, editable=False, blank=True, default='') # e.g. 'reusableItem', 'user', 'topTenList'. Whatever the notification is about.
 
-    event = models.CharField(max_length=5000, editable=False, blank=True, default='') # e.g. 'changeRequestCreated ', 'changeRequestRejected', 'changeRequestAccepted', 'changeRequestCancelled'
+    event = models.CharField(max_length=5000, editable=False, blank=True, default='') # e.g. 'changeRequestCreated ', 'changeRequestRejected', 'changeRequestAccepted', 'changeRequestCancelled', 'reusableItemFromTopTenItem' (reusable item created from a top ten item)
 
-    reusableItem = models.ForeignKey(ReusableItem, editable=False, on_delete=models.SET_NULL,  blank=True, null=True, related_name='reusableItem') # notification may reference a reusableItem
-    # in future, notifications may be added that relate to Top Ten Items, Top Ten Lists, or other Users. But for now, notifications are only about change requests to reusable items.
+    reusableItem = models.ForeignKey(ReusableItem, editable=False, on_delete=models.SET_NULL,  blank=True, null=True, related_name='reusableItem')
+    # anything to do with a Reusable Item
+
+    topTenItem = models.ForeignKey(TopTenItem, editable=False, on_delete=models.SET_NULL,  blank=True, null=True, related_name='topTenItem')
+    # e.g. another user has created a new Reusable Item from one of this user's Top Ten Items
 
     created_by = models.ForeignKey(USER, on_delete=models.CASCADE, related_name='notification_created_by', editable=False) # A notification must belong to a user. If the user is deleted, all their notications are deleted
     # This field is more 'created for' than 'created by', but I think it's more consistent e.g. with permissions, to use this label for 'owner'.

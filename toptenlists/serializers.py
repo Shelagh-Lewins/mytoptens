@@ -718,10 +718,22 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                         newReusableItem = ReusableItemSerializer.create(reusableItemData)
                         # print('newReusableItem', newReusableItem)
 
-                        # Does this toTenItem belong to the user?
+                        # Does this topTenItem belong to the user?
                         if topTenList.created_by == self.context['request'].user:
                             # The source topTenItem should also reference the new reusable item
                             self.update(topTenItem, { 'reusableItem': newReusableItem })
+
+                        # notify the owner of the topTenItem that a Reusable Item has been created from it
+                        else:
+                            notificationData = {
+                                'context': 'reusableItem',
+                                'event': 'reusableItemFromTopTenItem',
+                                'created_by': topTenList.created_by,
+                                'reusableItem': newReusableItem,
+                                'topTenItem': topTenItem
+                            }
+
+                            Notification.objects.create(**notificationData)
 
                         internal_value['reusableItem'] = newReusableItem
 
