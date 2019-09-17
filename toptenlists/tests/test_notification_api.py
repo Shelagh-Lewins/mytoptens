@@ -43,20 +43,7 @@ reusableitem_1_data = {'name': 'Jane Austen', 'reusableItemDefinition': 'A defin
 # 'Notifications' is the base_name set for the Notifications route in endpoints.py
 # '-list' is a standard api command to list a model.
 
-notification_url = reverse('topTenLists:Notifications-list')
-
-"""
-TODO
-test cannot see, edit or delete another user's notification
-
-test cannot create notification
-test can edit unread and nothing else
-test can delete notification
-
-test notification is created when it should be (maybe in reusable item tests)
-for at least 3 users
-
-"""
+notification_list_url = reverse('topTenLists:Notifications-list')
 
 def create_user(self, index):
     user_ref = 'user_' + str(index) # refer to user by self.user_1 etc
@@ -70,15 +57,15 @@ def create_user(self, index):
             primary=True,
             verified=True)
 
-def create_notification(self, user_ref):
-  notificationData = {
-    'context': 'reusableItem',
-    'event': 'changeRequestCreated',
-    'created_by': getattr(self, user_ref),
-    #'reusableItem': newReusableItem
-  }
+def get_notification_data(self, user_ref):
+    return {
+        'context': 'reusableItem',
+        'event': 'changeRequestCreated',
+        'created_by_id': getattr(self, user_ref).id
+    }
 
-  Notification.objects.create(**notificationData)
+def create_notification(self, user_ref):
+    Notification.objects.create(**get_notification_data(self, user_ref))
 
 class NotificationAPITest(APITestCase):
     @classmethod
@@ -89,46 +76,102 @@ class NotificationAPITest(APITestCase):
     #def setUp(self):
         #print('setup')
 
+    def test_create_notification(self):
+        """
+        Notifications cannot be created via the api
+        """
+
+        # user not logged in
+        response1 = self.client.post(notification_list_url, get_notification_data(self, 'user_1'), format='json')
+
+        self.assertEqual(response1.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(Notification.objects.count(), 0)
+
+        # user is logged in
+        self.client.force_authenticate(user=self.user_1)
+
+        response2 = self.client.post(notification_list_url, get_notification_data(self, 'user_1'), format='json')
+
+        self.assertEqual(response2.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(Notification.objects.count(), 0)
+
+
     def test_view_notifications_api_not_logged_in(self):
         """
         Cannot see notification if the user is not logged in
         """
 
         create_notification(self, 'user_1')
+        self.assertEqual(Notification.objects.count(), 1)
 
-        response = self.client.get(notification_url)
+        response = self.client.get(notification_list_url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
     def test_view_notifications_api_other_user(self):
-      """
-      Cannot see notification if the user does not own the notification
-      """
+        """
+        Cannot see notification that belongs to another user
+        """
 
-      create_notification(self, 'user_1')
+        create_notification(self, 'user_1')
+        self.assertEqual(Notification.objects.count(), 1)
 
-      self.client.force_authenticate(user=self.user_2)
+        self.client.force_authenticate(user=self.user_2)
 
-      response = self.client.get(notification_url)
+        response = self.client.get(notification_list_url, format='json')
 
-      self.assertEqual(response.status_code, status.HTTP_200_OK)
-      self.assertEqual(len(response.data), 0)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
 
     def test_view_notifications_api_own(self):
-      """
-      Can see notification if the user owns the notification
-      """
+        """
+        Can see notification if the user owns the notification
+        """
 
-      create_notification(self, 'user_1')
+        expected_data = get_notification_data(self, 'user_1')
 
-      self.client.force_authenticate(user=self.user_1)
+        create_notification(self, 'user_1')
 
-      response = self.client.get(notification_url)
+        # check the notification was created correctly
+        self.assertEqual(Notification.objects.count(), 1)
+        notification = Notification.objects.first()
+        self.assertEqual(notification.created_by, getattr(self, 'user_1'))
+        self.assertEqual(notification.context, expected_data['context'])
+        self.assertEqual(notification.event, expected_data['event'])
+        self.assertEqual(notification.unread, True)
 
-      self.assertEqual(response.status_code, status.HTTP_200_OK)
-      self.assertEqual(len(response.data), 1)
+        self.client.force_authenticate(user=self.user_1)
 
-  # TODO test:
-  # delete
-  # edit - only 'unread'
+        response = self.client.get(notification_list_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+        # check the api returned the correct values
+        response_notification = json.loads(response.content)[0]
+
+        self.assertEqual(response_notification['created_by'], str(getattr(self, 'user_1').id))
+        self.assertEqual(response_notification['context'], expected_data['context'])
+        self.assertEqual(response_notification['event'], expected_data['event'])
+        self.assertEqual(response_notification['unread'], True)
+
+    def test_delete_notification_own(self):
+        """
+        Can delete a notification owned by the user
+        """
+
+        create_notification(self, 'user_1')
+        self.assertEqual(Notification.objects.count(), 1)
+
+"""
+TODO
+test cannot edit or delete another user's notification
+
+test can edit unread and nothing else
+test can delete notification
+
+test notification is created when it should be (maybe in reusable item tests)
+for at least 3 users
+
+"""
