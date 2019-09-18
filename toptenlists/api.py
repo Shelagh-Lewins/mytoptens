@@ -415,14 +415,4 @@ class NotificationViewSet(viewsets.ModelViewSet):
         # notifications are created by the server
         raise APIException("Notification may not be created via API")
 
-    def perform_update(self, serializer):
-        print('validated_data', serializer.validated_data)
-        for key, value in serializer.validated_data.items():
-            print('****')
-            print('key', key)
-            print('value', value)
-            if key is not 'unread':
-                raise APIException("This property of notifications cannot be edited via API")
-
-        serializer.save()
 

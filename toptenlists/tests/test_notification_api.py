@@ -228,26 +228,32 @@ class EditNotificationAPITest(APITestCase):
         self.client.force_authenticate(user=self.user_1)
 
         # can set 'unread' to False
-        response = self.client.patch(self.url, {'unread': False}, format='json')
+        response1 = self.client.patch(self.url, {'unread': False}, format='json')
 
         # the request should succeed
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response1.status_code, status.HTTP_200_OK)
         self.assertEqual(Notification.objects.first().unread, False)
 
         # can set 'unread' to True
-        response = self.client.patch(self.url, {'unread': True}, format='json')
+        response2 = self.client.patch(self.url, {'unread': True}, format='json')
 
         # the request should succeed
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(Notification.objects.first().unread, True)
 
         # cannot set other properties
+        # we only test the string properties; we assume that the model is set up correctly so that created_by, created_at etc are readonly
+        response3 = self.client.patch(self.url, {'context': 'leisure'}, format='json')
+        self.assertEqual(response3.status_code, status.HTTP_200_OK)
+        self.assertEqual(Notification.objects.first().context, get_notification_data(self, 'user_1')['context'])
+
+        response4 = self.client.patch(self.url, {'event': 'goneFishing'}, format='json')
+        self.assertEqual(response4.status_code, status.HTTP_200_OK)
+        self.assertEqual(Notification.objects.first().event, get_notification_data(self, 'user_1')['event'])
 
 """
 TODO
 test cannot edit another user's notification
-
-test can edit unread and nothing else
 
 test notification is created when it should be (maybe in reusable item tests)
 for at least 3 users
