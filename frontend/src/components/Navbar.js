@@ -7,6 +7,7 @@ import { Link, withRouter } from 'react-router-dom';
 
 import * as authReducer from '../modules/auth';
 import * as pageReducer from '../modules/page';
+import * as notificationReducer from '../modules/notification';
 
 import Search from './Search';
 
@@ -48,7 +49,12 @@ class Navbar extends Component {
 	}
 
 	render() {
-		const { auth, searchComplete, searchResults, searchTerm } = this.props;
+		const {
+			auth,
+			searchComplete,
+			searchResults,
+			searchTerm,
+		} = this.props;
 		const { isAuthenticated, user } = auth;
 		const { showDropdown } = this.state;
 
@@ -92,6 +98,7 @@ Navbar.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
+	'notifications': PropTypes.objectOf(PropTypes.any).isRequired,
 	'searchTerm': PropTypes.string.isRequired,
 	'searchComplete': PropTypes.bool.isRequired,
 	'searchResults': PropTypes.arrayOf(PropTypes.any).isRequired,
@@ -99,6 +106,7 @@ Navbar.propTypes = {
 
 const mapStateToProps = state => ({
 	'auth': state.auth,
+	'notifications': notificationReducer.getSortedNotifications(state),
 	'searchTerm': state.page.searchTerm,
 	'searchComplete': state.page.searchComplete,
 	'searchResults': state.page.searchResults,

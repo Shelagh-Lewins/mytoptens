@@ -64,7 +64,8 @@ function receiveEntities(entities) {
 	};
 }
 
-export function fetchTopTenListsStarted(is_public) {
+export function fetchTopTenListsStarted() {
+	// export function fetchTopTenListsStarted(is_public) {
 	return {
 		'type': FETCH_TOPTENLISTS_STARTED,
 	};

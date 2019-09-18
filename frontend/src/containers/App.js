@@ -49,31 +49,27 @@ if (getAuthToken()) {
 	}
 }
 
-class App extends Component {
-	render() {
-		return (
-			<Provider store = { store }>
-				<Router>
-					<div>
-						<Navbar />	
-						<div className="container">
-							<Route exact path="/" component={ Home } />
-							<Route exact path="/newtoptenlist" component={ CreateTopTenList } />
-							<Route exact path="/toptenlist/:id" component={ TopTenListDetails } />
-							<Route exact path="/reusableitem/:id" component={ ReusableItemDetails } />
-							<Route exact path="/register" component={ Register } />
-							<Route exact path="/welcome" component={ Welcome } />
-							<Route exact path="/login" component={ Login } />
-							<Route exact path="/forgotpassword" component={ ForgotPassword } />
-							<Route exact path="/account" component={ Account } />
-							<Route exact path="/changepassword" component={ ChangePassword } />
-							<Route exact path="/verified" component={ Verified } />
-						</div>
-					</div>
-				</Router>
-			</Provider>
-		);
-	}
-}
+const App = () => (
+	<Provider store={store}>
+		<Router>
+			<div>
+				<Navbar />
+				<div className="container">
+					<Route exact path="/" component={Home} />
+					<Route exact path="/newtoptenlist" component={CreateTopTenList} />
+					<Route exact path="/toptenlist/:id" component={TopTenListDetails} />
+					<Route exact path="/reusableitem/:id" component={ReusableItemDetails} />
+					<Route exact path="/register" component={Register} />
+					<Route exact path="/welcome" component={Welcome} />
+					<Route exact path="/login" component={Login} />
+					<Route exact path="/forgotpassword" component={ForgotPassword} />
+					<Route exact path="/account" component={Account} />
+					<Route exact path="/changepassword" component={ChangePassword} />
+					<Route exact path="/verified" component={Verified} />
+				</div>
+			</div>
+		</Router>
+	</Provider>
+);
 
 export default App;

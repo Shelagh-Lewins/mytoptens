@@ -1,9 +1,10 @@
 // authReducer.js
 
 import store from '../store';
-import fetchAPI from '../modules/fetchAPI';
-import { getErrors, clearErrors } from '../modules/errors';
-import isEmpty from '../modules/isEmpty';
+import fetchAPI from './fetchAPI';
+import { getErrors, clearErrors } from './errors';
+import isEmpty from './isEmpty';
+import { fetchNotifications } from './notification';
 
 const updeep = require('updeep');
 
@@ -145,6 +146,7 @@ export const getUserInfo = () => (dispatch) => {
 		'method': 'GET',
 		'useAuth': true,
 	}).then((user) => {
+		dispatch(fetchNotifications());
 		return dispatch(setUserInfo({
 			'username': user.username,
 			'email': user.email,

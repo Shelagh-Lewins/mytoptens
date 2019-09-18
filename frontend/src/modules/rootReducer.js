@@ -11,6 +11,7 @@ import page from './page';
 import topTenList from './topTenList';
 import topTenItem from './topTenItem';
 import reusableItem from './reusableItem';
+import notification from './notification';
 // by importing the actual reducer as the default, the state of each is initialised
 
 export default combineReducers({
@@ -20,4 +21,5 @@ export default combineReducers({
 	'topTenList': topTenList,
 	'topTenItem': topTenItem,
 	'reusableItem': reusableItem,
+	'notification': notification,
 });
