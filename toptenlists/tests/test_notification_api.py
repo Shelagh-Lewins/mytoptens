@@ -195,7 +195,6 @@ class DeleteNotificationAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(Notification.objects.count(), 1)
-        print('notification 2', Notification.objects.first())
 
     def test_delete_notification_by_not_owner(self):
         """
@@ -224,6 +223,25 @@ class EditNotificationAPITest(APITestCase):
 
     def test_edit_notification_by_owner(self):
         self.assertEqual(Notification.objects.count(), 1)
+        self.assertEqual(Notification.objects.first().unread, True)
+
+        self.client.force_authenticate(user=self.user_1)
+
+        # can set 'unread' to False
+        response = self.client.patch(self.url, {'unread': False}, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Notification.objects.first().unread, False)
+
+        # can set 'unread' to True
+        response = self.client.patch(self.url, {'unread': True}, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Notification.objects.first().unread, True)
+
+        # cannot set other properties
 
 """
 TODO
