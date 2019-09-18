@@ -222,6 +222,10 @@ class EditNotificationAPITest(APITestCase):
         self.url = reverse('topTenLists:Notifications-detail', kwargs={'pk': self.notification.id})
 
     def test_edit_notification_by_owner(self):
+        """
+        The user should be able to edit 'unread' for a notification they own
+        """
+
         self.assertEqual(Notification.objects.count(), 1)
         self.assertEqual(Notification.objects.first().unread, True)
 
@@ -250,6 +254,38 @@ class EditNotificationAPITest(APITestCase):
         response4 = self.client.patch(self.url, {'event': 'goneFishing'}, format='json')
         self.assertEqual(response4.status_code, status.HTTP_200_OK)
         self.assertEqual(Notification.objects.first().event, get_notification_data(self, 'user_1')['event'])
+
+    def test_edit_notification_not_logged_in(self):
+        """
+        edit notification should fail if user not logged in
+        """
+
+        self.assertEqual(Notification.objects.count(), 1)
+        self.assertEqual(Notification.objects.first().unread, True)
+
+        # the request should fail
+        response = self.client.patch(self.url, {'unread': False}, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Notification.objects.first().unread, True)
+
+    def test_edit_notification_not_owner(self):
+        """
+        edit notification should fail if user not logged in
+        """
+
+        self.assertEqual(Notification.objects.count(), 1)
+        self.assertEqual(Notification.objects.first().unread, True)
+
+        self.client.force_authenticate(user=self.user_2)
+
+        # the request should fail
+        response = self.client.patch(self.url, {'unread': False}, format='json')
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Notification.objects.first().unread, True)
 
 """
 TODO
