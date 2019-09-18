@@ -65,16 +65,13 @@ def get_notification_data(self, user_ref):
     }
 
 def create_notification(self, user_ref):
-    Notification.objects.create(**get_notification_data(self, user_ref))
+    return Notification.objects.create(**get_notification_data(self, user_ref))
 
-class NotificationAPITest(APITestCase):
+class CreateNotificationAPITest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         for index in range(1, 3): # user_1 to user_3
             create_user(cls, index)
-
-    #def setUp(self):
-        #print('setup')
 
     def test_create_notification(self):
         """
@@ -95,6 +92,11 @@ class NotificationAPITest(APITestCase):
         self.assertEqual(response2.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual(Notification.objects.count(), 0)
 
+class ViewNotificationAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        for index in range(1, 3): # user_1 to user_3
+            create_user(cls, index)
 
     def test_view_notifications_api_not_logged_in(self):
         """
@@ -156,20 +158,78 @@ class NotificationAPITest(APITestCase):
         self.assertEqual(response_notification['event'], expected_data['event'])
         self.assertEqual(response_notification['unread'], True)
 
-    def test_delete_notification_own(self):
+class DeleteNotificationAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        for index in range(1, 3): # user_1 to user_3
+            create_user(cls, index)
+
+    def setUp(self):
+        self.notification = create_notification(self, 'user_1')
+        self.url = reverse('topTenLists:Notifications-detail', kwargs={'pk': self.notification.id})
+
+    def test_delete_notification_by_owner(self):
         """
-        Can delete a notification owned by the user
+        Delete notification should succeed if notification is owned by the user
         """
 
-        create_notification(self, 'user_1')
+        self.assertEqual(Notification.objects.count(), 1)
+
+        self.client.force_authenticate(user=self.user_1)
+
+        response = self.client.delete(self.url)
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Notification.objects.count(), 0)
+
+    def test_delete_notification_not_logged_in(self):
+        """
+        Delete notification should fail if user isn't logged in
+        """
+
+        self.assertEqual(Notification.objects.count(), 1)
+
+        response = self.client.delete(self.url)
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Notification.objects.count(), 1)
+        print('notification 2', Notification.objects.first())
+
+    def test_delete_notification_by_not_owner(self):
+        """
+        Delete notification should succeed if notification is not owned by the user
+        """
+
+        self.assertEqual(Notification.objects.count(), 1)
+
+        self.client.force_authenticate(user=self.user_2)
+
+        response = self.client.delete(self.url)
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Notification.objects.count(), 1)
+
+class EditNotificationAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        for index in range(1, 3): # user_1 to user_3
+            create_user(cls, index)
+
+    def setUp(self):
+        self.notification = create_notification(self, 'user_1')
+        self.url = reverse('topTenLists:Notifications-detail', kwargs={'pk': self.notification.id})
+
+    def test_edit_notification_by_owner(self):
         self.assertEqual(Notification.objects.count(), 1)
 
 """
 TODO
-test cannot edit or delete another user's notification
+test cannot edit another user's notification
 
 test can edit unread and nothing else
-test can delete notification
 
 test notification is created when it should be (maybe in reusable item tests)
 for at least 3 users
