@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
 from allauth.account.models import EmailAddress 
-from toptenlists.models import TopTenList, TopTenItem, ReusableItem
+from toptenlists.models import TopTenList, TopTenItem, ReusableItem, Notification
 
 # disable throttling for testing
 from toptenlists.api import TopTenListViewSet, TopTenItemViewSet, TopTenListDetailViewSet, ReusableItemViewSet
@@ -612,6 +612,9 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_object.definition, data['definition'])
         self.assertEqual(updated_object.link, data['link'])
 
+        # there should not be a notification
+        self.assertEqual(Notification.objects.count(), 0)
+
         # Note: there should never be an existing change request for a reusable item referenced by only one user
         # it should have been resolved
         # should this occur through some bug, the user could withdraw their vote and then revote, that should trigger a count
@@ -664,6 +667,9 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(history_entry['change_request']['definition'], data1['definition'])
         self.assertEqual(history_entry['change_request']['link'], data1['link'])
 
+        # there should not be a notification
+        self.assertEqual(Notification.objects.count(), 0)
+
         # add a second reference to this reusable item, by a different user
         create_toptenlist(self, 'user_2', 2)
         reference_reusable_item(self, 'user_2', self.reusableitem_1.id, 'toptenlist_2', 0)
@@ -692,6 +698,19 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem.change_request_votes_no.count(), 0)
         self.assertEqual(updated_reusableitem.change_request_votes_yes.count(), 1)
         self.assertEqual(updated_reusableitem.change_request_votes_yes.first(), self.user_1)
+
+        # User 2 should get a notification of the change request
+        self.assertEqual(Notification.objects.count(), 1)
+
+        notification = Notification.objects.first()
+        self.assertEqual(notification.created_by, self.user_2)
+        self.assertEqual(notification.context, 'reusableItem')
+        self.assertEqual(notification.event, 'changeRequestCreated')
+        self.assertEqual(notification.reusableItem, updated_reusableitem)
+
+        # delete any notifications prior to the next step
+        Notification.objects.all().delete()
+        self.assertEqual(Notification.objects.count(), 0)
 
         # user 2 now votes for the change request
         self.client.force_authenticate(user=self.user_2)
@@ -725,6 +744,19 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(history_entry['change_request']['name'], data2['name'])
         self.assertEqual(history_entry['change_request']['definition'], data2['definition'])
         self.assertEqual(history_entry['change_request']['link'], data2['link'])
+
+        # User 1 and user 2 should each get a notification of the change request acceptance
+        self.assertEqual(Notification.objects.count(), 2)
+
+        notification1 = Notification.objects.get(created_by=self.user_1)
+        self.assertEqual(notification1.context, 'reusableItem')
+        self.assertEqual(notification1.event, 'changeRequestAccepted')
+        self.assertEqual(notification1.reusableItem, updated_reusableitem)
+
+        notification2 = Notification.objects.get(created_by=self.user_2)
+        self.assertEqual(notification2.context, 'reusableItem')
+        self.assertEqual(notification2.event, 'changeRequestAccepted')
+        self.assertEqual(notification2.reusableItem, updated_reusableitem)
 
     def test_resuableitem_submit_changerequest_public_not_owner_accept(self):
         """
@@ -796,6 +828,9 @@ class ModifyReusableItemAPITest(APITestCase):
         data1 = submit_change_request_1(self, self.user_1)
 
         # user 2 now votes against the change request
+        Notification.objects.all().delete() # make sure no other notifications exist
+        self.assertEqual(Notification.objects.count(), 0)
+
         self.client.force_authenticate(user=self.user_2)
 
         data2 = {'vote': 'no'}
@@ -830,6 +865,19 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(history_entry['change_request']['definition'], data1['definition'])
         self.assertEqual(history_entry['change_request']['link'], data1['link'])
 
+        # User 1 and user 2 should each get a notification of the change request acceptance
+        self.assertEqual(Notification.objects.count(), 2)
+
+        notification1 = Notification.objects.get(created_by=self.user_1)
+        self.assertEqual(notification1.context, 'reusableItem')
+        self.assertEqual(notification1.event, 'changeRequestRejected')
+        self.assertEqual(notification1.reusableItem, updated_reusableitem)
+
+        notification2 = Notification.objects.get(created_by=self.user_2)
+        self.assertEqual(notification2.context, 'reusableItem')
+        self.assertEqual(notification2.event, 'changeRequestRejected')
+        self.assertEqual(notification2.reusableItem, updated_reusableitem)
+
     def test_resuableitem_submit_changerequest_public_owner_not_referenced(self):
         """
         A user cannot submit a change request to a public reusable item that they do not reference
@@ -851,6 +899,10 @@ class ModifyReusableItemAPITest(APITestCase):
 
         original_reusableitem = setup_public_reusable_item_1(self)
         data1 = submit_change_request_1(self, self.user_1)
+
+        # delete any notifications prior to the next step
+        Notification.objects.all().delete()
+        self.assertEqual(Notification.objects.count(), 0)
 
         # user 1 now cancels the change request
         self.client.force_authenticate(user=self.user_1)
@@ -880,6 +932,14 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(history_entry['change_request']['name'], data1['name'])
         self.assertEqual(history_entry['change_request']['definition'], data1['definition'])
         self.assertEqual(history_entry['change_request']['link'], data1['link'])
+
+        # user 2 should get a notification of the change request cancellation
+        self.assertEqual(Notification.objects.count(), 1)
+
+        notification2 = Notification.objects.get(created_by=self.user_2)
+        self.assertEqual(notification2.context, 'reusableItem')
+        self.assertEqual(notification2.event, 'changeRequestCancelled')
+        self.assertEqual(notification2.reusableItem, updated_reusableitem)
 
     def test_resuableitem_cancel_changerequest_not_submitter(self):
         """
@@ -973,6 +1033,10 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem1.change_request_votes_yes.first(), self.user_1)
         self.assertEqual(updated_reusableitem1.change_request_votes_yes.count(), 1)
 
+        # delete any notifications prior to the next step
+        Notification.objects.all().delete()
+        self.assertEqual(Notification.objects.count(), 0)
+
         # User 2 votes against
         self.client.force_authenticate(user=self.user_2)
         data2 = {'vote': 'no'}
@@ -1009,6 +1073,9 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem3.definition, data1['definition'])
         self.assertEqual(updated_reusableitem3.link, data1['link'])
 
+        # all 3 users should get notifications
+        self.assertEqual(Notification.objects.count(), 3)
+
     def test_reusableitem_vote_user_count_3_reject(self):
         """
         Test voting when 3 users reference a top ten item
@@ -1025,6 +1092,10 @@ class ModifyReusableItemAPITest(APITestCase):
 
         self.assertEqual(updated_reusableitem1.change_request_votes_yes.first(), self.user_1)
         self.assertEqual(updated_reusableitem1.change_request_votes_yes.count(), 1)
+
+        # delete any notifications prior to the next step
+        Notification.objects.all().delete()
+        self.assertEqual(Notification.objects.count(), 0)
 
         # User 2 votes against
         self.client.force_authenticate(user=self.user_2)
@@ -1051,6 +1122,9 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem3.change_request, None)
         history_entry = updated_reusableitem3.history[1]
         self.assertEqual(history_entry['change_request_resolution'], 'rejected')
+
+         # all 3 users should get notifications
+        self.assertEqual(Notification.objects.count(), 3)
 
     def test_reusableitem_vote_user_count_4_reject(self):
         """

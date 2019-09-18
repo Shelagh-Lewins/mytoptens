@@ -289,8 +289,6 @@ class EditNotificationAPITest(APITestCase):
 
 """
 TODO
-test cannot edit another user's notification
-
 test notification is created when it should be (maybe in reusable item tests)
 for at least 3 users
 

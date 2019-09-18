@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from users.models import CustomUser
 from allauth.account.models import EmailAddress 
-from toptenlists.models import TopTenList, TopTenItem, ReusableItem
+from toptenlists.models import TopTenList, TopTenItem, ReusableItem, Notification
 
 # disable throttling for testing
 from toptenlists.api import TopTenListViewSet, TopTenItemViewSet, TopTenListDetailViewSet, ReusableItemViewSet
@@ -57,7 +57,6 @@ def create_reusable_item(self, topTenItem):
         link='link@here.com',
         created_by=self.user)
 
-    # 
     topTenItem.reusableItem = self.reusableItem
     topTenItem.save()
 
@@ -646,6 +645,9 @@ class EditTopTenItemAPITest(APITestCase):
         self.assertEqual(updated_toptenitem.reusableItem.definition, data['reusableItemDefinition'])
         self.assertEqual(updated_toptenitem.reusableItem.link, data['reusableItemLink'])
 
+        # the owner of top ten item 2 should not get a notification
+        self.assertEqual(Notification.objects.count(), 0)
+
     def test_create_reusable_item_from_own_toptenitem_fails(self):
         """
         The top ten item from which the reusable item is to be created, must exist
@@ -704,6 +706,16 @@ class EditTopTenItemAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        # the owner of top ten item 2 should get a notification
+        self.assertEqual(Notification.objects.count(), 1)
+
+        notification = Notification.objects.first()
+        self.assertEqual(notification.created_by, self.user)
+        self.assertEqual(notification.context, 'reusableItem')
+        self.assertEqual(notification.event, 'reusableItemFromTopTenItem')
+        self.assertEqual(notification.reusableItem, ReusableItem.objects.first())
+        self.assertEqual(notification.topTenItem, topTenItems[0])
+
     def test_create_reusable_item_from_others_private_toptenitem(self):
         """
         Create a new reusable item from an existing top ten item belonging to anothere user, and assign it to own top ten item
@@ -741,7 +753,7 @@ class EditTopTenItemAPITest(APITestCase):
 
         response = self.client.patch(item_detail_url, data, format='json')
 
-        # the request should succeed
+        # the request should fail
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_edit_topTenItem_dereference_reusableItem(self):
