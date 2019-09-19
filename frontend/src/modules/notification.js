@@ -55,8 +55,6 @@ export function fetchNotifications() {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			console.log('response', response);
-
 			return dispatch(receiveNotifications(response));
 		}).catch((error) => {
 			dispatch(fetchNotificationsFailed());

@@ -4,6 +4,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
+import NotificationsList from './NotificationsList';
+import Notification from './Notification';
 
 import * as authReducer from '../modules/auth';
 import * as pageReducer from '../modules/page';
@@ -51,6 +53,7 @@ class Navbar extends Component {
 	render() {
 		const {
 			auth,
+			notifications,
 			searchComplete,
 			searchResults,
 			searchTerm,
@@ -74,6 +77,17 @@ class Navbar extends Component {
 				</li>
 			</ul>
 		);
+
+		const notificationsLink = (
+			<NotificationsList>
+				{notifications.map(notification => (
+					<Notification
+						notification={notification}
+					/>
+				))}
+			</NotificationsList>
+		);
+
 		return (
 			<nav className="navbar navbar-expand-sm navbar-light bg-light">
 				<Link className="navbar-brand" to="/">My Top Tens</Link>
@@ -81,6 +95,7 @@ class Navbar extends Component {
 					<span className="navbar-toggler-icon" />
 				</button>
 				<div className={`collapse navbar-collapse ${showDropdown ? 'show' : ''}`} id="navbarSupportedContent">
+					{notificationsLink}
 					{isAuthenticated ? authLinks : guestLinks}
 					<Search
 						onChange={this.onSearch}
