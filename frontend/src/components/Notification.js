@@ -1,12 +1,10 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { Button } from 'reactstrap';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Notification = props => (
-	<div className="notification">
+	<li className="notification">
 		hello: {JSON.stringify(props)}
-	</div>
+	</li>
 );
 
 export default Notification;

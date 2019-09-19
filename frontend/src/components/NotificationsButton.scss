@@ -1,0 +1,25 @@
+@import "../variables";
+
+.notifications-nav {
+	.btn {
+		background: transparent;
+		border: 0;
+
+		&:hover {
+			background: transparent;
+		}
+	}
+
+	.fa-bell {
+		&:hover {
+			color: $color-nav-hover !important;
+		}
+	}
+
+	.notifications-list {
+		background: $color-notifications-background;
+		position: absolute;
+		width: 200px;
+		z-index: 20;
+	}
+}

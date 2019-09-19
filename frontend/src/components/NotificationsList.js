@@ -1,17 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Container, Row, Col } from 'reactstrap';
 
 const NotificationsList = ({ children }) => (
-	<Container className="notifications-list">
-		<Row>
+	<div className="notifications-list">
+		<ul>
 			{children}
-		</Row>
-	</Container>
+		</ul>
+	</div>
 );
 
+NotificationsList.defaultProps = {
+	'children': [],
+};
+
 NotificationsList.propTypes = {
-	'children': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'children': PropTypes.arrayOf(PropTypes.any),
 };
 
 export default NotificationsList;

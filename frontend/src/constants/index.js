@@ -8,4 +8,5 @@ export const COLORS = { // svg icon colors need to be in code not css
 	'REUSABLEITEM': '#6db65b',
 	'HELP': '#666',
 	'BUTTONSECONDARY': '#fff',
+	'BUTTONNOTIFICATIONS': 'rgba(0,0,0,.5)',
 };

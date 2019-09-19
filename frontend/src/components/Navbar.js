@@ -4,8 +4,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link, withRouter } from 'react-router-dom';
-import NotificationsList from './NotificationsList';
-import Notification from './Notification';
+import NotificationsButton from './NotificationsButton';
 
 import * as authReducer from '../modules/auth';
 import * as pageReducer from '../modules/page';
@@ -61,9 +60,15 @@ class Navbar extends Component {
 		const { isAuthenticated, user } = auth;
 		const { showDropdown } = this.state;
 
-		const authLinks = (
+		const authLinks = user.username
+		&& (
 			<ul className="navbar-nav ml-auto">
-				{user.username && <li className="nav-item"><Link to="/account" className="nav-link">{user.username}</Link></li>}
+				<li className="nav-item">
+					<NotificationsButton
+						notifications={notifications}
+					/>
+				</li>
+				<li className="nav-item"><Link to="/account" className="nav-link">{user.username}</Link></li>
 				<li className="nav-item"><Link to="/" className="nav-link" onClick={this.onLogout}>Logout</Link></li>
 			</ul>
 		);
@@ -78,16 +83,6 @@ class Navbar extends Component {
 			</ul>
 		);
 
-		const notificationsLink = (
-			<NotificationsList>
-				{notifications.map(notification => (
-					<Notification
-						notification={notification}
-					/>
-				))}
-			</NotificationsList>
-		);
-
 		return (
 			<nav className="navbar navbar-expand-sm navbar-light bg-light">
 				<Link className="navbar-brand" to="/">My Top Tens</Link>
@@ -95,7 +90,6 @@ class Navbar extends Component {
 					<span className="navbar-toggler-icon" />
 				</button>
 				<div className={`collapse navbar-collapse ${showDropdown ? 'show' : ''}`} id="navbarSupportedContent">
-					{notificationsLink}
 					{isAuthenticated ? authLinks : guestLinks}
 					<Search
 						onChange={this.onSearch}
@@ -109,11 +103,12 @@ class Navbar extends Component {
 		);
 	}
 }
+
 Navbar.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
-	'notifications': PropTypes.objectOf(PropTypes.any).isRequired,
+	'notifications': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'searchTerm': PropTypes.string.isRequired,
 	'searchComplete': PropTypes.bool.isRequired,
 	'searchResults': PropTypes.arrayOf(PropTypes.any).isRequired,
