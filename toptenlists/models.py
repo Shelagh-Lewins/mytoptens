@@ -45,7 +45,6 @@ class ReusableItem(models.Model):
     link = models.CharField(max_length=255, blank=True, default='')
 
     modified_at = models.DateTimeField(auto_now_add=True)
-    users_when_modified = models.IntegerField(default=0)
     history = JSONField(default=list, blank=True) # array of version objects
    
     change_request = JSONField(default=None, blank=True, null=True) # change request object

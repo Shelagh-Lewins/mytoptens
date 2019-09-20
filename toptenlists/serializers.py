@@ -55,7 +55,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         model = ReusableItem
         # note that change_request_votes_yes and change_request_votes_no must not be returned
         # they are lists of user email addresses
-        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote')
+        fields = ('id', 'name', 'definition', 'is_public', 'created_by', 'created_by_username', 'created_at', 'link', 'change_request_at', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote')
 
     # magic method name to return calculated field
     def get_change_request_my_vote(cls, instance):
@@ -649,7 +649,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     # https://github.com/encode/django-rest-framework/issues/627
 
     expandable_fields = {
-        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'change_request_at', 'users_when_modified', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote']})
+        'reusableItem': (ReusableItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['id', 'name', 'definition', 'is_public', 'link', 'change_request_at', 'change_request', 'change_request_by', 'history', 'change_request_votes_yes_count', 'change_request_votes_no_count', 'change_request_my_vote']})
     }
 
     class Meta:
