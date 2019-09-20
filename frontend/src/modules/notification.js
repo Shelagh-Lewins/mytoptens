@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import { normalize, schema } from 'normalizr';
 import fetchAPI from './fetchAPI';
 import { getErrors } from './errors';
 
@@ -10,19 +11,40 @@ const updeep = require('updeep');
 
 /* eslint-disable array-callback-return */
 
-export const RECEIVE_NOTIFICATIONS = 'RECEIVE_NOTIFICATIONS';
+export const RECEIVE_ENTITIES = 'RECEIVE_ENTITIES';
 export const FETCH_NOTIFICATIONS_STARTED = 'FETCH_NOTIFICATIONS_STARTED';
 export const FETCH_NOTIFICATIONS_FAILED = 'FETCH_NOTIFICATIONS_FAILED';
-
 export const SET_NOTIFICATION_UNREAD_SUCCEEDED = 'SET_NOTIFICATION_UNREAD_SUCCEEDED';
-
 export const DELETE_NOTIFICATION_SUCCEEDED = 'DELETE_NOTIFICATION_SUCCEEDED';
 
+// https://medium.com/overlander/normalizing-data-into-relational-redux-state-with-normalizr-47e7020dd3c1
+// define all schemas so they can be referenced
+const topTenItemSchema = new schema.Entity('topTenItem');
+const reusableItemSchema = new schema.Entity('reusableItem');
+const notificationSchema = new schema.Entity('notification');
+
+// each data relationship must be defined in both directions
+// a topTenItem may have many notifications
+topTenItemSchema.define({
+	'notification': [notificationSchema],
+});
+
+// a reusableItem may have many notifications
+reusableItemSchema.define({
+	'notification': [notificationSchema],
+});
+
+// a notification may have one reusableItem and one topTenItem
+notificationSchema.define({
+	'reusableItem': reusableItemSchema,
+	'topTenItem': topTenItemSchema,
+});
+
 // ////////////////////
-function receiveNotifications(notifications) {
+function receiveEntities(entities) {
 	return {
-		'type': RECEIVE_NOTIFICATIONS,
-		'payload': notifications,
+		'type': RECEIVE_ENTITIES,
+		'payload': entities,
 	};
 }
 
@@ -55,7 +77,12 @@ export function fetchNotifications() {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			return dispatch(receiveNotifications(response));
+			console.log('fetchNotifications response', response);
+			const data = {
+				'entities': normalize(response, [notificationSchema]).entities,
+			};
+
+			return dispatch(receiveEntities(data));
 		}).catch((error) => {
 			dispatch(fetchNotificationsFailed());
 
@@ -76,9 +103,19 @@ const initialNotificationsState = {
 // state updates
 const getNotifications = state => state.notification.things;
 
+// returns notifications in an array, sorted by name
+// instead of the state.notification.organizerData object, keyed by id
 export const getSortedNotifications = createSelector(
 	[getNotifications],
-	notifications => notifications.slice().sort((a, b) => a.created_at < b.created_at),
+	(notifications) => {
+		const notificationsArray = Object.keys(notifications).map((id) => {
+			return notifications[id];
+		});
+
+		notificationsArray.sort((a, b) => a.created_at < b.created_at);
+
+		return notificationsArray;
+	},
 );
 
 export default function notification(state = initialNotificationsState, action) {
@@ -87,13 +124,13 @@ export default function notification(state = initialNotificationsState, action) 
 			return updeep(initialNotificationsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
 
-		case RECEIVE_NOTIFICATIONS: {
-			const notifications = action.payload;
+		case RECEIVE_ENTITIES: {
+			const { entities } = action.payload;
 
 			let things = {};
 
-			if (notifications) {
-				things = notifications;
+			if (entities && entities.notification) {
+				things = entities.notification;
 			}
 
 			return updeep({

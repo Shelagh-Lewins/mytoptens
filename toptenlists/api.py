@@ -402,6 +402,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsOwner] 
     model = Notification
     serializer_class = NotificationSerializer
+    permit_list_expands = ['reusableItem', 'topTenItem']
 
     def get_queryset(self):
         # can only view own notifications

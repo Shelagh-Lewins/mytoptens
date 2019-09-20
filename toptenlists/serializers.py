@@ -931,7 +931,15 @@ class NotificationSerializer(serializers.ModelSerializer):
     Serializer for notifications
     """
 
+    topTenItem = TopTenItemSerializer(read_only=True)
+    reusableItem = ReusableItemSerializer(read_only=True)
+
+    expandable_fields = {
+        'topTenItem': (TopTenItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['name', 'id', 'topTenList_id', 'order', 'reusableItem_id']}),
+        'reusableItem': (ReusableItemSerializer, {'source': 'reusableItem', 'many': True, 'fields': ['name', 'id']})
+    }
+
     class Meta:
         model = Notification
 
-        fields = ('id', 'created_at', 'context', 'event', 'reusableItem_id', 'created_by', 'unread')
+        fields = ('id', 'created_at', 'context', 'event', 'reusableItem', 'topTenItem', 'created_by', 'unread')

@@ -111,6 +111,7 @@ export function fetchTopTenLists({
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
+			console.log('fetch topTenLists response', response);
 			const data = {
 				'count': response.count,
 				'next': response.next,
