@@ -19,14 +19,14 @@ function ReusableItemComboBox(props) {
 				return <span>Use this text:</span>;
 
 			case 'newReusableItem':
-				return <span>Create a new Reusable Item:</span>;
+				return <span>New Reusable Item from text:</span>;
 
 			case 'reusableItem':
-				return <span>Reusable Items:</span>;
+				return <span>Existing Reusable Items:</span>;
 
 
 			case 'topTenItem':
-				return <span>Top Ten Items:</span>;
+				return <span>New Reusable Item from Top Ten Item:</span>;
 
 			default:
 				return null;
@@ -122,10 +122,14 @@ function ReusableItemComboBox(props) {
 	);
 }
 
+ReusableItemComboBox.defaultProps = {
+	'inputProps': {},
+};
+
 ReusableItemComboBox.propTypes = {
 	'data': PropTypes.arrayOf(PropTypes.any),
 	'defaultValue': PropTypes.string.isRequired,
-	'inputProps': PropTypes.objectOf(PropTypes.any).isRequired,
+	'inputProps': PropTypes.objectOf(PropTypes.any),
 	'labelText': PropTypes.string.isRequired,
 	'newReusableItem': PropTypes.objectOf(PropTypes.any),
 	'onChange': PropTypes.func.isRequired,

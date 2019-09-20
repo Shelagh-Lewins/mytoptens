@@ -22,7 +22,7 @@ function ReusableItemFormControls(props) {
 		reusableItemInfo = (
 			<div className="reusable-item">
 				<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'plus']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>{props.newReusableItem.name}</h3>
-				<p className="header">Create a new Reusable Item</p>
+				<p className="header">New Reusable Item from text</p>
 				<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>
 				<Input
 					type="text"
@@ -64,7 +64,7 @@ function ReusableItemFormControls(props) {
 		reusableItemInfo = (
 			<div className="reusable-item">
 				<h3><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{props.topTenItem.name}</h3>
-				<p className="header">Create a Reusable Item from an existing Top Ten Item</p>
+				<p className="header">New Reusable Item from Top Ten Item</p>
 				<Label for={`${props.identifier}_definition`}>{definitionLabel}</Label>
 				<Input
 					type="text"

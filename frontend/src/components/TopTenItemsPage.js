@@ -116,7 +116,7 @@ class TopTenItemsPage extends Component {
 
 			case 'reusableItem':
 				this.setState({
-					[`${widgetId}_newReusableItem`]: undefined,
+					[`${widgetId}_newReusableItem`]: false,
 					[`${widgetId}_reusableItemId`]: e.id,
 					[`${widgetId}_topTenItemForNewReusableItem`]: undefined,
 				});
@@ -132,7 +132,7 @@ class TopTenItemsPage extends Component {
 
 			default:
 				this.setState({
-					[`${widgetId}_newReusableItem`]: undefined,
+					[`${widgetId}_newReusableItem`]: false,
 					[`${widgetId}_reusableItemId`]: undefined,
 					[`${widgetId}_topTenItemForNewReusableItem`]: undefined,
 				});
@@ -241,6 +241,7 @@ class TopTenItemsPage extends Component {
 	}
 
 	renderTopTenItemsList() {
+		// console.log('*** render');
 		const elements = [];
 		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			const {
@@ -259,6 +260,9 @@ class TopTenItemsPage extends Component {
 			if (name || canEdit) {
 				// has the user selected an existing topTenItem?
 				const topTenItemId = state[`${identifier}_topTenItemForNewReusableItem`];
+				// console.log('name', name);
+				// console.log('check topTenItemId', topTenItemId);
+
 
 				let newReusableItem;
 				let topTenItem;
@@ -267,9 +271,19 @@ class TopTenItemsPage extends Component {
 
 				// create a new reusableItem based on the name the user typed
 				if (state[`${identifier}_newReusableItem`]) {
+					// console.log('name', name);
+					// console.log('new reusable item true');
 					newReusableItem = { 'name': state[`${identifier}`] };
-				} else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
-					topTenItem = reusableItemSuggestionsForName.find(item => item.id === topTenItemId);
+
+					if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
+						// console.log('name', name);
+						// console.log('new reusable from tti');
+						topTenItem = reusableItemSuggestionsForName.find(item => item.id === topTenItemId);
+					}
+				/* } else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
+					console.log('name', name);
+					console.log('new reusable from tti');
+					topTenItem = reusableItemSuggestionsForName.find(item => item.id === topTenItemId); */
 				} else {
 					// use an existing reusableItem
 					const reusableItemId = state[`${identifier}_reusableItemId`];

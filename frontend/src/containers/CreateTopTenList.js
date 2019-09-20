@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withRouter, Link } from 'react-router-dom';
-import { createTopTenList } from '../modules/topTenList';
 import { Container, Row, Col, Label, Input } from 'reactstrap';
+import { createTopTenList } from '../modules/topTenList';
 
 import FlashMessage from '../components/FlashMessage';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -28,7 +28,7 @@ class CreateTopTenList extends Component {
 			'description': '',
 			'activeItemNameId': '',
 		};
-		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			this.state[`topTenItem${i}_name`] = '';
 			this.state[`topTenItem${i}_description`] = '';
 		}
@@ -214,6 +214,7 @@ class CreateTopTenList extends Component {
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
 					<ReusableItemComboBox
+						defaultValue=""
 						widgetId={widgetId}
 						labelText={`Top Ten item ${i}`}
 						data={data}
@@ -322,8 +323,8 @@ class CreateTopTenList extends Component {
 }
 
 CreateTopTenList.propTypes = {
-	'auth': PropTypes.object.isRequired,
-	'errors': PropTypes.object.isRequired
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
 const mapStateToProps = state => ({

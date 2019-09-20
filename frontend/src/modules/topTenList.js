@@ -78,7 +78,7 @@ function fetchTopTenListsFailed() {
 }
 
 export function fetchTopTenLists({
-	listset, topLevelTopTenListsOnly, limit, offset,
+	listset, limit, offset,
 } = {}) {
 	return (dispatch, getState) => {
 		dispatch(fetchTopTenListsStarted());
@@ -90,10 +90,6 @@ export function fetchTopTenLists({
 		}
 
 		let url = `/api/v1/content/toptenlist/?`;
-
-		if (topLevelTopTenListsOnly) {
-			url += '&toplevel=1';
-		}
 
 		if (listset) {
 			url += `&listset=${listset}`;
@@ -358,10 +354,14 @@ const initialTopTenListsState = {
 export const getSearchTerm = state => state.page.searchTerm;
 
 // returns topTenLists as an array not an object
-export const getTopTenLists = state => Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
+export const getTopTenLists = state => {
+	console.log('state', state);
+	return Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
+}
 
 const getTopTenItems = state => state.topTenItem.things;
 
+// get all visible lists
 export const getPublicTopTenLists = createSelector(
 	[getTopTenLists],
 	topTenLists => topTenLists.filter(topTenListObject => topTenListObject.is_public),
@@ -378,6 +378,25 @@ export const getMyGroupedTopTenLists = createSelector(
 
 		return grouped;
 	},
+);
+
+// only get top level lists
+export const getTopLevelPublicTopTenLists = createSelector(
+	[getPublicTopTenLists],
+	topTenLists => topTenLists.filter(topTenListObject => !topTenListObject.parent_topTenItem),
+);
+
+export const getTopLevelMyGroupedTopTenLists = createSelector(
+	[getMyGroupedTopTenLists],
+	(groupedTopTenLists) => {
+		const grouped = {};
+
+		TOPTENLIST_IS_PUBLIC_VALUES.forEach((is_public) => {
+			grouped[is_public] = groupedTopTenLists[is_public].filter(topTenListObject => !topTenListObject.parent_topTenItem);
+		});
+
+		return grouped;
+	}
 );
 
 // ///////////////////////////

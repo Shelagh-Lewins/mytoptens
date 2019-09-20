@@ -94,9 +94,9 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
             queryset = queryset.filter(created_by=created_by)
 
         # return only topTenLists that have no parent topTenItem
-        toplevel = self.request.query_params.get('toplevel')
-        if toplevel is not None:
-            queryset = queryset.filter(parent_topTenItem=None)
+        #toplevel = self.request.query_params.get('toplevel')
+        #if toplevel is not None:
+            #queryset = queryset.filter(parent_topTenItem=None)
 
         return queryset.order_by('name')
 
