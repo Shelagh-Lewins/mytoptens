@@ -1,6 +1,7 @@
 @import "../variables";
 
 .notifications-nav {
+	display: inline-block; // address inconsistency between Chrome and Firefox
 	position: relative;
 
 	.btn {
@@ -25,7 +26,7 @@
 		box-shadow: 0 3px 8px rgba(0, 0, 0, .25);
 		left: -1.5rem;
 		position: absolute;
-		top: 1.8rem;
+		top: 3.2rem;
 		width: 300px;
 		z-index: 20;
 
@@ -69,6 +70,10 @@
 
 			&:last-child {
 				border-bottom: 0;
+			}
+
+			&.unread {
+				background: $color-notifications-unread-background;
 			}
 		}
 	}

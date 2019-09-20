@@ -63,7 +63,7 @@ const Notification = (props) => {
 	}
 
 	return (
-		<li className={`notification {notification.unread ? 'unread' : ''}`}>
+		<li className={`notification ${notification.unread ? 'unread' : ''}`}>
 			{content}
 		</li>
 	);
