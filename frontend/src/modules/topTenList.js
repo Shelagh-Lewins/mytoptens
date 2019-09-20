@@ -111,7 +111,6 @@ export function fetchTopTenLists({
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			console.log('fetch topTenLists response', response);
 			const data = {
 				'count': response.count,
 				'next': response.next,
@@ -356,26 +355,16 @@ const initialTopTenListsState = {
 };
 
 // 'state' here is global state
-export const getSearchTerm = (state) => {
-	return state.page.searchTerm;
-};
+export const getSearchTerm = state => state.page.searchTerm;
 
 // returns topTenLists as an array not an object
-export const getTopTenLists = (state) => {
-	return Object.keys(state.topTenList.things).map((id) => {
-		return state.topTenList.things[id];
-	});
-};
+export const getTopTenLists = state => Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
 
 const getTopTenItems = state => state.topTenItem.things;
 
 export const getPublicTopTenLists = createSelector(
 	[getTopTenLists],
-	(topTenLists) => {
-		return topTenLists.filter((topTenListObject) => {
-			return topTenListObject.is_public;
-		});
-	},
+	topTenLists => topTenLists.filter(topTenListObject => topTenListObject.is_public),
 );
 
 export const getMyGroupedTopTenLists = createSelector(
@@ -491,7 +480,8 @@ export default function topTenList(state = initialTopTenListsState, action) {
 				'count': count,
 				'previous': previous,
 				'next': next,
-				'things': updeep.constant(things), // constant provides placement instead of update, so all previous entries are removed
+				// 'things': updeep.constant(things), // constant provides placement instead of update, so all previous entries are removed
+				'things': things, // add data because notifications also use top ten lists
 				'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
 				'isLoading': false,
 			}, state);

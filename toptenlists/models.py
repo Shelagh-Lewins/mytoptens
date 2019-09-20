@@ -89,7 +89,7 @@ class Notification(models.Model):
     Notifications to users
     Each notification must belong to one user
     A user may have many notifications
-    Only 'unread' may be modified
+    Only 'unread' and 'new' may be modified
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -108,4 +108,5 @@ class Notification(models.Model):
     # This field is more 'created for' than 'created by', but I think it's more consistent e.g. with permissions, to use this label for 'owner'.
 
     unread = models.BooleanField(default=True)
+    new = models.BooleanField(default=True)
 

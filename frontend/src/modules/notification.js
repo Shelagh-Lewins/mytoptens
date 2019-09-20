@@ -63,11 +63,10 @@ function fetchNotificationsFailed() {
 export function fetchNotifications() {
 	return (dispatch, getState) => {
 		dispatch(fetchNotificationsStarted());
-		// if the user is not logged in, don't use auth. The server should return only the topTenLists a non-authenticated user should see.
-		let useAuth = false;
+		// notifications can only be fetched if the user is logged in
 
-		if (getState().auth.user.token) {
-			useAuth = true;
+		if (!getState().auth.user.token) {
+			return;
 		}
 
 		const url = `/api/v1/content/notification/`;
@@ -75,9 +74,9 @@ export function fetchNotifications() {
 		return fetchAPI({
 			'url': url,
 			'method': 'GET',
-			'useAuth': useAuth,
+			'useAuth': true,
 		}).then((response) => {
-			console.log('fetchNotifications response', response);
+			// console.log('fetchNotifications response', response);
 			const data = {
 				'entities': normalize(response, [notificationSchema]).entities,
 			};
@@ -96,11 +95,11 @@ export function fetchNotifications() {
 const initialNotificationsState = {
 	'isLoading': false,
 	'error': null,
-	'things': [],
+	'things': {},
 };
 
 // ///////////////////////////
-// state updates
+// get reduce info for components
 const getNotifications = state => state.notification.things;
 
 // returns notifications in an array, sorted by name
@@ -118,6 +117,19 @@ export const getSortedNotifications = createSelector(
 	},
 );
 
+export const getNewNotificationsCount = createSelector(
+	[getNotifications],
+	(notifications) => {
+		const notificationsArray = Object.keys(notifications).map(id => notifications[id]);
+
+		notificationsArray.sort((a, b) => a.created_at < b.created_at);
+
+		return notificationsArray;
+	},
+);
+
+// ///////////////////////////
+// state updates
 export default function notification(state = initialNotificationsState, action) {
 	switch (action.type) {
 		case LOGOUT_USER_COMPLETE: {
@@ -146,4 +158,5 @@ export default function notification(state = initialNotificationsState, action) 
 
 // TODO
 // delete notification
-// set unread to false
+// set unread
+// set new
