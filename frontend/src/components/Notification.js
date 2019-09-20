@@ -63,7 +63,7 @@ const Notification = (props) => {
 	}
 
 	return (
-		<li className="notification">
+		<li className={`notification {notification.unread ? 'unread' : ''}`}>
 			{content}
 		</li>
 	);
@@ -76,7 +76,7 @@ Notification.defaultProps = {
 Notification.propTypes = {
 	'notification': PropTypes.objectOf(PropTypes.any).isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
-	'topTenItem': PropTypes.objectOf(PropTypes.any),
+	// 'topTenItem': PropTypes.objectOf(PropTypes.any), // not using this yet but if we add notifications for a top ten item, it will be wanted
 };
 
 export default Notification;

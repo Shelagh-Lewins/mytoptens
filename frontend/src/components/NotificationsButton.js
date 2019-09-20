@@ -26,7 +26,9 @@ class NotificationsButton extends Component {
 	}
 
 	onClickButton = () => {
+		console.log('clicked');
 		const { showNotificationsList } = this.state;
+		console.log(showNotificationsList);
 		this.setState({
 			'showNotificationsList': !showNotificationsList,
 		});
