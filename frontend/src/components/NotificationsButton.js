@@ -16,7 +16,7 @@ class NotificationsButton extends Component {
 	constructor(props) {
 		super();
 
-		console.log('props', props);
+		// console.log('props', props);
 
 		this.state = {
 			'showNotificationsList': false,
@@ -40,6 +40,9 @@ class NotificationsButton extends Component {
 		// TODO pull in reusable item data so name can be shown
 		// TODO show meaningful message
 		// TODO link to reusable item / top ten item
+		// TODO show badge count of new notifications
+		// TODO delete notifications
+		// TODO limit total number of notifications shown?
 
 		// Link is used for formatting consistency with the navbar links
 		return (

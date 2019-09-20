@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 const NotificationsList = ({ children }) => (
 	<div className="notifications-list">
+		<span className="header">Notifications</span>
 		<ul>
 			{children}
 		</ul>
