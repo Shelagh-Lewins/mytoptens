@@ -573,7 +573,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			}
 
 			return updeep({
-				'things': updeep.constant(things),
+				'things': things,
 				'isLoading': false,
 			}, state);
 		}

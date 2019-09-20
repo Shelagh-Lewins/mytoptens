@@ -146,7 +146,7 @@ export default function notification(state = initialNotificationsState, action) 
 			}
 
 			return updeep({
-				'things': updeep.constant(things),
+				'things': things,
 				'isLoading': false,
 			}, state);
 		}

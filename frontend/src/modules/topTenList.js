@@ -355,7 +355,7 @@ export const getSearchTerm = state => state.page.searchTerm;
 
 // returns topTenLists as an array not an object
 export const getTopTenLists = state => {
-	console.log('state', state);
+	// console.log('state', state);
 	return Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
 }
 

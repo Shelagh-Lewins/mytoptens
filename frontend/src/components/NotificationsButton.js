@@ -53,6 +53,7 @@ class NotificationsButton extends Component {
 								<Notification
 									notification={notification}
 									key={notification.id}
+									reusableItem={store.getState().reusableItem.things[notification.reusableItem]}
 								/>
 							))}
 						</NotificationsList>

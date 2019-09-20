@@ -219,7 +219,7 @@ Home.propTypes = {
 	'publicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topLevelPublicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
-	'topLevelmyTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'topLevelmyTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'count': PropTypes.number, // data may not yet be loaded
 	// 'next': PropTypes.string, // there may be no 'next' page
 	// 'previous': PropTypes.string, // there may be no 'previous' page
