@@ -250,6 +250,7 @@ class TopTenItemsPage extends Component {
 				onCreateChildTopTenList,
 				reusableItems,
 				reusableItemSuggestions,
+				topTenItems, // top ten items direct from store
 			} = this.props;
 
 			const { state } = this;
@@ -310,6 +311,7 @@ class TopTenItemsPage extends Component {
 									'childTopTenList': state[`${i}_childTopTenList`],
 									'reusableItem': state[`${i}_name_reusableItemId`],
 								}}
+								topTenItemFromStore={topTenItems[i - 1]}
 								handleInputChange={this.handleInputChange}
 								handleComboboxChange={this.handleComboboxChange}
 								handleNewValue={this.handleNewValue}
@@ -322,6 +324,7 @@ class TopTenItemsPage extends Component {
 								reusableItemSuggestions={reusableItemSuggestions}
 								newReusableItem={newReusableItem}
 								reusableItem={reusableItem}
+								reusableItems={reusableItems}
 								topTenItemForReusableItem={topTenItem}
 							/>
 						</Col>

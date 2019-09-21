@@ -35,7 +35,7 @@ class NotificationsButton extends Component {
 	}
 
 	render() {
-		const { notifications } = this.props;
+		const { notifications, reusableItems } = this.props;
 		const { showNotificationsList } = this.state;
 		// TODO show message if no notifications
 		// TODO check for notifications every few seconds
@@ -58,7 +58,7 @@ class NotificationsButton extends Component {
 								<Notification
 									notification={notification}
 									key={notification.id}
-									reusableItem={store.getState().reusableItem.things[notification.reusableItem]}
+									reusableItem={reusableItems[notification.reusableItem]}
 								/>
 							))}
 						</NotificationsList>
@@ -71,10 +71,12 @@ class NotificationsButton extends Component {
 
 NotificationsButton.defaultProps = {
 	'notifications': [],
+	'reusableItems': {},
 };
 
 NotificationsButton.propTypes = {
 	'notifications': PropTypes.arrayOf(PropTypes.any),
+	'reusableItems': PropTypes.objectOf(PropTypes.any),
 };
 
 export default NotificationsButton;

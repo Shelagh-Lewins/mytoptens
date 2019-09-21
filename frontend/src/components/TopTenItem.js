@@ -74,6 +74,7 @@ class Item extends Component {
 		let showDescription = true;
 		const {
 			topTenItem,
+			topTenItemFromStore,
 			canEdit,
 			reusableItemSuggestions,
 			handleComboboxChange,
@@ -82,6 +83,7 @@ class Item extends Component {
 			onSelectItemName,
 			newReusableItem,
 			reusableItem,
+			reusableItems, // all reusable items from store
 			topTenItemForReusableItem,
 		} = this.props;
 		// console.log('topTenItem', topTenItem);
@@ -90,7 +92,7 @@ class Item extends Component {
 
 		if (topTenItem.name === '' && !isEditingName) {
 			showDescription = false;
-		} else if (isEditingName && store.getState().topTenItem.things[topTenItem.id] && store.getState().topTenItem.things[topTenItem.id].name === '') {
+		} else if (isEditingName && topTenItemFromStore && topTenItemFromStore.name === '') {
 			showDescription = false;
 		}
 
@@ -146,7 +148,8 @@ class Item extends Component {
 
 		// icon by name to indicate it's a reusableItem. Not shown when editing name.
 		if (topTenItem.reusableItem && !isEditingName) {
-			currentReusableItem = store.getState().reusableItem.things[topTenItem.reusableItem] || {};
+			// currentReusableItem = store.getState().reusableItem.things[topTenItem.reusableItem] || {};
+			currentReusableItem = reusableItems[topTenItem.reusableItem] || {};
 			const popoverId = `popover${topTenItem.order}`;
 
 			reusableItemIcon = (
@@ -257,6 +260,7 @@ class Item extends Component {
 
 Item.propTypes = {
 	'topTenItem': PropTypes.objectOf(PropTypes.any).isRequired,
+	'topTenItemFromStore': PropTypes.objectOf(PropTypes.any).isRequired,
 	'onCreateChildTopTenList': PropTypes.func.isRequired,
 	'onMoveTopTenItemUp': PropTypes.func.isRequired,
 	'onMoveTopTenItemDown': PropTypes.func.isRequired,
@@ -268,6 +272,7 @@ Item.propTypes = {
 	'onSelectItemName': PropTypes.func.isRequired,
 	'newReusableItem': PropTypes.objectOf(PropTypes.any),
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
+	'reusableItems': PropTypes.objectOf(PropTypes.any),
 	'topTenItemForReusableItem': PropTypes.objectOf(PropTypes.any),
 };
 

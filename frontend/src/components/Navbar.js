@@ -53,6 +53,7 @@ class Navbar extends Component {
 		const {
 			auth,
 			notifications,
+			reusableItems,
 			searchComplete,
 			searchResults,
 			searchTerm,
@@ -66,6 +67,7 @@ class Navbar extends Component {
 				<li className="nav-item">
 					<NotificationsButton
 						notifications={notifications}
+						reusableItems={reusableItems}
 					/>
 				</li>
 				<li className="nav-item"><Link to="/account" className="nav-link">{user.username}</Link></li>
@@ -109,6 +111,7 @@ Navbar.propTypes = {
 	'dispatch': PropTypes.func.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'notifications': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'reusableItems': PropTypes.objectOf(PropTypes.any).isRequired,
 	'searchTerm': PropTypes.string.isRequired,
 	'searchComplete': PropTypes.bool.isRequired,
 	'searchResults': PropTypes.arrayOf(PropTypes.any).isRequired,
@@ -117,6 +120,7 @@ Navbar.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'notifications': notificationReducer.getSortedNotifications(state),
+	'reusableItems': state.reusableItem.things,
 	'searchTerm': state.page.searchTerm,
 	'searchComplete': state.page.searchComplete,
 	'searchResults': state.page.searchResults,
