@@ -104,13 +104,6 @@ function searchReusableItemsSucceeded(results, widgetId) {
 	};
 }
 
-function searchReusableItemsFailed(widgetId) {
-	return {
-		'type': SEARCH_REUSABLEITEMS_FAILED,
-		'payload': { widgetId },
-	};
-}
-
 // reset if there is no searchTerm
 export function searchReusableItemsClear(widgetId) {
 	return {

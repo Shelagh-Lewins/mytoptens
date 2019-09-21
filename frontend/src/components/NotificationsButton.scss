@@ -4,6 +4,16 @@
 	display: inline-block; // address inconsistency between Chrome and Firefox
 	position: relative;
 
+	.badge.new {
+		background: $color-notifications-count-bg;
+		border-radius: 2px;
+		color: $color-notifications-count;
+		pointer-events: none;
+		position: absolute;
+		right: -15%;
+		top: 0;
+	}
+
 	.btn {
 		background: transparent;
 		border: 0;

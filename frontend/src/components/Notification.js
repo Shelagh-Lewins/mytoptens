@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { COLORS } from '../constants';
 
+/* eslint react/jsx-one-expression-per-line: "off" */
+
 const Notification = (props) => {
-	console.log('notification props', props);
-	const { notification, reusableItem } = props;
+	// console.log('notification props', props);
+	const { notification, onClickNotification, reusableItem } = props;
 
 	let content;
 
@@ -17,7 +19,11 @@ const Notification = (props) => {
 					content = (
 						<React.Fragment>
 							<span>
-								Please vote on a proposed change to <Link to={`/reusableitem/${reusableItem.id}`}><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}</Link>
+								Please vote on a proposed change to <Link
+									to={`/reusableitem/${reusableItem.id}`}
+									onClick={() => onClickNotification(notification.id)}>
+									<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}
+								</Link>
 							</span>
 						</React.Fragment>
 					);
@@ -27,7 +33,11 @@ const Notification = (props) => {
 					content = (
 						<React.Fragment>
 							<span>
-								A proposed change to <Link to={`/reusableitem/${reusableItem.id}`}><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}</Link> was rejected
+								A proposed change to <Link
+									to={`/reusableitem/${reusableItem.id}`}
+									onClick={() => onClickNotification(notification.id)}>
+									<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}
+								</Link> was rejected
 							</span>
 						</React.Fragment>
 					);
@@ -37,7 +47,11 @@ const Notification = (props) => {
 					content = (
 						<React.Fragment>
 							<span>
-								A proposed change to <Link to={`/reusableitem/${reusableItem.id}`}><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}</Link> was accepted
+								A proposed change to <Link
+									to={`/reusableitem/${reusableItem.id}`}
+									onClick={() => onClickNotification(notification.id)}>
+									<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}
+								</Link> was accepted
 							</span>
 						</React.Fragment>
 					);
@@ -47,7 +61,11 @@ const Notification = (props) => {
 					content = (
 						<React.Fragment>
 							<span>
-								A proposed change to <Link to={`/reusableitem/${reusableItem.id}`}><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}</Link> was cancelled
+								A proposed change to <Link
+									to={`/reusableitem/${reusableItem.id}`}
+									onClick={() => onClickNotification(notification.id)}>
+									<FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" />{reusableItem.name}
+								</Link> was cancelled
 							</span>
 						</React.Fragment>
 					);
@@ -75,6 +93,7 @@ Notification.defaultProps = {
 
 Notification.propTypes = {
 	'notification': PropTypes.objectOf(PropTypes.any).isRequired,
+	'onClickNotification': PropTypes.func.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	// 'topTenItem': PropTypes.objectOf(PropTypes.any), // not using this yet but if we add notifications for a top ten item, it will be wanted
 };

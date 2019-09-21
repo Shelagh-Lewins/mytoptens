@@ -10,8 +10,6 @@ import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import store from '../store';
-
 import EditableTextField from './EditableTextField';
 import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';

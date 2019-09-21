@@ -169,7 +169,7 @@ class Organizer extends Component {
 			<div className="toptenlists">
 				<div className="inner-tube">
 					<span>Select a new parent Top Ten item for this Top Ten list: </span>
-					{topTenListOrganizerData.map((topTenListInner) => {
+					{topTenListOrganizerData.map((topTenListInner) => { // eslint-disable-line array-callback-return
 						const numberOfTopTenItems = topTenItemOrganizerData[topTenListInner.id].length;
 
 						// only show topTenLists with at least one topTenItem

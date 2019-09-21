@@ -269,8 +269,13 @@ export function updateTopTenListSucceeded(response) {
 	};
 }
 
-export const updateTopTenList = (topTenListId, propertyName, value) => (dispatch) => {
+export const updateTopTenList = (topTenListId, propertyName, value) => (dispatch, getState) => {
 	// should be able to update any simple property e.g. name, description
+
+	if (!getState().auth.user.token) {
+		return;
+	}
+
 	return fetchAPI({
 		'url': `/api/v1/content/toptenlist/${topTenListId}/`,
 		'headers': { 'Content-Type': 'application/json' },
@@ -354,10 +359,7 @@ const initialTopTenListsState = {
 export const getSearchTerm = state => state.page.searchTerm;
 
 // returns topTenLists as an array not an object
-export const getTopTenLists = state => {
-	// console.log('state', state);
-	return Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
-}
+export const getTopTenLists = state => Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
 
 const getTopTenItems = state => state.topTenItem.things;
 
@@ -396,7 +398,7 @@ export const getTopLevelMyGroupedTopTenLists = createSelector(
 		});
 
 		return grouped;
-	}
+	},
 );
 
 // ///////////////////////////

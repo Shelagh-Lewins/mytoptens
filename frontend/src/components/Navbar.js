@@ -14,12 +14,30 @@ import Search from './Search';
 
 class Navbar extends Component {
 	constructor(props) {
+		console.log('nav constructor');
 		super(props);
 		this.state = {
 			'showDropdown': false,
 		};
 
 		this.onLogout = this.onLogout.bind(this);
+	}
+
+	componentDidUpdate = (prevProps) => {
+		console.log('***');
+		console.log('nav old pathname', prevProps.history.location.pathname);
+		console.log('nav new pathname', this.props.history.location.pathname);
+		console.log('nav match', this.props.match);
+
+		// let { location: { pathname } } = this.props.history
+
+		if (prevProps.history.location.pathname !== this.props.history.location.pathname) {
+			console.log('change');
+		}
+
+		if (prevProps.match.params.url !== this.props.match.params.url) {
+			console.log('new match');
+		}
 	}
 
 	onLogout(e) {
@@ -52,6 +70,9 @@ class Navbar extends Component {
 	render() {
 		const {
 			auth,
+			dispatch,
+			history,
+			newNotificationsCount,
 			notifications,
 			reusableItems,
 			searchComplete,
@@ -66,6 +87,9 @@ class Navbar extends Component {
 			<ul className="navbar-nav ml-auto">
 				<li className="nav-item">
 					<NotificationsButton
+						dispatch={dispatch}
+						history={history}
+						newNotificationsCount={newNotificationsCount}
 						notifications={notifications}
 						reusableItems={reusableItems}
 					/>
@@ -110,6 +134,7 @@ Navbar.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
+	'newNotificationsCount': PropTypes.number.isRequired,
 	'notifications': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'reusableItems': PropTypes.objectOf(PropTypes.any).isRequired,
 	'searchTerm': PropTypes.string.isRequired,
@@ -120,6 +145,7 @@ Navbar.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'notifications': notificationReducer.getSortedNotifications(state),
+	'newNotificationsCount': notificationReducer.getNewNotificationsCount(state),
 	'reusableItems': state.reusableItem.things,
 	'searchTerm': state.page.searchTerm,
 	'searchComplete': state.page.searchComplete,
@@ -127,3 +153,5 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps)(withRouter(Navbar));
+// export default withRouter(connect(mapStateToProps)(Navbar));
+

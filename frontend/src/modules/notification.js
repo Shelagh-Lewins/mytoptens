@@ -14,7 +14,7 @@ const updeep = require('updeep');
 export const RECEIVE_ENTITIES = 'RECEIVE_ENTITIES';
 export const FETCH_NOTIFICATIONS_STARTED = 'FETCH_NOTIFICATIONS_STARTED';
 export const FETCH_NOTIFICATIONS_FAILED = 'FETCH_NOTIFICATIONS_FAILED';
-export const SET_NOTIFICATION_UNREAD_SUCCEEDED = 'SET_NOTIFICATION_UNREAD_SUCCEEDED';
+export const UPDATE_NOTIFICATION_SUCCEEDED = 'UPDATE_NOTIFICATION_SUCCEEDED';
 export const DELETE_NOTIFICATION_SUCCEEDED = 'DELETE_NOTIFICATION_SUCCEEDED';
 
 // https://medium.com/overlander/normalizing-data-into-relational-redux-state-with-normalizr-47e7020dd3c1
@@ -85,10 +85,47 @@ export function fetchNotifications() {
 		}).catch((error) => {
 			dispatch(fetchNotificationsFailed());
 
-			return dispatch(getErrors({ 'fetch topTenLists': error.message }));
+			return dispatch(getErrors({ 'fetch notifications': error.message }));
 		});
 	};
 }
+
+// ////////////////////////////////
+// update Notifications
+// only 'new' and 'unread' are editable via the api
+export function updateNotificationSucceeded(response) {
+	return {
+		'type': UPDATE_NOTIFICATION_SUCCEEDED,
+		'payload': response,
+	};
+}
+
+export const updateNotification = (notificationId, propertyName, value) => (dispatch, getState) => {
+	// should be able to update any simple editable property e.g. new, unread
+
+	if (!getState().auth.user.token) {
+		return;
+	}
+
+	return fetchAPI({
+		'url': `/api/v1/content/notification/${notificationId}/`,
+		'headers': { 'Content-Type': 'application/json' },
+		'data': JSON.stringify({ [propertyName]: value }),
+		'method': 'PATCH',
+		'useAuth': true,
+	}).then((response) => {
+		return dispatch(updateNotificationSucceeded(response));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'update notification': error.message }));
+	});
+};
+
+// bulk set an array of notifications to the same value of 'New'
+export const setNew = (idArray, value) => (dispatch) =>  {
+	idArray.forEach((obj) => {
+		dispatch(updateNotification(obj.id, 'new', value));
+	});
+};
 
 // ////////////////////////////////
 // Reducer
@@ -118,13 +155,11 @@ export const getSortedNotifications = createSelector(
 );
 
 export const getNewNotificationsCount = createSelector(
-	[getNotifications],
+	[getSortedNotifications],
 	(notifications) => {
-		const notificationsArray = Object.keys(notifications).map(id => notifications[id]);
+		const notificationsArray = notifications.filter(obj => obj.new === true);
 
-		notificationsArray.sort((a, b) => a.created_at < b.created_at);
-
-		return notificationsArray;
+		return notificationsArray.length;
 	},
 );
 
@@ -149,6 +184,16 @@ export default function notification(state = initialNotificationsState, action) 
 				'things': things,
 				'isLoading': false,
 			}, state);
+		}
+
+		case UPDATE_NOTIFICATION_SUCCEEDED: {
+			// update editable properties
+			const update = {
+				'new': action.payload.new,
+				'unread': action.payload.unread,
+			};
+
+			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
 		default:

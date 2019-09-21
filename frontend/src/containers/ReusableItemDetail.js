@@ -18,11 +18,11 @@ import isEmpty from '../modules/isEmpty';
 
 import IsPublicIndicator from '../components/IsPublicIndicator';
 
-import './ReusableItemDetails.scss';
+import './ReusableItemDetail.scss';
 import { COLORS } from '../constants';
 
 
-class ReusableItemDetails extends Component {
+class ReusableItemDetail extends Component {
 	constructor(props) {
 		super();
 
@@ -41,7 +41,7 @@ class ReusableItemDetails extends Component {
 			'reusableItemHelp': 'reusableItemHelp',
 		};
 
-		Object.keys(this.popoverIds).map((key) => {
+		Object.keys(this.popoverIds).map((key) => { // eslint-disable-line array-callback-return
 			this.state[`popoverOpen${key}`] = false;
 		});
 
@@ -158,7 +158,7 @@ class ReusableItemDetails extends Component {
 		const cleanedData = {};
 
 		// only send changed values
-		Object.keys(data).map((key) => {
+		Object.keys(data).map((key) => { // eslint-disable-line array-callback-return
 			if (data[key] !== reusableItem[key]) {
 				cleanedData[key] = data[key];
 			}
@@ -454,11 +454,11 @@ class ReusableItemDetails extends Component {
 	}
 }
 
-ReusableItemDetails.defaultProps = {
+ReusableItemDetail.defaultProps = {
 	'reusableItem': undefined,
 };
 
-ReusableItemDetails.propTypes = {
+ReusableItemDetail.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
@@ -479,4 +479,4 @@ const mapStateToProps = (state, ownProps) => ({
 	'topTenItems': reusableItemReducer.getMyTopTenItemsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
 });
 
-export default connect(mapStateToProps)(ReusableItemDetails);
+export default connect(mapStateToProps)(ReusableItemDetail);

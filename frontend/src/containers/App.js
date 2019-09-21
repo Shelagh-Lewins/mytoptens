@@ -1,13 +1,13 @@
 // App.js
 
-import React, { Component } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
 // fontawesome
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-	faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit, faBell
+	faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit, faBell,
 } from '@fortawesome/free-solid-svg-icons'; // import the icons you want
 
 import store from '../store';
@@ -22,7 +22,7 @@ import Login from '../components/Login';
 import Home from './Home';
 import CreateTopTenList from './CreateTopTenList';
 import TopTenListDetails from './TopTenListDetail';
-import ReusableItemDetails from './ReusableItemDetails';
+import ReusableItemDetail from './ReusableItemDetail';
 import Account from '../components/Account';
 import ForgotPassword from '../components/ForgotPassword';
 import ChangePassword from '../components/ChangePassword';
@@ -58,7 +58,7 @@ const App = () => (
 					<Route exact path="/" component={Home} />
 					<Route exact path="/newtoptenlist" component={CreateTopTenList} />
 					<Route exact path="/toptenlist/:id" component={TopTenListDetails} />
-					<Route exact path="/reusableitem/:id" component={ReusableItemDetails} />
+					<Route exact path="/reusableitem/:id" component={ReusableItemDetail} />
 					<Route exact path="/register" component={Register} />
 					<Route exact path="/welcome" component={Welcome} />
 					<Route exact path="/login" component={Login} />

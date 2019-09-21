@@ -7,7 +7,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
     'anon': '1000/day',
-    'user': '30/minute'
+    'user': '60/minute'
 }
 
 DEFAULT_FROM_EMAIL = 'Local test <noreply@localhost>'

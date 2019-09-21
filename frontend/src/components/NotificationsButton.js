@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import * as notificationReducer from '../modules/notification';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import NotificationsList from './NotificationsList';
 import Notification from './Notification';
-
-import store from '../store';
 
 import { COLORS } from '../constants';
 import './NotificationsButton.scss';
@@ -23,19 +22,32 @@ class NotificationsButton extends Component {
 		};
 
 		this.onClickButton = this.onClickButton.bind(this);
+		this.onClickNotification = this.onClickNotification.bind(this);
 	}
 
 	onClickButton = () => {
-		console.log('clicked');
+		const { dispatch, notifications } = this.props;
 		const { showNotificationsList } = this.state;
-		console.log(showNotificationsList);
+
 		this.setState({
 			'showNotificationsList': !showNotificationsList,
 		});
+
+		dispatch(notificationReducer.setNew(notifications, false));
+	}
+
+	onClickNotification = (id) => {
+		const { dispatch } = this.props;
+
+		this.setState({
+			'showNotificationsList': false,
+		});
+
+		dispatch(notificationReducer.updateNotification(id, 'unread', false));
 	}
 
 	render() {
-		const { notifications, reusableItems } = this.props;
+		const { notifications, reusableItems, newNotificationsCount } = this.props;
 		const { showNotificationsList } = this.state;
 		// TODO show message if no notifications
 		// TODO check for notifications every few seconds
@@ -51,16 +63,28 @@ class NotificationsButton extends Component {
 			<span className="notifications-nav">
 				<Link to="#" className="nav-link" onClick={this.onClickButton}><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'bell']} style={{ 'color': COLORS.BUTTONNOTIFICATIONS }} size="1x" /></span></Link>
 
+				{newNotificationsCount > 0
+					&& (
+						<span className="badge new">{newNotificationsCount}</span>
+					)}
+
 				{showNotificationsList
 					&& (
 						<NotificationsList>
-							{notifications.map(notification => (
-								<Notification
-									notification={notification}
-									key={notification.id}
-									reusableItem={reusableItems[notification.reusableItem]}
-								/>
-							))}
+							{notifications.length > 0
+								&& notifications.map(notification => (
+									<Notification
+										notification={notification}
+										key={notification.id}
+										onClickNotification={this.onClickNotification}
+										reusableItem={reusableItems[notification.reusableItem]}
+									/>
+								))}
+							{notifications.length === 0
+								&& (
+									<li>You have no notifications</li>
+								)
+							}
 						</NotificationsList>
 					)
 				}
@@ -70,12 +94,14 @@ class NotificationsButton extends Component {
 }
 
 NotificationsButton.defaultProps = {
-	'notifications': [],
 	'reusableItems': {},
 };
 
 NotificationsButton.propTypes = {
-	'notifications': PropTypes.arrayOf(PropTypes.any),
+	'dispatch': PropTypes.func.isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
+	'newNotificationsCount': PropTypes.number.isRequired,
+	'notifications': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'reusableItems': PropTypes.objectOf(PropTypes.any),
 };
 
