@@ -25,6 +25,19 @@ class NotificationsButton extends Component {
 		this.onClickNotification = this.onClickNotification.bind(this);
 	}
 
+	componentDidUpdate = (prevProps) => {
+		console.log('Notifications ***');
+		console.log('notifications button old pathname', prevProps.pathname);
+		console.log('notifications button pathname', this.props.pathname);
+
+		if (prevProps.pathname !== this.props.pathname) {
+			console.log('change');
+			this.setState({
+				'showNotificationsList': false,
+			});
+		}
+	}
+
 	onClickButton = () => {
 		const { dispatch, notifications } = this.props;
 		const { showNotificationsList } = this.state;

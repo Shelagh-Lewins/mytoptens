@@ -28,7 +28,6 @@ import './TopTenListDetail.scss';
 class TopTenListDetails extends Component {
 	constructor(props) {
 		super();
-		console.log('top ten list constructor props', props);
 
 		// load the topTenList and any parent / children
 		this.getTopTenListData = this.getTopTenListData.bind(this);
@@ -50,8 +49,6 @@ class TopTenListDetails extends Component {
 		} = this.props;
 
 		const { id } = this.state;
-
-		console.log('top ten list details props', this.props);
 
 		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this topTenList

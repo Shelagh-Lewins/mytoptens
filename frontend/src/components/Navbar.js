@@ -25,18 +25,11 @@ class Navbar extends Component {
 
 	componentDidUpdate = (prevProps) => {
 		console.log('***');
-		console.log('nav old pathname', prevProps.history.location.pathname);
-		console.log('nav new pathname', this.props.history.location.pathname);
-		console.log('nav match', this.props.match);
+		console.log('nav old pathname', prevProps.location.pathname);
+		console.log('nav new pathname', this.props.location.pathname);
 
-		// let { location: { pathname } } = this.props.history
-
-		if (prevProps.history.location.pathname !== this.props.history.location.pathname) {
+		if (prevProps.location.pathname !== this.props.location.pathname) {
 			console.log('change');
-		}
-
-		if (prevProps.match.params.url !== this.props.match.params.url) {
-			console.log('new match');
 		}
 	}
 
@@ -72,6 +65,7 @@ class Navbar extends Component {
 			auth,
 			dispatch,
 			history,
+			location,
 			newNotificationsCount,
 			notifications,
 			reusableItems,
@@ -91,6 +85,7 @@ class Navbar extends Component {
 						history={history}
 						newNotificationsCount={newNotificationsCount}
 						notifications={notifications}
+						pathname={location.pathname}
 						reusableItems={reusableItems}
 					/>
 				</li>
