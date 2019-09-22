@@ -4,7 +4,6 @@ import store from '../store';
 import fetchAPI from './fetchAPI';
 import { getErrors, clearErrors } from './errors';
 import isEmpty from './isEmpty';
-import { fetchNotifications } from './notification';
 
 const updeep = require('updeep');
 

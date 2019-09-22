@@ -7,6 +7,7 @@
 		background: $color-search-background;
 		border: 1px solid $color-search-border;
 		position: absolute;
+		width: 230px;
 		z-index: 10;
 	}
 
@@ -22,6 +23,19 @@
 
 		&:last-child {
 			border-bottom: 0;
+		}
+
+		.detail {
+			color: $color-search-detail;
+			display: block;
+			max-height: 2em;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+
+			svg {
+				margin-right: 8px;
+			}
 		}
 	}
 
