@@ -60,6 +60,19 @@ export function searchHomeListsItems(searchTerm) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
+			console.log('lists and items', response.results);
+
+			// find the Top Ten List for each Top Ten Item
+			const associatedTopTenLists = [];
+			response.results.map((obj) => {
+				if (obj.type === 'TopTenItem') {
+					console.log('add', obj);
+					associatedTopTenLists.push(obj.topTenList_id);
+				}
+			});
+
+			console.log('lists for items', associatedTopTenLists);
+
 			return dispatch(searchHomeListsItemsSucceeded(response.results));
 		}).catch((error) => {
 			dispatch(searchHomeFailed());

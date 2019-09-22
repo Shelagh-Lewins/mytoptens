@@ -276,6 +276,7 @@ class SearchListsItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=too-m
     pagination_class = LimitPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    sorting_fields = ['name']
 
     def get_querylist(self):
         topTenList_query_set = {'queryset': TopTenList.objects.all(), 'serializer_class': TopTenListSerializer}
@@ -378,7 +379,6 @@ class SearchReusableItemsView(FlatMultipleModelAPIViewSet): # pylint: disable=to
 
         # authenticated user can view public ReusableItems and ReusableItems the user created
         if self.request.user.is_authenticated:
-            print('authenticated')
             reusableItem_query_set['queryset'] = reusableItem_query_set['queryset'].filter(
                 Q(created_by=self.request.user) |
                 Q(is_public=True)
