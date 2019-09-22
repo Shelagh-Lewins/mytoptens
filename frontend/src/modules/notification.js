@@ -127,6 +127,34 @@ export const setNew = (idArray, value) => (dispatch) =>  {
 	});
 };
 
+// /////////////////////////
+// delete notification
+export function deleteNotificationSucceeded(id) {
+	return {
+		'type': DELETE_NOTIFICATION_SUCCEEDED,
+		'payload': {
+			id,
+		},
+	};
+}
+
+export const deleteNotification = id => (dispatch, getState) => {
+	if (!getState().auth.user.token) {
+		return;
+	}
+
+	return fetchAPI({
+		'url': `/api/v1/content/notification/${id}/`,
+		'method': 'DELETE',
+		'useAuth': true,
+	}).then((response) => {
+		dispatch(fetchNotifications());
+		return dispatch(deleteNotificationSucceeded(id));
+	}).catch((error) => {
+		return dispatch(getErrors({ 'delete notification': error.message }));
+	});
+};
+
 // ////////////////////////////////
 // Reducer
 const initialNotificationsState = {
@@ -194,6 +222,10 @@ export default function notification(state = initialNotificationsState, action) 
 			};
 
 			return updeep({ 'things': { [action.payload.id]: update } }, state);
+		}
+
+		case DELETE_NOTIFICATION_SUCCEEDED: {
+			return updeep({ 'things': updeep.omit([action.payload.id]) }, state);
 		}
 
 		default:

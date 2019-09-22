@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import * as notificationReducer from '../modules/notification';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import * as notificationReducer from '../modules/notification';
 
 import NotificationsList from './NotificationsList';
 import Notification from './Notification';
@@ -15,27 +16,44 @@ class NotificationsButton extends Component {
 	constructor(props) {
 		super();
 
-		// console.log('props', props);
-
 		this.state = {
 			'showNotificationsList': false,
 		};
 
+		this.fetchNotifications = this.fetchNotifications.bind(this);
 		this.onClickButton = this.onClickButton.bind(this);
 		this.onClickNotification = this.onClickNotification.bind(this);
+		this.onDeleteNotification = this.onDeleteNotification.bind(this);
+	}
+
+	componentDidMount = () => {
+		// check notifications at regular intervals
+		this.fetchNotifications();
+
+		this.queryServerInterval = setInterval(() => {
+			this.fetchNotifications();
+		}, 7000);
 	}
 
 	componentDidUpdate = (prevProps) => {
-		console.log('Notifications ***');
-		console.log('notifications button old pathname', prevProps.pathname);
-		console.log('notifications button pathname', this.props.pathname);
+		// hide the notifications list if the user navigates to a different page
+		const { pathname } = this.props;
 
-		if (prevProps.pathname !== this.props.pathname) {
-			console.log('change');
+		if (prevProps.pathname !== pathname) {
 			this.setState({
 				'showNotificationsList': false,
 			});
 		}
+	}
+
+	componentWillUnmount = () => {
+		clearInterval(this.queryServerInterval);
+	}
+
+	fetchNotifications = () => {
+		const { dispatch } = this.props;
+
+		dispatch(notificationReducer.fetchNotifications());
 	}
 
 	onClickButton = () => {
@@ -59,15 +77,21 @@ class NotificationsButton extends Component {
 		dispatch(notificationReducer.updateNotification(id, 'unread', false));
 	}
 
+	onDeleteNotification = (id) => {
+		const { dispatch } = this.props;
+
+		dispatch(notificationReducer.deleteNotification(id));
+	}
+
 	render() {
-		const { notifications, reusableItems, newNotificationsCount } = this.props;
+		const {
+			dispatch,
+			notifications,
+			reusableItems,
+			newNotificationsCount,
+		} = this.props;
 		const { showNotificationsList } = this.state;
-		// TODO show message if no notifications
-		// TODO check for notifications every few seconds
-		// TODO pull in reusable item data so name can be shown
-		// TODO show meaningful message
-		// TODO link to reusable item / top ten item
-		// TODO show badge count of new notifications
+
 		// TODO delete notifications
 		// TODO limit total number of notifications shown?
 
@@ -87,9 +111,11 @@ class NotificationsButton extends Component {
 							{notifications.length > 0
 								&& notifications.map(notification => (
 									<Notification
+										dispatch={dispatch}
 										notification={notification}
 										key={notification.id}
 										onClickNotification={this.onClickNotification}
+										onDeleteNotification={this.onDeleteNotification}
 										reusableItem={reusableItems[notification.reusableItem]}
 									/>
 								))}
@@ -112,9 +138,9 @@ NotificationsButton.defaultProps = {
 
 NotificationsButton.propTypes = {
 	'dispatch': PropTypes.func.isRequired,
-	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'newNotificationsCount': PropTypes.number.isRequired,
 	'notifications': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'pathname': PropTypes.string.isRequired,
 	'reusableItems': PropTypes.objectOf(PropTypes.any),
 };
 

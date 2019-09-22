@@ -146,7 +146,7 @@ export const getUserInfo = () => (dispatch) => {
 		'method': 'GET',
 		'useAuth': true,
 	}).then((user) => {
-		dispatch(fetchNotifications());
+		// dispatch(fetchNotifications());
 		return dispatch(setUserInfo({
 			'username': user.username,
 			'email': user.email,

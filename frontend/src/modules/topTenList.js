@@ -301,7 +301,11 @@ export function deleteTopTenListSucceeded(id) {
 	};
 }
 
-export const deleteTopTenList = id => (dispatch) => {
+export const deleteTopTenList = id => (dispatch, getState) => {
+	if (!getState().auth.user.token) {
+		return;
+	}
+
 	return fetchAPI({
 		'url': `/api/v1/content/toptenlist/${id}/`,
 		'method': 'DELETE',

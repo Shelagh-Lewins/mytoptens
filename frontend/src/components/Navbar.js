@@ -14,23 +14,12 @@ import Search from './Search';
 
 class Navbar extends Component {
 	constructor(props) {
-		console.log('nav constructor');
 		super(props);
 		this.state = {
 			'showDropdown': false,
 		};
 
 		this.onLogout = this.onLogout.bind(this);
-	}
-
-	componentDidUpdate = (prevProps) => {
-		console.log('***');
-		console.log('nav old pathname', prevProps.location.pathname);
-		console.log('nav new pathname', this.props.location.pathname);
-
-		if (prevProps.location.pathname !== this.props.location.pathname) {
-			console.log('change');
-		}
 	}
 
 	onLogout(e) {
@@ -129,6 +118,7 @@ Navbar.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
+	'location': PropTypes.objectOf(PropTypes.any).isRequired,
 	'newNotificationsCount': PropTypes.number.isRequired,
 	'notifications': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'reusableItems': PropTypes.objectOf(PropTypes.any).isRequired,
@@ -137,8 +127,9 @@ Navbar.propTypes = {
 	'searchResults': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state, ownProps) => ({
 	'auth': state.auth,
+	'location': ownProps.location,
 	'notifications': notificationReducer.getSortedNotifications(state),
 	'newNotificationsCount': notificationReducer.getNewNotificationsCount(state),
 	'reusableItems': state.reusableItem.things,
@@ -147,6 +138,4 @@ const mapStateToProps = state => ({
 	'searchResults': state.page.searchResults,
 });
 
-export default connect(mapStateToProps)(withRouter(Navbar));
-// export default withRouter(connect(mapStateToProps)(Navbar));
-
+export default withRouter(connect(mapStateToProps)(Navbar));
