@@ -14,8 +14,10 @@ djangoproject/__pycache__/
 djangoproject/settings/__pycache__/
 toptenlists/__pycache__/
 toptenlists/migrations/__pycache__/
+toptenlists/tests/__pycache__/
 users/__pycache__/
 users/migrations/__pycache__/
+users/tests/__pycache__/
 
 # build output files
 assets/
