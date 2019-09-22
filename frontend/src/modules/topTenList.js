@@ -507,7 +507,8 @@ export default function topTenList(state = initialTopTenListsState, action) {
 				'next': next,
 				// 'things': updeep.constant(things), // constant provides placement instead of update, so all previous entries are removed
 				'things': things, // add data because notifications also use top ten lists
-				'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
+				// 'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
+				// update: must not clear out old organizer data, because notifications contain top ten list information
 				'isLoading': false,
 			}, state);
 		}

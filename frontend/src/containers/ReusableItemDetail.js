@@ -362,6 +362,15 @@ class ReusableItemDetail extends Component {
 							</Row>
 						</React.Fragment>
 					)}
+					{!reusableItem.change_request_my_vote && (
+						<React.Fragment>
+							<Row>
+								<Col>
+									You have not yet voted on this change request
+								</Col>
+							</Row>
+						</React.Fragment>
+					)}
 					{isAuthenticated && reusableItem.change_request_by === user.id
 					&& (
 						<Row>

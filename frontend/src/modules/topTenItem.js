@@ -215,7 +215,8 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 			return updeep({
 				// 'things': updeep.constant(things),
 				'things': things, // add data because notifications also use top ten items
-				'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
+				// 'organizerData': updeep.constant({}), // new topTenList data so clear out old organizer data, this must be loaded separately
+				// update: must not clear out old organizer data, because notifications contain top ten item information
 				'isLoading': false,
 			}, state);
 		}

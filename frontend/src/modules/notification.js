@@ -76,7 +76,7 @@ export function fetchNotifications() {
 			'method': 'GET',
 			'useAuth': true,
 		}).then((response) => {
-			// console.log('fetchNotifications response', response);
+			console.log('fetchNotifications response', response);
 			const data = {
 				'entities': normalize(response, [notificationSchema]).entities,
 			};
