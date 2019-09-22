@@ -4,6 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Col } from 'reactstrap';
 import { Link } from 'react-router-dom';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { COLORS } from '../constants';
 // Note how the is_public is updated without making this into a React Component with state.
 // By using props to populate the UI, we enable time travel and a direct connection with the store.
 
@@ -44,7 +47,7 @@ const TopTenListSummary = (props) => {
 				</Link>
 
 				{showCreatedBy
-					&& <div className="toptenlist-created-by">{topTenList.created_by_username}</div>
+					&& <div className="toptenlist-created-by" title="Top Ten List owner"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}</div>
 
 				}
 			</div>

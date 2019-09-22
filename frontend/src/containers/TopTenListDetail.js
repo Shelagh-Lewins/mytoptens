@@ -6,6 +6,9 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { COLORS } from '../constants';
+
 import FlashMessage from '../components/FlashMessage';
 import IsPublicIndicator from '../components/IsPublicIndicator';
 import EditableTextField from '../components/EditableTextField';
@@ -257,6 +260,11 @@ class TopTenListDetails extends Component {
 										handleNewValue={this.handleNewValue}
 										value={topTenList_name}
 									/>
+									{!canEdit && (
+										<div className="owner" title="Top Ten List owner">
+											<FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}
+										</div>
+									)}
 									{canEdit && (
 										<div className="toptenlist-detail-controls">
 											<IsPublicIndicator

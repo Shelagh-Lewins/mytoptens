@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 // fontawesome
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-	faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit, faBell,
+	faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit, faBell, faUser,
 } from '@fortawesome/free-solid-svg-icons'; // import the icons you want
 
 import store from '../store';
@@ -32,7 +32,7 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import './App.scss';
 // note that the Django template pages reset password loads the bootstrap css from static/bootstrap
 
-library.add(faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit, faBell); // and add them to your library
+library.add(faPencilAlt, faClone, faPlus, faListOl, faStickyNote, faQuestionCircle, faEdit, faBell, faUser); // and add them to your library
 
 // usage: for regular icons, import the component and specify 'far' i.e. font awesome regular as below
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
