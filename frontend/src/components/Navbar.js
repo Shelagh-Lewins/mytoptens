@@ -65,20 +65,24 @@ class Navbar extends Component {
 		const { isAuthenticated, user } = auth;
 		const { showDropdown } = this.state;
 
-		const authLinks = user.username
-		&& (
+		const authLinks = (
 			<ul className="navbar-nav ml-auto">
-				<li className="nav-item">
-					<NotificationsButton
-						dispatch={dispatch}
-						history={history}
-						newNotificationsCount={newNotificationsCount}
-						notifications={notifications}
-						pathname={location.pathname}
-						reusableItems={reusableItems}
-					/>
-				</li>
-				<li className="nav-item"><Link to="/account" className="nav-link">{user.username}</Link></li>
+				{user.username
+					&& (
+						<React.Fragment>
+							<li className="nav-item">
+								<NotificationsButton
+									dispatch={dispatch}
+									history={history}
+									newNotificationsCount={newNotificationsCount}
+									notifications={notifications}
+									pathname={location.pathname}
+									reusableItems={reusableItems}
+								/>
+							</li>
+							<li className="nav-item"><Link to="/account" className="nav-link">{user.username}</Link></li>
+						</React.Fragment>
+					)}
 				<li className="nav-item"><Link to="/" className="nav-link" onClick={this.onLogout}>Logout</Link></li>
 			</ul>
 		);

@@ -154,6 +154,8 @@ export const getUserInfo = () => (dispatch) => {
 			'emailVerified': user.email_verified,
 		}));
 	}).catch((error) => {
+		console.log('getUserInfo error');
+		dispatch(logoutUser()); // if the JWT token is invalid, e.g. because the account no longer exists, unblock the UI so the user can log in
 		return dispatch(getErrors({ 'get user info': 'Unable to get user info' }));
 	});
 };

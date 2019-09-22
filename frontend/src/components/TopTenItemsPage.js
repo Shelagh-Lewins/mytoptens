@@ -100,7 +100,6 @@ class TopTenItemsPage extends Component {
 	// user selects an item name from a dropdown list. This can be to use text directly, or to use or create a ReusableItem
 	onSelectItemName(e, widgetId) {
 		// we expect a widgetId like 1_name, 2_name
-		console.log('onSelectItemName. type', e.type);
 		this.setState({
 			[`${widgetId}`]: e.name,
 		});
@@ -146,7 +145,6 @@ class TopTenItemsPage extends Component {
 	}
 
 	handleNewValue = (element) => {
-		console.log('handleNewValue');
 		const { dispatch } = this.props;
 		const { state } = this;
 		const topTenItemId = element.dataset.entityid;

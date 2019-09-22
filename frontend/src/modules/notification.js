@@ -176,7 +176,7 @@ export const getSortedNotifications = createSelector(
 			return notifications[id];
 		});
 
-		notificationsArray.sort((a, b) => a.created_at < b.created_at);
+		notificationsArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
 		return notificationsArray;
 	},
