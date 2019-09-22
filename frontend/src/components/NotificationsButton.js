@@ -92,9 +92,6 @@ class NotificationsButton extends Component {
 		} = this.props;
 		const { showNotificationsList } = this.state;
 
-		// TODO delete notifications
-		// TODO limit total number of notifications shown?
-
 		// Link is used for formatting consistency with the navbar links
 		return (
 			<span className="notifications-nav">

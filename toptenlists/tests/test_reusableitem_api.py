@@ -265,6 +265,7 @@ class CreateReusableItemAPITest(APITestCase):
         self.assertEqual(newreusableitem.name, reusableitem_1_data['name'])
         self.assertEqual(newreusableitem.definition, reusableitem_1_data['reusableItemDefinition'])
         self.assertEqual(newreusableitem.link, reusableitem_1_data['reusableItemLink'])
+        self.assertEqual(newreusableitem.is_public, False)
 
 class ModifyReusableItemAPITest(APITestCase):
     @classmethod

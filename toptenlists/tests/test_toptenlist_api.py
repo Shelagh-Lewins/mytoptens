@@ -706,15 +706,9 @@ class EditTopTenItemAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # the owner of top ten item 2 should get a notification
-        self.assertEqual(Notification.objects.count(), 1)
-
-        notification = Notification.objects.first()
-        self.assertEqual(notification.created_by, self.user)
-        self.assertEqual(notification.context, 'reusableItem')
-        self.assertEqual(notification.event, 'reusableItemFromTopTenItem')
-        self.assertEqual(notification.reusableItem, ReusableItem.objects.first())
-        self.assertEqual(notification.topTenItem, topTenItems[0])
+        # the owner of top ten item 2 should NOT get a notification because the new reusable item is not public
+        self.assertEqual(Notification.objects.count(), 0)
+        self.assertEqual(json.loads(response.content)['reusableItem']['is_public'], False)
 
     def test_create_reusable_item_from_others_private_toptenitem(self):
         """
