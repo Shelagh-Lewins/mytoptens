@@ -119,8 +119,12 @@ class ReusableItemDetail extends Component {
 	}
 
 
-	onDeleteTopTenList() {
-		console.log('onDeleteTopTenList clicked');
+	onDeleteTopTenList({ id, name }) {
+		if (confirm(`Are you sure you want to delete the topTenList ${name}`)) { // eslint-disable-line no-restricted-globals
+			const { dispatch } = this.props;
+
+			dispatch(topTenListReducer.deleteTopTenList(id));
+		}
 	}
 
 	getReusableItemData = (props) => {

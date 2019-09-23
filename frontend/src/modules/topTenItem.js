@@ -10,6 +10,7 @@ import {
 } from './auth';
 
 import {
+	DELETE_TOPTENLIST_SUCCEEDED,
 	RECEIVE_ENTITIES,
 	FETCH_TOPTENLIST_DETAIL_STARTED,
 	RECEIVE_ORGANIZER_DATA,
@@ -247,6 +248,20 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 				topTenItemsObject[topTenItemObject.id] = topTenItemObject;
 			});
 			return updeep({ 'things': topTenItemsObject }, state);
+		}
+
+		case DELETE_TOPTENLIST_SUCCEEDED: {
+			const topTenItems = state.things;
+			const topTenItemsToDelete = [];
+
+			Object.keys(topTenItems).forEach((topTenItemId) => {
+				const topTenItemObj = state.things[topTenItemId];
+
+				if (topTenItemObj.topTenList_id === action.payload.id) {
+					topTenItemsToDelete.push(topTenItemObj.id);
+				}
+			});
+			return updeep({ 'things': updeep.omit(topTenItemsToDelete) }, state);
 		}
 
 		case RECEIVE_ORGANIZER_DATA: {
