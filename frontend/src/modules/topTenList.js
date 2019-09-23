@@ -355,13 +355,14 @@ export const setTopTenListIsPublic = ({ id, is_public }) => (dispatch) => {
 // note that the topTenLists's list of topTenItems is called 'topTenItem' for consistency with the database.
 const initialTopTenListsState = {
 	'isLoading': false,
+	'isLoadingOrganizerData': false,
 	'error': null,
 	'count': 0,
 	'next': '',
 	'previous': '',
 	'things': {},
-	'isLoadingOrganizerData': false,
-	'organizerData': {},
+	// 'isLoadingOrganizerData': false,
+	// 'organizerData': {},
 };
 
 // 'state' here is global state
@@ -412,15 +413,15 @@ export const getTopLevelMyGroupedTopTenLists = createSelector(
 
 // ///////////////////////////
 // organizer data
-export const getOrganizerTopTenLists = state => state.topTenList.organizerData;
-const getOrganizerTopTenItems = state => state.topTenItem.organizerData;
+export const getOrganizerTopTenLists = state => state.topTenList.things;
+const getOrganizerTopTenItems = state => state.topTenItem.things;
 
 // returns topTenLists in an array, sorted by name
-// instead of the state.topTenList.organizerData object, keyed by id
+// instead of the state.topTenList.things object, keyed by id
 export const getSortedOrganizerTopTenLists = createSelector(
 	[getOrganizerTopTenLists],
 	(topTenLists) => {
-		const topTenListsArray = Object.keys(topTenLists).map((id) => topTenLists[id]);
+		const topTenListsArray = Object.keys(topTenLists).map(id => topTenLists[id]);
 
 		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -514,7 +515,6 @@ export const getMyTopTenListsForReusableItem = createSelector(
 export const getParentTopTenItemAndTopTenList = createSelector(
 	[getOrganizerTopTenLists, getOrganizerTopTenItems],
 	// find a topTenLists's parent topTenItem and the parent topTenList, if any
-	// uses the organizer data which has minimal data for all topTenLists belonging to that user
 	(topTenLists, topTenItems) => (topTenListObject) => {
 		let parentTopTenItem;
 		let parentTopTenList;
@@ -567,6 +567,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 				'next': next,
 				'things': things, // add data because notifications also use top ten lists
 				'isLoading': false,
+				'isLoadingOrganizerData': false,
 			}, state);
 		}
 
@@ -662,7 +663,8 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			const organizerData = newEntities.topTenList || {};
 
 			return updeep({
-				'organizerData': updeep.constant(organizerData),
+				// 'organizerData': updeep.constant(organizerData),
+				'things': organizerData,
 				'isLoadingOrganizerData': false,
 			}, state);
 		}

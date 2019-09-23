@@ -113,9 +113,6 @@ class ReusableItemDetail extends Component {
 	}
 
 	onChangeTopTenListIsPublic({ id, is_public }) {
-		console.log('onChangeTopTenListIsPublic clicked');
-		console.log('id', id);
-		console.log('is_public', is_public);
 		const { dispatch } = this.props;
 
 		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
@@ -510,7 +507,7 @@ ReusableItemDetail.propTypes = {
 	'isLoadingOrganizerData': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
-	'myTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'myTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired, // may want to filter on my lists only
 	'topTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 

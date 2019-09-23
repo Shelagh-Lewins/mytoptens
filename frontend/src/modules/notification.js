@@ -167,7 +167,7 @@ const initialNotificationsState = {
 const getNotifications = state => state.notification.things;
 
 // returns notifications in an array, sorted by name
-// instead of the state.notification.organizerData object, keyed by id
+// instead of the state.notification.things object, keyed by id
 export const getSortedNotifications = createSelector(
 	[getNotifications],
 	(notifications) => {

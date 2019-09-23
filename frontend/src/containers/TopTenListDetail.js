@@ -44,6 +44,7 @@ class TopTenListDetails extends Component {
 	}
 
 	componentDidUpdate(prevProps) {
+		console.log('TopTenListDetail update');
 		const {
 			auth,
 			isLoading,

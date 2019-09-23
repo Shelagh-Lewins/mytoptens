@@ -178,7 +178,6 @@ export const fetchReusableItemDetail = id => (dispatch, getState) => {
 		if (getState().auth.isAuthenticated) {
 			userId = getState().auth.user.id;
 		} */
-		// console.log('reducer says fetchOrganizerData');
 
 		dispatch(topTenListsReducer.fetchOrganizerData({ 'reusableItemId': id }));
 

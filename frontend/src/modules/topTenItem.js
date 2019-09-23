@@ -141,14 +141,14 @@ const initialTopTenItemsState = {
 	'next': null,
 	'previous': null,
 	'things': {},
-	'organizerData': {},
+	// 'organizerData': {},
 };
 
 // ///////////////////////////
 // organizer data
 // all topTenItems and topTenLists, for selector to use
-export const getOrganizerTopTenItems = state => state.topTenItem.organizerData;
-const getOrganizerTopTenLists = state => state.topTenList.organizerData;
+export const getOrganizerTopTenItems = state => state.topTenItem.things;
+const getOrganizerTopTenLists = state => state.topTenList.things;
 
 export const groupedTopTenItems = createSelector(
 	[getOrganizerTopTenItems, getOrganizerTopTenLists],
@@ -262,7 +262,9 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 					}
 				});
 
-				return updeep({ 'organizerData': updeep.constant(topTenItemObject), 'isLoading': false }, state);
+				return updeep({ 'things': topTenItemObject, 'isLoading': false }, state);
+
+				// return updeep({ 'organizerData': updeep.constant(topTenItemObject), 'isLoading': false }, state);
 			}
 
 			return updeep(state, state);

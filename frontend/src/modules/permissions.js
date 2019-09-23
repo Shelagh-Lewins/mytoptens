@@ -38,8 +38,9 @@ export function canEditTopTenList(id) {
 	// a topTenList can be edited if created by user
 	const state = store.getState();
 	const userId = state.auth.user.id;
+	const topTenLists = state.topTenList.things;
 	let canEdit = false;
-
+	/*
 	// can use organizer data or full top ten list data
 	// organizer data not loaded in Home
 	// full data not loaded in list detail
@@ -49,7 +50,7 @@ export function canEditTopTenList(id) {
 		topTenLists = state.topTenList.things;
 	} else if (Object.keys(state.topTenList.organizerData).length > 0) {
 		topTenLists = state.topTenList.organizerData;
-	}
+	} */
 
 	if (Object.keys(topTenLists).length > 0) {
 		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
