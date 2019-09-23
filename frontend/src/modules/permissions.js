@@ -95,7 +95,9 @@ export function canViewReusableItem(reusableItem) {
 export function reusableItemChangeRequestsAvailable(reusableItem, myTopTenItems) {
 	const { auth } = store.getState();
 	const { isAuthenticated, user } = auth;
-
+	console.log('*** permissions', reusableItem);
+	console.log('auth', auth);
+	console.log('myTopTenItems', myTopTenItems);
 	if (!reusableItem) {
 		return false;
 	}

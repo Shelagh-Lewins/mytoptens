@@ -18,9 +18,14 @@
 
 		button {
 			border: 0;
-			margin-left: 8px;
+			margin: 0 8px;
 			padding: 0;
 		}
+	}
+
+	.about {
+		color: $color-hint;
+		font-size: 0.8rem;
 	}
 
 	.summary {
@@ -37,7 +42,7 @@
 		padding: 10px;
 
 		button {
-			margin: 8px 8px 0 0;
+			margin: 8px 8px 8px 0;
 		}
 
 		.invalid-feedback {
@@ -47,6 +52,10 @@
 				content: "\2718 ";
 			}
 		}
+	}
+
+	.topTenLists-list {
+		margin: 8px 0 8px 0;
 	}
 }
 

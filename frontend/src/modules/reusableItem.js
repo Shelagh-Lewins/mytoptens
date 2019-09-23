@@ -319,64 +319,6 @@ export const updateReusableItem = (id, data) => (dispatch, getState) => {
 // ////////////////////////////////
 // Reducer
 
-// this is no longer used but shows the data structure
-/* const fakeResuableItems = [
-	{
-		'id': '1001',
-		'created_by': '1234', // UUID
-		'created_at': new Date(),
-		'name': 'Jane austen', // name, definition, link need to be easily accessible and searchable. This is the third version.
-		'definition': 'English novelist (16 December 1775 – 18 July 1817)',
-		'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-		'modified_at': new Date(),
-		'users_when_modified': 403, // number of different users referencing this resuableItem in their own lists at the time when the last update was accepted. This is for tracking the approval process.
-		'change_request_votes_yes': [], // votes cast for the most recent change request
-		'change_request_votes_no': [],
-		'change_request': [ // may need to allow multiple proposed edits
-		// prevent same user voting more than once
-		// allow them to change their vote
-		// only allow votes by people using the item? And remove the vote if they stop using the item. Time delay?
-		// check for approval a few seconds after vote cast?
-		// user sees a notification that there is a suggested edit on an item they are referencing
-			{ // proposed change not yet approved
-				'name': 'Jane Austen',
-				'definition': 'English novelist (16 December 1775 – 18 July 1817)',
-				'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-				'change_request_by': '1234',
-				'change_request_at': new Date(),
-				'change_request_votes_yes': [], // list of usernames
-				'change_request_votes_no': [], // list of usernames
-			},
-		],
-		'change_request_by': '1234',
-		'history': [ // not sure this will be used but safer to keep it from the start
-		// when a new version is accepted, add current version to history
-		// remove version from suggested_edits
-		// update current values
-			{ // first version
-				'name': 'Jane austin',
-				'definition': 'Writer',
-				'link': '',
-				'change_request_by': '1234',
-				'modified_at': new Date(),
-				'users_when_modified': 403,
-				'change_request_votes_yes': [],
-				'change_request_votes_no': [],
-			},
-			{ // second version
-				'name': 'Jane austen',
-				'definition': 'Novelist',
-				'link': 'https://en.wikipedia.org/wiki/Jane_Austen',
-				'change_request_by': '1234',
-				'modified_at': new Date(),
-				'users_when_modified': 403,
-				'change_request_votes_yes': [],
-				'change_request_votes_no': [],
-			}
-		]
-	}
-]; */
-
 const initialResuableItemsState = {
 	'isLoading': false,
 	'error': null,
@@ -475,8 +417,6 @@ export const getSortedReusableItemSuggestions = createSelector(
 );
 
 export const getReusableItemList = (state) => {
-	// console.log('running getReusableItemList');
-	// console.log('widgetIds', widgetIds);
 	const sortedResults = getSortedReusableItemSuggestions(state);
 	const { search } = state.reusableItem;
 	const results = {};

@@ -222,7 +222,7 @@ class TopTenListDetails extends Component {
 
 			breadcrumbs = (
 				<div className="breadcrumbs">
-					<Link to={`/topTenList/${parentTopTenList.id}`}><span className="name"><span className="icon" title="Top Ten List' ><FontAwesomeIcon icon={['fas', 'list-ol"]} style={{ 'color': COLORS.TOPTENLIST }} size="1x" /></span></span>{parentTopTenList.name} &gt; <span className="icon" title="Top Ten Item" ><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{parentTopTenItem.name}</Link>
+					<Link to={`/topTenList/${parentTopTenList.id}`}><span className="name"><span className="icon" title="Top Ten List" ><FontAwesomeIcon icon={['fas', 'list-ol']} style={{ 'color': COLORS.TOPTENLIST }} size="1x" /></span></span>{parentTopTenList.name} &gt; <span className="icon" title="Top Ten Item" ><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{parentTopTenItem.name}</Link>
 				</div>
 			);
 		}

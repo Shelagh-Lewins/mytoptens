@@ -62,14 +62,16 @@ class ReusableItemDetail extends Component {
 			match,
 			auth,
 			reusableItem,
-			topTenLists,
+			// topTenLists,
+			myTopTenItems,
 			isLoadingOrganizerData,
 			history,
 		} = this.props;
-
+		console.log('checking props', myTopTenItems);
 		let { id } = this.state;
 
 		if (reusableItem && prevProps.isLoading && !isLoading) {
+			console.log('update 1');
 			// loaded a reusableItem
 			this.setState({
 				'canView': permissions.canViewReusableItem(reusableItem),
@@ -79,9 +81,11 @@ class ReusableItemDetail extends Component {
 		}
 
 		// loaded a new list of top ten lists that reference this reusableItem
+		// TODO this doesn't fire reliably, maybe a timing issue with main data loading first.
 		if (reusableItem && prevProps.isLoadingOrganizerData && !isLoadingOrganizerData) {
+			console.log('update 2');
 			this.setState({
-				'changeRequestsAvailable': permissions.reusableItemChangeRequestsAvailable(reusableItem, topTenLists),
+				'changeRequestsAvailable': permissions.reusableItemChangeRequestsAvailable(reusableItem, myTopTenItems),
 			});
 		}
 
@@ -150,7 +154,7 @@ class ReusableItemDetail extends Component {
 		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest changes to it. Do you want to continue?';
 
 		if (currentIsPublic) {
-			text = 'This is a public Reusable Item. This action will make a private copy of it which your lists will reference. Do you want to continue?';
+			text = 'This is a public Reusable Item. This action will make a private copy of it which your Top Ten Items will reference instead. Do you want to continue?';
 		}
 
 		if (confirm(text)) { // eslint-disable-line no-restricted-globals
@@ -214,7 +218,7 @@ class ReusableItemDetail extends Component {
 	}
 
 	renderReusableItem() {
-		const { auth, reusableItem } = this.props;
+		const { auth, reusableItem, reusableItemUsersCount } = this.props;
 		const { isAuthenticated, user } = auth;
 
 		const { changeRequestsAvailable, isOwner, showChangeRequestForm } = this.state;
@@ -415,7 +419,7 @@ class ReusableItemDetail extends Component {
 							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
 							{reusableItem.name}
 						</h2>
-						{isOwner && (
+						{changeRequestsAvailable && (
 							<div className="reusableitem-summary-controls">
 								<IsPublicIndicator
 									targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
@@ -425,8 +429,7 @@ class ReusableItemDetail extends Component {
 							</div>
 						)}
 						<span className="about">
-							Reusable item
-							{reusableItemIcon}
+							Reusable item referenced by {reusableItemUsersCount} users {reusableItemIcon}
 						</span>
 						{reusableItem.definition && (<p className="definition">{reusableItem.definition}</p>)}
 						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
@@ -511,7 +514,9 @@ ReusableItemDetail.propTypes = {
 	'isLoadingOrganizerData': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
+	'myTopTenItems': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'myTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired, // may want to filter on my lists only
+	'reusableItemUsersCount': PropTypes.number.isRequired,
 	'topTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
@@ -521,7 +526,9 @@ const mapStateToProps = (state, ownProps) => ({
 	'isLoading': state.reusableItem.isLoading,
 	'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
 	'reusableItem': state.reusableItem.things[ownProps.match.params.id],
+	'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, ownProps),
 	'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
+	'reusableItemUsersCount': topTenListReducer.getReusableItemUsersCount(state, ownProps),
 	'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, ownProps), // all topTenItems that reference this reusableItem
 });
 
