@@ -59,7 +59,8 @@ class ReusableItemDetail extends Component {
 			match,
 			auth,
 			reusableItem,
-			topTenItems,
+			// topTenItems,
+			topTenLists,
 			isLoadingOrganizerData,
 			history,
 		} = this.props;
@@ -75,10 +76,10 @@ class ReusableItemDetail extends Component {
 			});
 		}
 
-		// loaded a new list of the user's own topTenItems that reference this reusableItem
+		// loaded a new list of top ten lists that reference this reusableItem
 		if (reusableItem && prevProps.isLoadingOrganizerData && !isLoadingOrganizerData) {
 			this.setState({
-				'changeRequestsAvailable': permissions.reusableItemChangeRequestsAvailable(reusableItem, topTenItems),
+				'changeRequestsAvailable': permissions.reusableItemChangeRequestsAvailable(reusableItem, topTenLists),
 			});
 		}
 
@@ -92,9 +93,9 @@ class ReusableItemDetail extends Component {
 		}
 
 		// user has just logged in or out
-		if ((this.props.auth.user.id && (this.props.auth.user.id !== prevProps.auth.user.id))
+		if ((auth.user.id && (auth.user.id !== prevProps.auth.user.id))
 		|| (prevProps.auth.isAuthenticated !== auth.isAuthenticated)) {
-			console.log('auth change in component');
+			// console.log('auth change in component');
 			this.getReusableItemData(this.props);
 		}
 
@@ -112,7 +113,7 @@ class ReusableItemDetail extends Component {
 	getReusableItemData = (props) => {
 		// const { auth } = props;
 		const { 'id': reusableItemId } = props.match.params;
-		console.log('getReusableItemData');
+		// console.log('getReusableItemData');
 
 		props.dispatch(reusableItemReducer.fetchReusableItemDetail(reusableItemId));
 		props.dispatch(errorsReducer.clearErrors());
@@ -482,7 +483,7 @@ ReusableItemDetail.propTypes = {
 	'isLoadingOrganizerData': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
-	'topTenItems': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'topTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => ({
@@ -491,7 +492,7 @@ const mapStateToProps = (state, ownProps) => ({
 	'isLoading': state.reusableItem.isLoading,
 	'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
 	'reusableItem': state.reusableItem.things[ownProps.match.params.id],
-	'topTenItems': reusableItemReducer.getMyTopTenItemsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
+	'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
 });
 
 export default connect(mapStateToProps)(ReusableItemDetail);

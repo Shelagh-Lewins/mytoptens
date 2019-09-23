@@ -205,9 +205,9 @@ export function fetchOrganizerData({ userId, reusableItemId }) {
 		if (reusableItemId) {
 			URL += `&reusableItem=${reusableItemId}`;
 		}
-		console.log('fetchOrganizerData userId', userId);
+		// console.log('fetchOrganizerData userId', userId);
 		if (userId) {
-			console.log('fetchOrganizerData userId', userId);
+			// console.log('fetchOrganizerData userId', userId);
 			URL += `&created_by=${userId}`;
 		}
 
@@ -216,7 +216,7 @@ export function fetchOrganizerData({ userId, reusableItemId }) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			console.log('response', response);
+			// console.log('response', response);
 			const normalizedData = normalize(response, [topTenListSchema]);
 			// console.log('normalizedData', normalizedData);
 			return dispatch(receiveOrganizerData(normalizedData));
@@ -451,6 +451,49 @@ export const getTopTenItemsForTopTenList = createSelector(
 			});
 		}
 		return topTenListTopTenItems;
+	},
+);
+
+// Top Ten Lists for a Reusable Item
+const getReusableItemId = (state, props) => props.match.params.id;
+
+// not currently using this, but keeping it to show how to get top ten items belonging to the user, that reference the reusable item
+// const getMyId = (state, props) => props.auth.user.id;
+
+// return array of ids of topTenItems that reference the reusableItem
+/* export const getMyTopTenItemsForReusableItem = createSelector(
+	[getOrganizerTopTenItems, getReusableItemId, getMyId],
+	(myTopTenItems, reusableItemId, userId) => {
+		const results = [];
+
+		Object.keys(myTopTenItems).map((id) => {
+			const topTenItemObj = myTopTenItems[id];
+
+			if ((topTenItemObj.reusableItem_id === reusableItemId) && (topTenItemObj.created_by === userId)) {
+				results.push(topTenItemObj.id);
+			}
+		});
+		return results.sort();
+	},
+); */
+
+export const getTopTenListsForReusableItem = createSelector(
+	[getOrganizerTopTenItems, getReusableItemId],
+	(topTenItems, reusableItemId) => {
+		const results = [];
+
+		Object.keys(topTenItems).map((id) => {
+			const topTenItemObj = topTenItems[id];
+			const { topTenList_id } = topTenItemObj;
+
+			if (topTenItemObj.reusableItem_id === reusableItemId) {
+				// avoid duplicates
+				if (results.indexOf(topTenList_id === -1)) {
+					results.push(topTenList_id);
+				}
+			}
+		});
+		return results.sort();
 	},
 );
 

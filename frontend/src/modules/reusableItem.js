@@ -178,7 +178,7 @@ export const fetchReusableItemDetail = id => (dispatch, getState) => {
 		if (getState().auth.isAuthenticated) {
 			userId = getState().auth.user.id;
 		} */
-		console.log('reducer says fetchOrganizerData');
+		// console.log('reducer says fetchOrganizerData');
 
 		dispatch(topTenListsReducer.fetchOrganizerData({ 'reusableItemId': id }));
 
@@ -519,7 +519,7 @@ export const getReusableItemList = (state) => {
 
 // Functions to provide data to component
 // topTenItems belonging to the user
-const getMyTopTenItems = state => state.topTenItem.organizerData;
+/* const getMyTopTenItems = state => state.topTenItem.organizerData;
 
 const getReusableItemId = (state, props) => props.match.params.id;
 
@@ -538,7 +538,7 @@ export const getMyTopTenItemsForReusableItem = createSelector(
 		});
 		return results.sort();
 	},
-);
+); */
 
 
 // construct list of suggested item names
