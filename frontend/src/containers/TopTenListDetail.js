@@ -101,12 +101,12 @@ class TopTenListDetails extends Component {
 	getOrganizerData = () => {
 		// minimal data for all my topTenLists and topTenItems to allow parent topTenList to be changed.
 		// can't do this until the topTenList has been loaded, to find the owner
-		const { topTenList, dispatch} = this.props;
+		const { topTenList, dispatch } = this.props;
 
 		if (!topTenList) { // probably the user does not have permission to view this topTenList
 			return;
 		}
-		dispatch(topTenListReducer.fetchOrganizerData(topTenList.created_by));
+		dispatch(topTenListReducer.fetchOrganizerData({ 'userId': topTenList.created_by }));
 		dispatch(clearErrors());
 	}
 

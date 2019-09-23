@@ -11,6 +11,7 @@ import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
 
 import * as reusableItemReducer from '../modules/reusableItem';
+import * as topTenListReducer from '../modules/topTenList';
 import * as errorsReducer from '../modules/errors';
 import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
@@ -91,7 +92,9 @@ class ReusableItemDetail extends Component {
 		}
 
 		// user has just logged in or out
-		if (prevProps.auth.isAuthenticated !== auth.isAuthenticated) {
+		if ((this.props.auth.user.id && (this.props.auth.user.id !== prevProps.auth.user.id))
+		|| (prevProps.auth.isAuthenticated !== auth.isAuthenticated)) {
+			console.log('auth change in component');
 			this.getReusableItemData(this.props);
 		}
 
@@ -107,10 +110,13 @@ class ReusableItemDetail extends Component {
 	}
 
 	getReusableItemData = (props) => {
+		// const { auth } = props;
 		const { 'id': reusableItemId } = props.match.params;
+		console.log('getReusableItemData');
 
 		props.dispatch(reusableItemReducer.fetchReusableItemDetail(reusableItemId));
 		props.dispatch(errorsReducer.clearErrors());
+		// props.dispatch(topTenListReducer.fetchOrganizerData({ reusableItemId }));
 		return reusableItemId;
 	}
 

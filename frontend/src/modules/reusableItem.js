@@ -173,13 +173,14 @@ export const fetchReusableItemDetail = id => (dispatch, getState) => {
 		// console.log('fetchReusableItemDetail response', response);
 		const normalizedData = normalize(response, [reusableItemSchema]);
 
-		let userId;
+		/* let userId;
 
 		if (getState().auth.isAuthenticated) {
 			userId = getState().auth.user.id;
-		}
+		} */
+		console.log('reducer says fetchOrganizerData');
 
-		dispatch(topTenListsReducer.fetchOrganizerData(userId));
+		dispatch(topTenListsReducer.fetchOrganizerData({ 'reusableItemId': id }));
 
 		return dispatch(receiveEntities(normalizedData));
 	}).catch((error) => {
@@ -306,7 +307,7 @@ export const updateReusableItem = (id, data) => (dispatch, getState) => {
 
 		const normalizedData = normalize([response], [reusableItemSchema]);
 
-		dispatch(topTenListsReducer.fetchOrganizerData(getState().auth.user.id));
+		dispatch(topTenListsReducer.fetchOrganizerData({ 'userId': getState().auth.user.id }));
 
 		return dispatch(receiveEntities(normalizedData));
 	}).catch((error) => {

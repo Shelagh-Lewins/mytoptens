@@ -187,7 +187,7 @@ function fetchOrganizerDataFailed() {
 	};
 }
 
-export function fetchOrganizerData(userId) {
+export function fetchOrganizerData({ userId, reusableItemId }) {
 	// get minimal information about all topTenLists owned by one user
 	// for use in organizer
 	return (dispatch, getState) => {
@@ -202,7 +202,12 @@ export function fetchOrganizerData(userId) {
 
 		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem';
 
-		if (useAuth) {
+		if (reusableItemId) {
+			URL += `&reusableItem=${reusableItemId}`;
+		}
+		console.log('fetchOrganizerData userId', userId);
+		if (userId) {
+			console.log('fetchOrganizerData userId', userId);
 			URL += `&created_by=${userId}`;
 		}
 
@@ -211,7 +216,7 @@ export function fetchOrganizerData(userId) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			// console.log('response', response);
+			console.log('response', response);
 			const normalizedData = normalize(response, [topTenListSchema]);
 			// console.log('normalizedData', normalizedData);
 			return dispatch(receiveOrganizerData(normalizedData));
@@ -283,7 +288,7 @@ export const updateTopTenList = (topTenListId, propertyName, value) => (dispatch
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		dispatch(fetchOrganizerData(response.created_by));
+		dispatch(fetchOrganizerData({ 'userId': response.created_by }));
 		return dispatch(updateTopTenListSucceeded(response));
 	}).catch((error) => {
 		return dispatch(getErrors({ 'update topTenItem': error.message }));

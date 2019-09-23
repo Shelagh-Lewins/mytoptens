@@ -60,7 +60,7 @@ export function searchHomeListsItems(searchTerm) {
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			console.log('lists and items', response.results);
+			// console.log('lists and items', response.results);
 
 			return dispatch(searchHomeListsItemsSucceeded(response.results));
 		}).catch((error) => {

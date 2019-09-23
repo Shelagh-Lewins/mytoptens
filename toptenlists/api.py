@@ -87,12 +87,18 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
                     Q(is_public=True)
                 )
 
-        # allow filter by URL parameter created_by
+        # return top ten lists with a top ten item that references a particular reusable item
+        reusableitem_id = self.request.query_params.get('reusableItem', None)
+
+        if reusableitem_id is not None:
+            queryset = queryset.filter(topTenItem__reusableItem_id=reusableitem_id)
+
+        # return top ten lists created by user: URL parameter created_by
         created_by = self.request.query_params.get('created_by', None)
 
         if created_by is not None:
             queryset = queryset.filter(created_by=created_by)
-
+        
         # return only topTenLists that have no parent topTenItem
         #toplevel = self.request.query_params.get('toplevel')
         #if toplevel is not None:
