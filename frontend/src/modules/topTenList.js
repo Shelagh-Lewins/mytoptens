@@ -479,14 +479,14 @@ const getReusableItemId = (state, props) => props.match.params.id;
 
 export const getTopTenListsForReusableItem = createSelector(
 	[getOrganizerTopTenItems, getReusableItemId],
-	(topTenItems, reusableItemId) => {
+	(topTenItems, targetReusableItemId) => {
 		const results = [];
 
 		Object.keys(topTenItems).map((id) => {
 			const topTenItemObj = topTenItems[id];
-			const { topTenList_id } = topTenItemObj;
+			const { topTenList_id, reusableItem_id } = topTenItemObj;
 
-			if (topTenItemObj.reusableItem_id === reusableItemId) {
+			if (reusableItem_id === targetReusableItemId) {
 				// avoid duplicates
 				if (results.indexOf(topTenList_id === -1)) {
 					results.push(topTenList_id);
