@@ -71,6 +71,7 @@ class Search extends Component {
 							{searchResults.map((result) => {
 								let color;
 								let detail;
+								let isPublicData;
 								let icon;
 								let title;
 								let url;
@@ -82,7 +83,7 @@ class Search extends Component {
 										title = 'Top Ten List';
 										url = `/toptenlist/${result.id}`;
 										detail = (
-											<span className="detail"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.SECONDARYTEXT }} size="1x" />{result.created_by_username}</span>
+											<span className="toptenlist detail"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.SECONDARYTEXT }} size="1x" />{result.created_by_username}</span>
 										);
 										break;
 
@@ -91,8 +92,12 @@ class Search extends Component {
 										color = COLORS.TOPTENITEM;
 										title = 'Top Ten Item';
 										url = `/toptenlist/${result.topTenList_id}`;
-										detail = (result.description
-											&& <span className="detail">{result.description}</span>
+										detail = (
+											<React.Fragment>
+												<span className="toptenitem detail"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.SECONDARYTEXT }} size="1x" />{result.created_by_username}</span>
+												{result.description
+												&& <span className="detail">{result.description}</span>}
+											</React.Fragment>
 										);
 										break;
 
@@ -101,8 +106,9 @@ class Search extends Component {
 										color = COLORS.REUSABLEITEM;
 										title = 'Reusable Item';
 										url = `/reusableitem/${result.id}`;
+										isPublicData = result.is_public ? 'public' : 'private';
 										detail = (result.definition
-											&& <span className="detail">{result.definition}</span>
+											&& <span className="reusableitem detail"><span className={`${isPublicData} is-public`}>&nbsp;</span>{result.definition}</span>
 										);
 										break;
 
@@ -112,7 +118,7 @@ class Search extends Component {
 
 								return (
 									<li className="result" key={result.id}>
-										<Link to={url} onClick={this.closeDropdown}><span className="icon" title={title}><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span><span className="name">{result.name}</span>
+										<Link to={url} onClick={this.closeDropdown}><span className="name"><span className="icon" title={title}><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>{result.name}</span>
 											{detail}
 										</Link>
 									</li>

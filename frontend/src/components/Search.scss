@@ -25,16 +25,39 @@
 			border-bottom: 0;
 		}
 
+		.name {
+			display: inline-block;
+			width: 100%;
+		}
+
 		.detail {
 			color: $color-search-detail;
-			display: block;
+			display: inline-block;
 			max-height: 2em;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
+			width: 100%;
 
 			svg {
 				margin-right: 8px;
+			}
+		}
+
+		.is-public {
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: 1rem 1rem;
+			display: inline-block;
+			margin-right: 8px;
+			width: 1rem;
+
+			&.private {
+				background-image: url("../images/private.svg");
+			}
+
+			&.public {
+				background-image: url("../images/public.svg");
 			}
 		}
 	}

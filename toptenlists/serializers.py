@@ -641,6 +641,8 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
     A topTenItem may be associated with a reusableItem
     """
 
+    created_by_username = serializers.SerializerMethodField()
+
     reusableItem = ReusableItemSerializer(required=False, allow_null=True) # must not set many=True here
     # allow_null is required for patch
     # https://stackoverflow.com/questions/26702695/django-rest-framework-object-is-not-iterable
@@ -654,8 +656,11 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = TopTenItem
-        fields = ('id', 'name', 'description', 'topTenList_id', 'modified_at', 'order', 'reusableItem', 'reusableItem_id')
+        fields = ('id', 'name', 'description', 'topTenList_id', 'created_by_username', 'modified_at', 'order', 'reusableItem', 'reusableItem_id')
         # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model
+
+    def get_created_by_username(self, obj):
+        return obj.topTenList.created_by_username
 
     def to_internal_value(self, data):
         # intercept data before it is validated
