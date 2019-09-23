@@ -483,6 +483,7 @@ ReusableItemDetail.propTypes = {
 	'isLoadingOrganizerData': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
+	'myTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'topTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
@@ -492,7 +493,8 @@ const mapStateToProps = (state, ownProps) => ({
 	'isLoading': state.reusableItem.isLoading,
 	'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
 	'reusableItem': state.reusableItem.things[ownProps.match.params.id],
-	'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
+	'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
+	'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, ownProps), // all topTenItems that reference this reusableItem
 });
 
 export default connect(mapStateToProps)(ReusableItemDetail);

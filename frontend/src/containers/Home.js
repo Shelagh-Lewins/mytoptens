@@ -23,7 +23,7 @@ class Home extends Component {
 		props.dispatch(clearErrors());
 
 		// which set of topTenLists to view
-		// if logged in, default my-topTenLists
+		// if logged in, default mytoptens
 		// if not logged in, only show publictoptens
 		let listset = 'publictoptens';
 		if (props.auth.isAuthenticated) {

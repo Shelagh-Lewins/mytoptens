@@ -200,7 +200,7 @@ export function fetchOrganizerData({ userId, reusableItemId }) {
 			useAuth = true;
 		}
 
-		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,topTenItem,reusableItem,is_public,order,parent_topTenItem';
+		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,created_by,topTenItem,reusableItem,is_public,order,parent_topTenItem';
 
 		if (reusableItemId) {
 			URL += `&reusableItem=${reusableItemId}`;
@@ -420,9 +420,7 @@ const getOrganizerTopTenItems = state => state.topTenItem.organizerData;
 export const getSortedOrganizerTopTenLists = createSelector(
 	[getOrganizerTopTenLists],
 	(topTenLists) => {
-		const topTenListsArray = Object.keys(topTenLists).map((id) => {
-			return topTenLists[id];
-		});
+		const topTenListsArray = Object.keys(topTenLists).map((id) => topTenLists[id]);
 
 		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -456,6 +454,7 @@ export const getTopTenItemsForTopTenList = createSelector(
 
 // Top Ten Lists for a Reusable Item
 const getReusableItemId = (state, props) => props.match.params.id;
+const getUserId = state => null || state.auth.user.id;
 
 // not currently using this, but keeping it to show how to get top ten items belonging to the user, that reference the reusable item
 // const getMyId = (state, props) => props.auth.user.id;
@@ -478,22 +477,58 @@ const getReusableItemId = (state, props) => props.match.params.id;
 ); */
 
 export const getTopTenListsForReusableItem = createSelector(
-	[getOrganizerTopTenItems, getReusableItemId],
-	(topTenItems, targetReusableItemId) => {
-		const results = [];
+	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId],
+	(topTenLists, topTenItems, targetReusableItemId) => {
+		const topTenListsArray = [];
 
 		Object.keys(topTenItems).map((id) => {
 			const topTenItemObj = topTenItems[id];
 			const { topTenList_id, reusableItem_id } = topTenItemObj;
 
+			const topTenListObj = topTenLists[topTenList_id];
+
 			if (reusableItem_id === targetReusableItemId) {
 				// avoid duplicates
-				if (results.indexOf(topTenList_id === -1)) {
-					results.push(topTenList_id);
+				if (!topTenListsArray.includes(topTenListObj)) {
+					topTenListsArray.push(topTenListObj);
 				}
 			}
 		});
-		return results.sort();
+
+		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
+
+		return topTenListsArray;
+	},
+);
+
+export const getMyTopTenListsForReusableItem = createSelector(
+	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId, getUserId],
+	(topTenLists, topTenItems, targetReusableItemId, userId) => {
+		const topTenListsArray = [];
+		console.log('userId', userId);
+
+		Object.keys(topTenItems).map((id) => {
+			const topTenItemObj = topTenItems[id];
+			const { topTenList_id, reusableItem_id } = topTenItemObj;
+
+			const topTenListObj = topTenLists[topTenList_id];
+			const { created_by } = topTenListObj;
+
+			console.log('topTenListObj', topTenListObj);
+
+			if ((reusableItem_id === targetReusableItemId)
+				&& (created_by === userId)) {
+				console.log('add ', topTenList_id);
+				// avoid duplicates
+				if (!topTenListsArray.includes(topTenListObj)) {
+					topTenListsArray.push(topTenListObj);
+				}
+			}
+		});
+
+		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
+
+		return topTenListsArray;
 	},
 );
 
