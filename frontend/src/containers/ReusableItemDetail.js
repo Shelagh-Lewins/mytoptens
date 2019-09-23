@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import { Button, Label, Input, Popover, PopoverHeader, PopoverBody, Container, Row, Col } from 'reactstrap';
+import { Button, Label, Input, Popover, PopoverBody, Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import { withFormik, Formik, Field, Form, ErrorMessage } from 'formik';
-
+import { withFormik, Field } from 'formik';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FlashMessage from '../components/FlashMessage';
@@ -18,6 +16,8 @@ import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 
 import IsPublicIndicator from '../components/IsPublicIndicator';
+import TopTenListsList from '../components/TopTenListsList';
+import TopTenListSummary from '../components/TopTenListSummary';
 
 import './ReusableItemDetail.scss';
 import { COLORS } from '../constants';
@@ -51,6 +51,9 @@ class ReusableItemDetail extends Component {
 		this.submitChangeRequestForm = this.submitChangeRequestForm.bind(this);
 		this.voteOnChangeRequest = this.voteOnChangeRequest.bind(this);
 		this.cancelChangeRequest = this.cancelChangeRequest.bind(this);
+
+		this.onChangeTopTenListIsPublic = this.onChangeTopTenListIsPublic.bind(this);
+		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -59,7 +62,6 @@ class ReusableItemDetail extends Component {
 			match,
 			auth,
 			reusableItem,
-			// topTenItems,
 			topTenLists,
 			isLoadingOrganizerData,
 			history,
@@ -108,6 +110,20 @@ class ReusableItemDetail extends Component {
 				history.push(`/reusableitem/${reusableItem.targetId}`);
 			}
 		}
+	}
+
+	onChangeTopTenListIsPublic({ id, is_public }) {
+		console.log('onChangeTopTenListIsPublic clicked');
+		console.log('id', id);
+		console.log('is_public', is_public);
+		const { dispatch } = this.props;
+
+		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
+	}
+
+
+	onDeleteTopTenList() {
+		console.log('onDeleteTopTenList clicked');
 	}
 
 	getReusableItemData = (props) => {
@@ -421,7 +437,7 @@ class ReusableItemDetail extends Component {
 	}
 
 	renderPage() {
-		const { reusableItem, errors } = this.props;
+		const { reusableItem, errors, topTenLists } = this.props;
 
 		if (!reusableItem) {
 			return undefined;
@@ -443,6 +459,17 @@ class ReusableItemDetail extends Component {
 					</Container>
 				)}
 				{this.renderReusableItem()}
+				<TopTenListsList headerText={`Top Ten Lists using ${reusableItem.name}`}>
+					{topTenLists.map(topTenList => (
+						<TopTenListSummary
+							key={topTenList.id}
+							topTenList={topTenList}
+							onChangeIsPublic={this.onChangeTopTenListIsPublic}
+							onDeleteTopTenList={this.onDeleteTopTenList}
+							showCreatedBy={true}
+						/>
+					))}
+				</TopTenListsList>
 			</div>
 		);
 	}

@@ -37,10 +37,19 @@ export function canViewTopTenList(id) {
 export function canEditTopTenList(id) {
 	// a topTenList can be edited if created by user
 	const state = store.getState();
-	const topTenLists = state.topTenList.things;
 	const userId = state.auth.user.id;
-
 	let canEdit = false;
+
+	// can use organizer data or full top ten list data
+	// organizer data not loaded in Home
+	// full data not loaded in list detail
+	let topTenLists;
+
+	if (Object.keys(state.topTenList.things).length > 0) {
+		topTenLists = state.topTenList.things;
+	} else if (Object.keys(state.topTenList.organizerData).length > 0) {
+		topTenLists = state.topTenList.organizerData;
+	}
 
 	if (Object.keys(topTenLists).length > 0) {
 		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });

@@ -200,7 +200,7 @@ export function fetchOrganizerData({ userId, reusableItemId }) {
 			useAuth = true;
 		}
 
-		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,created_by,topTenItem,reusableItem,is_public,order,parent_topTenItem';
+		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,created_by,created_by_username,topTenItem,reusableItem,is_public,order,parent_topTenItem';
 
 		if (reusableItemId) {
 			URL += `&reusableItem=${reusableItemId}`;
@@ -456,26 +456,6 @@ export const getTopTenItemsForTopTenList = createSelector(
 const getReusableItemId = (state, props) => props.match.params.id;
 const getUserId = state => null || state.auth.user.id;
 
-// not currently using this, but keeping it to show how to get top ten items belonging to the user, that reference the reusable item
-// const getMyId = (state, props) => props.auth.user.id;
-
-// return array of ids of topTenItems that reference the reusableItem
-/* export const getMyTopTenItemsForReusableItem = createSelector(
-	[getOrganizerTopTenItems, getReusableItemId, getMyId],
-	(myTopTenItems, reusableItemId, userId) => {
-		const results = [];
-
-		Object.keys(myTopTenItems).map((id) => {
-			const topTenItemObj = myTopTenItems[id];
-
-			if ((topTenItemObj.reusableItem_id === reusableItemId) && (topTenItemObj.created_by === userId)) {
-				results.push(topTenItemObj.id);
-			}
-		});
-		return results.sort();
-	},
-); */
-
 export const getTopTenListsForReusableItem = createSelector(
 	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId],
 	(topTenLists, topTenItems, targetReusableItemId) => {
@@ -505,7 +485,6 @@ export const getMyTopTenListsForReusableItem = createSelector(
 	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId, getUserId],
 	(topTenLists, topTenItems, targetReusableItemId, userId) => {
 		const topTenListsArray = [];
-		console.log('userId', userId);
 
 		Object.keys(topTenItems).map((id) => {
 			const topTenItemObj = topTenItems[id];
@@ -514,11 +493,9 @@ export const getMyTopTenListsForReusableItem = createSelector(
 			const topTenListObj = topTenLists[topTenList_id];
 			const { created_by } = topTenListObj;
 
-			console.log('topTenListObj', topTenListObj);
-
 			if ((reusableItem_id === targetReusableItemId)
 				&& (created_by === userId)) {
-				console.log('add ', topTenList_id);
+
 				// avoid duplicates
 				if (!topTenListsArray.includes(topTenListObj)) {
 					topTenListsArray.push(topTenListObj);

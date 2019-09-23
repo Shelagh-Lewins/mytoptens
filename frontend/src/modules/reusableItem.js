@@ -517,30 +517,6 @@ export const getReusableItemList = (state) => {
 	return results;
 };
 
-// Functions to provide data to component
-// topTenItems belonging to the user
-/* const getMyTopTenItems = state => state.topTenItem.organizerData;
-
-const getReusableItemId = (state, props) => props.match.params.id;
-
-// return array of ids of topTenItems that reference the reusableItem being viewed in ReusableItemDetails
-export const getMyTopTenItemsForReusableItem = createSelector(
-	[getMyTopTenItems, getReusableItemId],
-	(myTopTenItems, reusableItemId) => {
-		const results = [];
-
-		Object.keys(myTopTenItems).map((id) => {
-			const topTenItem = myTopTenItems[id];
-
-			if (topTenItem.reusableItem_id === reusableItemId) {
-				results.push(topTenItem.id);
-			}
-		});
-		return results.sort();
-	},
-); */
-
-
 // construct list of suggested item names
 // reusableItems, sorted by name. Filter in combobox.
 // own TopTenItems with no reusableItem, sorted by name

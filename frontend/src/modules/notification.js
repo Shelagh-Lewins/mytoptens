@@ -11,7 +11,7 @@ const updeep = require('updeep');
 
 /* eslint-disable array-callback-return */
 
-export const RECEIVE_ENTITIES = 'RECEIVE_ENTITIES';
+export const RECEIVE_NOTIFICATIONS = 'RECEIVE_NOTIFICATIONS';
 export const FETCH_NOTIFICATIONS_STARTED = 'FETCH_NOTIFICATIONS_STARTED';
 export const FETCH_NOTIFICATIONS_FAILED = 'FETCH_NOTIFICATIONS_FAILED';
 export const UPDATE_NOTIFICATION_SUCCEEDED = 'UPDATE_NOTIFICATION_SUCCEEDED';
@@ -41,9 +41,9 @@ notificationSchema.define({
 });
 
 // ////////////////////
-function receiveEntities(entities) {
+function receiveNotifications(entities) {
 	return {
-		'type': RECEIVE_ENTITIES,
+		'type': RECEIVE_NOTIFICATIONS,
 		'payload': entities,
 	};
 }
@@ -79,8 +79,8 @@ export function fetchNotifications() {
 			const data = {
 				'entities': normalize(response, [notificationSchema]).entities,
 			};
-
-			return dispatch(receiveEntities(data));
+			// using receiveEntities here causes needless re-renders in components that don't use notifications
+			return dispatch(receiveNotifications(data));
 		}).catch((error) => {
 			dispatch(fetchNotificationsFailed());
 
@@ -198,7 +198,7 @@ export default function notification(state = initialNotificationsState, action) 
 			return updeep(initialNotificationsState, {}); // constant provides placement instead of update, so all previous entries are removed
 		}
 
-		case RECEIVE_ENTITIES: {
+		case RECEIVE_NOTIFICATIONS: {
 			const { entities } = action.payload;
 
 			let things = {};
