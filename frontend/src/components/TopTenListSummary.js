@@ -19,7 +19,7 @@ import './TopTenListSummary.scss';
 const TopTenListSummary = (props) => {
 	const { topTenList, onChangeIsPublic, showCreatedBy } = props;
 	const canEdit = permissions.canEditTopTenList(topTenList.id);
-	console.log('TopTenListSummary rerenders');
+
 	function onDeleteTopTenList() {
 		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });
 	}
