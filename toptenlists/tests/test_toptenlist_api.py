@@ -207,6 +207,42 @@ class EditTopTenListAPITest(APITestCase):
         # the list should have the parent_topTenItem assigned
         self.assertEqual(edited_topTenList.parent_topTenItem.id, item_1_id)
 
+    def test_set_parent_topTenItem_other_users_list(self):
+        """
+        You cannot set the parent top ten item to a top ten item from another user's top ten list
+        """
+       
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        # log the user out
+        # self.client.logout()
+
+        otherUser = CustomUser.objects.create_user('Other test user', 'otherperson@example.com', '12345')
+        EmailAddress.objects.create(user=otherUser, 
+            email='otherperson@example.com',
+            primary=True,
+            verified=True)
+
+        self.client.force_authenticate(user=otherUser)
+
+        response = self.client.post(create_list_url, second_list_data, format='json')
+
+        otherUserTopTenList_id = json.loads(response.content)['id']
+
+        # the list should be created OK
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # now try to set the parent top ten item
+        list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': otherUserTopTenList_id})
+
+        data = {'parent_topTenItem_id': item_1_id}
+
+        response = self.client.patch(list_detail_url, data, format='json')
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     def test_edit_topTenList_not_authenticated(self):
         """
         edit topTenList should fail if user not logged in
