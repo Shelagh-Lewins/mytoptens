@@ -368,10 +368,81 @@ const initialTopTenListsState = {
 // 'state' here is global state
 export const getSearchTerm = state => state.page.searchTerm;
 
-// returns topTenLists as an array not an object
-export const getTopTenLists = state => Object.keys(state.topTenList.things).map(id => state.topTenList.things[id]);
+// ///////////////////////////
+// Permissions
+const canViewTopTenList = (auth, topTenListObj) => {
+	if (!topTenListObj) {
+		return false;
+	}
 
+	if (topTenListObj.is_public) {
+		return true;
+	}
+
+	if (!auth.isAuthenticated) {
+		return false;
+	}
+
+	if (!auth.user) {
+		return false;
+	}
+
+	if (topTenListObj.created_by === auth.user.id) {
+		return true;
+	}
+
+	return false;
+};
+
+const canEditTopTenList = (auth, topTenListObj) => {
+	if (!topTenListObj) {
+		return false;
+	}
+
+	if (!auth.isAuthenticated) {
+		return false;
+	}
+
+	if (!auth.user) {
+		return false;
+	}
+
+	if (topTenListObj.created_by === auth.user.id) {
+		return true;
+	}
+
+	return false;
+};
+
+// functions to get topTenLists and topTenItems
+export const getTopTenList = (state, topTenListId) => {
+	// console.log('topTenListId', topTenListId);
+	const topTenListObj = state.topTenList.things[topTenListId];
+	if (!topTenListObj) {
+		return;
+	}
+	return {
+		...topTenListObj,
+		'canView': canViewTopTenList(state.auth, topTenListObj),
+		'canEdit': canEditTopTenList(state.auth, topTenListObj),
+	};
+	// console.log('obj', obj);
+	// return obj;
+};
+
+// returns topTenLists as an array not an object
+// and adds permissions information
+export const getTopTenLists = state => Object.keys(state.topTenList.things).map(id => ({
+	...state.topTenList.things[id],
+	'canView': canViewTopTenList(state.auth, state.topTenList.things[id]),
+	'canEdit': canEditTopTenList(state.auth, state.topTenList.things[id]),
+}));
+
+// return topTenItems and indicate whether the user can view any child top ten lists of those top ten items
 const getTopTenItems = state => state.topTenItem.things;
+
+// check user status
+// const getAuth = state => state.auth;
 
 // get all visible lists
 export const getPublicTopTenLists = createSelector(
@@ -387,7 +458,7 @@ export const getMyGroupedTopTenLists = createSelector(
 		TOPTENLIST_IS_PUBLIC_VALUES.forEach((is_public) => {
 			grouped[is_public] = topTenLists.filter(topTenListObject => (topTenListObject.created_by === store.getState().auth.user.id) && (topTenListObject.is_public === is_public));
 		});
-
+		console.log('getMyGroupedTopTenLists', grouped);
 		return grouped;
 	},
 );
@@ -404,9 +475,10 @@ export const getTopLevelMyGroupedTopTenLists = createSelector(
 		const grouped = {};
 
 		TOPTENLIST_IS_PUBLIC_VALUES.forEach((is_public) => {
+			console.log('is_public', is_public);
 			grouped[is_public] = groupedTopTenLists[is_public].filter(topTenListObject => !topTenListObject.parent_topTenItem);
 		});
-
+		console.log('getTopLevelMyGroupedTopTenLists', grouped);
 		return grouped;
 	},
 );
@@ -414,12 +486,33 @@ export const getTopLevelMyGroupedTopTenLists = createSelector(
 // ///////////////////////////
 // organizer data
 export const getOrganizerTopTenLists = state => state.topTenList.things;
+const getOrganizerMyTopTenLists = (state) => {
+	if (!state.auth.isAuthenticated || !state.auth.user.id) {
+		return {};
+	}
+
+	const allTopTenLists = state.topTenList.things;
+
+	const myTopTenLists = {};
+
+	Object.keys(allTopTenLists).forEach((key) => {
+		const topTenListObj = allTopTenLists[key];
+
+		if (topTenListObj.created_by === state.auth.user.id) {
+			myTopTenLists[topTenListObj.id] = topTenListObj;
+		}
+	});
+
+	return myTopTenLists;
+};
+
 const getOrganizerTopTenItems = state => state.topTenItem.things;
+
 
 // returns topTenLists in an array, sorted by name
 // instead of the state.topTenList.things object, keyed by id
-export const getSortedOrganizerTopTenLists = createSelector(
-	[getOrganizerTopTenLists],
+export const getMySortedOrganizerTopTenLists = createSelector(
+	[getOrganizerMyTopTenLists],
 	(topTenLists) => {
 		const topTenListsArray = Object.keys(topTenLists).map(id => topTenLists[id]);
 
@@ -444,6 +537,9 @@ export const getTopTenItemsForTopTenList = createSelector(
 
 				if (childTopTenList) {
 					topTenItem.childTopTenList = { ...childTopTenList };
+
+					// can the user view the child top ten list?
+					// topTenItem.childTopTenList.canView = canViewTopTenList(auth, childTopTenList);
 				}
 
 				topTenListTopTenItems.push(topTenItem);

@@ -243,7 +243,7 @@ class TopTenItemsPage extends Component {
 		const elements = [];
 		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			const {
-				canEdit,
+				// canEdit,
 				topTenList,
 				onCreateChildTopTenList,
 				reusableItems,
@@ -256,7 +256,7 @@ class TopTenItemsPage extends Component {
 			const identifier = `${i}_name`;
 			const name = state[`${i}_name`];
 
-			if (name || canEdit) {
+			if (name || topTenList.canEdit) {
 				// has the user selected an existing topTenItem?
 				const topTenItemId = state[`${identifier}_topTenItemForNewReusableItem`];
 				// console.log('name', name);
@@ -315,7 +315,7 @@ class TopTenItemsPage extends Component {
 								handleNewValue={this.handleNewValue}
 								onSelectItemName={this.onSelectItemName}
 								topTenList={topTenList}
-								canEdit={canEdit}
+								canEdit={topTenList.canEdit}
 								onCreateChildTopTenList={onCreateChildTopTenList}
 								onMoveTopTenItemUp={this.onMoveTopTenItemUp}
 								onMoveTopTenItemDown={this.onMoveTopTenItemDown}
@@ -343,13 +343,13 @@ class TopTenItemsPage extends Component {
 }
 
 TopTenItemsPage.propTypes = {
-	'canEdit': PropTypes.bool.isRequired,
+	// 'canEdit': PropTypes.bool.isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'onCreateChildTopTenList': PropTypes.func.isRequired,
 	'reusableItems': PropTypes.objectOf(PropTypes.any),
 	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any),
 	'topTenItems': PropTypes.arrayOf(PropTypes.any),
-	'topTenList': PropTypes.string.isRequired,
+	'topTenList': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
 export default connect()(TopTenItemsPage);

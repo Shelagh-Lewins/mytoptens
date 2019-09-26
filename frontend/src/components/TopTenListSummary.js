@@ -12,13 +12,14 @@ import { COLORS } from '../constants';
 
 import IsPublicIndicator from './IsPublicIndicator';
 
-import * as permissions from '../modules/permissions';
+// import * as permissions from '../modules/permissions';
 
 import './TopTenListSummary.scss';
 
 const TopTenListSummary = (props) => {
 	const { topTenList, onChangeIsPublic, showCreatedBy } = props;
-	const canEdit = permissions.canEditTopTenList(topTenList.id);
+	// const canEdit = permissions.canEditTopTenList(topTenList.id);
+	const canEdit = topTenList.canEdit;
 
 	function onDeleteTopTenList() {
 		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });

@@ -14,7 +14,7 @@
 import store from '../store';
 import findObjectByProperty from './findObjectByProperty';
 
-export function canViewTopTenList(id) {
+/* export function canViewTopTenList(id) {
 	// a topTenList can be viewed if public or if created by user
 
 	const state = store.getState();
@@ -32,9 +32,9 @@ export function canViewTopTenList(id) {
 	}
 
 	return canView;
-}
+} */
 
-export function canEditTopTenList(id) {
+/* export function canEditTopTenList(id) {
 	// a topTenList can be edited if created by user
 	const state = store.getState();
 	const userId = state.auth.user.id;
@@ -51,7 +51,7 @@ export function canEditTopTenList(id) {
 	} else if (Object.keys(state.topTenList.organizerData).length > 0) {
 		topTenLists = state.topTenList.organizerData;
 	} */
-
+/*
 	if (Object.keys(topTenLists).length > 0) {
 		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
 
@@ -61,7 +61,7 @@ export function canEditTopTenList(id) {
 	}
 
 	return canEdit;
-}
+} */
 
 export function canCreateTopTenList() {
 	// the user can create a topTenList if they are logged in

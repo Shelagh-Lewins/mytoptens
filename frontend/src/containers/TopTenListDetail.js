@@ -19,7 +19,7 @@ import Loading from '../components/Loading';
 import * as topTenListReducer from '../modules/topTenList';
 import * as topTenItemReducer from '../modules/topTenItem';
 import * as reusableItemReducer from '../modules/reusableItem';
-import * as permissions from '../modules/permissions';
+// import * as permissions from '../modules/permissions';
 import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
@@ -55,17 +55,18 @@ class TopTenListDetails extends Component {
 
 		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this topTenList
-			const canEditTopTenList = permissions.canEditTopTenList(id);
-			const canViewTopTenList = permissions.canViewTopTenList(id);
+			// const canEditTopTenList = permissions.canEditTopTenList(id);
+			// const canViewTopTenList = permissions.canViewTopTenList(id);
 
 			this.getOrganizerData();
 
-			this.setState({
-				'canView': canViewTopTenList,
-				'canEdit': canEditTopTenList,
-			});
+			// this.setState({
+				// 'canView': canViewTopTenList,
+				// 'canEdit': canEditTopTenList,
+			// });
 
-			if (canViewTopTenList) {
+			if (topTenList && topTenList.canView) {
+				// if (canViewTopTenList) {
 				this.setState({
 					'topTenList_name': topTenList.name,
 					'topTenList_description': topTenList.description,
@@ -130,7 +131,8 @@ class TopTenListDetails extends Component {
 
 			// if there is a visible parent, navigate there
 			if (parentTopTenList) {
-				if (permissions.canViewTopTenList(parentTopTenList.id)) {
+				if (topTenList.canView) {
+					// if (permissions.canViewTopTenList(parentTopTenList.id)) {
 					history.push(`/topTenList/${parentTopTenList.id}`);
 					return;
 				}
@@ -192,7 +194,7 @@ class TopTenListDetails extends Component {
 		} = this.props;
 
 		const {
-			canEdit,
+			// canEdit,
 			topTenList_name,
 			topTenList_description,
 		} = this.state;
@@ -204,7 +206,7 @@ class TopTenListDetails extends Component {
 		let showPrivacyWarning = false;
 		let privacyWarningText = '';
 
-		if (canEdit && parentTopTenList) {
+		if (topTenList.canEdit && parentTopTenList) {
 			if (topTenList.is_public && !parentTopTenList.is_public) {
 				privacyWarningText = 'This public topTenList has a private parent topTenList';
 				showPrivacyWarning = true;
@@ -248,7 +250,7 @@ class TopTenListDetails extends Component {
 								<Col className="toptenlist-name">
 									<EditableTextField
 										type="input"
-										canEdit={canEdit}
+										canEdit={topTenList.canEdit}
 										required={true}
 										name="topTenList_name"
 										placeholder="Click here to add a name for the list"
@@ -260,12 +262,12 @@ class TopTenListDetails extends Component {
 										handleNewValue={this.handleNewValue}
 										value={topTenList_name}
 									/>
-									{!canEdit && (
+									{!topTenList.canEdit && (
 										<div className="owner" title="Top Ten List owner">
 											<FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}
 										</div>
 									)}
-									{canEdit && (
+									{topTenList.canEdit && (
 										<div className="toptenlist-detail-controls">
 											<IsPublicIndicator
 												targetId={topTenList.id}
@@ -279,7 +281,7 @@ class TopTenListDetails extends Component {
 							</Row>
 							<Row>
 								<Col>
-									{canEdit && topTenListOrganizerData.length > 1
+									{topTenList.canEdit && topTenListOrganizerData.length > 1
 										&& (
 											<Organizer
 												topTenList={topTenList}
@@ -302,7 +304,7 @@ class TopTenListDetails extends Component {
 								<Col className="toptenlist-description">
 									<EditableTextField
 										type="textarea"
-										canEdit={canEdit}
+										canEdit={topTenList.canEdit}
 										name="topTenList_description"
 										placeholder="Click here to add a description for the topTenList"
 										label="Description"
@@ -317,11 +319,10 @@ class TopTenListDetails extends Component {
 							</Row>
 						</Container>
 						<Container>
-							{thisTopTenListTopTenItems && (
+							{topTenList && thisTopTenListTopTenItems && (
 								<TopTenItemsPage
 									topTenItems={thisTopTenListTopTenItems}
-									topTenList={topTenList.id}
-									canEdit={canEdit}
+									topTenList={topTenList}
 									onCreateChildTopTenList={this.onCreateChildTopTenList}
 									onMoveTopTenItemUp={this.onMoveTopTenItemUp}
 									onMoveTopTenItemDown={this.onMoveTopTenItemDown}
@@ -339,8 +340,8 @@ class TopTenListDetails extends Component {
 	// /////////////
 
 	render() {
-		const { isLoading } = this.props;
-		const { canView } = this.state;
+		const { isLoading, topTenList } = this.props;
+		// const { canView } = this.state;
 
 		if (isLoading) {
 			return <Loading />;
@@ -348,7 +349,7 @@ class TopTenListDetails extends Component {
 
 		let content;
 
-		if (canView) {
+		if (topTenList && topTenList.canView) {
 			content = this.renderPage();
 		} else {
 			content = <p>Either this Top Ten List does not exist or you do not have permission to view it</p>;
@@ -390,11 +391,11 @@ const mapStateToProps = (state, ownProps) => {
 		'auth': state.auth,
 		'errors': state.errors,
 		'isLoading': state.topTenList.isLoading,
-		'topTenList': topTenList,
+		'topTenList': topTenListReducer.getTopTenList(state, ownProps.match.params.id),
 		'thisTopTenListTopTenItems': topTenListReducer.getTopTenItemsForTopTenList(state)(topTenList),
 		'parentTopTenList': parentTopTenItemAndTopTenList.parentTopTenList,
 		'parentTopTenItem': parentTopTenItemAndTopTenList.parentTopTenItem,
-		'topTenListOrganizerData': topTenListReducer.getSortedOrganizerTopTenLists(state), // array containing limited topTenList info: id, name, topTenItem (array of child topTenItems), parent_topTenItem
+		'topTenListOrganizerData': topTenListReducer.getMySortedOrganizerTopTenLists(state), // array containing limited topTenList info: id, name, topTenItem (array of child topTenItems), parent_topTenItem
 		'topTenItemOrganizerData': topTenItemReducer.groupedTopTenItems(state), // object. limited topTenItem info: id, name, topTenList_id
 		'reusableItemSuggestions': reusableItemReducer.getReusableItemList(state),
 		'reusableItems': state.reusableItem.things,

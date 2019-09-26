@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import EditableTextField from './EditableTextField';
-import * as permissions from '../modules/permissions';
+// import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
 
@@ -73,7 +73,7 @@ class Item extends Component {
 		const {
 			topTenItem,
 			topTenItemFromStore,
-			canEdit,
+			// canEdit,
 			reusableItemSuggestions,
 			handleComboboxChange,
 			handleInputChange,
@@ -83,8 +83,10 @@ class Item extends Component {
 			reusableItem,
 			reusableItems, // all reusable items from store
 			topTenItemForReusableItem,
+			topTenList,
 		} = this.props;
 		// console.log('topTenItem', topTenItem);
+		// console.log('topTenList', topTenList);
 		// console.log('reusableItem', reusableItem);
 		const { isEditingName, setIsEditingDescription, popoverOpen } = this.state;
 
@@ -99,14 +101,15 @@ class Item extends Component {
 		if (topTenItem.childTopTenList // there is already a child topTenList
 		|| topTenItem.name === '' // there is no topTenItem
 			|| isEditingName // the topTenItem name is being edited
-			|| !canEdit) { // the user can't edit this topTenList
+			|| !topTenList.canEdit) { // the user can't edit this topTenList
 			canCreateChildTopTenList = false;
 		}
 
 		let canViewChildTopTenList = false;
 
 		// child topTenList exists and user can view it
-		if (topTenItem.childTopTenList && permissions.canViewTopTenList(topTenItem.childTopTenList.id)) {
+		if (topTenItem.childTopTenList && topTenItem.childTopTenList.canView) {
+			// if (topTenItem.childTopTenList && permissions.canViewTopTenList(topTenItem.childTopTenList.id)) {
 			canViewChildTopTenList = true;
 		}
 
@@ -130,7 +133,7 @@ class Item extends Component {
 		if (isEditingName || setIsEditingDescription) {
 			showUp = false;
 			showDown = false;
-		} else if (!canEdit
+		} else if (!topTenList.canEdit
 			|| topTenItem.name === ''
 			|| !showDescription) { // assume that showDescription means there is a saved name i.e. the topTenItem exists
 			showUp = false;
@@ -207,7 +210,7 @@ class Item extends Component {
 					{reusableItemIcon}
 					<EditableTextField
 						type="reusableItemCombobox"
-						canEdit={canEdit}
+						canEdit={topTenList.canEdit}
 						name={comboboxId}
 						data={data}
 						label={`Top Ten item ${topTenItem.order} name`}
@@ -232,7 +235,7 @@ class Item extends Component {
 						<div className="toptenitem-body">
 							<EditableTextField
 								type="textarea"
-								canEdit={canEdit}
+								canEdit={topTenList.canEdit}
 								name={`${topTenItem.order}_description`}
 								placeholder="Click here to add a description"
 								label="Item description"
@@ -258,12 +261,13 @@ class Item extends Component {
 
 Item.propTypes = {
 	'topTenItem': PropTypes.objectOf(PropTypes.any).isRequired,
+	'topTenList': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topTenItemFromStore': PropTypes.objectOf(PropTypes.any).isRequired,
 	'onCreateChildTopTenList': PropTypes.func.isRequired,
 	'onMoveTopTenItemUp': PropTypes.func.isRequired,
 	'onMoveTopTenItemDown': PropTypes.func.isRequired,
 	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any).isRequired,
-	'canEdit': PropTypes.bool.isRequired,
+	// 'canEdit': PropTypes.bool,
 	'handleComboboxChange': PropTypes.func.isRequired,
 	'handleInputChange': PropTypes.func.isRequired,
 	'handleNewValue': PropTypes.func.isRequired,
