@@ -124,6 +124,12 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
             if topTenItem.topTenList.created_by != self.request.user:
                 raise APIException("Unable to set parent_topTenItem. " + parent_topTenItem_id.__str__() + "does not belong to this user")
 
+            # don't allow the parent top ten list to be the same top ten list that contains the top ten item
+            parent_topTenItem = TopTenItem.objects.get(pk=parent_topTenItem_id)
+
+            if topTenItem.topTenList.id == parent_topTenItem.topTenList.id:
+                raise APIException("Unable to set parent_topTenItem. " + parent_topTenItem.topTenList.id.__str__() + "is the list to which the Top Ten Item belongs")
+
             # set any TopTenLists with this parent_topTenItem to null parent_topTenItem
             # an topTenItem can only have one child topTenList
             TopTenList.objects.filter(parent_topTenItem_id=parent_topTenItem_id).update(parent_topTenItem_id=None)

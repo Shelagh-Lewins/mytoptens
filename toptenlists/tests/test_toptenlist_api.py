@@ -187,7 +187,41 @@ class EditTopTenListAPITest(APITestCase):
 
     def test_set_parent_topTenItem(self):
         """
-        Set a parent item for the list, i.e. make it a child list
+        Set a parent top ten item for the list, i.e. make it a child top ten list
+        The parent top ten item must belong to a different top ten list
+        """
+       
+        topTenItems = self.topTenList.topTenItem.all()
+        item_1_id = topTenItems[0].id
+
+        # create a second Top Ten List
+        response = self.client.post(create_list_url, second_list_data, format='json')
+
+        otherTopTenList_id = json.loads(response.content)['id']
+
+        # the list should be created OK
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # now set the parent top ten item
+        list_detail_url = reverse('topTenLists:TopTenLists-detail', kwargs={'pk': otherTopTenList_id})
+
+        data = {'parent_topTenItem_id': item_1_id}
+
+
+        response = self.client.patch(list_detail_url, data, format='json')
+        print('response', response)
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        edited_topTenList = TopTenList.objects.get(pk=self.otherTopTenList_id)
+
+        # the list should have the parent_topTenItem assigned
+        self.assertEqual(edited_topTenList.parent_topTenItem.id, item_1_id)
+
+    def test_set_parent_topTenItem_same_topTenList(self):
+        """
+        Should not be able to set the a Top Ten List to be a child of one of its own Top Ten Items
         """
        
         topTenItems = self.topTenList.topTenItem.all()
@@ -199,13 +233,8 @@ class EditTopTenListAPITest(APITestCase):
 
         response = self.client.patch(list_detail_url, data, format='json')
 
-        # the request should succeed
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        edited_topTenList = TopTenList.objects.get(pk=self.topTenList_id)
-
-        # the list should have the parent_topTenItem assigned
-        self.assertEqual(edited_topTenList.parent_topTenItem.id, item_1_id)
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_set_parent_topTenItem_other_users_list(self):
         """
@@ -215,15 +244,14 @@ class EditTopTenListAPITest(APITestCase):
         topTenItems = self.topTenList.topTenItem.all()
         item_1_id = topTenItems[0].id
 
-        # log the user out
-        # self.client.logout()
-
+        # create a second user
         otherUser = CustomUser.objects.create_user('Other test user', 'otherperson@example.com', '12345')
         EmailAddress.objects.create(user=otherUser, 
             email='otherperson@example.com',
             primary=True,
             verified=True)
 
+        # and create a Top Ten List that they own
         self.client.force_authenticate(user=otherUser)
 
         response = self.client.post(create_list_url, second_list_data, format='json')
