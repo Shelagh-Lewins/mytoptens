@@ -415,6 +415,19 @@ const canEditTopTenList = (auth, topTenListObj) => {
 };
 
 // functions to get topTenLists and topTenItems
+const getUserId = state => state.auth.user.id;
+const getTopTenLists = (state) => {
+	const topTenLists = state.topTenList.things;
+	const enhancedTopTenLists = {};
+
+	Object.keys(topTenLists).forEach((key) => {
+		enhancedTopTenLists[key] = { ...topTenLists[key] };
+	});
+	return enhancedTopTenLists;
+};
+
+const getTopTenItems = state => state.topTenItem.things;
+
 export const getTopTenList = (state, topTenListId) => {
 	// console.log('topTenListId', topTenListId);
 	const topTenListObj = state.topTenList.things[topTenListId];
@@ -426,39 +439,55 @@ export const getTopTenList = (state, topTenListId) => {
 		'canView': canViewTopTenList(state.auth, topTenListObj),
 		'canEdit': canEditTopTenList(state.auth, topTenListObj),
 	};
-	// console.log('obj', obj);
-	// return obj;
 };
 
 // returns topTenLists as an array not an object
 // and adds permissions information
-export const getTopTenLists = state => Object.keys(state.topTenList.things).map(id => ({
+export const getTopTenListsArray = state => Object.keys(state.topTenList.things).map(id => ({
 	...state.topTenList.things[id],
 	'canView': canViewTopTenList(state.auth, state.topTenList.things[id]),
 	'canEdit': canEditTopTenList(state.auth, state.topTenList.things[id]),
 }));
 
 // return topTenItems and indicate whether the user can view any child top ten lists of those top ten items
-const getTopTenItems = state => state.topTenItem.things;
 
-// check user status
-// const getAuth = state => state.auth;
-
-// get all visible lists
+// get all public Top Ten Lists
 export const getPublicTopTenLists = createSelector(
-	[getTopTenLists],
+	[getTopTenListsArray],
 	topTenLists => topTenLists.filter(topTenListObject => topTenListObject.is_public),
 );
 
+// get Top Ten Lists belonging to the user
+export const getMyTopTenLists = createSelector(
+	[getTopTenLists, getUserId],
+	(allTopTenLists, userId) => {
+		if (!userId) {
+			return {};
+		}
+
+		const myTopTenLists = {};
+
+		Object.keys(allTopTenLists).forEach((key) => {
+			const topTenListObj = allTopTenLists[key];
+
+			if (topTenListObj.created_by === userId) {
+				myTopTenLists[topTenListObj.id] = topTenListObj;
+			}
+		});
+
+		return myTopTenLists;
+	},
+);
+
 export const getMyGroupedTopTenLists = createSelector(
-	[getTopTenLists],
+	[getTopTenListsArray],
 	(topTenLists) => {
 		const grouped = {};
 
 		TOPTENLIST_IS_PUBLIC_VALUES.forEach((is_public) => {
 			grouped[is_public] = topTenLists.filter(topTenListObject => (topTenListObject.created_by === store.getState().auth.user.id) && (topTenListObject.is_public === is_public));
 		});
-		console.log('getMyGroupedTopTenLists', grouped);
+
 		return grouped;
 	},
 );
@@ -475,7 +504,6 @@ export const getTopLevelMyGroupedTopTenLists = createSelector(
 		const grouped = {};
 
 		TOPTENLIST_IS_PUBLIC_VALUES.forEach((is_public) => {
-			console.log('is_public', is_public);
 			grouped[is_public] = groupedTopTenLists[is_public].filter(topTenListObject => !topTenListObject.parent_topTenItem);
 		});
 		console.log('getTopLevelMyGroupedTopTenLists', grouped);
@@ -485,34 +513,13 @@ export const getTopLevelMyGroupedTopTenLists = createSelector(
 
 // ///////////////////////////
 // organizer data
-export const getOrganizerTopTenLists = state => state.topTenList.things;
-const getOrganizerMyTopTenLists = (state) => {
-	if (!state.auth.isAuthenticated || !state.auth.user.id) {
-		return {};
-	}
-
-	const allTopTenLists = state.topTenList.things;
-
-	const myTopTenLists = {};
-
-	Object.keys(allTopTenLists).forEach((key) => {
-		const topTenListObj = allTopTenLists[key];
-
-		if (topTenListObj.created_by === state.auth.user.id) {
-			myTopTenLists[topTenListObj.id] = topTenListObj;
-		}
-	});
-
-	return myTopTenLists;
-};
-
 const getOrganizerTopTenItems = state => state.topTenItem.things;
 
 
 // returns topTenLists in an array, sorted by name
 // instead of the state.topTenList.things object, keyed by id
 export const getMySortedOrganizerTopTenLists = createSelector(
-	[getOrganizerMyTopTenLists],
+	[getMyTopTenLists],
 	(topTenLists) => {
 		const topTenListsArray = Object.keys(topTenLists).map(id => topTenLists[id]);
 
@@ -522,10 +529,10 @@ export const getMySortedOrganizerTopTenLists = createSelector(
 	},
 );
 
-// topTenLists, topTenItems should be memoized
+// topTenListsArray, topTenItems should be memoized
 // even though the rest of the selector will be rerun, it's still a gain
 export const getTopTenItemsForTopTenList = createSelector(
-	[getTopTenLists, getTopTenItems],
+	[getTopTenListsArray, getTopTenItems],
 	(topTenLists, topTenItems) => (topTenListObject) => {
 		const topTenListTopTenItems = [];
 
@@ -537,9 +544,6 @@ export const getTopTenItemsForTopTenList = createSelector(
 
 				if (childTopTenList) {
 					topTenItem.childTopTenList = { ...childTopTenList };
-
-					// can the user view the child top ten list?
-					// topTenItem.childTopTenList.canView = canViewTopTenList(auth, childTopTenList);
 				}
 
 				topTenListTopTenItems.push(topTenItem);
@@ -551,10 +555,9 @@ export const getTopTenItemsForTopTenList = createSelector(
 
 // Top Ten Lists for a Reusable Item
 const getReusableItemId = (state, props) => props.match.params.id;
-const getUserId = state => state.auth.user.id;
 
 export const getTopTenListsForReusableItem = createSelector(
-	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId],
+	[getTopTenLists, getOrganizerTopTenItems, getReusableItemId],
 	(topTenLists, topTenItems, targetReusableItemId) => {
 		const topTenListsArray = [];
 
@@ -588,7 +591,7 @@ export const getReusableItemUsersCount = createSelector(
 );
 
 export const getMyTopTenItemsForReusableItem = createSelector(
-	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId, getUserId],
+	[getMyTopTenLists, getOrganizerTopTenItems, getReusableItemId, getUserId],
 	(topTenLists, topTenItems, targetReusableItemId, userId) => {
 		const topTenItemsArray = [];
 
@@ -616,7 +619,7 @@ export const getMyTopTenItemsForReusableItem = createSelector(
 );
 
 export const getMyTopTenListsForReusableItem = createSelector(
-	[getOrganizerTopTenLists, getOrganizerTopTenItems, getReusableItemId, getUserId],
+	[getMyTopTenLists, getOrganizerTopTenItems, getReusableItemId, getUserId],
 	(topTenLists, topTenItems, targetReusableItemId, userId) => {
 		const topTenListsArray = [];
 
@@ -645,7 +648,7 @@ export const getMyTopTenListsForReusableItem = createSelector(
 // topTenLists, topTenItems should be memoized
 // even though the rest of the selector will be rerun, it's still a gain
 export const getParentTopTenItemAndTopTenList = createSelector(
-	[getOrganizerTopTenLists, getOrganizerTopTenItems],
+	[getTopTenLists, getOrganizerTopTenItems],
 	// find a topTenLists's parent topTenItem and the parent topTenList, if any
 	(topTenLists, topTenItems) => (topTenListObject) => {
 		let parentTopTenItem;
