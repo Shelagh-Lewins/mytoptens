@@ -562,6 +562,8 @@ export const getTopTenItemsForTopTenList = createSelector(
 // Top Ten Lists for a Reusable Item
 const getReusableItemId = (state, id) => id;
 
+// TODO look for a way to avoid running this multiple times
+// It is one lot of code used for multiple purposes, but the results are not cached
 export const getTopTenItemsAndListsForReusableItem = createSelector(
 	[getTopTenLists, getTopTenItems, getReusableItemId],
 	(topTenLists, topTenItems, targetReusableItemId) => {
@@ -639,7 +641,10 @@ export const getMyTopTenListsForReusableItem = createSelector(
 // count the number of users who reference a Reusable Item
 export const getReusableItemUsersCount = createSelector(
 	[getTopTenListsForReusableItem],
-	topTenLists => new Set(topTenLists).size, // count the unique values of created_by
+	(topTenLists) => {
+		const users = topTenLists.map(topTenListObj => topTenListObj.created_by);
+		return new Set(users).size; // count the unique values of created_by
+	},
 );
 
 // topTenLists, topTenItems should be memoized

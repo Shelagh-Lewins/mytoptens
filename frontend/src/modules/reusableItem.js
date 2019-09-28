@@ -351,29 +351,54 @@ const canViewReusableItem = (auth, reusableItemObj) => {
 	return false;
 };
 
+const canEditReusableItem = (state, reusableItemObj) => {
+	const { auth } = state;
+
+	if (!reusableItemObj) {
+		return false;
+	}
+
+	if (!auth.isAuthenticated) {
+		return false;
+	}
+
+	if (!auth.user) {
+		return false;
+	}
+
+	if (reusableItemObj.created_by === auth.user.id) {
+		return true;
+	}
+
+	if (!reusableItemObj.is_public) {
+		return false;
+	}
+
+	if (topTenListsReducer.getMyTopTenListsForReusableItem(state, reusableItemObj.id).length > 0) {
+		return true;
+	}
+
+	return false;
+};
+
 // data for suggesting reusableItems to select
 // for each widgetId in search
 // returns reusableItems as an array
 export const getReusableItems = (state) => {
 	const searchResults = state.reusableItem.search;
 	const results = {};
-	// console.log('running getReusableItems');
 
 	Object.keys(searchResults).map((widgetId) => {
-		// console.log('map');
 		if (!searchResults[widgetId].reusableItems) {
-			// console.log('return undefined');
 			return undefined;
 		}
 
 		const extendedReusableItems = searchResults[widgetId].reusableItems.map((ReusableItemObj) => {
-			// const extendedReusableItem = JSON.parse(JSON.stringify(thisReusableItem));
-			// extendedReusableItem.type = 'reusableItem';
-
 			const extendedReusableItem = {
 				...ReusableItemObj,
 				'type': 'reusableItem',
 				'canView': canViewReusableItem(state.auth, ReusableItemObj),
+				'canEdit': canEditReusableItem(state, ReusableItemObj),
 			};
 			return extendedReusableItem;
 		});
@@ -390,11 +415,9 @@ export const getReusableItems = (state) => {
 export const getTopTenItems = (state) => {
 	const searchResults = state.reusableItem.search;
 	const results = {};
-	// console.log('running getTopTenItems');
+
 	Object.keys(searchResults).map((widgetId) => {
-		// console.log('map');
 		if (!searchResults[widgetId].topTenItems) {
-			// console.log('return undefined');
 			return undefined;
 		}
 
@@ -424,7 +447,7 @@ export const getReusableItem = (state, reusableItemId) => {
 	return {
 		...reusableItemObj,
 		'canView': canViewReusableItem(state.auth, reusableItemObj),
-		// 'canEdit': canEditReusableItem(state.auth, topTenListObj),
+		'canEdit': canEditReusableItem(state, reusableItemObj),
 	};
 };
 
@@ -433,7 +456,6 @@ export const getReusableItem = (state, reusableItemId) => {
 export const getSortedReusableItemSuggestions = createSelector(
 	[getReusableItems, getTopTenItems],
 	(reusableItems, topTenItems) => {
-		// console.log('running getSortedReusableItemSuggestions');
 		const results = {};
 		Object.keys(reusableItems).map((widgetId) => {
 			const sortedItems = reusableItems[widgetId].slice();
@@ -460,7 +482,6 @@ export const getReusableItemList = (state) => {
 	const results = {};
 
 	Object.keys(search).map((widgetId) => {
-		// console.log('widgetId', widgetId);
 		const { searchTerm } = search[widgetId];
 
 		if (searchTerm === '' || searchTerm === undefined) {

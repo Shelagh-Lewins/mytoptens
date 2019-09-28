@@ -11,7 +11,7 @@ import Loading from '../components/Loading';
 import * as reusableItemReducer from '../modules/reusableItem';
 import * as topTenListReducer from '../modules/topTenList';
 import * as errorsReducer from '../modules/errors';
-import * as permissions from '../modules/permissions';
+// import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 
@@ -58,36 +58,13 @@ class ReusableItemDetail extends Component {
 
 	componentDidUpdate(prevProps) {
 		const {
-			isLoading,
 			match,
 			auth,
 			reusableItem,
-			// topTenLists,
-			myTopTenItems,
-			isLoadingOrganizerData,
 			history,
 		} = this.props;
-		// console.log('checking props', myTopTenItems);
+
 		let { id } = this.state;
-
-		if (reusableItem && prevProps.isLoading && !isLoading) {
-			console.log('update 1');
-			// loaded a reusableItem
-			this.setState({
-				// 'canView': permissions.canViewReusableItem(reusableItem),
-				'isOwner': permissions.userCreatedReusableItem(reusableItem),
-				'changeRequestsAvailable': false, // waiting for organizer data to load
-			});
-		}
-
-		// loaded a new list of top ten lists that reference this reusableItem
-		// TODO this doesn't fire reliably, maybe a timing issue with main data loading first.
-		if (reusableItem && prevProps.isLoadingOrganizerData && !isLoadingOrganizerData) {
-			console.log('update 2');
-			this.setState({
-				'changeRequestsAvailable': permissions.reusableItemChangeRequestsAvailable(reusableItem, myTopTenItems),
-			});
-		}
 
 		// navigated to a different reusableItem
 		if (prevProps.match.params.id !== match.params.id) {
@@ -219,9 +196,10 @@ class ReusableItemDetail extends Component {
 
 	renderReusableItem() {
 		const { auth, reusableItem, reusableItemUsersCount } = this.props;
+		const { canEdit } = reusableItem;
 		const { isAuthenticated, user } = auth;
 
-		const { changeRequestsAvailable, isOwner, showChangeRequestForm } = this.state;
+		const { showChangeRequestForm } = this.state;
 
 		const reusableItemHelpId = this.popoverIds.reusableItemHelp;
 		const { [`popoverOpen${reusableItemHelpId}`]: popoverOpen } = this.state;
@@ -419,7 +397,7 @@ class ReusableItemDetail extends Component {
 							<span className="icon"><FontAwesomeIcon icon={['fas', 'clone']} style={{ 'color': COLORS.REUSABLEITEM }} size="1x" /></span>
 							{reusableItem.name}
 						</h2>
-						{changeRequestsAvailable && (
+						{canEdit && (
 							<div className="reusableitem-summary-controls">
 								<IsPublicIndicator
 									targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
@@ -435,7 +413,7 @@ class ReusableItemDetail extends Component {
 						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
 					</Col>
 				</Row>
-				{changeRequestsAvailable && changeRequest}
+				{canEdit && changeRequest}
 			</React.Fragment>
 		);
 	}
@@ -529,7 +507,6 @@ const mapStateToProps = (state, ownProps) => {
 		'isLoading': state.reusableItem.isLoading,
 		'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
 		'reusableItem': reusableItemReducer.getReusableItem(state, reusableItemId),
-		// state.reusableItem.things[ownProps.match.params.id],
 		'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, reusableItemId),
 		'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, reusableItemId), // the user's topTenItems that reference this reusableItem
 		'reusableItemUsersCount': topTenListReducer.getReusableItemUsersCount(state, reusableItemId),
