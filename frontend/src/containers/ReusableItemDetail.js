@@ -67,14 +67,14 @@ class ReusableItemDetail extends Component {
 			isLoadingOrganizerData,
 			history,
 		} = this.props;
-		console.log('checking props', myTopTenItems);
+		// console.log('checking props', myTopTenItems);
 		let { id } = this.state;
 
 		if (reusableItem && prevProps.isLoading && !isLoading) {
 			console.log('update 1');
 			// loaded a reusableItem
 			this.setState({
-				'canView': permissions.canViewReusableItem(reusableItem),
+				// 'canView': permissions.canViewReusableItem(reusableItem),
 				'isOwner': permissions.userCreatedReusableItem(reusableItem),
 				'changeRequestsAvailable': false, // waiting for organizer data to load
 			});
@@ -138,7 +138,7 @@ class ReusableItemDetail extends Component {
 
 		props.dispatch(reusableItemReducer.fetchReusableItemDetail(reusableItemId));
 		props.dispatch(errorsReducer.clearErrors());
-		// props.dispatch(topTenListReducer.fetchOrganizerData({ reusableItemId }));
+		props.dispatch(topTenListReducer.fetchOrganizerData({ reusableItemId }));
 		return reusableItemId;
 	}
 
@@ -479,7 +479,7 @@ class ReusableItemDetail extends Component {
 	}
 
 	render() {
-		const { isLoading } = this.props;
+		const { reusableItem, isLoading } = this.props;
 
 		if (isLoading) {
 			return <Loading />;
@@ -487,8 +487,8 @@ class ReusableItemDetail extends Component {
 
 		let content;
 
-		const { canView } = this.state;
-		if (canView) {
+		// const { canView } = this.state;
+		if (reusableItem && reusableItem.canView) {
 			content = this.renderPage();
 		} else {
 			content = <p>This Reusable Item does not exist or you do not have permission to see it.</p>;
@@ -525,9 +525,10 @@ const mapStateToProps = (state, ownProps) => ({
 	'errors': state.errors,
 	'isLoading': state.reusableItem.isLoading,
 	'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
-	'reusableItem': state.reusableItem.things[ownProps.match.params.id],
-	'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, ownProps),
-	'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, ownProps), // the user's topTenItems that reference this reusableItem
+	'reusableItem': reusableItemReducer.getReusableItem(state, ownProps.match.params.id),
+	// state.reusableItem.things[ownProps.match.params.id],
+	'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, ownProps.match.params.id),
+	'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, ownProps.match.params.id), // the user's topTenItems that reference this reusableItem
 	'reusableItemUsersCount': topTenListReducer.getReusableItemUsersCount(state, ownProps),
 	'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, ownProps), // all topTenItems that reference this reusableItem
 });

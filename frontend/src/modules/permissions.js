@@ -24,7 +24,7 @@ export function canCreateTopTenList() {
 
 	return false;
 }
-
+/*
 export function canViewReusableItem(reusableItem) {
 	// public reusableItems can be viewed
 	// also private ones the user created
@@ -39,7 +39,7 @@ export function canViewReusableItem(reusableItem) {
 	}
 
 	return false;
-}
+} */
 
 // can the user view, create and vote on change requests?
 export function reusableItemChangeRequestsAvailable(reusableItem, myTopTenItems) {

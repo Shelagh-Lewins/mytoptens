@@ -2,7 +2,6 @@ import { createSelector } from 'reselect';
 import { normalize, schema } from 'normalizr';
 import fetchAPI from './fetchAPI';
 import { getErrors } from './errors';
-// import { getErrors } from './errors';
 
 import * as topTenListsReducer from './topTenList';
 
@@ -173,12 +172,6 @@ export const fetchReusableItemDetail = id => (dispatch, getState) => {
 		// console.log('fetchReusableItemDetail response', response);
 		const normalizedData = normalize(response, [reusableItemSchema]);
 
-		/* let userId;
-
-		if (getState().auth.isAuthenticated) {
-			userId = getState().auth.user.id;
-		} */
-
 		dispatch(topTenListsReducer.fetchOrganizerData({ 'reusableItemId': id }));
 
 		return dispatch(receiveEntities(normalizedData));
@@ -332,6 +325,32 @@ const initialResuableItemsState = {
 // ///////////////////////////
 // data for props
 
+// ///////////////////////////
+// Permissions
+const canViewReusableItem = (auth, reusableItemObj) => {
+	if (!reusableItemObj) {
+		return false;
+	}
+
+	if (reusableItemObj.is_public) {
+		return true;
+	}
+
+	if (!auth.isAuthenticated) {
+		return false;
+	}
+
+	if (!auth.user) {
+		return false;
+	}
+
+	if (reusableItemObj.created_by === auth.user.id) {
+		return true;
+	}
+
+	return false;
+};
+
 // data for suggesting reusableItems to select
 // for each widgetId in search
 // returns reusableItems as an array
@@ -347,9 +366,15 @@ export const getReusableItems = (state) => {
 			return undefined;
 		}
 
-		const extendedReusableItems = searchResults[widgetId].reusableItems.map((thisReusableItem) => {
-			const extendedReusableItem = JSON.parse(JSON.stringify(thisReusableItem));
-			extendedReusableItem.type = 'reusableItem';
+		const extendedReusableItems = searchResults[widgetId].reusableItems.map((ReusableItemObj) => {
+			// const extendedReusableItem = JSON.parse(JSON.stringify(thisReusableItem));
+			// extendedReusableItem.type = 'reusableItem';
+
+			const extendedReusableItem = {
+				...ReusableItemObj,
+				'type': 'reusableItem',
+				'canView': canViewReusableItem(state.auth, ReusableItemObj),
+			};
 			return extendedReusableItem;
 		});
 
@@ -388,6 +413,19 @@ export const getTopTenItems = (state) => {
 	});
 
 	return results;
+};
+// ///////////////////
+export const getReusableItem = (state, reusableItemId) => {
+	// console.log('topTenListId', topTenListId);
+	const reusableItemObj = state.reusableItem.things[reusableItemId];
+	if (!reusableItemObj) {
+		return;
+	}
+	return {
+		...reusableItemObj,
+		'canView': canViewReusableItem(state.auth, reusableItemObj),
+		// 'canEdit': canEditReusableItem(state.auth, topTenListObj),
+	};
 };
 
 // combined data for suggesting reusableItems
