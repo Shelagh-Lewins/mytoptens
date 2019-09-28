@@ -11,15 +11,12 @@ import { COLORS } from '../constants';
 // By using props to populate the UI, we enable time travel and a direct connection with the store.
 
 import IsPublicIndicator from './IsPublicIndicator';
-
-// import * as permissions from '../modules/permissions';
-
 import './TopTenListSummary.scss';
 
 const TopTenListSummary = (props) => {
 	const { topTenList, onChangeIsPublic, showCreatedBy } = props;
-	// const canEdit = permissions.canEditTopTenList(topTenList.id);
-	const canEdit = topTenList.canEdit;
+
+	const { canEdit } = topTenList;
 
 	function onDeleteTopTenList() {
 		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });

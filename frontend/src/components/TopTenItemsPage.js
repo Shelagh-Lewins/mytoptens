@@ -239,11 +239,9 @@ class TopTenItemsPage extends Component {
 	}
 
 	renderTopTenItemsList() {
-		// console.log('*** render');
 		const elements = [];
 		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			const {
-				// canEdit,
 				topTenList,
 				onCreateChildTopTenList,
 				reusableItems,
@@ -343,7 +341,6 @@ class TopTenItemsPage extends Component {
 }
 
 TopTenItemsPage.propTypes = {
-	// 'canEdit': PropTypes.bool.isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'onCreateChildTopTenList': PropTypes.func.isRequired,
 	'reusableItems': PropTypes.objectOf(PropTypes.any),

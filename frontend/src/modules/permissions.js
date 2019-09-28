@@ -12,56 +12,6 @@
 // identifier should be like { 'id': 'efg' } i.e. an object with one property
 
 import store from '../store';
-import findObjectByProperty from './findObjectByProperty';
-
-/* export function canViewTopTenList(id) {
-	// a topTenList can be viewed if public or if created by user
-
-	const state = store.getState();
-	const topTenLists = state.topTenList.things;
-	const userId = state.auth.user.id;
-
-	let canView = false;
-
-	if (Object.keys(topTenLists).length > 0) {
-		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
-
-		if (topTenList && (topTenList.is_public || (topTenList.created_by === userId))) {
-			canView = true;
-		}
-	}
-
-	return canView;
-} */
-
-/* export function canEditTopTenList(id) {
-	// a topTenList can be edited if created by user
-	const state = store.getState();
-	const userId = state.auth.user.id;
-	const topTenLists = state.topTenList.things;
-	let canEdit = false;
-	/*
-	// can use organizer data or full top ten list data
-	// organizer data not loaded in Home
-	// full data not loaded in list detail
-	let topTenLists;
-
-	if (Object.keys(state.topTenList.things).length > 0) {
-		topTenLists = state.topTenList.things;
-	} else if (Object.keys(state.topTenList.organizerData).length > 0) {
-		topTenLists = state.topTenList.organizerData;
-	} */
-/*
-	if (Object.keys(topTenLists).length > 0) {
-		const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': id });
-
-		if (topTenList && (topTenList.created_by === userId)) {
-			canEdit = true;
-		}
-	}
-
-	return canEdit;
-} */
 
 export function canCreateTopTenList() {
 	// the user can create a topTenList if they are logged in

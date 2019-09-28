@@ -11,12 +11,11 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import EditableTextField from './EditableTextField';
-// import * as permissions from '../modules/permissions';
 import './TopTenItem.scss';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
 
 
-class Item extends Component {
+class TopTenItem extends Component {
 	constructor(props) {
 		super();
 
@@ -109,16 +108,15 @@ class Item extends Component {
 
 		// child topTenList exists and user can view it
 		if (topTenItem.childTopTenList && topTenItem.childTopTenList.canView) {
-			// if (topTenItem.childTopTenList && permissions.canViewTopTenList(topTenItem.childTopTenList.id)) {
 			canViewChildTopTenList = true;
 		}
 
-		let childTopTenList;
+		let childTopTenListElm;
 
 		if (canCreateChildTopTenList) {
-			childTopTenList = (<button type="button" className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);
+			childTopTenListElm = (<button type="button" className="btn btn-primary create-childtoptenlist" onClick={this.onCreateChildTopTenList}>Create child Top Ten list</button>);
 		} else if (canViewChildTopTenList) {
-			childTopTenList = (
+			childTopTenListElm = (
 				<div className="child-toptenlist">
 					<Link to={`/toptenlist/${topTenItem.childTopTenList.id}`}>
 						{topTenItem.childTopTenList.name}
@@ -229,7 +227,7 @@ class Item extends Component {
 						topTenItem={topTenItemForReusableItem}
 					/>
 				</div>
-				{childTopTenList}
+				{childTopTenListElm}
 				{showDescription
 					&& (
 						<div className="toptenitem-body">
@@ -259,7 +257,7 @@ class Item extends Component {
 	}
 }
 
-Item.propTypes = {
+TopTenItem.propTypes = {
 	'topTenItem': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topTenList': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topTenItemFromStore': PropTypes.objectOf(PropTypes.any).isRequired,
@@ -267,7 +265,6 @@ Item.propTypes = {
 	'onMoveTopTenItemUp': PropTypes.func.isRequired,
 	'onMoveTopTenItemDown': PropTypes.func.isRequired,
 	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any).isRequired,
-	// 'canEdit': PropTypes.bool,
 	'handleComboboxChange': PropTypes.func.isRequired,
 	'handleInputChange': PropTypes.func.isRequired,
 	'handleNewValue': PropTypes.func.isRequired,
@@ -278,4 +275,4 @@ Item.propTypes = {
 	'topTenItemForReusableItem': PropTypes.objectOf(PropTypes.any),
 };
 
-export default Item;
+export default TopTenItem;

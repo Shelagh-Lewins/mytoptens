@@ -19,8 +19,6 @@ import Loading from '../components/Loading';
 import * as topTenListReducer from '../modules/topTenList';
 import * as topTenItemReducer from '../modules/topTenItem';
 import * as reusableItemReducer from '../modules/reusableItem';
-// import * as permissions from '../modules/permissions';
-import findObjectByProperty from '../modules/findObjectByProperty';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 import { clearErrors } from '../modules/errors';
@@ -59,11 +57,6 @@ class TopTenListDetails extends Component {
 			// const canViewTopTenList = permissions.canViewTopTenList(id);
 
 			this.getOrganizerData();
-
-			// this.setState({
-				// 'canView': canViewTopTenList,
-				// 'canEdit': canEditTopTenList,
-			// });
 
 			if (topTenList && topTenList.canView) {
 				// if (canViewTopTenList) {
@@ -380,18 +373,15 @@ TopTenListDetails.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => {
-	const topTenLists = state.topTenList.things; // details of the current topTenList, with parent and child topTenLists if they exist
+	const topTenList = topTenListReducer.getTopTenList(state, ownProps.match.params.id);
 
-	// first find the target topTenList
-	const topTenList = findObjectByProperty({ 'parentObject': topTenLists, 'property': 'id', 'value': ownProps.match.params.id });
-
-	const parentTopTenItemAndTopTenList = topTenListReducer.getParentTopTenItemAndTopTenList(state)(topTenList);
+	const parentTopTenItemAndTopTenList = topTenListReducer.getParentTopTenItemAndTopTenList(state)(ownProps.match.params.id);
 
 	return ({
 		'auth': state.auth,
 		'errors': state.errors,
 		'isLoading': state.topTenList.isLoading,
-		'topTenList': topTenListReducer.getTopTenList(state, ownProps.match.params.id),
+		'topTenList': topTenList,
 		'thisTopTenListTopTenItems': topTenListReducer.getTopTenItemsForTopTenList(state)(topTenList),
 		'parentTopTenList': parentTopTenItemAndTopTenList.parentTopTenList,
 		'parentTopTenItem': parentTopTenItemAndTopTenList.parentTopTenItem,
