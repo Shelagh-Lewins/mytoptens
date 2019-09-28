@@ -562,42 +562,27 @@ export const getTopTenItemsForTopTenList = createSelector(
 // Top Ten Lists for a Reusable Item
 const getReusableItemId = (state, id) => id;
 
-export const getTopTenItemsForReusableItem = createSelector(
-	[getTopTenItems, getReusableItemId],
-	(topTenItems, targetReusableItemId) => {
-		const topTenItemsArray = [];
-
-		Object.keys(topTenItems).map((id) => { // eslint-disable-line array-callback-return
-			const topTenItemObj = topTenItems[id];
-			const { reusableItem_id } = topTenItemObj;
-
-			if (reusableItem_id === targetReusableItemId) {
-				// avoid duplicates
-				if (!topTenItemsArray.includes(topTenItemObj)) {
-					topTenItemsArray.push(topTenItemObj);
-				}
-			}
-		});
-
-		return topTenItemsArray;
-	},
-);
-
-// export const getTopTenListsForReusableItem = createSelector(
-// [getTopTenLists, getTopTenItems, getReusableItemId],
-export const getTopTenListsForReusableItem = createSelector(
-	[getTopTenLists, getTopTenItemsForReusableItem, getReusableItemId],
+export const getTopTenItemsAndListsForReusableItem = createSelector(
+	[getTopTenLists, getTopTenItems, getReusableItemId],
 	(topTenLists, topTenItems, targetReusableItemId) => {
+		const topTenItemsArray = [];
 		const topTenListsArray = [];
 
 		Object.keys(topTenItems).map((id) => { // eslint-disable-line array-callback-return
 			const topTenItemObj = topTenItems[id];
-			const { topTenList_id, reusableItem_id } = topTenItemObj;
-
+			const { reusableItem_id, topTenList_id } = topTenItemObj;
 			const topTenListObj = topTenLists[topTenList_id];
 
+			// the Top Ten Item references the Reusable Item
 			if (reusableItem_id === targetReusableItemId) {
 				// avoid duplicates
+				if (!topTenItemsArray.includes(topTenItemObj)) {
+					topTenItemsArray.push({
+						...topTenItemObj,
+						'created_by': topTenListObj.created_by,
+					});
+				}
+
 				if (!topTenListsArray.includes(topTenListObj)) {
 					topTenListsArray.push(topTenListObj);
 				}
@@ -605,79 +590,47 @@ export const getTopTenListsForReusableItem = createSelector(
 		});
 
 		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
+		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
-		return topTenListsArray;
+		return { topTenListsArray, topTenItemsArray };
 	},
 );
 
+export const getTopTenItemsForReusableItem = createSelector(
+	[getTopTenItemsAndListsForReusableItem],
+	topTenItemsAndLists => topTenItemsAndLists.topTenItemsArray,
+);
+
+export const getTopTenListsForReusableItem = createSelector(
+	[getTopTenItemsAndListsForReusableItem],
+	topTenItemsAndLists => topTenItemsAndLists.topTenListsArray,
+);
+
 export const getMyTopTenItemsForReusableItem = createSelector(
-	[getMyTopTenLists, getTopTenItemsForReusableItem, getUserId],
-	(topTenLists, topTenItems, userId) => {
+	[getTopTenItemsAndListsForReusableItem, getUserId],
+	(topTenItemsAndLists, userId) => {
 		const topTenItemsArray = [];
-		//console.log('?????');
-		//console.log('getMyTopTenItemsForReusableItem topTenLists', topTenLists);
-		//console.log('***** 1');
-		//console.log('getMyTopTenItemsForReusableItem topTenItems', topTenItems);
-		//console.log('***** 2');
 
-		if (!userId) {
-			return topTenItemsArray;
-		}
-
-		Object.keys(topTenItems).map((id) => { // eslint-disable-line array-callback-return
-			//console.log('topTenItem id', topTenItems[id]);
-			const topTenItemObj = topTenItems[id];
-			const { topTenList_id, reusableItem_id } = topTenItemObj;
-
-			const topTenListObj = topTenLists[topTenList_id];
-			// const { created_by } = topTenListObj;
-
-			if (topTenListObj) {
+		topTenItemsAndLists.topTenItemsArray.forEach((topTenItemObj) => {
+			if (topTenItemObj.created_by === userId) {
 				topTenItemsArray.push(topTenItemObj);
 			}
 		});
-		console.log('topTenItemsArray', topTenItemsArray);
-		topTenItemsArray.sort((a, b) => a.name.localeCompare(b.name));
 
 		return topTenItemsArray;
 	},
 );
 
 export const getMyTopTenListsForReusableItem = createSelector(
-	[getTopTenListsForReusableItem, getReusableItemId, getUserId],
-	(topTenLists, targetReusableItemId, userId) => {
+	[getTopTenItemsAndListsForReusableItem, getUserId],
+	(topTenItemsAndLists, userId) => {
 		const topTenListsArray = [];
-		// console.log('getMyTopTenListsForReusableItem topTenLists', topTenLists);
-		// console.log('getMyTopTenListsForReusableItem topTenItems', topTenItems);
 
-		/* Object.keys(topTenItems).map((id) => { // eslint-disable-line array-callback-return
-			const topTenItemObj = topTenItems[id];
-			const { topTenList_id, reusableItem_id } = topTenItemObj;
-
-			const topTenListObj = topTenLists[topTenList_id];
-			const { created_by } = topTenListObj;
-
-			if ((reusableItem_id === targetReusableItemId)
-				&& (created_by === userId)) {
-				// avoid duplicates
-				if (!topTenListsArray.includes(topTenListObj)) {
-					topTenListsArray.push(topTenListObj);
-				}
-			}
-		}); */
-
-		Object.keys(topTenLists).map((topTenListObj) => { // eslint-disable-line array-callback-return
-			const { created_by } = topTenListObj;
-
-			if (created_by === userId) {
-				// avoid duplicates
-				if (!topTenListsArray.includes(topTenListObj)) {
-					topTenListsArray.push(topTenListObj);
-				}
+		topTenItemsAndLists.topTenItemsArray.forEach((topTenListObj) => {
+			if (topTenListObj.created_by === userId) {
+				topTenListsArray.push(topTenListObj);
 			}
 		});
-
-		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
 		return topTenListsArray;
 	},
@@ -686,10 +639,7 @@ export const getMyTopTenListsForReusableItem = createSelector(
 // count the number of users who reference a Reusable Item
 export const getReusableItemUsersCount = createSelector(
 	[getTopTenListsForReusableItem],
-	(topTenLists) => {
-		// count the unique values of created_by
-		return new Set(topTenLists).size;
-	},
+	topTenLists => new Set(topTenLists).size, // count the unique values of created_by
 );
 
 // topTenLists, topTenItems should be memoized

@@ -520,17 +520,21 @@ ReusableItemDetail.propTypes = {
 	'topTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
-const mapStateToProps = (state, ownProps) => ({
-	'auth': state.auth,
-	'errors': state.errors,
-	'isLoading': state.reusableItem.isLoading,
-	'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
-	'reusableItem': reusableItemReducer.getReusableItem(state, ownProps.match.params.id),
-	// state.reusableItem.things[ownProps.match.params.id],
-	'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, ownProps.match.params.id),
-	'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, ownProps.match.params.id), // the user's topTenItems that reference this reusableItem
-	'reusableItemUsersCount': topTenListReducer.getReusableItemUsersCount(state, ownProps),
-	'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, ownProps), // all topTenItems that reference this reusableItem
-});
+const mapStateToProps = (state, ownProps) => {
+	const reusableItemId = ownProps.match.params.id;
+
+	return {
+		'auth': state.auth,
+		'errors': state.errors,
+		'isLoading': state.reusableItem.isLoading,
+		'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
+		'reusableItem': reusableItemReducer.getReusableItem(state, reusableItemId),
+		// state.reusableItem.things[ownProps.match.params.id],
+		'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, reusableItemId),
+		'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, reusableItemId), // the user's topTenItems that reference this reusableItem
+		'reusableItemUsersCount': topTenListReducer.getReusableItemUsersCount(state, reusableItemId),
+		'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, reusableItemId), // all topTenItems that reference this reusableItem
+	};
+};
 
 export default connect(mapStateToProps)(ReusableItemDetail);

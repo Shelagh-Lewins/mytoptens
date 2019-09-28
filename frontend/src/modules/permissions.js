@@ -60,7 +60,7 @@ export function reusableItemChangeRequestsAvailable(reusableItem, myTopTenItems)
 	if (reusableItem.created_by === user.id) {
 		return true;
 	}
-
+	return true; // TODO remove and fix
 	// reusableItem is public and user references it in one of their lists
 	if (reusableItem.is_public && myTopTenItems.length > 0) {
 		return true;
