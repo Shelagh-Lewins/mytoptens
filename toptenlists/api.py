@@ -119,15 +119,18 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
 
             if not topTenItem: # if the topTenItem isn't found, don't save the new value
                 raise APIException("Unable to set parent_topTenItem. No topTenItem found with id: " + parent_topTenItem_id.__str__())
-
+                print('case 1')
             # check the topTenItem belongs to the same user
             if topTenItem.topTenList.created_by != self.request.user:
                 raise APIException("Unable to set parent_topTenItem. " + parent_topTenItem_id.__str__() + "does not belong to this user")
-
+                print('case 2')
             # don't allow the parent top ten list to be the same top ten list that contains the top ten item
             parent_topTenItem = TopTenItem.objects.get(pk=parent_topTenItem_id)
 
-            if topTenItem.topTenList.id == parent_topTenItem.topTenList.id:
+            print('serializer.instance.id', serializer.instance.id)
+            print('parent_topTenItem.topTenList.id', parent_topTenItem.topTenList.id)
+
+            if serializer.instance.id == parent_topTenItem.topTenList.id:
                 raise APIException("Unable to set parent_topTenItem. " + parent_topTenItem.topTenList.id.__str__() + "is the list to which the Top Ten Item belongs")
 
             # set any TopTenLists with this parent_topTenItem to null parent_topTenItem

@@ -190,11 +190,12 @@ class EditTopTenListAPITest(APITestCase):
         Set a parent top ten item for the list, i.e. make it a child top ten list
         The parent top ten item must belong to a different top ten list
         """
-       
+
+        # find the first Top Ten Item, which will become the parent
         topTenItems = self.topTenList.topTenItem.all()
         item_1_id = topTenItems[0].id
 
-        # create a second Top Ten List
+        # create a second Top Ten List, to be attached to the Top Ten Item found above
         response = self.client.post(create_list_url, second_list_data, format='json')
 
         otherTopTenList_id = json.loads(response.content)['id']
@@ -209,12 +210,11 @@ class EditTopTenListAPITest(APITestCase):
 
 
         response = self.client.patch(list_detail_url, data, format='json')
-        print('response', response)
 
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        edited_topTenList = TopTenList.objects.get(pk=self.otherTopTenList_id)
+        edited_topTenList = TopTenList.objects.get(pk=otherTopTenList_id)
 
         # the list should have the parent_topTenItem assigned
         self.assertEqual(edited_topTenList.parent_topTenItem.id, item_1_id)
