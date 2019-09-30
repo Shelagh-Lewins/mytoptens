@@ -334,10 +334,3 @@ class EditNotificationAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(Notification.objects.first().unread, True)
-
-"""
-TODO
-test notification is created when it should be (maybe in reusable item tests)
-for at least 3 users
-
-"""
