@@ -1,5 +1,18 @@
 import React, { Component } from 'react';
-import { Button, Label, Input, Popover, PopoverBody, Container, Row, Col } from 'reactstrap';
+import {
+	Button,
+	Label,
+	Input,
+	Popover,
+	PopoverBody,
+	Container,
+	Row,
+	Col,
+	Dropdown,
+	DropdownToggle,
+	DropdownMenu,
+	DropdownItem,
+} from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withFormik, Field } from 'formik';
@@ -11,7 +24,6 @@ import Loading from '../components/Loading';
 import * as reusableItemReducer from '../modules/reusableItem';
 import * as topTenListReducer from '../modules/topTenList';
 import * as errorsReducer from '../modules/errors';
-// import * as permissions from '../modules/permissions';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
 
@@ -31,10 +43,12 @@ class ReusableItemDetail extends Component {
 
 		this.state = {
 			id,
+			'dropDownValue': 'Name',
 			'myTopTenListsOnly': true, // start with minimal data on screen
 			'popoverOpenreusableItemHelp': false,
 			'showMoreTopTenLists': false,
 			'showChangeRequestForm': false,
+			'sortDropdownOpen': false,
 		};
 
 		// each popover in the component needs an id
@@ -42,7 +56,7 @@ class ReusableItemDetail extends Component {
 			'reusableItemHelp': 'reusableItemHelp',
 		};
 
-		this.defaultTopTenListsNumber = 2;
+		this.defaultTopTenListsNumber = 10;
 
 		Object.keys(this.popoverIds).map((key) => { // eslint-disable-line array-callback-return
 			this.state[`popoverOpen${key}`] = false;
@@ -52,6 +66,9 @@ class ReusableItemDetail extends Component {
 		this.renderReusableItem = this.renderReusableItem.bind(this);
 		this.togglePopover = this.togglePopover.bind(this);
 		this.toggleChangeRequestForm = this.toggleChangeRequestForm.bind(this);
+		this.toggleSortDropdown = this.toggleSortDropdown.bind(this);
+		this.changeDropdownValue = this.changeDropdownValue.bind(this);
+
 		this.submitChangeRequestForm = this.submitChangeRequestForm.bind(this);
 		this.voteOnChangeRequest = this.voteOnChangeRequest.bind(this);
 		this.cancelChangeRequest = this.cancelChangeRequest.bind(this);
@@ -178,6 +195,16 @@ class ReusableItemDetail extends Component {
 		this.setState({
 			'showChangeRequestForm': !showChangeRequestForm,
 		});
+	}
+
+	toggleSortDropdown() {
+		this.setState(prevState => ({
+			'sortDropdownOpen': !prevState.sortDropdownOpen,
+		}));
+	}
+
+	changeDropdownValue(e) {
+		this.setState({ 'dropDownValue': e.currentTarget.textContent });
 	}
 
 	submitChangeRequestForm(data) {
@@ -459,7 +486,12 @@ class ReusableItemDetail extends Component {
 			'usageData': { myTopTenListsArray } = { 'myTopTenListsArray': [] },
 		} = this.props;
 
-		const { myTopTenListsOnly, showMoreTopTenLists } = this.state;
+		const {
+			dropDownValue,
+			myTopTenListsOnly,
+			showMoreTopTenLists,
+			sortDropdownOpen,
+		} = this.state;
 
 		let TopTenLists = myTopTenListsOnly ? myTopTenListsArray : topTenListsArray;
 		const numberOfTopTenLists = TopTenLists.length;
@@ -502,6 +534,20 @@ class ReusableItemDetail extends Component {
 								{' '}
 								Show my Top Ten lists only
 							</Label>
+						</Col>
+					</Row>
+					<Row>
+						<Col>
+							<Dropdown isOpen={sortDropdownOpen} toggle={this.toggleSortDropdown}>
+								<DropdownToggle caret>
+									{dropDownValue}
+								</DropdownToggle>
+								<DropdownMenu>
+									<DropdownItem onClick={this.changeDropdownValue}>Name</DropdownItem>
+									<DropdownItem onClick={this.changeDropdownValue}>User</DropdownItem>
+									<DropdownItem onClick={this.changeDropdownValue}>Date</DropdownItem>
+								</DropdownMenu>
+							</Dropdown>
 						</Col>
 					</Row>
 				</Container>
