@@ -363,43 +363,6 @@ class EditTopTenItemAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # def test_edit_topTenItem_topTenList(self):
-        """
-        edit topTenItem parent topTenList should fail
-        """
-
-        # the request does not fail, but the topTenList_id is not updated
-        # It is likely that the test is not correctly setting new value
-        # though, I cannot see how else it would work and have not found documentation with other information
-        # For now, this will have to remain untested
-        """
-        topTenItems = self.topTenList.topTenItem.all()
-        item_4_id = topTenItems[3].id
-        print('original list')
-        print(topTenItems[3].topTenList_id)
-
-        item_detail_url = reverse('topTenLists:TopTenItems-detail', kwargs={'pk': item_4_id})
-
-        # create a second topTenList
-        response1 = self.client.post(create_list_url, second_list_data, format='json')
-        second_topTenList_id = json.loads(response1.content)['id']
-        print('id')
-        print(second_topTenList_id)
-        data = {'topTenList_id': second_topTenList_id}
-        print('about to set topTenList_id')
-        response2 = self.client.patch(item_detail_url, data, format='json')
-
-        updated_item = TopTenItem.objects.get(pk=item_4_id)
-        print('updated item')
-        print(updated_item)
-        print(updated_item.name)
-        print(updated_item.topTenList_id)
-
-        # the request should fail
-        self.assertEqual(response2.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)"""
-
-
-
     def test_edit_topTenItem_not_authenticated(self):
         """
         edit topTenItem should fail if user not logged in

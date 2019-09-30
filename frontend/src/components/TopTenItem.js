@@ -72,7 +72,6 @@ class TopTenItem extends Component {
 		const {
 			topTenItem,
 			topTenItemFromStore,
-			// canEdit,
 			reusableItemSuggestions,
 			handleComboboxChange,
 			handleInputChange,
@@ -84,10 +83,11 @@ class TopTenItem extends Component {
 			topTenItemForReusableItem,
 			topTenList,
 		} = this.props;
-		// console.log('topTenItem', topTenItem);
-		// console.log('topTenList', topTenList);
-		// console.log('reusableItem', reusableItem);
+
 		const { isEditingName, setIsEditingDescription, popoverOpen } = this.state;
+
+		const displayName = (reusableItem && reusableItem.name)
+		|| topTenItem.name; // if there is a reusable item, use its name. Otherwise use the top ten item's name.
 
 		if (topTenItem.name === '' && !isEditingName) {
 			showDescription = false;
@@ -147,7 +147,6 @@ class TopTenItem extends Component {
 
 		// icon by name to indicate it's a reusableItem. Not shown when editing name.
 		if (topTenItem.reusableItem && !isEditingName) {
-			// currentReusableItem = store.getState().reusableItem.things[topTenItem.reusableItem] || {};
 			currentReusableItem = reusableItems[topTenItem.reusableItem] || {};
 			const popoverId = `popover${topTenItem.order}`;
 
@@ -175,27 +174,21 @@ class TopTenItem extends Component {
 		}
 
 		// for topTenItem combobox
-		// TODO only get data if editing
-		// cancel doesn't restore
 		const comboboxId = `${topTenItem.order}_name`;
 
 		let data;
 
 		if (isEditingName) {
 			data = reusableItemSuggestions[comboboxId];
-			// console.log('data', data);
-			// console.log('this.props.topTenItem.id', this.props.topTenItem.id);
 
 			if (data) {
 				for (let i = 0; i < data.length; i += 1) {
 					if (data[i].id === topTenItem.id) {
-						// console.log('entry id', data[i].id);
 						data.splice(i, 1);
 						break;
 					}
 				}
 			}
-			// console.log('filtered data', data);
 		}
 
 		return (
@@ -221,7 +214,7 @@ class TopTenItem extends Component {
 						handleNewValue={handleNewValue}
 						onSelect={onSelectItemName}
 						isEditing={this.setIsEditingName}
-						value={topTenItem.name}
+						value={displayName}
 						newReusableItem={newReusableItem}
 						reusableItem={reusableItem}
 						topTenItem={topTenItemForReusableItem}

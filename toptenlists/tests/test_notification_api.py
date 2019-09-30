@@ -45,6 +45,8 @@ reusableitem_1_data = {'name': 'Jane Austen', 'reusableItemDefinition': 'A defin
 
 notification_list_url = reverse('topTenLists:Notifications-list')
 
+notification_deleteall_url = reverse('topTenLists:Notifications-deleteall')
+
 def create_user(self, index):
     user_ref = 'user_' + str(index) # refer to user by self.user_1 etc
     username = 'Test user ' + str(index)
@@ -210,6 +212,52 @@ class DeleteNotificationAPITest(APITestCase):
         # the request should succeed
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(Notification.objects.count(), 1)
+
+class DeleteAllNotificationAPITest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        for index in range(1, 4): # user_1 to user_3
+            create_user(cls, index)
+
+    def setUp(self):
+        create_notification(self, 'user_1')
+        create_notification(self, 'user_1')
+        create_notification(self, 'user_1')
+        create_notification(self, 'user_2')
+        create_notification(self, 'user_3')
+
+    def test_delete_all_notifications(self):
+        """
+        Delete notification should succeed
+        """
+
+        self.assertEqual(Notification.objects.count(), 5)
+
+        self.client.force_authenticate(user=self.user_1)
+
+        response = self.client.delete(notification_deleteall_url)
+
+        user_1_id = self.user_1.id
+
+        # the request should succeed
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # only the user's notifications should be deleted
+        self.assertEqual(Notification.objects.filter(pk=user_1_id).count(), 0)
+        self.assertEqual(Notification.objects.count(), 2)
+
+    def test_delete_all_notifications_not_logged_in(self):
+        """
+        Delete notification should fail if user isn't logged in
+        """
+
+        self.assertEqual(Notification.objects.count(), 5)
+
+        response = self.client.delete(notification_deleteall_url)
+
+        # the request should fail
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(Notification.objects.count(), 5)
 
 class EditNotificationAPITest(APITestCase):
     @classmethod

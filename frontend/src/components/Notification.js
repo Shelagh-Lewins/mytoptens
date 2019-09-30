@@ -7,11 +7,10 @@ import { COLORS } from '../constants';
 /* eslint react/jsx-one-expression-per-line: "off" */
 
 const Notification = (props) => {
-	// console.log('notification props', props);
 	const {
 		notification,
 		onClickNotification,
-		onDeleteNotification,
+		onClickDeleteNotification,
 		reusableItem,
 	} = props;
 
@@ -87,7 +86,7 @@ const Notification = (props) => {
 
 	return (
 		<li className={`notification ${notification.unread ? 'unread' : ''}`}>
-			<span className="delete"><button type="button" className="btn btn-danger" onClick={() => onDeleteNotification(notification.id)}>X</button></span>
+			<span className="delete"><button type="button" className="btn btn-danger" onClick={() => onClickDeleteNotification(notification.id)}>X</button></span>
 			{content}
 		</li>
 	);
@@ -100,7 +99,7 @@ Notification.defaultProps = {
 Notification.propTypes = {
 	'notification': PropTypes.objectOf(PropTypes.any).isRequired,
 	'onClickNotification': PropTypes.func.isRequired,
-	'onDeleteNotification': PropTypes.func.isRequired,
+	'onClickDeleteNotification': PropTypes.func.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	// 'topTenItem': PropTypes.objectOf(PropTypes.any), // not using this yet but if we add notifications for a top ten item, it will be wanted
 };

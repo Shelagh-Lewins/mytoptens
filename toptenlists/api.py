@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, list_route
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import filters
@@ -119,16 +119,16 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
 
             if not topTenItem: # if the topTenItem isn't found, don't save the new value
                 raise APIException("Unable to set parent_topTenItem. No topTenItem found with id: " + parent_topTenItem_id.__str__())
-                print('case 1')
+                # print('case 1')
             # check the topTenItem belongs to the same user
             if topTenItem.topTenList.created_by != self.request.user:
                 raise APIException("Unable to set parent_topTenItem. " + parent_topTenItem_id.__str__() + "does not belong to this user")
-                print('case 2')
+                # print('case 2')
             # don't allow the parent top ten list to be the same top ten list that contains the top ten item
             parent_topTenItem = TopTenItem.objects.get(pk=parent_topTenItem_id)
 
-            print('serializer.instance.id', serializer.instance.id)
-            print('parent_topTenItem.topTenList.id', parent_topTenItem.topTenList.id)
+            # print('serializer.instance.id', serializer.instance.id)
+            # print('parent_topTenItem.topTenList.id', parent_topTenItem.topTenList.id)
 
             if serializer.instance.id == parent_topTenItem.topTenList.id:
                 raise APIException("Unable to set parent_topTenItem. " + parent_topTenItem.topTenList.id.__str__() + "is the list to which the Top Ten Item belongs")
@@ -138,7 +138,6 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
             TopTenList.objects.filter(parent_topTenItem_id=parent_topTenItem_id).update(parent_topTenItem_id=None)
  
         serializer.save()
-
 
 class TopTenListDetailViewSet(viewsets.ModelViewSet):
     """
@@ -435,4 +434,24 @@ class NotificationViewSet(viewsets.ModelViewSet):
         # notifications are created by the server
         raise APIException("Notification may not be created via API")
 
+    @list_route(methods=['delete'])
+    def deleteall(self, request):
+        """
+        Delete all notifications belonging to this user
+        """
+
+        if self.request.user.is_authenticated:
+            # find the user's notifications
+            myNotifications = Notification.objects.filter(created_by=request.user)
+
+            data = []
+
+            for notification in myNotifications:
+                data.append(notification.id)
+
+            myNotifications.delete()
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 

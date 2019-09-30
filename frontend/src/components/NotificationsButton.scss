@@ -17,9 +17,15 @@
 	.btn {
 		background: transparent;
 		border: 0;
+		width: 100%;
 
 		&:hover {
 			background: transparent;
+		}
+
+		&.delete-all {
+			border-bottom: 1px solid $color-notifications-border;
+			color: $color-text;
 		}
 	}
 

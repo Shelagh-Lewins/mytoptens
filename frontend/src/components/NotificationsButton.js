@@ -23,7 +23,8 @@ class NotificationsButton extends Component {
 		this.fetchNotifications = this.fetchNotifications.bind(this);
 		this.onClickButton = this.onClickButton.bind(this);
 		this.onClickNotification = this.onClickNotification.bind(this);
-		this.onDeleteNotification = this.onDeleteNotification.bind(this);
+		this.onClickDeleteNotification = this.onClickDeleteNotification.bind(this);
+		this.onClickDeleteAll = this.onClickDeleteAll.bind(this);
 	}
 
 	componentDidMount = () => {
@@ -77,10 +78,17 @@ class NotificationsButton extends Component {
 		dispatch(notificationReducer.updateNotification(id, 'unread', false));
 	}
 
-	onDeleteNotification = (id) => {
+	onClickDeleteNotification = (id) => {
 		const { dispatch } = this.props;
 
 		dispatch(notificationReducer.deleteNotification(id));
+	}
+
+	onClickDeleteAll = () => {
+		console.log('delete all');
+		const { dispatch } = this.props;
+
+		dispatch(notificationReducer.deleteMyNotifications());
 	}
 
 	render() {
@@ -104,7 +112,10 @@ class NotificationsButton extends Component {
 
 				{showNotificationsList
 					&& (
-						<NotificationsList>
+						<NotificationsList
+							showDeleteAllButton={notifications.length > 0}
+							onClickDeleteAll={this.onClickDeleteAll}
+						>
 							{notifications.length > 0
 								&& notifications.map(notification => (
 									<Notification
@@ -112,7 +123,7 @@ class NotificationsButton extends Component {
 										notification={notification}
 										key={notification.id}
 										onClickNotification={this.onClickNotification}
-										onDeleteNotification={this.onDeleteNotification}
+										onClickDeleteNotification={this.onClickDeleteNotification}
 										reusableItem={reusableItems[notification.reusableItem]}
 									/>
 								))}
