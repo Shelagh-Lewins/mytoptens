@@ -562,13 +562,15 @@ export const getTopTenItemsForTopTenList = createSelector(
 // Top Ten Lists for a Reusable Item
 const getReusableItemId = (state, id) => id;
 
-// TODO look for a way to avoid running this multiple times
-// It is one lot of code used for multiple purposes, but the results are not cached
-export const getTopTenItemsAndListsForReusableItem = createSelector(
-	[getTopTenLists, getTopTenItems, getReusableItemId],
-	(topTenLists, topTenItems, targetReusableItemId) => {
+// find the Top Ten Items, Top Ten Lists and Users that reference this Reusable Item
+export const getReusableItemUsageData = createSelector(
+	[getTopTenLists, getTopTenItems, getReusableItemId, getUserId],
+	(topTenLists, topTenItems, targetReusableItemId, userId) => {
 		const topTenItemsArray = [];
 		const topTenListsArray = [];
+
+		const myTopTenItemsArray = [];
+		const myTopTenListsArray = [];
 
 		Object.keys(topTenItems).map((id) => { // eslint-disable-line array-callback-return
 			const topTenItemObj = topTenItems[id];
@@ -579,14 +581,19 @@ export const getTopTenItemsAndListsForReusableItem = createSelector(
 			if (reusableItem_id === targetReusableItemId) {
 				// avoid duplicates
 				if (!topTenItemsArray.includes(topTenItemObj)) {
-					topTenItemsArray.push({
-						...topTenItemObj,
-						'created_by': topTenListObj.created_by,
-					});
+					topTenItemsArray.push(topTenItemObj);
+
+					if (topTenListObj.created_by === userId) {
+						myTopTenItemsArray.push(topTenItemObj);
+					}
 				}
 
 				if (!topTenListsArray.includes(topTenListObj)) {
 					topTenListsArray.push(topTenListObj);
+
+					if (topTenListObj.created_by === userId) {
+						myTopTenListsArray.push(topTenListObj);
+					}
 				}
 			}
 		});
@@ -594,56 +601,15 @@ export const getTopTenItemsAndListsForReusableItem = createSelector(
 		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
-		return { topTenListsArray, topTenItemsArray };
-	},
-);
+		const users = new Set(topTenListsArray.map(topTenListObj => topTenListObj.created_by)); // all users who reference this Reusable Item, as a Set to avoid duplicates
 
-export const getTopTenItemsForReusableItem = createSelector(
-	[getTopTenItemsAndListsForReusableItem],
-	topTenItemsAndLists => topTenItemsAndLists.topTenItemsArray,
-);
-
-export const getTopTenListsForReusableItem = createSelector(
-	[getTopTenItemsAndListsForReusableItem],
-	topTenItemsAndLists => topTenItemsAndLists.topTenListsArray,
-);
-
-export const getMyTopTenItemsForReusableItem = createSelector(
-	[getTopTenItemsAndListsForReusableItem, getUserId],
-	(topTenItemsAndLists, userId) => {
-		const topTenItemsArray = [];
-
-		topTenItemsAndLists.topTenItemsArray.forEach((topTenItemObj) => {
-			if (topTenItemObj.created_by === userId) {
-				topTenItemsArray.push(topTenItemObj);
-			}
-		});
-
-		return topTenItemsArray;
-	},
-);
-
-export const getMyTopTenListsForReusableItem = createSelector(
-	[getTopTenItemsAndListsForReusableItem, getUserId],
-	(topTenItemsAndLists, userId) => {
-		const topTenListsArray = [];
-
-		topTenItemsAndLists.topTenItemsArray.forEach((topTenListObj) => {
-			if (topTenListObj.created_by === userId) {
-				topTenListsArray.push(topTenListObj);
-			}
-		});
-
-		return topTenListsArray;
-	},
-);
-
-// count the number of users who reference a Reusable Item
-export const getReusableItemUsersCount = createSelector(
-	[getTopTenListsForReusableItem],
-	(topTenLists) => {
-		const users = topTenLists.map(topTenListObj => topTenListObj.created_by);
-		return new Set(users).size; // count the unique values of created_by
+		return {
+			topTenListsArray,
+			topTenItemsArray,
+			myTopTenItemsArray,
+			myTopTenListsArray,
+			users,
+		};
 	},
 );
 

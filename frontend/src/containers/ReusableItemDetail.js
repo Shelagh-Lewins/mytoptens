@@ -195,7 +195,13 @@ class ReusableItemDetail extends Component {
 	}
 
 	renderReusableItem() {
-		const { auth, reusableItem, reusableItemUsersCount } = this.props;
+		const {
+			auth,
+			reusableItem,
+			'usageData': { users } = { 'users': new Set() },
+		} = this.props;
+
+		const reusableItemUsersCount = users.size;
 		const { canEdit } = reusableItem;
 		const { isAuthenticated, user } = auth;
 
@@ -419,7 +425,11 @@ class ReusableItemDetail extends Component {
 	}
 
 	renderPage() {
-		const { reusableItem, errors, topTenLists } = this.props;
+		const {
+			reusableItem,
+			errors,
+			'usageData': { topTenListsArray } = { 'topTenListsArray': [] },
+		} = this.props;
 
 		if (!reusableItem) {
 			return undefined;
@@ -442,7 +452,7 @@ class ReusableItemDetail extends Component {
 				)}
 				{this.renderReusableItem()}
 				<TopTenListsList headerText={`Top Ten Lists using ${reusableItem.name}`}>
-					{topTenLists.map(topTenList => (
+					{topTenListsArray.map(topTenList => (
 						<TopTenListSummary
 							key={topTenList.id}
 							topTenList={topTenList}
@@ -489,28 +499,22 @@ ReusableItemDetail.propTypes = {
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'isLoadingOrganizerData': PropTypes.bool.isRequired,
 	'reusableItem': PropTypes.objectOf(PropTypes.any),
 	'match': PropTypes.objectOf(PropTypes.any).isRequired,
-	'myTopTenItems': PropTypes.arrayOf(PropTypes.any).isRequired,
-	'myTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired, // may want to filter on my lists only
-	'reusableItemUsersCount': PropTypes.number.isRequired,
-	'topTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'usageData': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
 const mapStateToProps = (state, ownProps) => {
 	const reusableItemId = ownProps.match.params.id;
+	const usageData = topTenListReducer.getReusableItemUsageData(state, reusableItemId);
 
 	return {
 		'auth': state.auth,
 		'errors': state.errors,
 		'isLoading': state.reusableItem.isLoading,
 		'isLoadingOrganizerData': state.topTenList.isLoadingOrganizerData,
-		'reusableItem': reusableItemReducer.getReusableItem(state, reusableItemId),
-		'myTopTenItems': topTenListReducer.getMyTopTenItemsForReusableItem(state, reusableItemId),
-		'myTopTenLists': topTenListReducer.getMyTopTenListsForReusableItem(state, reusableItemId), // the user's topTenItems that reference this reusableItem
-		'reusableItemUsersCount': topTenListReducer.getReusableItemUsersCount(state, reusableItemId),
-		'topTenLists': topTenListReducer.getTopTenListsForReusableItem(state, reusableItemId), // all topTenItems that reference this reusableItem
+		'reusableItem': reusableItemReducer.getReusableItem(state, reusableItemId, usageData.myTopTenListsArray),
+		'usageData': usageData,
 	};
 };
 

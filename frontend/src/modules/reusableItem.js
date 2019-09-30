@@ -351,7 +351,7 @@ const canViewReusableItem = (auth, reusableItemObj) => {
 	return false;
 };
 
-const canEditReusableItem = (state, reusableItemObj) => {
+const canEditReusableItem = (state, reusableItemObj, myTopTenListsArray) => {
 	const { auth } = state;
 
 	if (!reusableItemObj) {
@@ -374,7 +374,7 @@ const canEditReusableItem = (state, reusableItemObj) => {
 		return false;
 	}
 
-	if (topTenListsReducer.getMyTopTenListsForReusableItem(state, reusableItemObj.id).length > 0) {
+	if (myTopTenListsArray.length > 0) {
 		return true;
 	}
 
@@ -397,8 +397,6 @@ export const getReusableItems = (state) => {
 			const extendedReusableItem = {
 				...ReusableItemObj,
 				'type': 'reusableItem',
-				'canView': canViewReusableItem(state.auth, ReusableItemObj),
-				'canEdit': canEditReusableItem(state, ReusableItemObj),
 			};
 			return extendedReusableItem;
 		});
@@ -438,8 +436,7 @@ export const getTopTenItems = (state) => {
 	return results;
 };
 // ///////////////////
-export const getReusableItem = (state, reusableItemId) => {
-	// console.log('topTenListId', topTenListId);
+export const getReusableItem = (state, reusableItemId, myTopTenListsArray) => {
 	const reusableItemObj = state.reusableItem.things[reusableItemId];
 	if (!reusableItemObj) {
 		return;
@@ -447,7 +444,7 @@ export const getReusableItem = (state, reusableItemId) => {
 	return {
 		...reusableItemObj,
 		'canView': canViewReusableItem(state.auth, reusableItemObj),
-		'canEdit': canEditReusableItem(state, reusableItemObj),
+		'canEdit': canEditReusableItem(state, reusableItemObj, myTopTenListsArray),
 	};
 };
 
