@@ -131,11 +131,6 @@ class Home extends Component {
 		this.setState({
 			'topLevelTopTenListsOnly': !topLevelTopTenListsOnly,
 		});
-
-		// use callback to avoid async issues
-		// this.setState(prevState => ({ 'topLevelTopTenListsOnly': !prevState.topLevelTopTenListsOnly }));
-
-		// this.fetchTopTenLists({ 'topLevelTopTenListsOnly': !topLevelTopTenListsOnly });
 	}
 
 	// refresh topTenLists based on user choices

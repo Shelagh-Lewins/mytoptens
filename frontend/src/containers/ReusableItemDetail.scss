@@ -28,21 +28,21 @@
 		font-size: 0.8rem;
 	}
 
-	.summary {
+	.main {
 		border: 1px solid $color-reusableitem-border;
 		border-radius: 10px;
 		margin: 10px 0 10px 0;
 		padding: 10px;
 	}
 
-	.modification-form {
-		border: 1px solid $color-reusableitem-border;
-		border-radius: 10px;
-		margin: 10px 0 10px 0;
-		padding: 10px;
-
+	.change-request-form {
 		button {
 			margin: 8px 8px 8px 0;
+		}
+
+		.hint {
+			color: $color-hint;
+			font-size: 0.8rem;
 		}
 
 		.invalid-feedback {
@@ -51,6 +51,15 @@
 			&::before {
 				content: "\2718 ";
 			}
+		}
+	}
+
+	.toptenlists {
+		margin-top: 8px;
+
+		input {
+			margin-left: 0;
+			position: relative;
 		}
 	}
 

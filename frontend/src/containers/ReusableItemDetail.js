@@ -27,14 +27,13 @@ class ReusableItemDetail extends Component {
 	constructor(props) {
 		super();
 
-		this.getReusableItemData = this.getReusableItemData.bind(this);
-		this.renderReusableItem = this.renderReusableItem.bind(this);
 		const id = this.getReusableItemData(props);
 
 		this.state = {
 			id,
 			'myTopTenListsOnly': true, // start with minimal data on screen
 			'popoverOpenreusableItemHelp': false,
+			'showMoreTopTenLists': false,
 			'showChangeRequestForm': false,
 		};
 
@@ -43,10 +42,14 @@ class ReusableItemDetail extends Component {
 			'reusableItemHelp': 'reusableItemHelp',
 		};
 
+		this.defaultTopTenListsNumber = 2;
+
 		Object.keys(this.popoverIds).map((key) => { // eslint-disable-line array-callback-return
 			this.state[`popoverOpen${key}`] = false;
 		});
 
+		this.getReusableItemData = this.getReusableItemData.bind(this);
+		this.renderReusableItem = this.renderReusableItem.bind(this);
 		this.togglePopover = this.togglePopover.bind(this);
 		this.toggleChangeRequestForm = this.toggleChangeRequestForm.bind(this);
 		this.submitChangeRequestForm = this.submitChangeRequestForm.bind(this);
@@ -57,6 +60,7 @@ class ReusableItemDetail extends Component {
 		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
 
 		this.handleTopTenListsChange = this.handleTopTenListsChange.bind(this);
+		this.handleShowMoreTopTenListsChange = this.handleShowMoreTopTenListsChange.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -149,6 +153,14 @@ class ReusableItemDetail extends Component {
 
 		this.setState({
 			'myTopTenListsOnly': !myTopTenListsOnly,
+		});
+	}
+
+	handleShowMoreTopTenListsChange() {
+		const { showMoreTopTenLists } = this.state;
+
+		this.setState({
+			'showMoreTopTenLists': !showMoreTopTenLists,
 		});
 	}
 
@@ -248,6 +260,10 @@ class ReusableItemDetail extends Component {
 
 			return (
 				<form onSubmit={handleSubmit}>
+					<h3>{reusableItemUsersCount === 0 ? 'Edit' : 'Create a change request'}</h3>
+					{reusableItemUsersCount > 0 && (
+						<p className="hint">Other users who reference this Reusable Item in their Top Ten Lists will vote on your change request.</p>
+					)}
 					<Label for="name">Name</Label>
 					<Input
 						type="text"
@@ -407,7 +423,7 @@ class ReusableItemDetail extends Component {
 		}
 
 		return (
-			<React.Fragment>
+			<div className="main">
 				<Row>
 					<Col className="summary">
 						<h2>
@@ -431,7 +447,7 @@ class ReusableItemDetail extends Component {
 					</Col>
 				</Row>
 				{canEdit && changeRequest}
-			</React.Fragment>
+			</div>
 		);
 	}
 
@@ -443,9 +459,15 @@ class ReusableItemDetail extends Component {
 			'usageData': { myTopTenListsArray } = { 'myTopTenListsArray': [] },
 		} = this.props;
 
-		const { myTopTenListsOnly } = this.state;
+		const { myTopTenListsOnly, showMoreTopTenLists } = this.state;
 
-		const TopTenLists = myTopTenListsOnly ? myTopTenListsArray : topTenListsArray;
+		let TopTenLists = myTopTenListsOnly ? myTopTenListsArray : topTenListsArray;
+		const numberOfTopTenLists = TopTenLists.length;
+
+		const listHeaderText = myTopTenListsOnly ? `My Top Ten Lists (${TopTenLists.length})` : `All Top Ten Lists (${TopTenLists.length})`;
+		if (!showMoreTopTenLists) {
+			TopTenLists = TopTenLists.slice(0, this.defaultTopTenListsNumber);
+		}
 
 		if (!reusableItem) {
 			return undefined;
@@ -469,7 +491,8 @@ class ReusableItemDetail extends Component {
 				{this.renderReusableItem()}
 				<Container>
 					<Row>
-						<Col className="top-level-toptenlists-control">
+						<Col className="toptenlists">
+							<h2>{`Top Ten Lists using ${reusableItem.name}`}</h2>
 							<Label check>
 								<Input
 									type="checkbox"
@@ -482,7 +505,7 @@ class ReusableItemDetail extends Component {
 						</Col>
 					</Row>
 				</Container>
-				<TopTenListsList headerText={`Top Ten Lists using ${reusableItem.name}`}>
+				<TopTenListsList headerText={listHeaderText}>
 					{TopTenLists.map(topTenList => (
 						<TopTenListSummary
 							key={topTenList.id}
@@ -493,6 +516,13 @@ class ReusableItemDetail extends Component {
 						/>
 					))}
 				</TopTenListsList>
+				{numberOfTopTenLists > this.defaultTopTenListsNumber && (
+					<Row>
+						<Col>
+							<Button type="button" color="secondary" onClick={this.handleShowMoreTopTenListsChange}>{showMoreTopTenLists ? 'Show less' : 'Show more'}</Button>
+						</Col>
+					</Row>
+				)}
 			</div>
 		);
 	}
