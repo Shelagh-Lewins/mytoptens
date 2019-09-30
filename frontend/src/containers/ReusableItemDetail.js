@@ -33,6 +33,7 @@ class ReusableItemDetail extends Component {
 
 		this.state = {
 			id,
+			'myTopTenListsOnly': true, // start with minimal data on screen
 			'popoverOpenreusableItemHelp': false,
 			'showChangeRequestForm': false,
 		};
@@ -54,6 +55,8 @@ class ReusableItemDetail extends Component {
 
 		this.onChangeTopTenListIsPublic = this.onChangeTopTenListIsPublic.bind(this);
 		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
+
+		this.handleTopTenListsChange = this.handleTopTenListsChange.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -139,6 +142,14 @@ class ReusableItemDetail extends Component {
 
 			dispatch(reusableItemReducer.setReusableItemIsPublic({ id, is_public }));
 		}
+	}
+
+	handleTopTenListsChange() {
+		const { myTopTenListsOnly } = this.state;
+
+		this.setState({
+			'myTopTenListsOnly': !myTopTenListsOnly,
+		});
 	}
 
 	togglePopover(popoverId) {
@@ -429,7 +440,12 @@ class ReusableItemDetail extends Component {
 			reusableItem,
 			errors,
 			'usageData': { topTenListsArray } = { 'topTenListsArray': [] },
+			'usageData': { myTopTenListsArray } = { 'myTopTenListsArray': [] },
 		} = this.props;
+
+		const { myTopTenListsOnly } = this.state;
+
+		const TopTenLists = myTopTenListsOnly ? myTopTenListsArray : topTenListsArray;
 
 		if (!reusableItem) {
 			return undefined;
@@ -451,8 +467,23 @@ class ReusableItemDetail extends Component {
 					</Container>
 				)}
 				{this.renderReusableItem()}
+				<Container>
+					<Row>
+						<Col className="top-level-toptenlists-control">
+							<Label check>
+								<Input
+									type="checkbox"
+									defaultChecked={myTopTenListsOnly}
+									onChange={this.handleTopTenListsChange}
+								/>
+								{' '}
+								Show my Top Ten lists only
+							</Label>
+						</Col>
+					</Row>
+				</Container>
 				<TopTenListsList headerText={`Top Ten Lists using ${reusableItem.name}`}>
-					{topTenListsArray.map(topTenList => (
+					{TopTenLists.map(topTenList => (
 						<TopTenListSummary
 							key={topTenList.id}
 							topTenList={topTenList}
