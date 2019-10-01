@@ -200,7 +200,7 @@ export function fetchOrganizerData({ userId, reusableItemId }) {
 			useAuth = true;
 		}
 
-		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,created_by,created_by_username,topTenItem,reusableItem,is_public,order,parent_topTenItem';
+		let URL = '/api/v1/content/toptenlist/?expand=topTenItem&fields=id,name,created_at,created_by,created_by_username,modified_at,topTenItem,reusableItem,is_public,order,parent_topTenItem';
 
 		if (reusableItemId) {
 			URL += `&reusableItem=${reusableItemId}`;

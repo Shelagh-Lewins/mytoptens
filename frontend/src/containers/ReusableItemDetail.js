@@ -12,6 +12,7 @@ import {
 	DropdownToggle,
 	DropdownMenu,
 	DropdownItem,
+	FormGroup,
 } from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -26,6 +27,7 @@ import * as topTenListReducer from '../modules/topTenList';
 import * as errorsReducer from '../modules/errors';
 import formatErrorMessages from '../modules/formatErrorMessages';
 import isEmpty from '../modules/isEmpty';
+import sortArrayByProperty from '../modules/sortArrayByProperty';
 
 import IsPublicIndicator from '../components/IsPublicIndicator';
 import TopTenListsList from '../components/TopTenListsList';
@@ -41,13 +43,21 @@ class ReusableItemDetail extends Component {
 
 		const id = this.getReusableItemData(props);
 
+		// display text for sort by options
+		this.sortByOptions = {
+			'name': 'Top Ten List name',
+			'user': 'Owner',
+			'modified': 'Date of last edit',
+		};
+
 		this.state = {
 			id,
-			'dropDownValue': 'Name',
 			'myTopTenListsOnly': true, // start with minimal data on screen
 			'popoverOpenreusableItemHelp': false,
 			'showMoreTopTenLists': false,
 			'showChangeRequestForm': false,
+			'sortBy': this.sortByOptions.name,
+			'sortDirection': 'ascending',
 			'sortDropdownOpen': false,
 		};
 
@@ -68,6 +78,7 @@ class ReusableItemDetail extends Component {
 		this.toggleChangeRequestForm = this.toggleChangeRequestForm.bind(this);
 		this.toggleSortDropdown = this.toggleSortDropdown.bind(this);
 		this.changeDropdownValue = this.changeDropdownValue.bind(this);
+		this.changeDirectionValue = this.changeDirectionValue.bind(this);
 
 		this.submitChangeRequestForm = this.submitChangeRequestForm.bind(this);
 		this.voteOnChangeRequest = this.voteOnChangeRequest.bind(this);
@@ -204,7 +215,11 @@ class ReusableItemDetail extends Component {
 	}
 
 	changeDropdownValue(e) {
-		this.setState({ 'dropDownValue': e.currentTarget.textContent });
+		this.setState({ 'sortBy': e.currentTarget.textContent });
+	}
+
+	changeDirectionValue(e) {
+		this.setState({ 'sortDirection': e.currentTarget.value });
 	}
 
 	submitChangeRequestForm(data) {
@@ -478,22 +493,45 @@ class ReusableItemDetail extends Component {
 		);
 	}
 
-	renderPage() {
+	renderTopTenLists() {
 		const {
 			reusableItem,
-			errors,
 			'usageData': { topTenListsArray } = { 'topTenListsArray': [] },
 			'usageData': { myTopTenListsArray } = { 'myTopTenListsArray': [] },
 		} = this.props;
 
 		const {
-			dropDownValue,
 			myTopTenListsOnly,
 			showMoreTopTenLists,
+			sortBy,
+			sortDirection,
 			sortDropdownOpen,
 		} = this.state;
 
 		let TopTenLists = myTopTenListsOnly ? myTopTenListsArray : topTenListsArray;
+
+		switch (sortBy) {
+			case this.sortByOptions.name:
+				TopTenLists = sortArrayByProperty(TopTenLists, 'name');
+				break;
+
+			case this.sortByOptions.user:
+				TopTenLists = sortArrayByProperty(TopTenLists, 'created_by_username');
+				break;
+
+			case this.sortByOptions.modified:
+				TopTenLists = sortArrayByProperty(TopTenLists, 'modified_at');
+				break;
+
+			default:
+		}
+
+		if (sortDirection === 'descending') {
+			TopTenLists.reverse();
+		}
+
+		// TODO show date created on top ten item summary
+
 		const numberOfTopTenLists = TopTenLists.length;
 
 		const listHeaderText = myTopTenListsOnly ? `My Top Ten Lists (${TopTenLists.length})` : `All Top Ten Lists (${TopTenLists.length})`;
@@ -501,26 +539,10 @@ class ReusableItemDetail extends Component {
 			TopTenLists = TopTenLists.slice(0, this.defaultTopTenListsNumber);
 		}
 
-		if (!reusableItem) {
-			return undefined;
-		}
+		const directionInputs = [['Ascending', 'ascending'], ['Descending', 'descending']];
 
 		return (
-			<div>
-				{!isEmpty(errors) && (
-					<Container>
-						<Row>
-							<Col>
-								<FlashMessage
-									message={formatErrorMessages(errors)}
-									type="error"
-									onClick={this.onCloseFlashMessage}
-								/>
-							</Col>
-						</Row>
-					</Container>
-				)}
-				{this.renderReusableItem()}
+			<div className="usage">
 				<Container>
 					<Row>
 						<Col className="toptenlists">
@@ -537,17 +559,36 @@ class ReusableItemDetail extends Component {
 						</Col>
 					</Row>
 					<Row>
-						<Col>
-							<Dropdown isOpen={sortDropdownOpen} toggle={this.toggleSortDropdown}>
+						<Col className="sort-controls">
+							Sort by:
+							{' '}
+							<Dropdown isOpen={sortDropdownOpen} toggle={this.toggleSortDropdown} className="sort-by">
 								<DropdownToggle caret>
-									{dropDownValue}
+									{sortBy}
 								</DropdownToggle>
 								<DropdownMenu>
-									<DropdownItem onClick={this.changeDropdownValue}>Name</DropdownItem>
-									<DropdownItem onClick={this.changeDropdownValue}>User</DropdownItem>
-									<DropdownItem onClick={this.changeDropdownValue}>Date</DropdownItem>
+									<DropdownItem onClick={this.changeDropdownValue}>{this.sortByOptions.name}</DropdownItem>
+									<DropdownItem onClick={this.changeDropdownValue}>{this.sortByOptions.user}</DropdownItem>
+									<DropdownItem onClick={this.changeDropdownValue}>{this.sortByOptions.modified}</DropdownItem>
 								</DropdownMenu>
 							</Dropdown>
+							<div className="sort-direction">
+								{
+									directionInputs.map(([text, value]) => (
+										<div key={`direction-${value}`}>
+											<Label>
+												<Input
+													type="radio"
+													checked={sortDirection === value}
+													onChange={this.changeDirectionValue}
+													value={value}
+												/>
+												{text}
+											</Label>
+										</div>
+									))
+								}
+							</div>
 						</Col>
 					</Row>
 				</Container>
@@ -573,6 +614,37 @@ class ReusableItemDetail extends Component {
 		);
 	}
 
+	renderPage() {
+		const {
+			reusableItem,
+			errors,
+		} = this.props;
+
+		if (!reusableItem) {
+			return undefined;
+		}
+
+		return (
+			<div>
+				{!isEmpty(errors) && (
+					<Container>
+						<Row>
+							<Col>
+								<FlashMessage
+									message={formatErrorMessages(errors)}
+									type="error"
+									onClick={this.onCloseFlashMessage}
+								/>
+							</Col>
+						</Row>
+					</Container>
+				)}
+				{this.renderReusableItem()}
+				{this.renderTopTenLists()}
+			</div>
+		);
+	}
+
 	render() {
 		const { reusableItem, isLoading } = this.props;
 
@@ -582,7 +654,6 @@ class ReusableItemDetail extends Component {
 
 		let content;
 
-		// const { canView } = this.state;
 		if (reusableItem && reusableItem.canView) {
 			content = this.renderPage();
 		} else {

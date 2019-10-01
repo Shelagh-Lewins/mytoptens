@@ -18,6 +18,8 @@ const TopTenListSummary = (props) => {
 
 	const { canEdit } = topTenList;
 
+	var dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+
 	function onDeleteTopTenList() {
 		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });
 	}
@@ -48,6 +50,10 @@ const TopTenListSummary = (props) => {
 					&& <div className="toptenlist-created-by" title="Top Ten List owner"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}</div>
 
 				}
+
+				<div className="toptenlist-modified-at" title="Date of last edit">
+					<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{new Date(topTenList.modified_at).toLocaleString('en-GB', dateOptions)}
+				</div>
 			</div>
 		</Col>
 	);

@@ -62,4 +62,19 @@
 			margin-right: 8px;
 		}
 	}
+
+	.toptenlist-modified-at {
+		float: left;
+		margin: 6px 0;
+
+		svg {
+			margin-right: 8px;
+		}
+	}
+
+	@media (min-width: 576px) {
+		.toptenlist-modified-at {
+			float: right;
+		}
+	}
 }

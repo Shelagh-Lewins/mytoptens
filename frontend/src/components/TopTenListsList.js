@@ -5,12 +5,12 @@ import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 
 const TopTenListsList = ({ children, headerText }) => (
-	<Container className="topTenLists-list">
+	<Container className="toptenlists-list">
 		{headerText
 			&& (
 				<Row>
 					<Col>
-						<h3 className="topTenLists-list-name">
+						<h3 className="toptenlists-list-name">
 							{headerText}
 						</h3>
 					</Col>

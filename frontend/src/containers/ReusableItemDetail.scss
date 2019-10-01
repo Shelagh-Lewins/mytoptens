@@ -63,8 +63,28 @@
 		}
 	}
 
-	.topTenLists-list {
+	.toptenlists-list {
 		margin: 8px 0 8px 0;
+	}
+
+	.sort-controls {
+		margin-top: 8px;
+	}
+
+	.sort-by {
+		display: inline-block;
+	}
+
+	.sort-direction {
+		display: inline-block;
+
+		div {
+			display: inline-block;
+		}
+
+		label {
+			margin-left: 2rem;
+		}
 	}
 }
 
