@@ -46,20 +46,17 @@ class TopTenListDetails extends Component {
 			auth,
 			isLoading,
 			topTenList,
-			match,
+			// match,
 		} = this.props;
 
-		const { id } = this.state;
+		// const { id } = this.state;
 
 		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this topTenList
-			// const canEditTopTenList = permissions.canEditTopTenList(id);
-			// const canViewTopTenList = permissions.canViewTopTenList(id);
 
 			this.getOrganizerData();
 
 			if (topTenList && topTenList.canView) {
-				// if (canViewTopTenList) {
 				this.setState({
 					'topTenList_name': topTenList.name,
 					'topTenList_description': topTenList.description,
@@ -68,18 +65,16 @@ class TopTenListDetails extends Component {
 		}
 
 		// user has navigated to a different topTenList
-		if (prevProps.match.params.id !== match.params.id) {
+		/* if (prevProps.match.params.id !== match.params.id) {
 			const newId = this.getTopTenListData(this.props);
 			this.setState({
 				'id': newId,
 			});
-		}
+		} */
 
 		// user has just logged out
 		// store needs to be repopulated
 		if (prevProps.auth.isAuthenticated && !auth.isAuthenticated) {
-			// this.props.dispatch(topTenListReducer.fetchTopTenListDetail(this.state.id));
-			// this.props.dispatch(clearErrors());
 			this.getTopTenListData(this.props);
 		}
 	}

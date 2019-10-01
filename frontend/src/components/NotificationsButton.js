@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 import { Button } from 'reactstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -86,7 +85,6 @@ class NotificationsButton extends Component {
 	}
 
 	onClickDeleteAll = () => {
-		console.log('delete all');
 		const { dispatch } = this.props;
 
 		dispatch(notificationReducer.deleteMyNotifications());
