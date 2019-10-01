@@ -193,6 +193,7 @@ class TopTenListDetails extends Component {
 
 		let showPrivacyWarning = false;
 		let privacyWarningText = '';
+		const dateOptions = { 'year': 'numeric', 'month': 'short', 'day': 'numeric' };
 
 		if (topTenList.canEdit && parentTopTenList) {
 			if (topTenList.is_public && !parentTopTenList.is_public) {
@@ -212,7 +213,7 @@ class TopTenListDetails extends Component {
 
 			breadcrumbs = (
 				<div className="breadcrumbs">
-					<Link to={`/topTenList/${parentTopTenList.id}`}><span className="name"><span className="icon" title="Top Ten List" ><FontAwesomeIcon icon={['fas', 'list-ol']} style={{ 'color': COLORS.TOPTENLIST }} size="1x" /></span></span>{parentTopTenList.name} &gt; <span className="icon" title="Top Ten Item" ><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{parentTopTenItem.name}</Link>
+					<Link to={`/topTenList/${parentTopTenList.id}`}><span className="name"><span className="icon" title="Top Ten List" ><FontAwesomeIcon icon={['fas', 'list-ol']} style={{ 'color': COLORS.TOPTENLIST }} size="1x" /></span></span>{parentTopTenList.name} &gt; <span className="icon" title="Top Ten Item"><FontAwesomeIcon icon={['fas', 'sticky-note']} style={{ 'color': COLORS.TOPTENITEM }} size="1x" /></span>{parentTopTenItem.name}</Link>
 				</div>
 			);
 		}
@@ -250,11 +251,6 @@ class TopTenListDetails extends Component {
 										handleNewValue={this.handleNewValue}
 										value={topTenList_name}
 									/>
-									{!topTenList.canEdit && (
-										<div className="owner" title="Top Ten List owner">
-											<FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}
-										</div>
-									)}
 									{topTenList.canEdit && (
 										<div className="toptenlist-detail-controls">
 											<IsPublicIndicator
@@ -265,6 +261,18 @@ class TopTenListDetails extends Component {
 											<button type="button" className="btn btn-danger" onClick={this.onDeleteTopTenList}>X</button>
 										</div>
 									)}
+								</Col>
+							</Row>
+							<Row className="info">
+								<Col xs="12" sm="6">
+									<div className="toptenlist-created-by" title="Top Ten List owner">
+										<FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}
+									</div>
+								</Col>
+								<Col xs="12" sm="6">
+									<div className="toptenlist-modified-at" title="Date of last edit">
+										<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{new Date(topTenList.modified_at).toLocaleString('en-GB', dateOptions)}
+									</div>
 								</Col>
 							</Row>
 							<Row>

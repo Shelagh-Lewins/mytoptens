@@ -98,4 +98,18 @@
 	.privacy-warning {
 		color: $color-privacy-warning;
 	}
+
+	.info {
+		margin-bottom: 8px;
+
+		svg {
+			margin-right: 8px;
+		}
+	}
+
+	@media (min-width: 576px) {
+		.toptenlist-modified-at {
+			float: right;
+		}
+	}
 }
