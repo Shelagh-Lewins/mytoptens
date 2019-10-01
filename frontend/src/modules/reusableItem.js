@@ -486,9 +486,10 @@ export const getReusableItemList = (state) => {
 			return;
 		}
 
+		// all options must have a unique id for keyboard navigation in the dropdwon
 		const option1 = {
 			'type': 'text',
-			'id': '',
+			'id': 'usetext',
 			'name': searchTerm,
 			'value': searchTerm,
 		};
@@ -496,7 +497,7 @@ export const getReusableItemList = (state) => {
 		// option to create a new reusableItem with this text
 		const option2 = {
 			'type': 'newReusableItem',
-			'id': '',
+			'id': 'newreusableitem',
 			'name': searchTerm,
 			'value': searchTerm,
 		};

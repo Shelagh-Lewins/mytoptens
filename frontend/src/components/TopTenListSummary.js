@@ -18,7 +18,7 @@ const TopTenListSummary = (props) => {
 
 	const { canEdit } = topTenList;
 
-	var dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+	const dateOptions = { 'year': 'numeric', 'month': 'short', 'day': 'numeric' };
 
 	function onDeleteTopTenList() {
 		props.onDeleteTopTenList({ 'id': props.topTenList.id, 'name': props.topTenList.name });

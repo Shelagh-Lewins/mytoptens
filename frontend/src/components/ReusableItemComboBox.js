@@ -62,6 +62,7 @@ function ReusableItemComboBox(props) {
 				icon = '';
 				break;
 		}
+
 		return (
 			<span className="combobox-dropdown">
 				<span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
@@ -85,21 +86,9 @@ function ReusableItemComboBox(props) {
 		widgetId,
 	} = props;
 
-	const colors = ['orange', 'red', 'blue', 'purple'];
-
-	const example = (
-		<div>
-			<Combobox
-				data={colors}
-				defaultValue="orange"
-			/>
-		</div>
-	);
-
 	return (
 		<Row>
 			<Col lg="9" className="toptenitem-name">
-				{/* keyboard example {example} */}
 				<Label for={widgetId}>{labelText}</Label>
 				<Combobox
 					name={widgetId}
