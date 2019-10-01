@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { Button } from 'reactstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -100,10 +101,10 @@ class NotificationsButton extends Component {
 		} = this.props;
 		const { showNotificationsList } = this.state;
 
-		// Link is used for formatting consistency with the navbar links
+		// color="link" is used for formatting consistency with the navbar links
 		return (
 			<span className="notifications-nav">
-				<Link to="#" className="nav-link" onClick={this.onClickButton}><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'bell']} style={{ 'color': COLORS.BUTTONNOTIFICATIONS }} size="1x" /></span></Link>
+				<Button className="nav-link" onClick={this.onClickButton} color="link"><span className="icon" title="New reusable item"><FontAwesomeIcon icon={['fas', 'bell']} style={{ 'color': COLORS.BUTTONNOTIFICATIONS }} size="1x" /></span></Button>
 
 				{newNotificationsCount > 0
 					&& (
