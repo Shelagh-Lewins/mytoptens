@@ -118,7 +118,7 @@ class TopTenItem extends Component {
 		} else if (canViewChildTopTenList) {
 			childTopTenListElm = (
 				<div className="child-toptenlist">
-					<Link to={`/toptenlist/${topTenItem.childTopTenList.id}`}>
+					Child Top Ten List: <Link to={`/toptenlist/${topTenItem.childTopTenList.id}`}>
 						{topTenItem.childTopTenList.name}
 					</Link>
 				</div>

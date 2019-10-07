@@ -44,7 +44,7 @@ function receiveEntities(entities) {
 
 // define action types so they are visible
 // and export them so other reducers can use them
-export const CREATE_REUSABLEITEM_REQUESTED = 'CREATE_REUSABLEITEM_REQUESTED';
+// export const CREATE_REUSABLEITEM_REQUESTED = 'CREATE_REUSABLEITEM_REQUESTED';
 export const RECEIVE_REUSABLEITEMS = 'RECEIVE_REUSABLEITEMS';
 
 export const SUGGEST_REUSABLE_ITEMS_STARTED = 'SUGGEST_REUSABLE_ITEMS_STARTED';
