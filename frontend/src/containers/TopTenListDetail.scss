@@ -3,8 +3,13 @@
 .toptenlist-detail-controls {
 	float: right;
 
+	.save-toptenlist-as-text {
+		float: left;
+	}
+
 	.is-public {
 		float: left;
+		margin-left: 8px;
 	}
 
 	.btn-danger {
