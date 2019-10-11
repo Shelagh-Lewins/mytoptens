@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'reactstrap';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -21,9 +20,7 @@ class SaveTopTenListAsTextButton extends Component {
 			id,
 		} = this.props;
 
-		const text = topTenListAsText(id);
-
-		console.log('text', text);
+		topTenListAsText(id);
 	}
 
 	render() {
@@ -35,7 +32,7 @@ class SaveTopTenListAsTextButton extends Component {
 					onClick={this.onClickButton}
 					color="link"
 				>
-					<span className="icon" title="Save this Top Ten List as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>
+					<span className="icon" title="Download this Top Ten List as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>
 				</button>
 			</div>
 		);

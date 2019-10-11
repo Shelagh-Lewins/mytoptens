@@ -10,7 +10,7 @@ import './IsPublicIndicator.scss';
 const IsPublicIndicator = (props) => {
 	const { targetId, isPublic } = props;
 	const isPublicData = isPublic ? 'public' : 'private';
-	const tooltip = isPublic ? 'Public' : 'Private';
+	const tooltip = isPublic ? 'Public Top Ten List: click to make it private' : 'Private Top Ten List: click to make it public';
 
 	function onChangeIsPublic(e) {
 		// map from button data to true / false

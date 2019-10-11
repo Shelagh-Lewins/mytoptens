@@ -115,7 +115,7 @@ class TopTenListDetails extends Component {
 		} = this.props;
 		const { id, name } = topTenList;
 
-		if (confirm(`Are you sure you want to delete the topTenList ${name}?`)) { // eslint-disable-line no-restricted-globals
+		if (confirm(`Are you sure you want to delete the Top Ten List \n${name}?`)) { // eslint-disable-line no-restricted-globals
 			dispatch(topTenListReducer.deleteTopTenList(id));
 
 			// if there is a visible parent, navigate there
@@ -262,7 +262,7 @@ class TopTenListDetails extends Component {
 												isPublic={topTenList.is_public}
 												onChangeIsPublic={this.onChangeIsPublic}
 											/>
-											<button type="button" className="btn btn-danger" onClick={this.onDeleteTopTenList}>X</button>
+											<button type="button" className="btn btn-danger" onClick={this.onDeleteTopTenList} title="Delete this Top Ten List">X</button>
 										</div>
 									)}
 								</Col>
