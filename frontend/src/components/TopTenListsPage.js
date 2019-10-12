@@ -32,15 +32,43 @@ class TopTenListsPage extends Component {
 						topTenList={topTenList}
 						onChangeIsPublic={onChangeIsPublic}
 						onDeleteTopTenList={onDeleteTopTenList}
-						showCreatedBy={true}
 					/>
 				))}
 			</TopTenListsList>
 		);
 	}
 
+	renderTopTenListsCheckbox() {
+		const {
+			topLevelTopTenListsOnly,
+			handleTopLevelTopTenListsChange,
+		} = this.props;
+
+		return (
+			<Container>
+				<Row key="topTenListsCheckbox">
+					<Col className="top-level-toptenlists-control">
+						<Label check>
+							<Input
+								type="checkbox"
+								defaultChecked={topLevelTopTenListsOnly}
+								onChange={handleTopLevelTopTenListsChange}
+							/>
+							{' '}
+							Show top level Top Ten Lists only
+						</Label>
+					</Col>
+				</Row>
+			</Container>
+		);
+	}
+
 	renderMyTopTenLists() {
-		const { myTopTenLists, onChangeIsPublic, onDeleteTopTenList } = this.props;
+		const {
+			myTopTenLists,
+			onChangeIsPublic,
+			onDeleteTopTenList,
+		} = this.props;
 
 		return Object.keys(myTopTenLists).map((is_public) => {
 			const topTenListsByIsPublic = myTopTenLists[is_public];
@@ -56,7 +84,6 @@ class TopTenListsPage extends Component {
 									topTenList={topTenList}
 									onChangeIsPublic={onChangeIsPublic}
 									onDeleteTopTenList={onDeleteTopTenList}
-									showCreatedBy={false}
 								/>
 							))}
 						</TopTenListsList>
@@ -109,12 +136,10 @@ class TopTenListsPage extends Component {
 			currentPage,
 			onChangePage,
 			pageSize,
-			topLevelTopTenListsOnly,
-			handleTopLevelTopTenListsChange,
 		} = this.props;
 
 		if (selectedTab === 'mytoptens') {
-			TopTenListsListElement = this.renderMyTopTenLists();
+			TopTenListsListElement = [this.renderTopTenListsCheckbox(), this.renderMyTopTenLists()];
 		} else if (selectedTab === 'publictoptens') {
 			TopTenListsListElement = this.renderPublicTopTenLists();
 		}
@@ -156,19 +181,6 @@ class TopTenListsPage extends Component {
 			<div className="toptenlists-list">
 				<Container>
 					<Row>
-						<Col className="top-level-toptenlists-control">
-							<Label check>
-								<Input
-									type="checkbox"
-									defaultChecked={topLevelTopTenListsOnly}
-									onChange={handleTopLevelTopTenListsChange}
-								/>
-								{' '}
-								Show top level Top Ten lists only
-							</Label>
-						</Col>
-					</Row>
-					<Row>
 						<Col>
 							{createTopTenList}
 						</Col>
@@ -183,16 +195,18 @@ class TopTenListsPage extends Component {
 				<div className="topTenLists">
 					{TopTenListsListElement}
 				</div>
-				<div className="container">
-					<div className="text-center">
-						<Pagination
-							count={count}
-							pageSize={pageSize}
-							currentPage={currentPage}
-							onChangePage={onChangePage}
-						/>
+				{selectedTab === 'publictoptens' && (
+					<div className="container">
+						<div className="text-center">
+							<Pagination
+								count={count}
+								pageSize={pageSize}
+								currentPage={currentPage}
+								onChangePage={onChangePage}
+							/>
+						</div>
 					</div>
-				</div>
+				)}
 			</div>
 		);
 	}

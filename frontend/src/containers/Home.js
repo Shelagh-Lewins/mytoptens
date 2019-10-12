@@ -134,18 +134,24 @@ class Home extends Component {
 	}
 
 	// refresh topTenLists based on user choices
-	fetchTopTenLists({ listset = this.state.topTenListset, currentPage = this.state.currentPage }) { // eslint-disable-line react/destructuring-assignment
+	fetchTopTenLists({ listset = this.state.selectedTab, currentPage = this.state.currentPage }) { // eslint-disable-line react/destructuring-assignment
 		// use state values by default
 		// however these may be passed in by functions that set state because setState is not synchronous
 
 		const { dispatch } = this.props;
 
-		dispatch(topTenListReducer.fetchTopTenLists({
-			listset,
-			// topLevelTopTenListsOnly,
-			'limit': PAGE_SIZE,
-			'offset': (currentPage - 1) * PAGE_SIZE,
-		}));
+		// public top ten lists are paginated
+		if (listset === 'publictoptens') {
+			dispatch(topTenListReducer.fetchTopTenLists({
+				listset,
+				'limit': PAGE_SIZE,
+				'offset': (currentPage - 1) * PAGE_SIZE,
+			}));
+		} else {
+			dispatch(topTenListReducer.fetchTopTenLists({
+				listset,
+			}));
+		}
 	}
 
 	render() {
@@ -159,6 +165,8 @@ class Home extends Component {
 			topLevelPublicTopTenLists,
 			topLevelmyTopTenLists,
 		} = this.props;
+
+		// const count = publicTopTenLists.length;
 
 		const {
 			currentPage,
@@ -184,7 +192,7 @@ class Home extends Component {
 				<TopTenListsPage
 					auth={auth}
 					myTopTenLists={topLevelTopTenListsOnly ? topLevelmyTopTenLists : myTopTenLists}
-					publicTopTenLists={topLevelTopTenListsOnly ? topLevelPublicTopTenLists : publicTopTenLists}
+					publicTopTenLists={publicTopTenLists}
 					canCreateTopTenList={permissions.canCreateTopTenList}
 					onCreateTopTenList={this.onCreateTopTenList}
 					onChangeIsPublic={this.onChangeIsPublic}
@@ -213,7 +221,7 @@ Home.propTypes = {
 	'location': PropTypes.objectOf(PropTypes.any).isRequired,
 	'publicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
-	'topLevelPublicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	// 'topLevelPublicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'topLevelmyTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'count': PropTypes.number, // data may not yet be loaded
 	// 'next': PropTypes.string, // there may be no 'next' page
@@ -226,7 +234,7 @@ const mapStateToProps = state => ({
 	'isLoading': state.topTenList.isLoading,
 	'publicTopTenLists': topTenListReducer.getPublicTopTenLists(state),
 	'myTopTenLists': topTenListReducer.getMyGroupedTopTenLists(state),
-	'topLevelPublicTopTenLists': topTenListReducer.getTopLevelPublicTopTenLists(state),
+	// 'topLevelPublicTopTenLists': topTenListReducer.getTopLevelPublicTopTenLists(state),
 	'topLevelmyTopTenLists': topTenListReducer.getTopLevelMyGroupedTopTenLists(state),
 	'count': state.topTenList.count,
 	'next': state.topTenList.next,

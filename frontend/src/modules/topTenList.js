@@ -107,12 +107,22 @@ export function fetchTopTenLists({
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			const data = {
-				'count': response.count,
-				'next': response.next,
-				'previous': response.previous,
-				'entities': normalize(response.results, [topTenListSchema]).entities,
-			};
+			// console.log('response', response);
+
+			let data = {};
+
+			if (response.results) { // using pagination changes the structure of the returned data
+				data = {
+					'count': response.count,
+					'next': response.next,
+					'previous': response.previous,
+					'entities': normalize(response.results, [topTenListSchema]).entities,
+				};
+			} else {
+				data = {
+					'entities': normalize(response, [topTenListSchema]).entities,
+				};
+			}
 
 			return dispatch(receiveEntities(data));
 		}).catch((error) => {
@@ -434,6 +444,8 @@ const getTopTenLists = (state) => {
 	return enhancedTopTenLists;
 };
 
+const getLatestThings = state => state.topTenList.latestThings || [];
+
 const getTopTenItems = state => state.topTenItem.things;
 
 // group, sort, filter objects
@@ -460,8 +472,14 @@ export const getTopTenListsArray = createSelector(
 
 // get all public Top Ten Lists
 export const getPublicTopTenLists = createSelector(
-	[getTopTenListsArray],
-	topTenLists => topTenLists.filter(topTenListObject => topTenListObject.is_public),
+	[getTopTenListsArray, getLatestThings],
+	(topTenLists, latestThings) => {
+		let selectedTopTenLists = topTenLists.filter(topTenListObject => topTenListObject.is_public);
+		// console.log('latestThings', latestThings);
+		// console.log('selectedTopTenLists', selectedTopTenLists);
+		selectedTopTenLists = topTenLists.filter(topTenListObject => latestThings.indexOf(topTenListObject.id) !== -1);
+		return selectedTopTenLists;
+	},
 );
 
 // get Top Ten Lists belonging to the user
@@ -670,6 +688,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 				'count': count,
 				'previous': previous,
 				'next': next,
+				'latestThings': updeep.constant(Object.keys(things)), // array of ids of the Top Ten Lists that were fetched. UI uses this to select the Top Ten Lists to show when paginating
 				'things': things, // add data because notifications also use top ten lists
 				'isLoading': false,
 				'isLoadingOrganizerData': false,

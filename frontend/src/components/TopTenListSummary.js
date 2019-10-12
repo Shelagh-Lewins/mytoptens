@@ -14,7 +14,7 @@ import IsPublicIndicator from './IsPublicIndicator';
 import './TopTenListSummary.scss';
 
 const TopTenListSummary = (props) => {
-	const { topTenList, onChangeIsPublic, showCreatedBy } = props;
+	const { topTenList, onChangeIsPublic } = props;
 
 	const { canEdit } = topTenList;
 
@@ -46,10 +46,7 @@ const TopTenListSummary = (props) => {
 					<div className="toptenlist-description">{topTenList.description}</div>
 				</Link>
 
-				{showCreatedBy
-					&& <div className="toptenlist-created-by" title="Top Ten List owner"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}</div>
-
-				}
+				<div className="toptenlist-created-by" title="Top Ten List owner"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{topTenList.created_by_username}</div>
 
 				<div className="toptenlist-modified-at" title="Date of last edit">
 					<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{new Date(topTenList.modified_at).toLocaleString('en-GB', dateOptions)}
@@ -62,7 +59,6 @@ const TopTenListSummary = (props) => {
 TopTenListSummary.propTypes = {
 	'onChangeIsPublic': PropTypes.func.isRequired,
 	'onDeleteTopTenList': PropTypes.func.isRequired,
-	'showCreatedBy': PropTypes.bool.isRequired,
 	'topTenList': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 

@@ -33,11 +33,9 @@ class TopTenListDetails extends Component {
 
 		// load the topTenList and any parent / children
 		this.getTopTenListData = this.getTopTenListData.bind(this);
-		const id = this.getTopTenListData(props);
+		this.getTopTenListData(props);
 
-		this.state = {
-			id,
-		};
+		this.state = {};
 
 		this.onDeleteTopTenList = this.onDeleteTopTenList.bind(this);
 	}
@@ -47,10 +45,7 @@ class TopTenListDetails extends Component {
 			auth,
 			isLoading,
 			topTenList,
-			// match,
 		} = this.props;
-
-		// const { id } = this.state;
 
 		if (prevProps.isLoading && !isLoading) {
 			// just finished loading; need to check if user should view this topTenList
@@ -64,14 +59,6 @@ class TopTenListDetails extends Component {
 				});
 			}
 		}
-
-		// user has navigated to a different topTenList
-		/* if (prevProps.match.params.id !== match.params.id) {
-			const newId = this.getTopTenListData(this.props);
-			this.setState({
-				'id': newId,
-			});
-		} */
 
 		// user has just logged out
 		// store needs to be repopulated
@@ -90,10 +77,10 @@ class TopTenListDetails extends Component {
 
 	getOrganizerData = () => {
 		// minimal data for all my topTenLists and topTenItems to allow parent topTenList to be changed.
-		// can't do this until the topTenList has been loaded, to find the owner
+		// can't do this until the topTenList has been loaded, to find the owner (we are not assuming it's the logged in user, in case of future changes)
 		const { topTenList, dispatch } = this.props;
 
-		if (!topTenList) { // probably the user does not have permission to view this topTenList
+		if (!topTenList || topTenList.canEdit) { // probably the user does not have permission to view this topTenList
 			return;
 		}
 		dispatch(topTenListReducer.fetchOrganizerData({ 'userId': topTenList.created_by }));
@@ -101,7 +88,7 @@ class TopTenListDetails extends Component {
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
-		const { dispatch} = this.props;
+		const { dispatch } = this.props;
 
 		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
 	}
@@ -183,7 +170,6 @@ class TopTenListDetails extends Component {
 		} = this.props;
 
 		const {
-			// canEdit,
 			topTenList_name,
 			topTenList_description,
 		} = this.state;
@@ -341,7 +327,6 @@ class TopTenListDetails extends Component {
 
 	render() {
 		const { isLoading, topTenList } = this.props;
-		// const { canView } = this.state;
 
 		if (isLoading) {
 			return <Loading />;
