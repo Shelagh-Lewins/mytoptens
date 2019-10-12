@@ -15,7 +15,7 @@ import EditableTextField from '../components/EditableTextField';
 import TopTenItemsPage from '../components/TopTenItemsPage';
 import Organizer from '../components/Organizer';
 import Loading from '../components/Loading';
-import SaveTopTenListAsTextButton from '../components/SaveTopTenListAsTextButton';
+import downloadTopTenListButton from '../components/downloadTopTenListButton';
 
 import * as topTenListReducer from '../modules/topTenList';
 import * as topTenItemReducer from '../modules/topTenItem';
@@ -240,7 +240,7 @@ class TopTenListDetails extends Component {
 									/>
 									{topTenList.canEdit && (
 										<div className="toptenlist-detail-controls">
-											<SaveTopTenListAsTextButton
+											<downloadTopTenListButton
 												id={topTenList.id}
 											/>
 											<IsPublicIndicator
