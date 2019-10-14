@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import sanitizeFilename from '../modules/sanitizeFilename';
 import topTenListAsText from '../modules/topTenListAsText';
+import downloadFile from '../modules/downloadFile';
 import './DownloadMyTopTenListsButton.scss';
 
 import { COLORS } from '../constants';
@@ -15,13 +17,19 @@ class DownloadMyTopTenListsButton extends Component {
 		this.onClickButton = this.onClickButton.bind(this);
 	}
 
+	// destructure nested properties
+	// https://itnext.io/using-es6-to-destructure-nested-objects-in-javascript-avoid-undefined-errors-that-break-your-code-612ae67913e9
 	onClickButton = () => {
 		const {
-			auth,
+			'auth': {
+				'user': {
+					username,
+				},
+			},
 			myTopTenLists,
 		} = this.props;
 
-		let text = `Top Ten Lists owned by: ${auth.user.username}\n`;
+		let text = `Top Ten Lists owned by: ${username}\n`;
 		text += `${new Date()}\n\n`;
 
 		Object.keys(myTopTenLists).map((is_public) => {
@@ -41,6 +49,10 @@ class DownloadMyTopTenListsButton extends Component {
 				});
 			}
 		});
+
+		const filename = `${sanitizeFilename(`toptenlists-${username}`)}.txt`;
+
+		downloadFile(text, filename);
 
 		console.log('text:', text);
 	}
