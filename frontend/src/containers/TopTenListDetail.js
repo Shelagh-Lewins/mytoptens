@@ -87,12 +87,6 @@ class TopTenListDetails extends Component {
 		dispatch(clearErrors());
 	}
 
-	onChangeIsPublic = ({ id, is_public }) => {
-		const { dispatch } = this.props;
-
-		dispatch(topTenListReducer.setTopTenListIsPublic({ id, is_public }));
-	}
-
 	onDeleteTopTenList = () => {
 		const {
 			topTenList,
@@ -249,7 +243,7 @@ class TopTenListDetails extends Component {
 												isPublic={topTenList.is_public}
 												onChangeIsPublic={this.onChangeIsPublic}
 											/>
-											<button type="button" className="btn btn-danger" onClick={this.onDeleteTopTenList} title="Delete this Top Ten List">X</button>
+											<button type="button" className="btn btn-danger" onClick={this.onDeleteTopTenList} title="Delete this Top Ten List"><FontAwesomeIcon icon={['fas', 'trash']} style={{ 'color': COLORS.BUTTONSECONDARY }} size="1x" /></button>
 										</div>
 									)}
 								</Col>

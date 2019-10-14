@@ -2,18 +2,11 @@
 
 .is-public {
 	button {
-		background-position: center;
-		background-repeat: no-repeat;
-		background-size: 32px 32px;
 		height: 40px;
 		width: 40px;
+	}
 
-		&.private {
-			background-image: url("../images/private.svg");
-		}
-
-		&.public {
-			background-image: url("../images/public.svg");
-		}
+	svg {
+		pointer-events: none; // prevent svg from stealing click event without dataset
 	}
 }

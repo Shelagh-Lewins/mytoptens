@@ -51,14 +51,6 @@
 			display: inline-block;
 			margin-right: 8px;
 			width: 1rem;
-
-			&.private {
-				background-image: url("../images/private.svg");
-			}
-
-			&.public {
-				background-image: url("../images/public.svg");
-			}
 		}
 	}
 

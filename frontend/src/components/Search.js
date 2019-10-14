@@ -71,7 +71,7 @@ class Search extends Component {
 							{searchResults.map((result) => {
 								let color;
 								let detail;
-								let isPublicData;
+								let iconName;
 								let icon;
 								let title;
 								let url;
@@ -92,6 +92,7 @@ class Search extends Component {
 										color = COLORS.TOPTENITEM;
 										title = 'Top Ten Item';
 										url = `/toptenlist/${result.topTenList_id}`;
+
 										detail = (
 											<React.Fragment>
 												<span className="toptenitem detail"><FontAwesomeIcon icon={['fas', 'user']} style={{ 'color': COLORS.SECONDARYTEXT }} size="1x" />{result.created_by_username}</span>
@@ -106,9 +107,10 @@ class Search extends Component {
 										color = COLORS.REUSABLEITEM;
 										title = 'Reusable Item';
 										url = `/reusableitem/${result.id}`;
-										isPublicData = result.is_public ? 'public' : 'private';
+										iconName = result.is_public ? 'lock-open' : 'lock';
+
 										detail = (result.definition
-											&& <span className="reusableitem detail"><span className={`${isPublicData} is-public`}>&nbsp;</span>{result.definition}</span>
+											&& <span className="reusableitem detail"><FontAwesomeIcon icon={['fas', iconName]} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{result.definition}</span>
 										);
 										break;
 

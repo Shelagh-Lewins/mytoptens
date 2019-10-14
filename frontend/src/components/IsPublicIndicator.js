@@ -5,11 +5,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './IsPublicIndicator.scss';
+
+import { COLORS } from '../constants';
 
 const IsPublicIndicator = (props) => {
 	const { targetId, isPublic } = props;
 	const isPublicData = isPublic ? 'public' : 'private';
+	const iconName = isPublic ? 'lock-open' : 'lock';
 	const tooltip = isPublic ? 'Public Top Ten List: click to make it private' : 'Private Top Ten List: click to make it public';
 
 	function onChangeIsPublic(e) {
@@ -28,7 +32,7 @@ const IsPublicIndicator = (props) => {
 				className={`${isPublicData} btn btn-default`}
 				title={tooltip}
 			>
-			&nbsp;
+				<FontAwesomeIcon icon={['fas', iconName]} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />
 			</button>
 		</div>
 	);
