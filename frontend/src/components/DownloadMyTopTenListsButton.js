@@ -4,11 +4,11 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import topTenListAsText from '../modules/topTenListAsText';
-import './downloadMyTopTenListsButton.scss';
+import './DownloadMyTopTenListsButton.scss';
 
 import { COLORS } from '../constants';
 
-class downloadMyTopTenLists extends Component {
+class DownloadMyTopTenLists extends Component {
 	constructor(props) {
 		super();
 
@@ -39,8 +39,8 @@ class downloadMyTopTenLists extends Component {
 	}
 }
 
-downloadMyTopTenLists.propTypes = {
+DownloadMyTopTenLists.propTypes = {
 	'id': PropTypes.string.isRequired,
 };
 
-export default downloadMyTopTenLists;
+export default DownloadMyTopTenLists;

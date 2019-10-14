@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import sanitizeFilename from '../modules/sanitizeFilename';
 import topTenListAsText from '../modules/topTenListAsText';
-import './downloadTopTenListButton.scss';
+import downloadFile from '../modules/downloadFile';
+import './DownloadTopTenListButton.scss';
 
 import { COLORS } from '../constants';
 
-class downloadTopTenListButton extends Component {
+class DownloadTopTenListButton extends Component {
 	constructor(props) {
 		super();
 
@@ -18,9 +19,13 @@ class downloadTopTenListButton extends Component {
 	onClickButton = () => {
 		const {
 			id,
+			name,
 		} = this.props;
 
-		topTenListAsText(id);
+		const text = topTenListAsText(id);
+		const filename = `${sanitizeFilename(name)}.txt`;
+
+		downloadFile(text, filename);
 	}
 
 	render() {
@@ -39,8 +44,9 @@ class downloadTopTenListButton extends Component {
 	}
 }
 
-downloadTopTenListButton.propTypes = {
+DownloadTopTenListButton.propTypes = {
 	'id': PropTypes.string.isRequired,
+	'name': PropTypes.string.isRequired,
 };
 
-export default downloadTopTenListButton;
+export default DownloadTopTenListButton;

@@ -15,7 +15,7 @@ import EditableTextField from '../components/EditableTextField';
 import TopTenItemsPage from '../components/TopTenItemsPage';
 import Organizer from '../components/Organizer';
 import Loading from '../components/Loading';
-import downloadTopTenListButton from '../components/downloadTopTenListButton';
+import DownloadTopTenListButton from '../components/DownloadTopTenListButton';
 
 import * as topTenListReducer from '../modules/topTenList';
 import * as topTenItemReducer from '../modules/topTenItem';
@@ -240,8 +240,9 @@ class TopTenListDetails extends Component {
 									/>
 									{topTenList.canEdit && (
 										<div className="toptenlist-detail-controls">
-											<downloadTopTenListButton
+											<DownloadTopTenListButton
 												id={topTenList.id}
+												name={topTenList.name}
 											/>
 											<IsPublicIndicator
 												targetId={topTenList.id}
@@ -353,7 +354,7 @@ TopTenListDetails.propTypes = {
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
-	'match': PropTypes.objectOf(PropTypes.any).isRequired,
+	// 'match': PropTypes.objectOf(PropTypes.any).isRequired,
 	'parentTopTenItem': PropTypes.objectOf(PropTypes.any),
 	'parentTopTenList': PropTypes.objectOf(PropTypes.any),
 	'reusableItems': PropTypes.objectOf(PropTypes.any).isRequired,

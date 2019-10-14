@@ -1,12 +1,12 @@
+// export a Top Ten List as text
+
 import store from '../store';
-import sanitizeFilename from './sanitizeFilename';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST } from '../constants';
 
 const topTenListAsText = (id) => {
 	const state = store.getState();
 	const topTenLists = state.topTenList.things;
 	const topTenList = topTenLists[id];
-	const filename = `${sanitizeFilename(topTenList.name)}.txt`;
 
 	let text = `Top Ten List: ${topTenList.name}`;
 	text += '\n';
@@ -34,16 +34,7 @@ const topTenListAsText = (id) => {
 		}
 	}
 
-	const element = document.createElement('a');
-	element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`);
-	element.setAttribute('download', filename);
-
-	element.style.display = 'none';
-	document.body.appendChild(element);
-
-	element.click();
-
-	document.body.removeChild(element);
+	return text;
 };
 
 export default topTenListAsText;
