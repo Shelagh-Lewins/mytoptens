@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import * as topTenListReducer from '../modules/topTenList';
-import * as pageReducer from '../modules/page';
+// import * as pageReducer from '../modules/page';
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
 import TopTenListsPage from '../components/TopTenListsPage';
@@ -19,7 +19,7 @@ import { PAGE_SIZE } from '../constants';
 class Home extends Component {
 	constructor(props) {
 		super(props);
-
+console.log('constructor');
 		props.dispatch(clearErrors());
 
 		// which set of topTenLists to view
@@ -34,6 +34,8 @@ class Home extends Component {
 		this.setListSetURL(listset);
 
 		this.state = {
+			'publicTopTenListsFilterBy': 'name',
+			'publicTopTenListsFilterTerm': '',
 			'selectedTab': listset,
 			'topLevelTopTenListsOnly': true,
 			'currentPage': 1,
@@ -75,14 +77,30 @@ class Home extends Component {
 		}
 	}
 
-	onSearch = (searchTerm) => {
-		// wait until the user pauses in typing before searching
+	onChangePublicTopTenListsFilterTerm = (e) => {
+		// wait until the user stops typing before searching
+		const publicTopTenListsFilterTerm = e.target.value;
+
+		this.setState({
+			publicTopTenListsFilterTerm,
+		});
+
 		clearTimeout(this.searchTimeout);
-		const { dispatch } = this.props;
 
 		this.searchTimeout = setTimeout(() => {
-			dispatch(pageReducer.searchHome(searchTerm));
+			this.fetchTopTenLists({ publicTopTenListsFilterTerm });
 		}, 500);
+	}
+
+	onChangePublicTopTenListsFilterBy = (e) => {
+		// wait until the user stops typing before searching
+		const publicTopTenListsFilterBy = e.target.value;
+
+		this.setState({
+			publicTopTenListsFilterBy,
+		});
+
+		this.fetchTopTenLists({ publicTopTenListsFilterBy });
 	}
 
 	onChangeIsPublic = ({ id, is_public }) => {
@@ -134,7 +152,12 @@ class Home extends Component {
 	}
 
 	// refresh topTenLists based on user choices
-	fetchTopTenLists({ listset = this.state.selectedTab, currentPage = this.state.currentPage }) { // eslint-disable-line react/destructuring-assignment
+	fetchTopTenLists({
+		listset = this.state.selectedTab, // eslint-disable-line react/destructuring-assignment
+		currentPage = this.state.currentPage, // eslint-disable-line react/destructuring-assignment
+		publicTopTenListsFilterTerm = this.state.publicTopTenListsFilterTerm, // eslint-disable-line react/destructuring-assignment
+		publicTopTenListsFilterBy = this.state.publicTopTenListsFilterBy, // eslint-disable-line react/destructuring-assignment
+	}) {
 		// use state values by default
 		// however these may be passed in by functions that set state because setState is not synchronous
 
@@ -144,6 +167,8 @@ class Home extends Component {
 		if (listset === 'publictoptens') {
 			dispatch(topTenListReducer.fetchTopTenLists({
 				listset,
+				publicTopTenListsFilterTerm,
+				publicTopTenListsFilterBy,
 				'limit': PAGE_SIZE,
 				'offset': (currentPage - 1) * PAGE_SIZE,
 			}));
@@ -171,6 +196,8 @@ class Home extends Component {
 		const {
 			currentPage,
 			selectedTab,
+			publicTopTenListsFilterBy,
+			publicTopTenListsFilterTerm,
 			topLevelTopTenListsOnly,
 		} = this.state;
 		return (
@@ -195,6 +222,8 @@ class Home extends Component {
 					publicTopTenLists={publicTopTenLists}
 					canCreateTopTenList={permissions.canCreateTopTenList}
 					onCreateTopTenList={this.onCreateTopTenList}
+					onChangePublicTopTenListsFilterBy={this.onChangePublicTopTenListsFilterBy}
+					onChangePublicTopTenListsFilterTerm={this.onChangePublicTopTenListsFilterTerm}
 					onChangeIsPublic={this.onChangeIsPublic}
 					onDeleteTopTenList={this.onDeleteTopTenList}
 					isLoading={isLoading}
@@ -206,6 +235,8 @@ class Home extends Component {
 					pageSize={PAGE_SIZE}
 					currentPage={currentPage}
 					onChangePage={this.onChangePage}
+					publicTopTenListsFilterBy={publicTopTenListsFilterBy}
+					publicTopTenListsFilterTerm={publicTopTenListsFilterTerm}
 				/>
 			</div>
 		);
@@ -216,6 +247,8 @@ Home.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	// 'filterPublicTopTenListsBy': PropTypes.string.isRequired,
+	// 'filterPublicTopTenListsTerm': PropTypes.string.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
 	'location': PropTypes.objectOf(PropTypes.any).isRequired,
@@ -231,6 +264,8 @@ Home.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'errors': state.errors,
+	// 'filterPublicTopTenListsBy': state.topTenList.filterPublicTopTenListsBy,
+	// 'filterPublicTopTenListsTerm': state.topTenList.filterPublicTopTenListsTerm,
 	'isLoading': state.topTenList.isLoading,
 	'publicTopTenLists': topTenListReducer.getPublicTopTenLists(state),
 	'myTopTenLists': topTenListReducer.getMyGroupedTopTenLists(state),

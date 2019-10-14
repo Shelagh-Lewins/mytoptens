@@ -22,20 +22,59 @@ class TopTenListsPage extends Component {
 		history.push('/newtopTenList');
 	}
 
-	renderPublicTopTenLists() {
-		const { publicTopTenLists, onChangeIsPublic, onDeleteTopTenList } = this.props;
+	renderPublicTopTenListsControls() {
+		const {
+			publicTopTenListsFilterBy,
+			publicTopTenListsFilterTerm,
+			onChangePublicTopTenListsFilterBy,
+			onChangePublicTopTenListsFilterTerm,
+		} = this.props;
 
 		return (
-			<TopTenListsList headerText="All public Top Ten lists">
-				{publicTopTenLists.map(topTenList => (
-					<TopTenListSummary
-						key={topTenList.id}
-						topTenList={topTenList}
-						onChangeIsPublic={onChangeIsPublic}
-						onDeleteTopTenList={onDeleteTopTenList}
-					/>
-				))}
-			</TopTenListsList>
+			<Container key="publicTopTenListsControls">
+				<Row key="publicTopTenListsControls">
+					<Col className="public-toptenlists-controls">
+						<Label check>
+							Filter:
+							<Input
+								className="form-control"
+								onChange={onChangePublicTopTenListsFilterTerm}
+								type="text"
+								value={publicTopTenListsFilterTerm}
+								placeholder="Enter a filter term"
+							/>
+							<select className="form-control" onChange={onChangePublicTopTenListsFilterBy} value={publicTopTenListsFilterBy}>
+								<option value="topTenListName">Name</option>
+								<option value="username">Owner</option>
+							</select>
+						</Label>
+					</Col>
+				</Row>
+			</Container>
+		);
+	}
+
+	renderPublicTopTenLists() {
+		const { publicTopTenLists, onChangeIsPublic, onDeleteTopTenList, publicTopTenListsFilterTerm } = this.props;
+
+		const headerText = publicTopTenListsFilterTerm === '' ? 'All public Top Ten lists' : 'Filtered public Top Ten Lists';
+
+		if (publicTopTenLists.length > 0) {
+			return (
+				<TopTenListsList headerText={headerText} key="publicTopTenLists">
+					{publicTopTenLists.map(topTenList => (
+						<TopTenListSummary
+							key={topTenList.id}
+							topTenList={topTenList}
+							onChangeIsPublic={onChangeIsPublic}
+							onDeleteTopTenList={onDeleteTopTenList}
+						/>
+					))}
+				</TopTenListsList>
+			);
+		}
+		return (
+			<p key="publicTopTenLists">No Top Ten Lists match the current filter</p>
 		);
 	}
 
@@ -48,9 +87,9 @@ class TopTenListsPage extends Component {
 		} = this.props;
 
 		return (
-			<React.Fragment key="testkey">
+			<React.Fragment key="myTopTenListsControls">
 				<Container>
-					<Row key="topTenListsCheckbox">
+					<Row>
 						<Col className="top-level-toptenlists-control">
 							<Label check>
 								<Input
@@ -65,7 +104,7 @@ class TopTenListsPage extends Component {
 					</Row>
 				</Container>
 				<Container>
-					<Row key="downloadMyTopTenListsButton">
+					<Row>
 						<Col className="download-my-toptenlists">
 							<DownloadMyTopTenListsButton
 								auth={auth}
@@ -156,7 +195,7 @@ class TopTenListsPage extends Component {
 		if (selectedTab === 'mytoptens') {
 			TopTenListsListElement = [this.renderMyTopTenListsControls(), this.renderMyTopTenLists()];
 		} else if (selectedTab === 'publictoptens') {
-			TopTenListsListElement = this.renderPublicTopTenLists();
+			TopTenListsListElement = [this.renderPublicTopTenListsControls(), this.renderPublicTopTenLists()];
 		}
 
 		if (isLoading) {
@@ -232,15 +271,21 @@ TopTenListsPage.propTypes = {
 	'canCreateTopTenList': PropTypes.func.isRequired,
 	'count': PropTypes.number,
 	'currentPage': PropTypes.number.isRequired,
+	// 'publicTopTenListsFilterBy': PropTypes.string.isRequired,
+	// 'publicTopTenListsFilterTerm': PropTypes.string.isRequired,
 	'handleTabClick': PropTypes.func.isRequired,
 	'handleTopLevelTopTenListsChange': PropTypes.func.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
+	'onChangePublicTopTenListsFilterBy': PropTypes.func.isRequired,
+	'onChangePublicTopTenListsFilterTerm': PropTypes.func.isRequired,
 	'onChangeIsPublic': PropTypes.func.isRequired,
 	'onChangePage': PropTypes.func.isRequired,
 	'onDeleteTopTenList': PropTypes.func.isRequired,
 	'pageSize': PropTypes.number.isRequired,
 	'publicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'publicTopTenListsFilterBy': PropTypes.string.isRequired,
+	'publicTopTenListsFilterTerm': PropTypes.string.isRequired,
 	'selectedTab': PropTypes.string.isRequired,
 	'topLevelTopTenListsOnly': PropTypes.bool.isRequired,
 };

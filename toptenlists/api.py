@@ -66,6 +66,9 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
     permit_list_expands = ['topTenItem']
     pagination_class = LimitOffsetPagination
 
+    search_fields = ['created_by_username']
+    filter_backends = (filters.SearchFilter,)
+
     def get_queryset(self):
         # unauthenticated user can only view public topTenLists
         queryset = TopTenList.objects.filter(is_public=True)
@@ -98,7 +101,19 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
 
         if created_by is not None:
             queryset = queryset.filter(created_by=created_by)
-        
+
+        # filter on username constains string
+        created_by_username = self.request.query_params.get('created_by_username', None)
+
+        if created_by_username is not None:
+            queryset = queryset.filter(created_by_username__icontains=created_by_username)
+
+        # filter on name contains string
+        name = self.request.query_params.get('name', None)
+
+        if name is not None:
+            queryset = queryset.filter(name__icontains=name)
+
         # return only topTenLists that have no parent topTenItem
         #toplevel = self.request.query_params.get('toplevel')
         #if toplevel is not None:

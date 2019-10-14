@@ -78,7 +78,7 @@ function fetchTopTenListsFailed() {
 }
 
 export function fetchTopTenLists({
-	listset, limit, offset,
+	listset, limit, offset, publicTopTenListsFilterTerm, publicTopTenListsFilterBy,
 } = {}) {
 	return (dispatch, getState) => {
 		dispatch(fetchTopTenListsStarted());
@@ -102,16 +102,25 @@ export function fetchTopTenLists({
 		if (offset) {
 			url += `&offset=${offset}`;
 		}
+
+		if (publicTopTenListsFilterTerm && publicTopTenListsFilterTerm !== '' && listset === 'publictoptens') {
+			if (publicTopTenListsFilterBy === 'username') {
+				url += `&created_by_username=${publicTopTenListsFilterTerm}`;
+			} else if (publicTopTenListsFilterBy === 'name') {
+				url += `&name=${publicTopTenListsFilterTerm}`;
+			}
+		}
+
+		let data;
+
 		return fetchAPI({
 			'url': url,
 			'method': 'GET',
 			'useAuth': useAuth,
 		}).then((response) => {
-			// console.log('response', response);
-
-			let data = {};
-
-			if (response.results) { // using pagination changes the structure of the returned data
+			// when paginating, response is an object
+			// with array of objects from database as a property
+			if (response.results) {
 				data = {
 					'count': response.count,
 					'next': response.next,
@@ -364,6 +373,8 @@ export const setTopTenListIsPublic = ({ id, is_public }) => (dispatch) => {
 // this is initial state of topTenLists and the topTenList loading states
 // note that the topTenLists's list of topTenItems is called 'topTenItem' for consistency with the database.
 const initialTopTenListsState = {
+	'publicTopTenListsFilterBy': 'topTenListName',
+	'publicTopTenListsFilterTerm': '',
 	'isLoading': false,
 	'isLoadingOrganizerData': false,
 	'error': null,
@@ -371,8 +382,6 @@ const initialTopTenListsState = {
 	'next': '',
 	'previous': '',
 	'things': {},
-	// 'isLoadingOrganizerData': false,
-	// 'organizerData': {},
 };
 
 // 'state' here is global state
@@ -475,8 +484,8 @@ export const getPublicTopTenLists = createSelector(
 	[getTopTenListsArray, getLatestThings],
 	(topTenLists, latestThings) => {
 		let selectedTopTenLists = topTenLists.filter(topTenListObject => topTenListObject.is_public);
-		// console.log('latestThings', latestThings);
-		// console.log('selectedTopTenLists', selectedTopTenLists);
+
+		//
 		selectedTopTenLists = topTenLists.filter(topTenListObject => latestThings.indexOf(topTenListObject.id) !== -1);
 		return selectedTopTenLists;
 	},
