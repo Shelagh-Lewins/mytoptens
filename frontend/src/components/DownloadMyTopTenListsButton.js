@@ -8,7 +8,7 @@ import './DownloadMyTopTenListsButton.scss';
 
 import { COLORS } from '../constants';
 
-class DownloadMyTopTenLists extends Component {
+class DownloadMyTopTenListsButton extends Component {
 	constructor(props) {
 		super();
 
@@ -17,10 +17,32 @@ class DownloadMyTopTenLists extends Component {
 
 	onClickButton = () => {
 		const {
-			id,
+			auth,
+			myTopTenLists,
 		} = this.props;
 
-		topTenListAsText(id);
+		let text = `Top Ten Lists owned by: ${auth.user.username}\n`;
+		text += `${new Date()}\n\n`;
+
+		Object.keys(myTopTenLists).map((is_public) => {
+			const topTenListsByIsPublic = myTopTenLists[is_public];
+
+			if (topTenListsByIsPublic.length > 0) {
+				const headerText = is_public === 'true'
+					? `Public Top Ten lists (${topTenListsByIsPublic.length})`
+					: `Private Top Ten lists (${topTenListsByIsPublic.length})`;
+
+				text += `${headerText}`;
+				text += '\n=======================\n';
+
+				topTenListsByIsPublic.map((topTenList) => {
+					text += topTenListAsText(topTenList.id);
+					text += '\n-------------------------------\n';
+				});
+			}
+		});
+
+		console.log('text:', text);
 	}
 
 	render() {
@@ -32,15 +54,16 @@ class DownloadMyTopTenLists extends Component {
 					onClick={this.onClickButton}
 					color="link"
 				>
-					<span className="icon" title="Download all my Top Ten Lists as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>
+					<span className="icon" title="Download all my Top Ten Lists as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>Download my Top Ten Lists
 				</button>
 			</div>
 		);
 	}
 }
 
-DownloadMyTopTenLists.propTypes = {
-	'id': PropTypes.string.isRequired,
+DownloadMyTopTenListsButton.propTypes = {
+	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
-export default DownloadMyTopTenLists;
+export default DownloadMyTopTenListsButton;

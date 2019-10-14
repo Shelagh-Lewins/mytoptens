@@ -14,6 +14,7 @@ import TopTenListsList from './TopTenListsList';
 import TopTenListSummary from './TopTenListSummary';
 import './TopTenListsPage.scss';
 import Pagination from './Pagination';
+import DownloadMyTopTenListsButton from './DownloadMyTopTenListsButton';
 
 class TopTenListsPage extends Component {
 	onAddTopTenList = () => {
@@ -38,28 +39,42 @@ class TopTenListsPage extends Component {
 		);
 	}
 
-	renderTopTenListsCheckbox() {
+	renderMyTopTenListsControls() {
 		const {
+			auth,
 			topLevelTopTenListsOnly,
 			handleTopLevelTopTenListsChange,
+			myTopTenLists,
 		} = this.props;
 
 		return (
-			<Container>
-				<Row key="topTenListsCheckbox">
-					<Col className="top-level-toptenlists-control">
-						<Label check>
-							<Input
-								type="checkbox"
-								defaultChecked={topLevelTopTenListsOnly}
-								onChange={handleTopLevelTopTenListsChange}
+			<React.Fragment key="testkey">
+				<Container>
+					<Row key="topTenListsCheckbox">
+						<Col className="top-level-toptenlists-control">
+							<Label check>
+								<Input
+									type="checkbox"
+									defaultChecked={topLevelTopTenListsOnly}
+									onChange={handleTopLevelTopTenListsChange}
+								/>
+								{' '}
+								Show top level Top Ten Lists only
+							</Label>
+						</Col>
+					</Row>
+				</Container>
+				<Container>
+					<Row key="downloadMyTopTenListsButton">
+						<Col className="download-my-toptenlists">
+							<DownloadMyTopTenListsButton
+								auth={auth}
+								myTopTenLists={myTopTenLists}
 							/>
-							{' '}
-							Show top level Top Ten Lists only
-						</Label>
-					</Col>
-				</Row>
-			</Container>
+						</Col>
+					</Row>
+				</Container>
+			</React.Fragment>
 		);
 	}
 
@@ -139,7 +154,7 @@ class TopTenListsPage extends Component {
 		} = this.props;
 
 		if (selectedTab === 'mytoptens') {
-			TopTenListsListElement = [this.renderTopTenListsCheckbox(), this.renderMyTopTenLists()];
+			TopTenListsListElement = [this.renderMyTopTenListsControls(), this.renderMyTopTenLists()];
 		} else if (selectedTab === 'publictoptens') {
 			TopTenListsListElement = this.renderPublicTopTenLists();
 		}

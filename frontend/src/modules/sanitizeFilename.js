@@ -37,7 +37,7 @@ const illegalRe = /[/?<>\\:*|"'`]/g;
 const controlRe = /[\x00-\x1f\x80-\x9f]/g; // eslint-disable-line no-control-regex
 const reservedRe = /^\.+$/;
 const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
-const windowsTrailingRe = /[\. ]+$/;
+const windowsTrailingRe = /[\. ]+$/;// eslint-disable-line no-useless-escape
 
 function sanitize(input, replacement) {
 	if (typeof input !== 'string') {

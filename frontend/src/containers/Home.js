@@ -162,7 +162,7 @@ class Home extends Component {
 			isLoading,
 			myTopTenLists,
 			publicTopTenLists,
-			topLevelPublicTopTenLists,
+			// topLevelPublicTopTenLists,
 			topLevelmyTopTenLists,
 		} = this.props;
 

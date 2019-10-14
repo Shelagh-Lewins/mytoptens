@@ -10,8 +10,10 @@ const topTenListAsText = (id) => {
 
 	let text = `Top Ten List: ${topTenList.name}`;
 	text += '\n';
-	text += topTenList.description;
-	text += '\n';
+	if (topTenList.description !== '') {
+		text += topTenList.description;
+		text += '\n';
+	}
 
 	for (let i = 0; i < MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 		const topTenItem = state.topTenItem.things[topTenList.topTenItem[i]];
