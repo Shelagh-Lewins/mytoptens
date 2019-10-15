@@ -82,6 +82,7 @@ class Home extends Component {
 		const publicTopTenListsFilterTerm = e.target.value;
 
 		this.setState({
+			'currentPage': 1,
 			publicTopTenListsFilterTerm,
 		});
 
@@ -97,6 +98,7 @@ class Home extends Component {
 		const publicTopTenListsFilterBy = e.target.value;
 
 		this.setState({
+			'currentPage': 1,
 			publicTopTenListsFilterBy,
 		});
 

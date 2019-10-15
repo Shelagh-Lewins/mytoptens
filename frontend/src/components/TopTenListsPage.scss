@@ -62,4 +62,20 @@
 	.download-my-toptenlists {
 		margin: 8px 0;
 	}
+
+	.public-toptenlists-controls {
+		margin-bottom: 8px;
+		
+		input {
+			display: inline-block;
+			margin-left: 8px;
+			width: 15em;
+		}
+
+		select {
+			display: inline-block;
+			margin-left: 8px;
+			width: 10em;
+		}
+	}
 }

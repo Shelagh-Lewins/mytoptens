@@ -35,7 +35,7 @@ class TopTenListsPage extends Component {
 				<Row key="publicTopTenListsControls">
 					<Col className="public-toptenlists-controls">
 						<Label check>
-							Filter:
+							Filter Top Ten Lists:
 							<Input
 								className="form-control"
 								onChange={onChangePublicTopTenListsFilterTerm}
