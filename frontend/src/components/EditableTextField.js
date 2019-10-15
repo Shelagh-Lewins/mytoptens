@@ -43,7 +43,7 @@ class EditableTextField extends Component {
 		this.isOverflowActive();
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate = (prevProps) => {
 		this.isOverflowActive();
 	}
 
@@ -175,7 +175,7 @@ class EditableTextField extends Component {
 		const newOverflowActive = element.offsetHeight < element.scrollHeight;
 
 		if (newOverflowActive !== overflowActive) {
-			this.setState({ 'overflowActive': overflowActive });
+			this.setState({ 'overflowActive': newOverflowActive });
 		}
 	}
 
