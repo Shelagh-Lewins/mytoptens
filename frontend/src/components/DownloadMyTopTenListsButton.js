@@ -17,22 +17,28 @@ class DownloadMyTopTenListsButton extends Component {
 		this.onClickButton = this.onClickButton.bind(this);
 	}
 
-	// destructure nested properties
-	// https://itnext.io/using-es6-to-destructure-nested-objects-in-javascript-avoid-undefined-errors-that-break-your-code-612ae67913e9
 	onClickButton = () => {
 		const {
-			'auth': {
-				'user': {
-					username,
-				},
-			},
+			username,
 			myTopTenLists,
+			topLevelTopTenListsOnly,
 		} = this.props;
 
-		let text = `Top Ten Lists owned by: ${username}\n`;
+		if (!username) {
+			return;
+		}
+
+		let text;
+
+		if (topLevelTopTenListsOnly) {
+			text = `Top level Top Ten Lists owned by: ${username}\nChild Top Ten Lists are not included\n`;
+		} else {
+			text = `All Top Ten Lists owned by: ${username}\nChild Top Ten LIsts are included\n`;
+		}
+
 		text += `${new Date()}\n\n`;
 
-		Object.keys(myTopTenLists).map((is_public) => {
+		Object.keys(myTopTenLists).forEach((is_public) => { // eslint-disable-line array-callback-return
 			const topTenListsByIsPublic = myTopTenLists[is_public];
 
 			if (topTenListsByIsPublic.length > 0) {
@@ -43,7 +49,7 @@ class DownloadMyTopTenListsButton extends Component {
 				text += `${headerText}`;
 				text += '\n=======================\n';
 
-				topTenListsByIsPublic.map((topTenList) => {
+				topTenListsByIsPublic.forEach((topTenList) => {
 					text += topTenListAsText(topTenList.id);
 					text += '\n-------------------------------\n';
 				});
@@ -53,8 +59,6 @@ class DownloadMyTopTenListsButton extends Component {
 		const filename = `${sanitizeFilename(`toptenlists-${username}`)}.txt`;
 
 		downloadFile(text, filename);
-
-		console.log('text:', text);
 	}
 
 	render() {
@@ -66,7 +70,8 @@ class DownloadMyTopTenListsButton extends Component {
 					onClick={this.onClickButton}
 					color="link"
 				>
-					<span className="icon" title="Download all my Top Ten Lists as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>Download my Top Ten Lists
+					<span className="icon" title="Download all my Top Ten Lists as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>
+					Download my Top Ten Lists
 				</button>
 			</div>
 		);
@@ -74,8 +79,9 @@ class DownloadMyTopTenListsButton extends Component {
 }
 
 DownloadMyTopTenListsButton.propTypes = {
-	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'username': PropTypes.string,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
+	'topLevelTopTenListsOnly': PropTypes.bool.isRequired,
 };
 
 export default DownloadMyTopTenListsButton;

@@ -8,7 +8,7 @@ const topTenListAsText = (id) => {
 	const topTenLists = state.topTenList.things;
 	const topTenList = topTenLists[id];
 
-	let text = `Top Ten List: ${topTenList.name}`;
+	let text = topTenList.name;
 	text += '\n';
 	if (topTenList.description !== '') {
 		text += topTenList.description;

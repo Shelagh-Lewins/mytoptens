@@ -78,9 +78,15 @@ class TopTenListsPage extends Component {
 		);
 	}
 
+	// destructure nested properties
+	// https://itnext.io/using-es6-to-destructure-nested-objects-in-javascript-avoid-undefined-errors-that-break-your-code-612ae67913e9
 	renderMyTopTenListsControls() {
 		const {
-			auth,
+			'auth': {
+				'user': {
+					username,
+				},
+			},
 			topLevelTopTenListsOnly,
 			handleTopLevelTopTenListsChange,
 			myTopTenLists,
@@ -107,8 +113,9 @@ class TopTenListsPage extends Component {
 					<Row>
 						<Col className="download-my-toptenlists">
 							<DownloadMyTopTenListsButton
-								auth={auth}
+								username={username}
 								myTopTenLists={myTopTenLists}
+								topLevelTopTenListsOnly={topLevelTopTenListsOnly}
 							/>
 						</Col>
 					</Row>

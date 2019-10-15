@@ -19,7 +19,7 @@ import { PAGE_SIZE } from '../constants';
 class Home extends Component {
 	constructor(props) {
 		super(props);
-console.log('constructor');
+
 		props.dispatch(clearErrors());
 
 		// which set of topTenLists to view
