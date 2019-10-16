@@ -60,6 +60,9 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
     # magic method name to return calculated field
     def get_change_request_my_vote(cls, instance):
         # return the user's recorded vote, if any
+        #print('cls', cls)
+        #print('cls.context', cls.context)
+        #print('get_change_request_my_vote')
         current_user = cls.context['request'].user
 
         if current_user in instance.change_request_votes_yes.all():

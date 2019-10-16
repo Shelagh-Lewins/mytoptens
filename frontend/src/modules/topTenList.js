@@ -11,7 +11,7 @@ import {
 
 import {
 	CREATE_TOPTENITEM_SUCCEEDED,
-	MOVE_TOPTENITEM_UP_SUCCEEDED,
+	// MOVE_TOPTENITEM_UP_SUCCEEDED,
 } from './topTenItem';
 
 var updeep = require('updeep');
@@ -582,6 +582,8 @@ export const getTopTenItemsForTopTenList = createSelector(
 				topTenListTopTenItems.push(topTenItem);
 			});
 		}
+
+		topTenListTopTenItems.sort((a, b) => a.order < b.order);
 		return topTenListTopTenItems;
 	},
 );
@@ -773,7 +775,9 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
-		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
+		/* case MOVE_TOPTENITEM_UP_SUCCEEDED: {
+			console.log('in topTenList reducer');
+			return updeep(state, state);
 			const topTenItemsArray = action.payload.topTenItems; // array containing the two topTenItems that have been swapped
 			// update the TopTenItems array in their parent topTenList, change order
 			const topTenListId = topTenItemsArray[0].topTenList_id;
@@ -788,7 +792,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			}
 
 			return updeep.updateIn(`things.${topTenListId}.topTenItem`, replaceTopTenItems, state);
-		}
+		} */
 
 		case RECEIVE_ORGANIZER_DATA: {
 			// load topTenLists data into store

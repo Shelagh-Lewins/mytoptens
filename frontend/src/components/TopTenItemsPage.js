@@ -71,6 +71,7 @@ class TopTenItemsPage extends Component {
 				update[`${order}_id`] = topTenItem.id;
 				update[`${order}_name`] = topTenItem.name;
 				update[`${order}_description`] = topTenItem.description;
+				update[`${order}_name_reusableItemId`] = topTenItem.reusableItem;
 
 				// set child topTenList if exists
 				// or set to null if it does not
@@ -277,10 +278,6 @@ class TopTenItemsPage extends Component {
 						// console.log('new reusable from tti');
 						topTenItem = reusableItemSuggestionsForName.find(item => item.id === topTenItemId);
 					}
-				/* } else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
-					console.log('name', name);
-					console.log('new reusable from tti');
-					topTenItem = reusableItemSuggestionsForName.find(item => item.id === topTenItemId); */
 				} else {
 					// use an existing reusableItem
 					const reusableItemId = state[`${identifier}_reusableItemId`];

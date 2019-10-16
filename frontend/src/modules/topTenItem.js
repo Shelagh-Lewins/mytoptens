@@ -94,11 +94,11 @@ export const updateTopTenItem = (topTenItemId, data) => (dispatch) => {
 
 // ////////////////////////////////
 // move topTenItem up
-export function moveTopTenItemUpSucceeded(topTenItems) {
+export function moveTopTenItemUpSucceeded(topTenItemId) {
 	return {
 		'type': 'MOVE_TOPTENITEM_UP_SUCCEEDED',
 		'payload': {
-			topTenItems,
+			topTenItemId,
 		},
 	};
 }
@@ -110,7 +110,10 @@ export const moveTopTenItemUp = ({ topTenItemId }) => (dispatch) => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		return dispatch(moveTopTenItemUpSucceeded(response));
+		console.log('here');
+		console.log('moveTopTenItemUp topTenItemId', topTenItemId);
+		return dispatch(moveTopTenItemUpSucceeded(topTenItemId));
+		// return dispatch(moveTopTenItemUpSucceeded(response));
 	}).catch((error) => {
 		return dispatch(getErrors({ 'move topTenItem up error ': error.message }));
 	});
@@ -128,6 +131,7 @@ export const moveTopTenItemDown = ({ topTenItemId }) => (dispatch) => {
 	const { order } = topTenItemObject;
 
 	// find the topTenItem below it in the parent topTenList
+	console.log('there');
 	const topTenItemBelowId = store.getState().topTenList.things[topTenListId].topTenItem[order];
 
 	dispatch(moveTopTenItemUp({ 'topTenItemId': topTenItemBelowId }));
@@ -241,10 +245,39 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		}
 
 		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
-			const topTenItemsArray = action.payload.topTenItems; // array containing the two topTenItems that have been swapped
+			// swap the two top ten items in the store
+
+			const { topTenItemId } = action.payload;
+
+			const lowerTopTenItem = { ...state.things[topTenItemId] };
+			const lowerOrder = lowerTopTenItem.order;
+
+			const topTenListId = lowerTopTenItem.topTenList_id;
+
+			let upperTopTenItem;
+
+			const ids = Object.keys(state.things); // array of ids of all Top Ten Items
+
+			for (let i = 0; i < ids.length; i += 1) {
+				const topTenItemObj = state.things[ids[i]];
+				if (topTenItemObj.topTenList_id === topTenListId
+				&& topTenItemObj.order === lowerOrder - 1) {
+					upperTopTenItem = { ...topTenItemObj };
+					break;
+				}
+			}
+
+			if (lowerOrder < 2) {
+				return updeep(state, state);
+			}
+
+			lowerTopTenItem.order -= 1;
+			upperTopTenItem.order += 1;
+
+			const topTenItemsArray = [upperTopTenItem, lowerTopTenItem];
 
 			const topTenItemsObject = {};
-			topTenItemsArray.map((topTenItemObject) => { // eslint-disable-line array-callback-return
+			topTenItemsArray.forEach((topTenItemObject) => { // eslint-disable-line array-callback-return
 				topTenItemsObject[topTenItemObject.id] = topTenItemObject;
 			});
 			return updeep({ 'things': topTenItemsObject }, state);

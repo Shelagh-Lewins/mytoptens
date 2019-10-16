@@ -249,11 +249,14 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
             topTenItem_above.save()
 
             # return the new topTenItems so the UI can update
-            topTenItems = [topTenItem, topTenItem_above]
+            # update: this doesn't provide context, so request doesn't exist in the serializer and it can't get the user's vote on a referenced reusable item.
+            # I can't make get_serializer work to provide context
+            # so will not return the new items. Instead, the UI can figure out what should happen, it knows what was requested and that it succeeded.
+            #topTenItems = [topTenItem, topTenItem_above]
+            # serializer = TopTenItemSerializer(topTenItems, many=True)
 
-            serializer = TopTenItemSerializer(topTenItems, many=True)
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            # return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 

@@ -21,7 +21,8 @@ TopTenListDetailViewSet.throttle_classes = ()
 
 
 new_list_data = {'name': 'Tasty food', 'description':'My favourite foods', 'topTenItem': [
-    {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1},
+    # {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1},
+    {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1, 'newReusableItem': True, 'reusableItemDefinition': 'An Italian Classic', 'reusableItemLink': 'here@there.com'},
     {'name': 'Cheese', 'description': 'Not goat!', 'order': 2},
     {'name': 'Steak', 'description': 'Medium rare', 'order': 3},
     {'name': 'Cauliflower cheese', 'description': 'With green pepper sauce', 'order': 4},
@@ -120,6 +121,9 @@ class CreateTopTenListAPITest(APITestCase):
             self.assertEqual(topTenItem.description, item_data.get('description', None))
             self.assertEqual(topTenItem.topTenList_id, new_topTenList.id)
 
+        # Top Ten Item 1 should reference a new Reusable Item
+        # there should be 1 ReusableItems in the database
+        self.assertEqual(ReusableItem.objects.all().count(), 1)
 
     def test_create_topTenList_not_verified(self):
         """
