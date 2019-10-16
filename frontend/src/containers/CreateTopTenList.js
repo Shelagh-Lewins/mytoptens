@@ -72,7 +72,7 @@ class CreateTopTenList extends Component {
 				// and the passed event is the selected item - an object - not the entered text
 				// so, only update the search string if the user has typed text
 				// not if they have made a selection
-				//console.log('suggest for ', e);
+				// console.log('suggest for ', e);
 
 				// the dropdown list will be rebuilt.
 				// We need to remove the selection from state to avoid confusion.
@@ -129,7 +129,7 @@ class CreateTopTenList extends Component {
 		}
 	}
 
-	cancel(e) {
+	cancel() {
 		this.props.history.push('/');
 	}
 
@@ -141,8 +141,8 @@ class CreateTopTenList extends Component {
 			'description': this.state.description,
 			'topTenItem': [],
 		};
-		
-		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+
+		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			if (this.state[`topTenItem${i}`] !== '') {
 				const newTopTenItem = {
 					'name': this.state[`topTenItem${i}_name`],
@@ -150,8 +150,8 @@ class CreateTopTenList extends Component {
 					'newReusableItem': this.state[`topTenItem${i}_name_newReusableItem`],
 					'reusableItem_id': this.state[`topTenItem${i}_name_reusableItemId`],
 					'topTenItem_id': this.state[`topTenItem${i}_name_topTenItemId`],
-					'definition': this.state[`topTenItem${i}_name_definition`],
-					'link': this.state[`topTenItem${i}_name_link`],
+					'reusableItemDefinition': this.state[`topTenItem${i}_name_definition`],
+					'reusableItemLink': this.state[`topTenItem${i}_name_link`],
 					'order': i,
 				};
 				newTopTenList.topTenItem.push(newTopTenItem);
@@ -166,7 +166,7 @@ class CreateTopTenList extends Component {
 	}
 
 	onCreateTopTenList = (newTopTenList) => {
-		//console.log('new list data', newTopTenList);
+		// console.log('new list data', newTopTenList);
 		this.props.dispatch(createTopTenList(newTopTenList, this.props.history));
 	}
 
@@ -303,7 +303,7 @@ class CreateTopTenList extends Component {
 					{this.renderTopTenItemInputs()}
 					<Row>
 						<Col lg="9">
-							<button type="button" className="btn btn-secondary"onClick={this.cancel}>
+							<button type="button" className="btn btn-secondary" onClick={this.cancel}>
 								Cancel
 							</button>
 							<button type="submit" className="btn btn-primary">
@@ -311,12 +311,12 @@ class CreateTopTenList extends Component {
 							</button>
 						</Col>
 					</Row>
-	        <Row>
+					<Row>
 						<Col lg="9">
 							{this.props.errors.topTenLists && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.topTenLists}</div>}
 						</Col>
 					</Row>
-	      </ValidatedForm>
+				</ValidatedForm>
 			</Container>
 		);
 	}

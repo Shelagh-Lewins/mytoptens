@@ -366,6 +366,9 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
 
 
     def pre_save(self, obj):
+        print('API. ReusableItemViewSet, pre_save')
+        print('obj', obj)
+        print('self.request.user', self.request.user)
         obj.created_by = self.request.user
 
     def get_queryset(self):

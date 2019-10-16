@@ -458,6 +458,7 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
         """
         create an initial history entry as well as the obvious data
         """
+
         history_entry = {}
 
         for key in cls.editable_properties:
@@ -695,7 +696,6 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
             if data['newReusableItem'] == True:
                 # create a new reusableItem
                 # assign the new reusableItem to that topTenItem
-                # print('newReusableItem')
 
                 if 'topTenItemForNewReusableItem' in data:
                 # create the reusable item from an existing topTenItem
@@ -746,6 +746,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
                     reusableItemData['created_by'] = self.context['request'].user
                     reusableItemData['created_by_username'] = self.context['request'].user.username
 
+                    # editing or creating a Top Ten Item
                     if 'reusableItemDefinition' in data:
                         reusableItemData['definition'] = data['reusableItemDefinition']
 
@@ -816,23 +817,9 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
             # note that if newReusableItem is False, the code will fail
             # if the value exists, it must be True
             for index, topTenItem_data in enumerate(data.get('topTenItem')):
-                if 'newReusableItem' in topTenItem_data:
-                    if topTenItem_data['newReusableItem'] == True:
-                    # create new reusableItem from raw data
+                # if a new reusable item is to be created, this will happen in the Top Ten Item serializer, it does not need to be done here
 
-                        reusableItemData = {'name': topTenItem_data['name']}
-
-                        if 'definition' in topTenItem_data:
-                            reusableItemData['definition'] = topTenItem_data['definition']
-
-                        if 'link' in topTenItem_data:
-                            reusableItemData['link'] = topTenItem_data['link']
-
-                        newReusableItem = ReusableItem.objects.create(**reusableItemData)
-
-                        internal_value['topTenItem'][index]['reusableItem'] = newReusableItem
-
-                elif 'reusableItem_id' in topTenItem_data:
+                if 'reusableItem_id' in topTenItem_data:
                     # reference an existing reusableItem
                     try:
                         # make sure the reusableItem exists
@@ -855,8 +842,6 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
 
                 elif 'topTenItem_id' in topTenItem_data:
                     # create new reusableItem from topTenItem
-                    #print('topTenItem_id')
-                    #print(topTenItem_data['topTenItem_id'])
 
                     try:
                         topTenItem = TopTenItem.objects.get(id=topTenItem_data['topTenItem_id'])
