@@ -21,7 +21,6 @@ TopTenListDetailViewSet.throttle_classes = ()
 
 
 new_list_data = {'name': 'Tasty food', 'description':'My favourite foods', 'topTenItem': [
-    # {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1},
     {'name': 'Spaghetti bolognese', 'description': 'Like mum makes', 'order': 1, 'newReusableItem': True, 'reusableItemDefinition': 'An Italian Classic', 'reusableItemLink': 'here@there.com'},
     {'name': 'Cheese', 'description': 'Not goat!', 'order': 2},
     {'name': 'Steak', 'description': 'Medium rare', 'order': 3},
@@ -113,7 +112,13 @@ class CreateTopTenListAPITest(APITestCase):
         # there should be 10 TopTenItems in the database
         self.assertEqual(TopTenItem.objects.all().count(), 10)
 
-        # check order, name, description, topTenList_id for each topTenItem
+        # there should be 1 ReusableItem in the database
+        self.assertEqual(ReusableItem.objects.all().count(), 1)
+        self.assertEqual(ReusableItem.objects.first().name, new_list_data['topTenItem'][0]['name'])
+        self.assertEqual(ReusableItem.objects.first().definition, new_list_data['topTenItem'][0]['reusableItemDefinition'])
+        self.assertEqual(ReusableItem.objects.first().link, new_list_data['topTenItem'][0]['reusableItemLink'])
+
+        # check properties for each topTenItem
         for index, topTenItem in enumerate(topTenList_topTenItems_queryset):
             self.assertEqual(topTenItem.order, index+1)
             item_data = new_list_data.get('topTenItem', None)[index]
@@ -121,9 +126,12 @@ class CreateTopTenListAPITest(APITestCase):
             self.assertEqual(topTenItem.description, item_data.get('description', None))
             self.assertEqual(topTenItem.topTenList_id, new_topTenList.id)
 
-        # Top Ten Item 1 should reference a new Reusable Item
-        # there should be 1 ReusableItems in the database
-        self.assertEqual(ReusableItem.objects.all().count(), 1)
+            # the first top ten item only should reference the reusable item
+            if index == 0:
+                self.assertEqual(ReusableItem.objects.first(), topTenItem.reusableItem)
+
+            else:
+                self.assertEqual(None, topTenItem.reusableItem)
 
     def test_create_topTenList_not_verified(self):
         """
