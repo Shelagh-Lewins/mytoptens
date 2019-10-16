@@ -28,6 +28,7 @@ class CreateTopTenList extends Component {
 			'description': '',
 			'activeItemNameId': '',
 		};
+
 		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			this.state[`topTenItem${i}_name`] = '';
 			this.state[`topTenItem${i}_description`] = '';
@@ -48,20 +49,25 @@ class CreateTopTenList extends Component {
 			this.state.parentTopTenListId = urlParams.get('parent-topTenList-id');
 		}
 
+		const { parentTopTenItemName } = this.state;
 		// use parent item name as default list name
-		if (this.state.parentTopTenItemName) {
-			this.state.name = this.state.parentTopTenItemName;
+		if (parentTopTenItemName) {
+			this.state.name = parentTopTenItemName;
 		}
 	}
 
-	handleInputChange(e) {
-		this.setState({
-			[e.target.name]: e.target.value
-		});
+	componentDidUpdate(prevProps) {
+		// If the user cannot create a topTenList, redirect to Home
+		const { auth, history } = this.props;
+		if (!permissions.canCreateTopTenList() && !auth.isLoading) {
+			history.push('/');
+		}
 	}
 
 	// user types in an item name combobox.
 	onChangeItemName(e, widgetId) {
+		const { dispatch } = this.props;
+
 		this.setState({
 			'activeItemNameId': widgetId,
 		});
@@ -82,7 +88,7 @@ class CreateTopTenList extends Component {
 					[`${widgetId}_reusableItemId`]: undefined,
 				});
 
-				this.props.dispatch(reusableItemReducer.suggestReusableItems(e, widgetId));
+				dispatch(reusableItemReducer.suggestReusableItems(e, widgetId));
 			}
 		}, 300);
 	}
@@ -129,16 +135,43 @@ class CreateTopTenList extends Component {
 		}
 	}
 
+	onCreateTopTenList = (newTopTenList) => {
+		// console.log('new list data', newTopTenList);
+		const { dispatch, history } = this.props;
+
+		dispatch(createTopTenList(newTopTenList, history));
+	}
+
+	onCloseFlashMessage = () => {
+		const { dispatch } = this.props;
+
+		dispatch(clearErrors());
+	}
+
 	cancel() {
-		this.props.history.push('/');
+		const { history } = this.props;
+
+		history.push('/');
+	}
+
+	handleInputChange(e) {
+		this.setState({
+			[e.target.name]: e.target.value,
+		});
 	}
 
 	handleSubmit(e) {
 		e.preventDefault();
 
-		let newTopTenList = {
-			'name': this.state.name,
-			'description': this.state.description,
+		const {
+			description,
+			name,
+			parentTopTenItemId,
+		} = this.state;
+
+		const newTopTenList = {
+			'name': name,
+			'description': description,
 			'topTenItem': [],
 		};
 
@@ -158,33 +191,20 @@ class CreateTopTenList extends Component {
 			}
 		}
 
-		if (this.state.parentTopTenItemId) {
-			newTopTenList.parent_topTenItem = this.state.parentTopTenItemId;
+		if (parentTopTenItemId) {
+			newTopTenList.parent_topTenItem = parentTopTenItemId;
 		}
 
 		this.onCreateTopTenList(newTopTenList);
 	}
 
-	onCreateTopTenList = (newTopTenList) => {
-		// console.log('new list data', newTopTenList);
-		this.props.dispatch(createTopTenList(newTopTenList, this.props.history));
-	}
-
-	componentDidUpdate(prevProps){
-		// If the user cannot create a topTenList, redirect to Home
-		if(!permissions.canCreateTopTenList() && !this.props.auth.isLoading){
-			this.props.history.push('/');
-		}
-	}
-
-	onCloseFlashMessage = () => {
-		this.props.dispatch(clearErrors());
-	}
-
 	renderTopTenItemInputs() {
+		const { reusableItemSuggestions } = this.props;
+		const { activeItemNameId } = this.state;
+
 		const elements = [];
 
-		for (let i=1; i<=MAX_TOPTENITEMS_IN_TOPTENLIST; i++) {
+		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			const widgetId = `topTenItem${i}_name`;
 
 			// has the user selected an existing topTenItem?
@@ -193,23 +213,23 @@ class CreateTopTenList extends Component {
 			let newReusableItem;
 			let topTenItem;
 			let reusableItem;
-			const reusableItemSuggestions = this.props.reusableItemSuggestions[widgetId];
+			const reusableItemSuggestionsForWidget = reusableItemSuggestions[widgetId];
 
 			// create a new reusableItem based on the name the user typed
 			if (this.state[`${widgetId}_newReusableItem`]) {
 				newReusableItem = { 'name': this.state[widgetId] };
 			} else 	if (topTenItemId) { // create a new reusableItem to share with the selected topTenItem
-				topTenItem = reusableItemSuggestions.find(item => item.id === topTenItemId);
+				topTenItem = reusableItemSuggestionsForWidget.find(item => item.id === topTenItemId);
 			} else {
 				// use an existing reusableItem
 				const reusableItemId = this.state[`${widgetId}_reusableItemId`];
 
 				if (reusableItemId) {
-					reusableItem = reusableItemSuggestions.find(item => item.id === reusableItemId);
+					reusableItem = reusableItemSuggestionsForWidget.find(item => item.id === reusableItemId);
 				}
 			}
 
-			const data = widgetId === this.state.activeItemNameId ? reusableItemSuggestions : [];
+			const data = widgetId === activeItemNameId ? reusableItemSuggestionsForWidget : [];
 
 			elements.push(
 				<div className="form-group" key={`topTenItem${i}`}>
@@ -218,8 +238,8 @@ class CreateTopTenList extends Component {
 						widgetId={widgetId}
 						labelText={`Top Ten item ${i}`}
 						data={data}
-						onChange={(param) => this.onChangeItemName(param, widgetId)}
-						onSelect={(param) => this.onSelectItemName(param, widgetId)}
+						onChange={param => this.onChangeItemName(param, widgetId)}
+						onSelect={param => this.onSelectItemName(param, widgetId)}
 						newReusableItem={newReusableItem}
 						reusableItem={reusableItem}
 						topTenItem={topTenItem}
@@ -233,37 +253,49 @@ class CreateTopTenList extends Component {
 								type="textarea"
 								name={`topTenItem${i}_description`}
 								id={`topTenItem${i}_description`}
-								onChange={ this.handleInputChange }
-								value={ this.state[`topTenItem${i}_description`] }
+								onChange={this.handleInputChange}
+								value={this.state[`topTenItem${i}_description`]}
 								placeholder="Enter the description"
 							/>
-							<div className='invalid-feedback' />
+							<div className="invalid-feedback" />
 						</Col>
 					</Row>
-				</div>);
+				</div>,
+			);
 		}
 		return elements;
 	}
 
 	render() {
+		const { errors } = this.props;
+		const {
+			description,
+			name,
+			parentTopTenItemName,
+			parentTopTenListId,
+			parentTopTenListName,
+		} = this.state;
+
 		return (
 			<Container className="create-toptenlist">
-				{!isEmpty(this.props.errors) && (<Container>
-					<Row>
-						<Col>
-							<FlashMessage
-								message={formatErrorMessages(this.props.errors)}
-								type="error"
-								onClick={this.onCloseFlashMessage}
-							/>
-						</Col>
-					</Row>
-				</Container>)}
-				<h2>Create a new Top Ten list</h2>
-				{this.state.parentTopTenItemName && (
-					<div className="parent-topTenItem"><Link to={`/toptenlist/${this.state.parentTopTenListId}`}>{this.state.parentTopTenListName}</Link> > {this.state.parentTopTenItemName}</div>
+				{!isEmpty(errors) && (
+					<Container>
+						<Row>
+							<Col>
+								<FlashMessage
+									message={formatErrorMessages(errors)}
+									type="error"
+									onClick={this.onCloseFlashMessage}
+								/>
+							</Col>
+						</Row>
+					</Container>
 				)}
-				<ValidatedForm onSubmit={ this.handleSubmit }>
+				<h2>Create a new Top Ten list</h2>
+				{parentTopTenItemName && (
+					<div className="parent-topTenItem"><Link to={`/toptenlist/${parentTopTenListId}`}>{parentTopTenListName}</Link> &gt; {parentTopTenItemName}</div>
+				)}
+				<ValidatedForm onSubmit={this.handleSubmit}>
 					<div className="form-group">
 						<Row>
 							<Col lg="9" className="toptenlist-name">
@@ -273,12 +305,12 @@ class CreateTopTenList extends Component {
 									name="name"
 									required={true}
 									id="name"
-									onChange={ this.handleInputChange }
-									value={ this.state.name }
+									onChange={this.handleInputChange}
+									value={name}
 									placeholder="Enter the topTenList name"
 								/>
-								<div className='invalid-feedback' />
-								<small className='form-text text-muted'>
+								<div className="invalid-feedback" />
+								<small className="form-text text-muted">
 									<p>Name is required</p>
 								</small>
 							</Col>
@@ -292,11 +324,11 @@ class CreateTopTenList extends Component {
 									type="textarea"
 									name="description"
 									id="description"
-									onChange={ this.handleInputChange }
-									value={ this.state.description }
+									onChange={this.handleInputChange}
+									value={description}
 									placeholder="Enter the topTenList description"
 								/>
-								<div className='invalid-feedback' />
+								<div className="invalid-feedback" />
 							</Col>
 						</Row>
 					</div>
@@ -313,7 +345,7 @@ class CreateTopTenList extends Component {
 					</Row>
 					<Row>
 						<Col lg="9">
-							{this.props.errors.topTenLists && <div className="invalid-feedback " style={{ 'display': 'block' }}>{this.props.errors.topTenLists}</div>}
+							{errors.topTenLists && <div className="invalid-feedback " style={{ 'display': 'block' }}>{errors.topTenLists}</div>}
 						</Col>
 					</Row>
 				</ValidatedForm>
@@ -324,7 +356,11 @@ class CreateTopTenList extends Component {
 
 CreateTopTenList.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
+	'dispatch': PropTypes.func.isRequired,
+	'history': PropTypes.objectOf(PropTypes.any).isRequired,
+	'location': PropTypes.objectOf(PropTypes.any).isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	'reusableItemSuggestions': PropTypes.objectOf(PropTypes.any).isRequired,
 };
 
 const mapStateToProps = state => ({
