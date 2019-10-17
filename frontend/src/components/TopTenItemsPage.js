@@ -57,6 +57,7 @@ class TopTenItemsPage extends Component {
 
 	componentDidUpdate(prevProps) {
 		const update = {};
+		// console.log('topTenItemsPage update', this.props);
 		const { topTenItems } = this.props;
 		for (let i = 0; i < topTenItems.length; i += 1) {
 			const topTenItem = topTenItems[i];

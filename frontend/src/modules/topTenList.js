@@ -583,7 +583,14 @@ export const getTopTenItemsForTopTenList = createSelector(
 			});
 		}
 
-		topTenListTopTenItems.sort((a, b) => a.order < b.order);
+		topTenListTopTenItems.sort((a, b) => {
+			//console.log('a', a.order);
+			//console.log('typeof a', typeof a.order);
+			//console.log('b', b.order);
+			//console.log('typeof b', typeof b.order);
+			return a.order - b.order; // Chrome doesn't support the common boolean sort. Must return a number.
+		});
+		// console.log('topTenListTopTenItems', topTenListTopTenItems);
 		return topTenListTopTenItems;
 	},
 );
@@ -628,7 +635,7 @@ export const getReusableItemUsageData = createSelector(
 		});
 
 		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
-		topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
+		// topTenListsArray.sort((a, b) => a.name.localeCompare(b.name));
 
 		const users = new Set(topTenListsArray.map(topTenListObj => topTenListObj.created_by)); // all users who reference this Reusable Item, as a Set to avoid duplicates
 

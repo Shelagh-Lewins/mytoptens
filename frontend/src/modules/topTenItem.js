@@ -110,8 +110,7 @@ export const moveTopTenItemUp = ({ topTenItemId }) => (dispatch) => {
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		console.log('here');
-		console.log('moveTopTenItemUp topTenItemId', topTenItemId);
+		// console.log('moveTopTenItemUp topTenItemId', topTenItemId);
 		return dispatch(moveTopTenItemUpSucceeded(topTenItemId));
 		// return dispatch(moveTopTenItemUpSucceeded(response));
 	}).catch((error) => {
@@ -131,7 +130,6 @@ export const moveTopTenItemDown = ({ topTenItemId }) => (dispatch) => {
 	const { order } = topTenItemObject;
 
 	// find the topTenItem below it in the parent topTenList
-	console.log('there');
 	const topTenItemBelowId = store.getState().topTenList.things[topTenListId].topTenItem[order];
 
 	dispatch(moveTopTenItemUp({ 'topTenItemId': topTenItemBelowId }));
@@ -275,6 +273,7 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 			upperTopTenItem.order += 1;
 
 			const topTenItemsArray = [upperTopTenItem, lowerTopTenItem];
+			console.log('topTenItemsArray', topTenItemsArray);
 
 			const topTenItemsObject = {};
 			topTenItemsArray.forEach((topTenItemObject) => { // eslint-disable-line array-callback-return
