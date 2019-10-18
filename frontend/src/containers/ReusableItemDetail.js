@@ -90,6 +90,20 @@ class ReusableItemDetail extends Component {
 		this.handleShowMoreTopTenListsChange = this.handleShowMoreTopTenListsChange.bind(this);
 	}
 
+	shouldComponentUpdate(nextProps, nextState) {
+		// the Formik form re-renders on any parent component re-render, losing values in an input with focus
+		// This is a dirty way to prevent the component from updating unless parent state has actually changed
+		// Formik isn't supposed to do this, I think, but I can't at present find a better solution.
+		if (JSON.stringify(this.props) !== JSON.stringify(nextProps)) {
+			return true;
+		}
+
+		if (JSON.stringify(this.state) !== JSON.stringify(nextState)) {
+			return true;
+		}
+		return false;
+	}
+
 	componentDidUpdate(prevProps) {
 		const {
 			match,
@@ -266,7 +280,8 @@ class ReusableItemDetail extends Component {
 		} = this.props;
 
 		const reusableItemUsersCount = users.size;
-		const { canEdit } = reusableItem;
+		const { canEdit, is_public } = reusableItem;
+		const aboutText = is_public ? `Public Reusable Item, referenced by ${reusableItemUsersCount} users ${reusableItemIcon} in public lists. Note that additional users may reference it in private lists.` : 'Private Reusable Item';
 		const { isAuthenticated, user } = auth;
 
 		const { showChangeRequestForm } = this.state;
@@ -480,9 +495,16 @@ class ReusableItemDetail extends Component {
 								/>
 							</div>
 						)}
-						<span className="about">
-							Reusable item referenced by {reusableItemUsersCount} users {reusableItemIcon}
-						</span>
+						{is_public && (
+							<span className="about">
+								Public Reusable Item referenced by {reusableItemUsersCount} users in public lists. Note that additional users may reference it in private lists.{reusableItemIcon}
+							</span>
+						)}
+						{!is_public && (
+							<span className="about">
+								Private Reusable Item {reusableItemIcon}
+							</span>
+						)}
 						{reusableItem.definition && (<p className="definition">{reusableItem.definition}</p>)}
 						{reusableItem.link && (<p className="link"><a href={reusableItem.link} target="_blank" rel="noopener noreferrer">{reusableItem.link}</a></p>)}
 					</Col>

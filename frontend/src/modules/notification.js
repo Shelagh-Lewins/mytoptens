@@ -80,7 +80,7 @@ export function fetchNotifications() {
 			const data = {
 				'entities': normalize(response, [notificationSchema]).entities,
 			};
-			// using receiveEntities here causes needless re-renders in components that don't use notifications
+
 			return dispatch(receiveNotifications(data));
 		}).catch((error) => {
 			dispatch(fetchNotificationsFailed());
@@ -185,7 +185,6 @@ export const deleteMyNotifications = () => (dispatch, getState) => {
 // ////////////////////////////////
 // Reducer
 const initialNotificationsState = {
-	'isLoading': false,
 	'error': null,
 	'things': {},
 };
@@ -237,7 +236,6 @@ export default function notification(state = initialNotificationsState, action) 
 
 			return updeep({
 				'things': updeep.constant(things), // replace store data
-				'isLoading': false,
 			}, state);
 		}
 
@@ -263,4 +261,3 @@ export default function notification(state = initialNotificationsState, action) 
 			return state;
 	}
 }
-
