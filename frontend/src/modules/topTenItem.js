@@ -94,24 +94,54 @@ export const updateTopTenItem = (topTenItemId, data) => (dispatch) => {
 
 // ////////////////////////////////
 // move topTenItem up
-export function moveTopTenItemUpSucceeded(topTenItemId) {
+export function moveTopTenItemUpSucceeded(topTenItems) {
 	return {
 		'type': 'MOVE_TOPTENITEM_UP_SUCCEEDED',
 		'payload': {
-			topTenItemId,
+			topTenItems,
 		},
 	};
 }
 
-export const moveTopTenItemUp = ({ topTenItemId }) => (dispatch) => {
+export const moveTopTenItemUp = ({ topTenItemId }) => (dispatch, getState) => {
 	return fetchAPI({
 		'url': `/api/v1/content/toptenitem/${topTenItemId}/moveup/`,
 		'headers': { 'Content-Type': 'application/json' },
 		'method': 'PATCH',
 		'useAuth': true,
 	}).then((response) => {
-		// console.log('moveTopTenItemUp topTenItemId', topTenItemId);
-		return dispatch(moveTopTenItemUpSucceeded(topTenItemId));
+		// construct the revised Top Ten Items with swapped order
+		const allTopTenItems = getState().topTenItem.things;
+		const lowerTopTenItem = { ...allTopTenItems[topTenItemId] };
+		const lowerOrder = lowerTopTenItem.order;
+		const topTenListId = lowerTopTenItem.topTenList_id;
+
+		let upperTopTenItem;
+
+		const ids = Object.keys(allTopTenItems); // array of ids of all Top Ten Items
+
+		for (let i = 0; i < ids.length; i += 1) {
+			const topTenItemObj = allTopTenItems[ids[i]];
+			if (topTenItemObj.topTenList_id === topTenListId
+			&& topTenItemObj.order === lowerOrder - 1) {
+				upperTopTenItem = { ...topTenItemObj };
+				break;
+			}
+		}
+
+		if (lowerOrder < 2) {
+			return;
+		}
+
+		lowerTopTenItem.order -= 1;
+		upperTopTenItem.order += 1;
+
+		const topTenItems = {
+			[lowerTopTenItem.id]: lowerTopTenItem,
+			[upperTopTenItem.id]: upperTopTenItem,
+		};
+
+		return dispatch(moveTopTenItemUpSucceeded(topTenItems));
 		// return dispatch(moveTopTenItemUpSucceeded(response));
 	}).catch((error) => {
 		return dispatch(getErrors({ 'move topTenItem up error ': error.message }));
@@ -244,42 +274,9 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 
 		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
 			// swap the two top ten items in the store
+			const { topTenItems } = action.payload;
 
-			const { topTenItemId } = action.payload;
-
-			const lowerTopTenItem = { ...state.things[topTenItemId] };
-			const lowerOrder = lowerTopTenItem.order;
-
-			const topTenListId = lowerTopTenItem.topTenList_id;
-
-			let upperTopTenItem;
-
-			const ids = Object.keys(state.things); // array of ids of all Top Ten Items
-
-			for (let i = 0; i < ids.length; i += 1) {
-				const topTenItemObj = state.things[ids[i]];
-				if (topTenItemObj.topTenList_id === topTenListId
-				&& topTenItemObj.order === lowerOrder - 1) {
-					upperTopTenItem = { ...topTenItemObj };
-					break;
-				}
-			}
-
-			if (lowerOrder < 2) {
-				return updeep(state, state);
-			}
-
-			lowerTopTenItem.order -= 1;
-			upperTopTenItem.order += 1;
-
-			const topTenItemsArray = [upperTopTenItem, lowerTopTenItem];
-			console.log('topTenItemsArray', topTenItemsArray);
-
-			const topTenItemsObject = {};
-			topTenItemsArray.forEach((topTenItemObject) => { // eslint-disable-line array-callback-return
-				topTenItemsObject[topTenItemObject.id] = topTenItemObject;
-			});
-			return updeep({ 'things': topTenItemsObject }, state);
+			return updeep({ 'things': topTenItems }, state);
 		}
 
 		case DELETE_TOPTENLIST_SUCCEEDED: {

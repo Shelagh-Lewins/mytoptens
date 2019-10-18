@@ -28,6 +28,7 @@ export const CREATE_TOPTENLIST_SUCCEEDED = 'CREATE_TOPTENLIST_SUCCEEDED';
 export const DELETE_TOPTENLIST_SUCCEEDED = 'DELETE_TOPTENLIST_SUCCEEDED';
 export const SET_TOPTENLIST_IS_PUBLIC_SUCCEEDED = 'SET_TOPTENLIST_IS_PUBLIC_SUCCEEDED';
 export const UPDATE_TOPTENLIST_SUCCEEDED = 'UPDATE_TOPTENLIST_SUCCEEDED';
+export const MOVE_TOPTENITEM_UP_SUCCEEDED = 'MOVE_TOPTENITEM_UP_SUCCEEDED';
 
 export const RECEIVE_ORGANIZER_DATA = 'RECEIVE_ORGANIZER_DATA';
 export const FETCH_ORGANIZER_DATA_STARTED = 'FETCH_ORGANIZER_DATA_STARTED';
@@ -782,16 +783,17 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			return updeep({ 'things': { [action.payload.id]: update } }, state);
 		}
 
-		/* case MOVE_TOPTENITEM_UP_SUCCEEDED: {
-			console.log('in topTenList reducer');
-			return updeep(state, state);
-			const topTenItemsArray = action.payload.topTenItems; // array containing the two topTenItems that have been swapped
-			// update the TopTenItems array in their parent topTenList, change order
-			const topTenListId = topTenItemsArray[0].topTenList_id;
+		case MOVE_TOPTENITEM_UP_SUCCEEDED: {
+			// construct a new version of the top ten lists' topTenItem array of top ten item ids
+			const { topTenItems } = action.payload;
+			const topTenListId = topTenItems[Object.keys(topTenItems)[0]].topTenList_id;
 
 			function replaceTopTenItems() { // eslint-disable-line no-inner-declarations
 				const newTopTenItems = [].concat(state.things[topTenListId].topTenItem);
-				topTenItemsArray.map((topTenItem) => { // eslint-disable-line array-callback-return
+
+				Object.keys(topTenItems).map((topTenItemId) => { // eslint-disable-line array-callback-return
+					const topTenItem = topTenItems[topTenItemId];
+
 					newTopTenItems[topTenItem.order - 1] = topTenItem.id;
 				});
 
@@ -799,7 +801,7 @@ export default function topTenList(state = initialTopTenListsState, action) {
 			}
 
 			return updeep.updateIn(`things.${topTenListId}.topTenItem`, replaceTopTenItems, state);
-		} */
+		}
 
 		case RECEIVE_ORGANIZER_DATA: {
 			// load topTenLists data into store
