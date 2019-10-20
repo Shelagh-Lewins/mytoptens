@@ -308,10 +308,10 @@ class ReusableItemDetail extends Component {
 
 		const BasicChangeRequestForm = (props) => {
 			const {
-				touched,
+				touched, // eslint-disable-line react/prop-types
 				errors,
-				handleSubmit,
-				isSubmitting,
+				handleSubmit, // eslint-disable-line react/prop-types
+				isSubmitting, // eslint-disable-line react/prop-types
 			} = props;
 
 			return (

@@ -351,7 +351,7 @@ class EditableTextField extends Component {
 								{type === 'textarea'
 								&& (
 									<span className="hint">
-								You can use <Link to="https://help.github.com/articles/basic-writing-and-formatting-syntax/">Markdown</Link>
+								You can use <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown</a>
 									</span>
 								)}
 							</Col>
