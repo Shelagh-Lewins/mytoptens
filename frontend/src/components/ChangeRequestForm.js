@@ -18,10 +18,10 @@ import './ChangeRequestForm.scss';
 class BasicChangeRequestForm extends PureComponent {
 	render() {
 		const {
-			touched, // eslint-disable-line react/prop-types
+			touched,
 			errors,
-			handleSubmit, // eslint-disable-line react/prop-types
-			isSubmitting, // eslint-disable-line react/prop-types
+			handleSubmit,
+			isSubmitting,
 			onCancel,
 			reusableItemUsersCount,
 		} = this.props;
@@ -97,6 +97,8 @@ export default EnhancedChangeRequestForm;
 
 BasicChangeRequestForm.propTypes = {
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
+	'handleSubmit': PropTypes.func.isRequired,
+	'isSubmitting': PropTypes.bool.isRequired,
 	'onCancel': PropTypes.func.isRequired,
 	'reusableItemUsersCount': PropTypes.number.isRequired,
 	'touched': PropTypes.objectOf(PropTypes.any).isRequired,
