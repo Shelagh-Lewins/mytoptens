@@ -15,7 +15,6 @@ import {
 } from 'reactstrap';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { withFormik, Field } from 'formik';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FlashMessage from '../components/FlashMessage';
@@ -31,6 +30,7 @@ import sortArrayByProperty from '../modules/sortArrayByProperty';
 import IsPublicIndicator from '../components/IsPublicIndicator';
 import TopTenListsList from '../components/TopTenListsList';
 import TopTenListSummary from '../components/TopTenListSummary';
+import ChangeRequestForm from '../components/ChangeRequestForm';
 
 import './ReusableItemDetail.scss';
 import { COLORS } from '../constants';
@@ -88,20 +88,6 @@ class ReusableItemDetail extends Component {
 
 		this.handleTopTenListsChange = this.handleTopTenListsChange.bind(this);
 		this.handleShowMoreTopTenListsChange = this.handleShowMoreTopTenListsChange.bind(this);
-	}
-
-	shouldComponentUpdate(nextProps, nextState) {
-		// the Formik form re-renders on any parent component re-render, losing values in an input with focus
-		// This is a dirty way to prevent the component from updating unless parent state has actually changed
-		// Formik isn't supposed to do this, I think, but I can't at present find a better solution.
-		if (JSON.stringify(this.props) !== JSON.stringify(nextProps)) {
-			return true;
-		}
-
-		if (JSON.stringify(this.state) !== JSON.stringify(nextState)) {
-			return true;
-		}
-		return false;
 	}
 
 	componentDidUpdate(prevProps) {
@@ -281,7 +267,7 @@ class ReusableItemDetail extends Component {
 
 		const reusableItemUsersCount = users.size;
 		const { canEdit, is_public } = reusableItem;
-		const aboutText = is_public ? `Public Reusable Item, referenced by ${reusableItemUsersCount} users ${reusableItemIcon} in public lists. Note that additional users may reference it in private lists.` : 'Private Reusable Item';
+		// const aboutText = is_public ? `Public Reusable Item, referenced by ${reusableItemUsersCount} users ${reusableItemIcon} in public lists. Note that additional users may reference it in private lists.` : 'Private Reusable Item';
 		const { isAuthenticated, user } = auth;
 
 		const { showChangeRequestForm } = this.state;
@@ -306,89 +292,17 @@ class ReusableItemDetail extends Component {
 
 		let changeRequest;
 
-		const BasicChangeRequestForm = (props) => {
-			const {
-				touched, // eslint-disable-line react/prop-types
-				errors,
-				handleSubmit, // eslint-disable-line react/prop-types
-				isSubmitting, // eslint-disable-line react/prop-types
-			} = props;
-
-			return (
-				<form onSubmit={handleSubmit}>
-					<h3>{reusableItemUsersCount === 0 ? 'Edit' : 'Create a change request'}</h3>
-					{reusableItemUsersCount > 0 && (
-						<p className="hint">Other users who reference this Reusable Item in their Top Ten Lists will vote on your change request.</p>
-					)}
-					<Label for="name">Name</Label>
-					<Input
-						type="text"
-						name="name"
-						tag={Field}
-						component="input"
-					/>
-					{errors.name && touched.name && <div className="invalid-feedback">{errors.name}</div>}
-					<Label for="definition">Definition</Label>
-					<Input
-						type="text"
-						name="definition"
-						tag={Field}
-						component="input"
-					/>
-					<Label for="name">Link</Label>
-					<Input
-						type="text"
-						name="link"
-						tag={Field}
-						component="input"
-					/>
-					<Button type="button" color="secondary" onClick={props.onCancel}>Cancel</Button>
-					<Button type="submit" color="primary" disabled={isSubmitting}>Done</Button>
-				</form>
-			);
-		};
-
-		const EnhancedChangeRequestForm = withFormik({
-			'mapPropsToValues': (props: Props) => ({
-				'name': props.data.name, 'definition': props.data.definition, 'link': props.data.link,
-			}),
-
-			// Custom sync validation
-			'validate': (values) => {
-				const errors = {};
-
-				if (!values.name || values.name === '') {
-					errors.name = 'Name is required';
-				}
-
-				return errors;
-			},
-
-			// note how to upack onSubmit from props in the FormikBag parameter
-			'handleSubmit': (values, { setSubmitting, 'props': { onSubmit, closeForm } }) => {
-				onSubmit(values);
-				setTimeout(() => {
-					setSubmitting(false);
-					closeForm();
-				}, 1000);
-			},
-
-			'displayName': 'ChangeRequestForm',
-		})(BasicChangeRequestForm);
 		// if no proposed change request exists already
 		if (!reusableItem.change_request) {
 			if (showChangeRequestForm) { // form to propose a change request
 				changeRequest = (
-					<Row>
-						<Col className="change-request-form">
-							<EnhancedChangeRequestForm
-								onCancel={this.toggleChangeRequestForm}
-								onSubmit={this.submitChangeRequestForm}
-								closeForm={this.toggleChangeRequestForm}
-								data={reusableItem}
-							/>
-						</Col>
-					</Row>
+					<ChangeRequestForm
+						onCancel={this.toggleChangeRequestForm}
+						onSubmit={this.submitChangeRequestForm}
+						closeForm={this.toggleChangeRequestForm}
+						data={reusableItem}
+						reusableItemUsersCount={reusableItemUsersCount}
+					/>
 				);
 			} else { // button to show the form
 				changeRequest = (

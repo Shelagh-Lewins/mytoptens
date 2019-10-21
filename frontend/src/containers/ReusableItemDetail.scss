@@ -31,27 +31,8 @@
 	.main {
 		border: 1px solid $color-reusableitem-border;
 		border-radius: 10px;
-		margin: 10px 0 10px 0;
+		margin: 10px 0;
 		padding: 10px;
-	}
-
-	.change-request-form {
-		button {
-			margin: 8px 8px 8px 0;
-		}
-
-		.hint {
-			color: $color-hint;
-			font-size: 0.8rem;
-		}
-
-		.invalid-feedback {
-			display: block;
-
-			&::before {
-				content: "\2718 ";
-			}
-		}
 	}
 
 	.toptenlists {
@@ -64,7 +45,7 @@
 	}
 
 	.toptenlists-list {
-		margin: 8px 0 8px 0;
+		margin: 8px 0;
 	}
 
 	.sort-controls {

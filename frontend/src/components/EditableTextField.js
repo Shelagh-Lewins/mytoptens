@@ -13,7 +13,6 @@ import {
 } from 'reactstrap';
 import './EditableTextField.scss';
 import Markdown from 'react-markdown';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import ReusableItemComboBox from './ReusableItemComboBox';
 
@@ -351,7 +350,7 @@ class EditableTextField extends Component {
 								{type === 'textarea'
 								&& (
 									<span className="hint">
-								You can use <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown</a>
+								You can use <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank" rel="noopener noreferrer">Markdown</a>
 									</span>
 								)}
 							</Col>
