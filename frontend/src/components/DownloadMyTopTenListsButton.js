@@ -20,6 +20,7 @@ class DownloadMyTopTenListsButton extends Component {
 	onClickButton = () => {
 		const {
 			username,
+			myReusableItems,
 			myTopTenLists,
 			topLevelTopTenListsOnly,
 		} = this.props;
@@ -30,6 +31,7 @@ class DownloadMyTopTenListsButton extends Component {
 
 		let text;
 
+		// export Top Ten Lists
 		if (topLevelTopTenListsOnly) {
 			text = `Top level Top Ten Lists owned by: ${username}\nChild Top Ten Lists are not included\n`;
 		} else {
@@ -55,6 +57,28 @@ class DownloadMyTopTenListsButton extends Component {
 				});
 			}
 		});
+
+		// export Reusable Items
+		if (myReusableItems.length > 0) {
+			text += '\nReusableItems referenced by Top Ten Lists';
+			text += '\n=======================\n';
+
+			myReusableItems.forEach((reusableItem) => {
+				if (reusableItem && reusableItem.name) {
+					text += `Reusable Item: ${reusableItem.name}\n`;
+
+					if (reusableItem.definition) {
+						text += `Definition: ${reusableItem.definition}\n`;
+					}
+
+					if (reusableItem.link) {
+						text += `Link: ${reusableItem.link}\n`;
+					}
+
+					text += '\n-------------------------------\n';
+				}
+			});
+		}
 
 		const filename = `${sanitizeFilename(`toptenlists-${username}`)}.txt`;
 
@@ -82,6 +106,7 @@ DownloadMyTopTenListsButton.propTypes = {
 	'username': PropTypes.string,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topLevelTopTenListsOnly': PropTypes.bool.isRequired,
+	'myReusableItems': PropTypes.arrayOf(PropTypes.any).isRequired,
 };
 
 export default DownloadMyTopTenListsButton;

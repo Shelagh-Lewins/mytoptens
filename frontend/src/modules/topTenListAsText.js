@@ -8,7 +8,7 @@ const topTenListAsText = (id) => {
 	const topTenLists = state.topTenList.things;
 	const topTenList = topTenLists[id];
 
-	let text = topTenList.name;
+	let text = `Top Ten List: ${topTenList.name}`;
 	text += '\n';
 	if (topTenList.description !== '') {
 		text += topTenList.description;
@@ -19,8 +19,7 @@ const topTenListAsText = (id) => {
 		const topTenItem = state.topTenItem.things[topTenList.topTenItem[i]];
 
 		if (topTenItem && topTenItem.name !== '') {
-			text += `\n${i + 1}: ${topTenItem.name}`;
-			text += '\n';
+			text += `\n${i + 1}: ${topTenItem.name}\n`;
 
 			const childTopTenList = Object.values(topTenLists).find(topTenListObj => topTenListObj.parent_topTenItem === topTenList.topTenItem[i]);
 

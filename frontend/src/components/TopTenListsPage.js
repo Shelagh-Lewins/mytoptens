@@ -44,8 +44,8 @@ class TopTenListsPage extends Component {
 								placeholder="Enter a filter term"
 							/>
 							<select className="form-control" onChange={onChangePublicTopTenListsFilterBy} value={publicTopTenListsFilterBy}>
-								<option value="topTenListName">Name</option>
-								<option value="username">Owner</option>
+								<option value="topTenListName">Filter by name</option>
+								<option value="username">Filter by owner</option>
 							</select>
 						</Label>
 					</Col>
@@ -90,6 +90,7 @@ class TopTenListsPage extends Component {
 			topLevelTopTenListsOnly,
 			handleTopLevelTopTenListsChange,
 			myTopTenLists,
+			myReusableItems,
 		} = this.props;
 
 		return (
@@ -114,6 +115,7 @@ class TopTenListsPage extends Component {
 						<Col className="download-my-toptenlists">
 							<DownloadMyTopTenListsButton
 								username={username}
+								myReusableItems={myReusableItems}
 								myTopTenLists={myTopTenLists}
 								topLevelTopTenListsOnly={topLevelTopTenListsOnly}
 							/>
@@ -283,6 +285,7 @@ TopTenListsPage.propTypes = {
 	'handleTabClick': PropTypes.func.isRequired,
 	'handleTopLevelTopTenListsChange': PropTypes.func.isRequired,
 	'isLoading': PropTypes.bool.isRequired,
+	'myReusableItems': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'onChangePublicTopTenListsFilterBy': PropTypes.func.isRequired,
 	'onChangePublicTopTenListsFilterTerm': PropTypes.func.isRequired,

@@ -1,11 +1,12 @@
 // Home.js
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Container, Row, Col } from 'reactstrap';
 import { connect } from 'react-redux';
 import * as topTenListReducer from '../modules/topTenList';
+import * as reusableItemReducer from '../modules/reusableItem';
 // import * as pageReducer from '../modules/page';
 import FlashMessage from '../components/FlashMessage';
 import Loading from '../components/Loading';
@@ -16,7 +17,7 @@ import { clearErrors } from '../modules/errors';
 import * as permissions from '../modules/permissions';
 import { PAGE_SIZE } from '../constants';
 
-class Home extends Component {
+class Home extends PureComponent {
 	constructor(props) {
 		super(props);
 
@@ -187,6 +188,8 @@ class Home extends Component {
 			count,
 			errors,
 			isLoading,
+			myReusableItems,
+			topLevelMyReusableItems,
 			myTopTenLists,
 			publicTopTenLists,
 			// topLevelPublicTopTenLists,
@@ -220,6 +223,7 @@ class Home extends Component {
 				{isLoading && <Loading />}
 				<TopTenListsPage
 					auth={auth}
+					myReusableItems={topLevelTopTenListsOnly ? topLevelMyReusableItems : myReusableItems}
 					myTopTenLists={topLevelTopTenListsOnly ? topLevelmyTopTenLists : myTopTenLists}
 					publicTopTenLists={publicTopTenLists}
 					canCreateTopTenList={permissions.canCreateTopTenList}
@@ -249,14 +253,12 @@ Home.propTypes = {
 	'auth': PropTypes.objectOf(PropTypes.any).isRequired,
 	'dispatch': PropTypes.func.isRequired,
 	'errors': PropTypes.objectOf(PropTypes.any).isRequired,
-	// 'filterPublicTopTenListsBy': PropTypes.string.isRequired,
-	// 'filterPublicTopTenListsTerm': PropTypes.string.isRequired,
 	'history': PropTypes.objectOf(PropTypes.any).isRequired,
 	'isLoading': PropTypes.bool.isRequired,
 	'location': PropTypes.objectOf(PropTypes.any).isRequired,
 	'publicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
+	'myReusableItems': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'myTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
-	// 'topLevelPublicTopTenLists': PropTypes.arrayOf(PropTypes.any).isRequired,
 	'topLevelmyTopTenLists': PropTypes.objectOf(PropTypes.any).isRequired,
 	'count': PropTypes.number, // data may not yet be loaded
 	// 'next': PropTypes.string, // there may be no 'next' page
@@ -266,12 +268,11 @@ Home.propTypes = {
 const mapStateToProps = state => ({
 	'auth': state.auth,
 	'errors': state.errors,
-	// 'filterPublicTopTenListsBy': state.topTenList.filterPublicTopTenListsBy,
-	// 'filterPublicTopTenListsTerm': state.topTenList.filterPublicTopTenListsTerm,
 	'isLoading': state.topTenList.isLoading,
 	'publicTopTenLists': topTenListReducer.getPublicTopTenLists(state),
+	'myReusableItems': reusableItemReducer.getMyReusableItems(state, false),
+	'topLevelMyReusableItems': reusableItemReducer.getMyReusableItems(state, true),
 	'myTopTenLists': topTenListReducer.getMyGroupedTopTenLists(state),
-	// 'topLevelPublicTopTenLists': topTenListReducer.getTopLevelPublicTopTenLists(state),
 	'topLevelmyTopTenLists': topTenListReducer.getTopLevelMyGroupedTopTenLists(state),
 	'count': state.topTenList.count,
 	'next': state.topTenList.next,

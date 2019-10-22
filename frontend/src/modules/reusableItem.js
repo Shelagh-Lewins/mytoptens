@@ -381,10 +381,63 @@ const canEditReusableItem = (state, reusableItemObj, myTopTenListsArray) => {
 	return false;
 };
 
+// list all Reusable Items
+export const getReusableItems = state => state.reusableItem.things;
+
+const getTopTenItems = state => state.topTenItem.things;
+
+const getUserId = state => state.auth.user.id;
+
+// all Reusable Items referenced by lists belonging to a particular user
+
+const getReusableItemsFromTopTenLists = (topTenLists, topTenItems, reusableItems) => {
+	const reusableItemsArray = [];
+
+	Object.keys(topTenLists).forEach((topTenListId) => {
+		const topTenListObj = topTenLists[topTenListId];
+
+		topTenListObj.topTenItem.forEach((topTenItemId) => {
+			const topTenItemObj = topTenItems[topTenItemId];
+
+			if (topTenItemObj.reusableItem && topTenItemObj.reusableItem !== '') {
+				const reusableItemObj = reusableItems[topTenItemObj.reusableItem];
+				reusableItemsArray.push(reusableItemObj);
+			}
+		});
+	});
+
+	const reusableItemsSet = new Set(reusableItemsArray);
+
+	return [...reusableItemsSet].sort((a, b) => a.name.localeCompare(b.name));
+};
+
+export const getAllMyReusableItems = createSelector(
+	[topTenListsReducer.getMyTopTenLists, getTopTenItems, getReusableItems, getUserId],
+	(myTopTenLists, myTopTenItems, allReusableItems, userId) => {
+		if (!userId) {
+			return [];
+		}
+
+		return getReusableItemsFromTopTenLists(myTopTenLists, myTopTenItems, allReusableItems);
+	},
+);
+
+export const getTopLevelMyReusableItems = createSelector(
+	[topTenListsReducer.getMyTopLevelTopTenLists, getTopTenItems, getReusableItems, getUserId],
+	(myTopTenLists, myTopTenItems, allReusableItems, userId) => {
+		if (!userId) {
+			return [];
+		}
+		return getReusableItemsFromTopTenLists(myTopTenLists, myTopTenItems, allReusableItems);
+	},
+);
+
+export const getMyReusableItems = (state, topLevelTopTenListsOnly) => (topLevelTopTenListsOnly ? getTopLevelMyReusableItems(state) : getAllMyReusableItems(state));
+
 // data for suggesting reusableItems to select
 // for each widgetId in search
 // returns reusableItems as an array
-export const getReusableItems = (state) => {
+export const getReusableItemsSearchSuggestions = (state) => {
 	const searchResults = state.reusableItem.search;
 	const results = {};
 
@@ -410,7 +463,7 @@ export const getReusableItems = (state) => {
 // data for suggesting reusableItems to create
 // for each widgetId in search
 // returns topTenItems with no reusableItem, as an array
-export const getTopTenItems = (state) => {
+export const getTopTenItemsSearchSuggestions = (state) => {
 	const searchResults = state.reusableItem.search;
 	const results = {};
 
@@ -451,7 +504,7 @@ export const getReusableItem = (state, reusableItemId, myTopTenListsArray) => {
 // combined data for suggesting reusableItems
 // memoize as possible
 export const getSortedReusableItemSuggestions = createSelector(
-	[getReusableItems, getTopTenItems],
+	[getReusableItemsSearchSuggestions, getTopTenItemsSearchSuggestions],
 	(reusableItems, topTenItems) => {
 		const results = {};
 		Object.keys(reusableItems).map((widgetId) => {

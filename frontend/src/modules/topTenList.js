@@ -492,7 +492,7 @@ export const getPublicTopTenLists = createSelector(
 	},
 );
 
-// get Top Ten Lists belonging to the user
+// get Top Ten Lists belonging to the current user
 export const getMyTopTenLists = createSelector(
 	[getTopTenLists, getUserId],
 	(allTopTenLists, userId) => {
@@ -511,6 +511,27 @@ export const getMyTopTenLists = createSelector(
 		});
 
 		return myTopTenLists;
+	},
+);
+
+export const getMyTopLevelTopTenLists = createSelector(
+	[getMyTopTenLists, getUserId],
+	(myTopTenLists, userId) => {
+		if (!userId) {
+			return {};
+		}
+
+		const myTopLevelTopTenLists = {};
+
+		Object.keys(myTopTenLists).forEach((key) => {
+			const topTenListObj = myTopTenLists[key];
+
+			if (!topTenListObj.parent_topTenItem) {
+				myTopLevelTopTenLists[topTenListObj.id] = topTenListObj;
+			}
+		});
+
+		return myTopLevelTopTenLists;
 	},
 );
 
@@ -585,10 +606,6 @@ export const getTopTenItemsForTopTenList = createSelector(
 		}
 
 		topTenListTopTenItems.sort((a, b) => {
-			//console.log('a', a.order);
-			//console.log('typeof a', typeof a.order);
-			//console.log('b', b.order);
-			//console.log('typeof b', typeof b.order);
 			return a.order - b.order; // Chrome doesn't support the common boolean sort. Must return a number.
 		});
 		// console.log('topTenListTopTenItems', topTenListTopTenItems);
