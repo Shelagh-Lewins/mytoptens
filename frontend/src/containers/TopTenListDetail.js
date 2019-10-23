@@ -65,6 +65,12 @@ class TopTenListDetails extends Component {
 		if (prevProps.auth.isAuthenticated && !auth.isAuthenticated) {
 			this.getTopTenListData(this.props);
 		}
+
+		// user has navigated to a new top ten list
+		// e.g. child or parent top ten list
+		if (prevProps.topTenList && prevProps.topTenList.id !== topTenList.id) {
+			this.getTopTenListData(this.props);
+		}
 	}
 
 	getTopTenListData = (props) => {
@@ -217,6 +223,20 @@ class TopTenListDetails extends Component {
 					<div>
 						<Container>
 							<Row>
+								<Col>
+									{topTenList.canEdit && topTenListOrganizerData.length > 1
+										&& (
+											<Organizer
+												topTenList={topTenList}
+												parentTopTenListId={parentTopTenListId}
+												topTenListOrganizerData={topTenListOrganizerData}
+												topTenItemOrganizerData={topTenItemOrganizerData}
+											/>
+										)}
+									{breadcrumbs}
+								</Col>
+							</Row>
+							<Row>
 								<Col className="toptenlist-name">
 									<EditableTextField
 										type="input"
@@ -258,20 +278,6 @@ class TopTenListDetails extends Component {
 									<div className="toptenlist-modified-at" title="Date of last edit">
 										<FontAwesomeIcon icon={['fas', 'edit']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{new Date(topTenList.modified_at).toLocaleString('en-GB', dateOptions)}
 									</div>
-								</Col>
-							</Row>
-							<Row>
-								<Col>
-									{topTenList.canEdit && topTenListOrganizerData.length > 1
-										&& (
-											<Organizer
-												topTenList={topTenList}
-												parentTopTenListId={parentTopTenListId}
-												topTenListOrganizerData={topTenListOrganizerData}
-												topTenItemOrganizerData={topTenItemOrganizerData}
-											/>
-										)}
-									{breadcrumbs}
 								</Col>
 							</Row>
 							{showPrivacyWarning && (
