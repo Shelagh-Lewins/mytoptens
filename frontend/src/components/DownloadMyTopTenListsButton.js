@@ -29,11 +29,13 @@ class DownloadMyTopTenListsButton extends Component {
 			return;
 		}
 
+		const totalNumberOfLists = myTopTenLists.true.length + myTopTenLists.false.length;
+
 		let text;
 
 		// export Top Ten Lists
 		if (topLevelTopTenListsOnly) {
-			text = `Top level Top Ten Lists owned by: ${username}\nChild Top Ten Lists are not included\n`;
+			text = `Top level Top Ten Lists owned by: ${username} (${totalNumberOfLists})\nChild Top Ten Lists are not included\n`;
 		} else {
 			text = `All Top Ten Lists owned by: ${username}\nChild Top Ten LIsts are included\n`;
 		}
