@@ -234,9 +234,13 @@ export default function notification(state = initialNotificationsState, action) 
 				things = entities.notification;
 			}
 
-			return updeep({
+			return updeep({ things }, state);
+
+			// I would prefer to completely replace the notifications in the store, but using updeep.constant triggers a complete update to the store, which is OTT to do every 10 seconds.
+			// So I'm trusting that the actions here to remove notifications will work, and if things do get out of sync, a refresh will fix it.
+			/* return updeep({
 				'things': updeep.constant(things), // replace store data
-			}, state);
+			}, state); */
 		}
 
 		case UPDATE_NOTIFICATION_SUCCEEDED: {
