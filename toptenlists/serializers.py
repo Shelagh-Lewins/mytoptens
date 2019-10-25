@@ -324,6 +324,10 @@ class ReusableItemSerializer(FlexFieldsModelSerializer):
             setattr(instance, key, value)
             history_entry['change_request'][key] = value
 
+            if key == 'name':
+                # update the name of any Top Ten Item that references this Reusable Item
+                topTenItems = TopTenItem.objects.filter(reusableItem=instance).update(name=value)
+
         history_entry['changed_request_submitted_by_id'] = getattr(instance, 'change_request_by').id.__str__()
         history_entry['change_request_resolution'] = 'accepted'
         history_entry['changed_request_resolved_at'] = timezone.now().__str__()
@@ -675,7 +679,7 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         reusableItemData = data.get('reusableItem')
 
         if reusableItemData is not None:
-            print('data', reusableItemData)
+            # print('data', reusableItemData)
 
             if reusableItemData['created_by'] != current_user.id and reusableItemData['is_public'] != True:
                 data.pop('reusableItem')

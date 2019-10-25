@@ -121,8 +121,8 @@ class TopTenListViewSet(FlexFieldsModelViewSet):
 
         return queryset.order_by('name')
 
-    def pre_save(self, obj):
-        obj.created_by = self.request.user
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
 
     def perform_update(self, serializer):
         # housekeeping if parent_topTenItem is changed
@@ -368,11 +368,11 @@ class ReusableItemViewSet(FlexFieldsModelViewSet):
     serializer_class = ReusableItemSerializer
 
 
-    def pre_save(self, obj):
-        print('API. ReusableItemViewSet, pre_save')
-        print('obj', obj)
-        print('self.request.user', self.request.user)
-        obj.created_by = self.request.user
+    #def pre_save(self, obj):
+        #print('API. ReusableItemViewSet, pre_save')
+        # print('obj', obj)
+        #print('self.request.user', self.request.user)
+        #obj.created_by = self.request.user
 
     def get_queryset(self):
         queryset = ReusableItem.objects.all()
