@@ -663,6 +663,25 @@ class TopTenItemSerializer(FlexFieldsModelSerializer):
         fields = ('id', 'name', 'description', 'topTenList_id', 'created_by_username', 'modified_at', 'order', 'reusableItem', 'reusableItem_id')
         # note 'topTenList_id' is the field that can be returned, even though 'topTenList' is the actual foreign key in the model
 
+    def to_representation(self, instance):
+        """
+        We must check permissions before returning a reusableItem as part of a topTenItem.
+        The permissions defined in the api for reusableItem are not applied here.
+        """
+        data = super(TopTenItemSerializer, self).to_representation(instance)
+
+        current_user = self.context['request'].user
+
+        reusableItemData = data.get('reusableItem')
+
+        if reusableItemData is not None:
+            print('data', reusableItemData)
+
+            if reusableItemData['created_by'] != current_user.id and reusableItemData['is_public'] != True:
+                data.pop('reusableItem')
+
+        return data
+
     def get_created_by_username(self, obj):
         return obj.topTenList.created_by_username
 
