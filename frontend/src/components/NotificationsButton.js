@@ -32,7 +32,7 @@ class NotificationsButton extends Component {
 		this.fetchNotifications();
 
 		this.queryServerInterval = setInterval(() => {
-			// this.fetchNotifications();
+			this.fetchNotifications();
 		}, 10000);
 	}
 

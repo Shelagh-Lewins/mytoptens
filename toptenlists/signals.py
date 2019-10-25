@@ -30,4 +30,3 @@ def update_reusableItem(sender, instance, using, **kwargs):
 		if instance.is_public == False:
 			print('is_public False')
 			ReusableItem.objects.filter(id=instance.id).delete()
-
