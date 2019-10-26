@@ -28,6 +28,7 @@ import isEmpty from '../modules/isEmpty';
 import sortArrayByProperty from '../modules/sortArrayByProperty';
 
 import IsPublicIndicator from '../components/IsPublicIndicator';
+import onChangeReusableItemIsPublic from '../modules/onChangeReusableItemIsPublic';
 import TopTenListsList from '../components/TopTenListsList';
 import TopTenListSummary from '../components/TopTenListSummary';
 import ChangeRequestForm from '../components/ChangeRequestForm';
@@ -88,6 +89,8 @@ class ReusableItemDetail extends Component {
 
 		this.handleTopTenListsChange = this.handleTopTenListsChange.bind(this);
 		this.handleShowMoreTopTenListsChange = this.handleShowMoreTopTenListsChange.bind(this);
+
+		this.onChangeReusableItemIsPublic = this.onChangeReusableItemIsPublic.bind(this);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -158,21 +161,16 @@ class ReusableItemDetail extends Component {
 		dispatch(errorsReducer.clearErrors());
 	}
 
-	onChangeIsPublic = ({ id, is_public }) => {
+	onChangeReusableItemIsPublic = ({ id, is_public }) => {
 		const { reusableItem } = this.props;
-		const currentIsPublic = reusableItem.is_public;
+		const { dispatch } = this.props;
 
-		let text = 'This is a private Reusable Item; only you can see it. If you make it public, other people will be able to use it in their lists and suggest changes to it. Do you want to continue?';
-
-		if (currentIsPublic) {
-			text = 'This is a public Reusable Item. This action will make a private copy of it which your Top Ten Items will reference instead. Do you want to continue?';
-		}
-
-		if (confirm(text)) { // eslint-disable-line no-restricted-globals
-			const { dispatch } = this.props;
-
-			dispatch(reusableItemReducer.setReusableItemIsPublic({ id, is_public }));
-		}
+		onChangeReusableItemIsPublic({
+			id,
+			is_public,
+			reusableItem,
+			dispatch,
+		});
 	}
 
 	handleTopTenListsChange() {
@@ -267,9 +265,7 @@ class ReusableItemDetail extends Component {
 
 		const reusableItemUsersCount = users.size;
 		const { canEdit, is_public } = reusableItem;
-		// const aboutText = is_public ? `Public Reusable Item, referenced by ${reusableItemUsersCount} users ${reusableItemIcon} in public lists. Note that additional users may reference it in private lists.` : 'Private Reusable Item';
 		const { isAuthenticated, user } = auth;
-
 		const { showChangeRequestForm } = this.state;
 
 		const reusableItemHelpId = this.popoverIds.reusableItemHelp;
@@ -405,7 +401,7 @@ class ReusableItemDetail extends Component {
 								<IsPublicIndicator
 									targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
 									isPublic={reusableItem.is_public || false}
-									onChangeIsPublic={this.onChangeIsPublic}
+									onChangeIsPublic={this.onChangeReusableItemIsPublic}
 								/>
 							</div>
 						)}

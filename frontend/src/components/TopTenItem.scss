@@ -45,10 +45,20 @@
 	}
 
 	.name-icon {
-		border: none;
+		border: 0;
 		float: left;
 		margin-right: 8px;
 		padding: 6px 0;
+	}
+
+	.is-public {
+		float: left;
+		margin-right: 8px;
+
+		button {
+			border: 0;
+			padding: 0;
+		}
 	}
 
 	button {

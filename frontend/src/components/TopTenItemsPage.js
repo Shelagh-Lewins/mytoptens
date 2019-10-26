@@ -57,15 +57,19 @@ class TopTenItemsPage extends Component {
 
 	componentDidUpdate(prevProps) {
 		const update = {};
-		// console.log('topTenItemsPage update', this.props);
+		console.log('topTenItemsPage update', this.props);
 		const { topTenItems } = this.props;
 		for (let i = 0; i < topTenItems.length; i += 1) {
 			const topTenItem = topTenItems[i];
 
 			// first the topTenList is loaded and this just gives ids
 			// only when the full data are loaded and getTopTenItemsForTopTenList recalculated do we find the childTopTenList
+			if (prevProps.topTenItems[i].reusableItem !== topTenItems[i].reusableItem) {
+				console.log('new reusable item id for ', i);
+			}
 			if (prevProps.topTenItems[i].id !== topTenItems[i].id
-				|| prevProps.topTenItems[i].childTopTenList !== topTenItems[i].childTopTenList) {
+				|| prevProps.topTenItems[i].childTopTenList !== topTenItems[i].childTopTenList
+				|| prevProps.topTenItems[i].reusableItem !== topTenItems[i].reusableItem) {
 				const { order } = topTenItem;
 
 				// update topTenItem properties
@@ -244,6 +248,7 @@ class TopTenItemsPage extends Component {
 		const elements = [];
 		for (let i = 1; i <= MAX_TOPTENITEMS_IN_TOPTENLIST; i += 1) {
 			const {
+				dispatch,
 				topTenList,
 				onCreateChildTopTenList,
 				reusableItems,
@@ -305,6 +310,7 @@ class TopTenItemsPage extends Component {
 									'childTopTenList': state[`${i}_childTopTenList`],
 									'reusableItem': state[`${i}_name_reusableItemId`],
 								}}
+								dispatch={dispatch}
 								topTenItemFromStore={topTenItems[i - 1]}
 								handleInputChange={this.handleInputChange}
 								handleComboboxChange={this.handleComboboxChange}

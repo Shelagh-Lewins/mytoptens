@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import IsPublicIndicator from './IsPublicIndicator';
+import onChangeReusableItemIsPublic from '../modules/onChangeReusableItemIsPublic';
 import EditableTextField from './EditableTextField';
 import './TopTenItem.scss';
 import { MAX_TOPTENITEMS_IN_TOPTENLIST, COLORS } from '../constants';
@@ -31,6 +33,7 @@ class TopTenItem extends Component {
 		this.onMoveDown = this.onMoveDown.bind(this);
 
 		this.togglePopover = this.togglePopover.bind(this);
+		this.onChangeReusableItemIsPublic = this.onChangeReusableItemIsPublic.bind(this);
 	}
 
 	setIsEditingName(showInput) {
@@ -60,6 +63,18 @@ class TopTenItem extends Component {
 		onMoveTopTenItemDown(topTenItem.id);
 	}
 
+	onChangeReusableItemIsPublic = ({ id, is_public }) => {
+		const { reusableItem } = this.props;
+		const { dispatch } = this.props;
+
+		onChangeReusableItemIsPublic({
+			id,
+			is_public,
+			reusableItem,
+			dispatch,
+		});
+	}
+
 	togglePopover() {
 		const { popoverOpen } = this.state;
 		this.setState({
@@ -85,9 +100,6 @@ class TopTenItem extends Component {
 		} = this.props;
 
 		const { isEditingName, setIsEditingDescription, popoverOpen } = this.state;
-
-		const displayName = (reusableItem && reusableItem.name)
-		|| topTenItem.name; // if there is a reusable item, use its name. Otherwise use the top ten item's name.
 
 		if (topTenItem.name === '' && !isEditingName) {
 			showDescription = false;
@@ -144,11 +156,22 @@ class TopTenItem extends Component {
 
 		let currentReusableItem;
 		let reusableItemIcon;
+		let reusableItemIsPublic;
 
 		// icon by name to indicate it's a reusableItem. Not shown when editing name.
 		if (topTenItem.reusableItem && !isEditingName) {
 			currentReusableItem = reusableItems[topTenItem.reusableItem] || {};
 			const popoverId = `popover${topTenItem.order}`;
+
+			reusableItemIsPublic = (
+				<div className="reusableitem-summary-controls">
+					<IsPublicIndicator
+						targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
+						isPublic={reusableItem.is_public || false}
+						onChangeIsPublic={this.onChangeReusableItemIsPublic}
+					/>
+				</div>
+			);
 
 			reusableItemIcon = (
 				<div>
@@ -199,6 +222,7 @@ class TopTenItem extends Component {
 						:
 					</span>
 					{reusableItemIcon}
+					{reusableItemIsPublic}
 					<EditableTextField
 						type="reusableItemCombobox"
 						canEdit={topTenList.canEdit}
@@ -214,7 +238,7 @@ class TopTenItem extends Component {
 						handleNewValue={handleNewValue}
 						onSelect={onSelectItemName}
 						isEditing={this.setIsEditingName}
-						value={displayName}
+						value={topTenItem.name}
 						newReusableItem={newReusableItem}
 						reusableItem={reusableItem}
 						topTenItem={topTenItemForReusableItem}
@@ -251,6 +275,7 @@ class TopTenItem extends Component {
 }
 
 TopTenItem.propTypes = {
+	'dispatch': PropTypes.func.isRequired,
 	'topTenItem': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topTenList': PropTypes.objectOf(PropTypes.any).isRequired,
 	'topTenItemFromStore': PropTypes.objectOf(PropTypes.any).isRequired,
