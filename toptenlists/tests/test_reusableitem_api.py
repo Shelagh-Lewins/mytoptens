@@ -654,6 +654,17 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem.definition, data1['definition'])
         self.assertEqual(updated_reusableitem.link, data1['link'])
 
+        # the name of all referencing top ten items should be updated
+        toptenitems1 = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems1[0].id
+        updated_user1_toptenitem1 = TopTenItem.objects.get(pk=toptenitem_1_id)
+        self.assertEqual(updated_user1_toptenitem1.name, data1['name'])
+
+        toptenitems2 = self.toptenlist_1_2.topTenItem.all()
+        toptenitem_2_id = toptenitems2[4].id
+        updated_user1_toptenitem2 = TopTenItem.objects.get(pk=toptenitem_2_id)
+        self.assertEqual(updated_user1_toptenitem2.name, data1['name'])
+
         # history has been updated
         history_entry = updated_reusableitem.history[1]
         self.assertNotEqual(history_entry, None)
@@ -732,6 +743,22 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem.definition, data2['definition'])
         self.assertEqual(updated_reusableitem.link, data2['link'])
 
+        # the name of all referencing top ten items should be updated
+        toptenitems1 = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems1[0].id
+        updated_user1_toptenitem1 = TopTenItem.objects.get(pk=toptenitem_1_id)
+        self.assertEqual(updated_user1_toptenitem1.name, data2['name'])
+
+        toptenitems2 = self.toptenlist_1_2.topTenItem.all()
+        toptenitem_2_id = toptenitems2[4].id
+        updated_user1_toptenitem2 = TopTenItem.objects.get(pk=toptenitem_2_id)
+        self.assertEqual(updated_user1_toptenitem2.name, data2['name'])
+
+        toptenitems3 = self.toptenlist_2.topTenItem.all()
+        toptenitem_3_id = toptenitems3[0].id
+        updated_user2_toptenitem1 = TopTenItem.objects.get(pk=toptenitem_3_id)
+        self.assertEqual(updated_user2_toptenitem1.name, data2['name'])
+
         # history has been updated
         history_entry = updated_reusableitem.history[2]
         self.assertNotEqual(history_entry, None)
@@ -806,6 +833,19 @@ class ModifyReusableItemAPITest(APITestCase):
         self.assertEqual(updated_reusableitem.name, data['name'])
         self.assertEqual(updated_reusableitem.definition, data['definition'])
         self.assertEqual(updated_reusableitem.link, data['link'])
+
+        # the name of all referencing top ten items should be updated
+        toptenitems1 = self.toptenlist_1.topTenItem.all()
+        toptenitem_1_id = toptenitems1[0].id
+        updated_user1_toptenitem1 = TopTenItem.objects.get(pk=toptenitem_1_id)
+
+        self.assertEqual(updated_user1_toptenitem1.name, data['name'])
+
+        #updated_user2_toptenitem = toptenlist_1_2
+        toptenitems2 = self.toptenlist_2.topTenItem.all()
+        toptenitem_2_id = toptenitems2[1].id
+        updated_user1_toptenitem2 = TopTenItem.objects.get(pk=toptenitem_1_id)
+        self.assertEqual(updated_user1_toptenitem2.name, data['name'])
 
         # history has been updated
         history_entry = updated_reusableitem.history[1]

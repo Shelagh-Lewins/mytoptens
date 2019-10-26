@@ -20,12 +20,14 @@ def delete_topTenList(sender, instance, using, **kwargs):
 # if it has no created_by, it should be deleted if not public
 # because nobody will be able to access it
 # created_by is None should only happen when a user is deleted, but has been observed under other circumstances
+# TODO find out why this happened and stop it
 @receiver([post_save], sender=ReusableItem)
 def update_reusableItem(sender, instance, using, **kwargs):
 
 	if instance.created_by is None:
 		print('*** signals.py says Reusable item has created_by is None')
 		print('id', instance.id)
+		print('name', instance.name)
 
 		if instance.is_public == False:
 			print('is_public False')
