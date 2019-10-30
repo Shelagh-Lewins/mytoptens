@@ -693,7 +693,7 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 				// this is effectively a one-time signal to the UI which will respond after redirection with
 				newThings[sourceId] = { ...{ 'copiedTo': id }, ...sourceReusableItem };
 				newThings[id] = newReusableItem;
-				console.log('updated reusable item', newThings[sourceId]);
+				// console.log('updated reusable item', newThings[sourceId]);
 
 				return updeep({ 'things': newThings }, state);
 			}
