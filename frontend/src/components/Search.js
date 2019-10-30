@@ -110,7 +110,7 @@ class Search extends Component {
 										iconName = result.is_public ? 'lock-open' : 'lock';
 
 										detail = (result.definition
-											&& <span className="reusableitem detail"><FontAwesomeIcon icon={['fas', iconName]} style={{ 'color': COLORS.REGULARTEXT }} size="1x" />{result.definition}</span>
+											&& <span className="reusableitem detail"><FontAwesomeIcon icon={['fas', iconName]} style={{ 'color': COLORS.SECONDARYTEXT }} size="1x" />{result.definition}</span>
 										);
 										break;
 

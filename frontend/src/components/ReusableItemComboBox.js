@@ -35,6 +35,7 @@ function ReusableItemComboBox(props) {
 
 	const ComboboxItem = ({ item }) => {
 		let icon;
+		let iconForDefinition;
 		let color;
 
 		switch (item.type) {
@@ -51,6 +52,7 @@ function ReusableItemComboBox(props) {
 			case 'reusableItem':
 				icon = 'clone';
 				color = COLORS.REUSABLEITEM;
+				iconForDefinition = item.is_public ? 'lock-open' : 'lock';
 				break;
 
 			case 'topTenItem':
@@ -67,7 +69,7 @@ function ReusableItemComboBox(props) {
 			<span className="combobox-dropdown">
 				<span className="icon"><FontAwesomeIcon icon={['fas', icon]} style={{ 'color': color }} size="1x" /></span>
 				<span className="name">{item.name}</span>
-				{item.definition && (<span className="definition">{item.definition}</span>)}
+				{item.definition && (<span className="definition"><span className="icon"><FontAwesomeIcon icon={['fas', iconForDefinition]} style={{ 'color': COLORS.SECONDARYTEXT }} size="1x" /></span>{item.definition}</span>)}
 			</span>
 		);
 	};
