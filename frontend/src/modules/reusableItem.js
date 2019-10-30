@@ -14,6 +14,11 @@ import {
 	FETCH_TOPTENLIST_DETAIL_STARTED,
 } from './topTenList';
 
+// topTenItem reducer also uses this action, and is loaded first.
+import {
+	SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED,
+} from './topTenItem';
+
 const updeep = require('updeep');
 
 /* eslint-disable array-callback-return */
@@ -57,7 +62,9 @@ export const SEARCH_TOPTENITEMS_STARTED = 'SEARCH_TOPTENITEMS_STARTED';
 export const SEARCH_TOPTENITEMS_SUCCEEDED = 'SEARCH_TOPTENITEMS_SUCCEEDED';
 export const SEARCH_TOPTENITEMS_FAILED = 'SEARCH_TOPTENITEMS_FAILED';
 
-export const SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED = 'SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED';
+// export const SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED = 'SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED';
+// weird event to
+export const SET_REUSABLEITEM_IS_PUBLIC_UI_UPDATED = 'SET_REUSABLEITEM_IS_PUBLIC_UI_UPDATED';
 
 export const UPDATE_REUSABLEITEM_SUCCEEDED = 'UPDATE_REUSABLEITEM_SUCCEEDED';
 
@@ -244,6 +251,15 @@ export function setReusableItemIsPublicSucceeded({ id, is_public, sourceId }) {
 			'id': id,
 			is_public,
 			sourceId,
+		},
+	};
+}
+
+export function setReusableItemIsPublicUIUpdated({ id }) {
+	return {
+		'type': SET_REUSABLEITEM_IS_PUBLIC_UI_UPDATED,
+		'payload': {
+			'id': id,
 		},
 	};
 }
@@ -663,13 +679,33 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 			// console.log('response', action.payload);
 
 			if (id !== sourceId) { // a new reusableItem, probably because the user made a new private reusableItem from a public one
-				// sourceId is the original reusableItem that was copied. This reusableItem needs to be modified so the UI will detect a change in properties
-				return updeep({ 'things': { [id]: { 'is_public': is_public }, [sourceId]: { 'targetId': id } } }, state);
+				// sourceId is the original reusableItem that was copied, and is unchanged.
+				// there is a new reusableItem that should be added to the store.
+				const sourceReusableItem = state.things[sourceId];
+
+				const newReusableItem = { ...sourceReusableItem };
+				newReusableItem.id = id;
+				newReusableItem.is_public = is_public;
+
+				const newThings = {};
+
+				// if the user is on the reusable item detail page, they will need to be redirected to the new reusable item
+				// this is effectively a one-time signal to the UI which will respond after redirection with
+				newThings[sourceId] = { ...{ 'copiedTo': id }, ...sourceReusableItem };
+				newThings[id] = newReusableItem;
+				console.log('updated reusable item', newThings[sourceId]);
+
+				return updeep({ 'things': newThings }, state);
 			}
 
 			// same reusableItem that the user was originally trying to edit
 			// probably the user made a private reusableItem public
 			return updeep({ 'things': { [id]: { 'is_public': is_public } } }, state);
+		}
+
+		// remove the property which causes the user to be redirected to a new reusableItem
+		case SET_REUSABLEITEM_IS_PUBLIC_UI_UPDATED: {
+			return updeep({ 'things': { [action.payload.id]: { 'copiedTo': undefined } } }, state);
 		}
 
 		default:

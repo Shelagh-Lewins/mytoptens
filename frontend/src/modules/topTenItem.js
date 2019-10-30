@@ -16,6 +16,8 @@ import {
 	RECEIVE_ORGANIZER_DATA,
 } from './topTenList';
 
+
+
 const updeep = require('updeep');
 
 /* eslint-disable array-callback-return */
@@ -25,6 +27,8 @@ const updeep = require('updeep');
 
 // define action types so they are visible
 // and export them so other reducers can use them
+export const SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED = 'SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED';
+
 export const CREATE_TOPTENITEM_REQUESTED = 'CREATE_TOPTENITEM_REQUESTED';
 export const CREATE_TOPTENITEM_SUCCEEDED = 'CREATE_TOPTENITEM_SUCCEEDED';
 export const UPDATE_TOPTENITEM_SUCCEEDED = 'UPDATE_TOPTENITEM_SUCCEEDED';
@@ -312,6 +316,43 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 			}
 
 			return updeep(state, state);
+		}
+
+		case SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED: {
+			const { id, is_public, sourceId } = action.payload;
+			// console.log('response', action.payload);
+
+			if (id !== sourceId) { // a new reusableItem, probably because the user made a new private reusableItem from a public one
+				// sourceId is the original reusableItem that was copied.
+
+				// all top ten items that referenced the old reusableItem need to reference the new one
+				// console.log('new id', id);
+				// console.log('old id', sourceId);
+				// console.log('state.things', state.things);
+
+				const topTenItems = {};
+
+				Object.keys(state.things).forEach((key) => {
+					const topTenItemObj = state.things[key];
+					// console.log('topTenItemObj', topTenItemObj);
+
+					if (topTenItemObj.reusableItem === sourceId) {
+						const newTopTenItemObj = { ...topTenItemObj };
+						newTopTenItemObj.reusableItem = id;
+						newTopTenItemObj.reusableItem_id = id;
+
+						topTenItems[key] = newTopTenItemObj;
+					}
+				});
+				// console.log('topTenItems', topTenItems);
+
+				return updeep({ 'things': topTenItems }, state);
+			}
+
+			return updeep(state, state);
+
+			// same reusableItem that the user was originally trying to edit
+			// probably the user made a private reusableItem public
 		}
 
 		default:

@@ -120,13 +120,18 @@ class ReusableItemDetail extends Component {
 		}
 
 		// the reusableItem has been replaced by a new one
-		// probably because the user made a popular reusableItem private
+		// because the user made a popular reusableItem private
 		// so all their topTenItems now reference a new, private reusableItem
-		// navigate to the new one
-		if (reusableItem && reusableItem.targetId) {
-			if (reusableItem.targetId !== match.params.id) {
-				history.push(`/reusableitem/${reusableItem.targetId}`);
-			}
+		// navigate to the new reusable item
+		if (reusableItem && reusableItem.copiedTo) {
+			const { dispatch } = this.props;
+
+			history.push(`/reusableitem/${reusableItem.copiedTo}`);
+
+			// removes the copiedTo property from the store so that the original reusable item can be viewed without redirecting
+			setTimeout(() => {
+				dispatch(reusableItemReducer.setReusableItemIsPublicUIUpdated({ id }));
+			}, 3000);
 		}
 	}
 
