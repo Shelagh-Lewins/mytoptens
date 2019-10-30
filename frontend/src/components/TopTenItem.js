@@ -159,6 +159,7 @@ class TopTenItem extends Component {
 		let reusableItemIsPublic;
 
 		// icon by name to indicate it's a reusableItem. Not shown when editing name.
+		// in case data are loading
 		if (topTenItem.reusableItem && !isEditingName) {
 			currentReusableItem = reusableItems[topTenItem.reusableItem] || {};
 			const popoverId = `popover${topTenItem.order}`;
@@ -166,8 +167,8 @@ class TopTenItem extends Component {
 			reusableItemIsPublic = (
 				<div className="reusableitem-summary-controls">
 					<IsPublicIndicator
-						targetId={reusableItem.id || ''} // in case reusableItem detail not yet loaded
-						isPublic={reusableItem.is_public || false}
+						targetId={currentReusableItem.id || ''} // in case reusableItem detail not yet loaded
+						isPublic={currentReusableItem.is_public || false}
 						onChangeIsPublic={this.onChangeReusableItemIsPublic}
 					/>
 				</div>
