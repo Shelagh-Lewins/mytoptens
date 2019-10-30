@@ -88,6 +88,14 @@ class DownloadMyTopTenListsButton extends Component {
 	}
 
 	render() {
+		const {
+			topLevelTopTenListsOnly,
+		} = this.props;
+
+		const tooltip = topLevelTopTenListsOnly ? 'Download my top level Top Ten Lists as a text file' : 'Download all my Top Ten Lists as a text file';
+
+		const buttonText = topLevelTopTenListsOnly ? 'Download my top level Top Ten Lists' : 'Download all my Top Ten Lists';
+
 		return (
 			<div className="download-my-toptenlists">
 				<button
@@ -96,8 +104,8 @@ class DownloadMyTopTenListsButton extends Component {
 					onClick={this.onClickButton}
 					color="link"
 				>
-					<span className="icon" title="Download all my Top Ten Lists as a text file"><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>
-					Download my Top Ten Lists
+					<span className="icon" title={tooltip}><FontAwesomeIcon icon={['fas', 'file-download']} style={{ 'color': COLORS.REGULARTEXT }} size="1x" /></span>
+					{buttonText}
 				</button>
 			</div>
 		);

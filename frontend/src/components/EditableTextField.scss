@@ -16,7 +16,7 @@
 	.text {
 		display: inline-block;
 		margin: 6px 0;
-		max-height: 3em;
+		max-height: 3.5em;
 		overflow: hidden;
 		position: relative;
 
@@ -30,7 +30,7 @@
 
 		// Markdown component inserts a p
 		p {
-			margin: 0;
+			margin: 0 0 0.5em 0;
 			padding: 0;
 		}
 
@@ -41,8 +41,14 @@
 			position: absolute;
 			right: 0;
 			text-align: center;
-			top: 1.5em;
+			top: 2em;
 			width: 4em;
+		}
+	}
+
+	textarea {
+		&.form-control {
+			height: 120px;
 		}
 	}
 
