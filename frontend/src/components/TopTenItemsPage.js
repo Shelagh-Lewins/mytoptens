@@ -30,7 +30,7 @@ class TopTenItemsPage extends Component {
 		Object.keys(topTenItems).forEach((key) => {
 			if (topTenItems[key].order && topTenItems[key].order <= MAX_TOPTENITEMS_IN_TOPTENLIST) {
 				const { order } = topTenItems[key];
-
+				console.log('constructor. topTenItem', topTenItems[key]);
 				this.state[`${order}_id`] = topTenItems[key].id;
 				this.state[`${order}_name`] = topTenItems[key].name;
 				this.state[`${order}_description`] = topTenItems[key].description;
@@ -61,6 +61,7 @@ class TopTenItemsPage extends Component {
 		const { topTenItems } = this.props;
 		for (let i = 0; i < topTenItems.length; i += 1) {
 			const topTenItem = topTenItems[i];
+			console.log('update. topTenItem', topTenItem);
 
 			// first the topTenList is loaded and this just gives ids
 			// only when the full data are loaded and getTopTenItemsForTopTenList recalculated do we find the childTopTenList
@@ -77,6 +78,7 @@ class TopTenItemsPage extends Component {
 				update[`${order}_name`] = topTenItem.name;
 				update[`${order}_description`] = topTenItem.description;
 				update[`${order}_name_reusableItemId`] = topTenItem.reusableItem;
+				// update[`${order}_name_reusableItemId`] = topTenItems[topTenItem.id].reusableItem;
 
 				// set child topTenList if exists
 				// or set to null if it does not

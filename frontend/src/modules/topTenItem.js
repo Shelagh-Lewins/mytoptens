@@ -265,12 +265,15 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		}
 
 		case UPDATE_TOPTENITEM_SUCCEEDED: {
+			console.log('UPDATE_TOPTENITEM_SUCCEEDED. new top ten item', action.payload);
 			// update editable properties
 			const update = {
 				'name': action.payload.name,
 				'description': action.payload.description,
 				'modified_at': action.payload.modified_at,
 				'order': action.payload.order,
+				'reusableItem': action.payload.reusableItem,
+				'reusableItem_id': action.payload.reusableItem_id,
 			};
 
 			return updeep({ 'things': { [action.payload.id]: update } }, state);
