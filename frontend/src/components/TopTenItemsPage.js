@@ -30,7 +30,9 @@ class TopTenItemsPage extends Component {
 		Object.keys(topTenItems).forEach((key) => {
 			if (topTenItems[key].order && topTenItems[key].order <= MAX_TOPTENITEMS_IN_TOPTENLIST) {
 				const { order } = topTenItems[key];
-				console.log('constructor. topTenItem', topTenItems[key]);
+				/* if (topTenItems[key].name !== '') {
+					console.log('constructor. topTenItem', topTenItems[key]);
+				} */
 				this.state[`${order}_id`] = topTenItems[key].id;
 				this.state[`${order}_name`] = topTenItems[key].name;
 				this.state[`${order}_description`] = topTenItems[key].description;
@@ -61,7 +63,7 @@ class TopTenItemsPage extends Component {
 		const { topTenItems } = this.props;
 		for (let i = 0; i < topTenItems.length; i += 1) {
 			const topTenItem = topTenItems[i];
-			console.log('update. topTenItem', topTenItem);
+			// console.log('update. topTenItem', topTenItem);
 
 			// first the topTenList is loaded and this just gives ids
 			// only when the full data are loaded and getTopTenItemsForTopTenList recalculated do we find the childTopTenList
@@ -205,6 +207,9 @@ class TopTenItemsPage extends Component {
 					data.reusableItemDefinition = definition;
 					data.reusableItemLink = link;
 					// make the reusableItem from scratch from a text name
+
+					// clear the search field
+					dispatch(reusableItemReducer.searchReusableItemsClear(`${order}_name`));
 				}
 			}
 
