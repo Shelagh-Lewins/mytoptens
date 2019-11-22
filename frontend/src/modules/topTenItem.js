@@ -319,7 +319,7 @@ export default function topTenItem(state = initialTopTenItemsState, action) {
 		}
 
 		case SET_REUSABLEITEM_IS_PUBLIC_SUCCEEDED: {
-			const { id, is_public, sourceId } = action.payload;
+			const { id, sourceId } = action.payload;
 			// console.log('response', action.payload);
 
 			if (id !== sourceId) { // a new reusableItem, probably because the user made a new private reusableItem from a public one

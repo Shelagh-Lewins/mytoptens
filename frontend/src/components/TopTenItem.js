@@ -130,7 +130,8 @@ class TopTenItem extends Component {
 		} else if (canViewChildTopTenList) {
 			childTopTenListElm = (
 				<div className="child-toptenlist">
-					Child Top Ten List: <Link to={`/toptenlist/${topTenItem.childTopTenList.id}`}>
+					<span className="icon" title="Child Top Ten List"><FontAwesomeIcon icon={['fas', 'list-ol']} style={{ 'color': COLORS.TOPTENLIST }} size="1x" /></span>
+					<Link to={`/toptenlist/${topTenItem.childTopTenList.id}`}>
 						{topTenItem.childTopTenList.name}
 					</Link>
 				</div>

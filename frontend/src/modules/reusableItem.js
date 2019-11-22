@@ -650,14 +650,6 @@ export default function reusableItem(state = initialResuableItemsState, action) 
 
 		case SEARCH_REUSABLEITEMS_CLEAR: {
 			return updeep({ 'search': updeep.omit([action.payload.widgetId]) }, state);
-			return updeep(
-				updeep.updateIn(`search.${action.payload.widgetId}`, {
-					'searchTerm': '',
-					'reusableItems': [],
-					'topTenItems': [],
-				}),
-				state,
-			);
 		}
 
 		case SEARCH_TOPTENITEMS_STARTED: {
