@@ -1,4 +1,0 @@
-db.sqlite3
-/.env
-/database.cnf
-deploy/.env

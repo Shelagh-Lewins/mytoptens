@@ -99,7 +99,7 @@ class Navbar extends Component {
 
 		return (
 			<nav className="navbar navbar-expand-sm navbar-dark bg-dark">
-				<Link className="navbar-brand" to="/">My Top Tens</Link>
+				<Link className="navbar-brand" to="/">My Top Tens Updated</Link>
 				<button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onClick={(e) => { this.showDropdown(e); }}>
 					<span className="navbar-toggler-icon" />
 				</button>

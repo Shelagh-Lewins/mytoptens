@@ -23,6 +23,9 @@ users/tests/__pycache__/
 assets/
 static/
 
+# zipped update file
+mytoptens-app-update.tar.gz
+
 # note that at present, migrations are created on the dev machine and copied to the live server, so they are tracked. The lines below are there for reference in case we need to revert.
 # /api/migrations
 # /toptenlists/migrations

@@ -15,16 +15,14 @@ echo $DESTINATION
 echo "building app..."
 ./buildapp.sh
 
-# remove old app update files from the server
-# this forces a complete refresh of all files instead of relying on rsync to detect changes
-echo "deleting old update files from server..."
-ssh $DESTINATION rm -f -r mytoptens
+echo "compressing app update..."
+touch mytoptens-app-update.tar.gz
+tar -zcvf mytoptens-app-update.tar.gz ./ --exclude mytoptens-app-update.tar.gz --exclude deployapp.sh --exclude startapp.sh --exclude test_server.sh --exclude deploy --exclude .git --exclude .gitignore
 
-# copy new app update files onto the server
-echo "copying new update files onto server..."
-rsync -arv --filter=":- .rsyncignore" "$SOURCE" "$DESTINATION"":~/"
-# rsync -arv  --filter=":- .gitignore" "$SOURCE" "$DESTINATION"":~/"
+# copy zipped app update onto the app user's folder on the server
+echo "copying zipped app update onto server..."
+scp mytoptens-app-update.tar.gz "$DESTINATION":~/
 
 # run the deployment script on the server
-echo "deploying app on server..."
+echo "running serverscript.sh on server to deploy app..."
 ssh  $DESTINATION 'bash -s' < $my_dir/serverscript.sh

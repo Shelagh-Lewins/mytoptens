@@ -2,26 +2,27 @@
 
 ### Configuration ###
 # temporary location of app update files
-UPDATE_DIR=$HOME/"mytoptens"
+UPDATE_DIR=$HOME/
 
 # app location
 APP_DIR="/var/www/mytoptens/"
 PROJECT_DIR="mytoptens"
 FRONTEND_DIR="frontend"
 
-# copy app update files to where Passenger needs them
-echo "copying new app files into /var/www/mytoptens..."
-# rsync -arv  --delete --filter=":- .gitignore" "$UPDATE_DIR" "$APP_DIR"/
-rsync -arv  --delete --filter=":- .rsyncignore" "$UPDATE_DIR" "$APP_DIR"/
+cd $APP_DIR
+
+# unzip app update files to where Passenger needs them
+echo "unzipping new app files into /var/www/mytoptens..."
+tar -zxvf "$UPDATE_DIR"/mytoptens-app-update.tar.gz
+rm -rf "$UPDATE_DIR"/mytoptens-app-update.tar.gz
 
 ### Activate Python virtual environment ###
-cd $APP_DIR
-source venv35/bin/activate
+source venv38/bin/activate
 
 cd $PROJECT_DIR
 
 ### update Python requirements ###
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 ### load secret environment variables required by manage.py
 . .env
@@ -29,8 +30,10 @@ pip install -r requirements.txt
 ### make and run migrations ###
 # note that at present, migrations are created on the dev machine and copied to the live server. The line below is there for reference in case we need to revert.
 # ./manage.py makemigrations --settings=djangoproject.settings.production
+echo "make and run migrations"
 ./manage.py migrate --settings=djangoproject.settings.production
 
+echo "update node packages"
 ### update node packages ###
 cd $FRONTEND_DIR
 npm prune
