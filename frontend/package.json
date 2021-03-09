@@ -21,7 +21,7 @@
     "react-markdown": "^4.3.1",
     "react-redux": "^6.0.1",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "3.0.0",
+    "react-scripts": "^4.0.3",
     "react-widgets": "^4.6.1",
     "reactstrap": "^7.1.0",
     "redux": "^4.0.5",
@@ -44,8 +44,125 @@
       "airbnb"
     ],
     "rules": {
+      "prefer-destructuring": [
+        "warn"
+      ],
+      "space-before-function-paren": [
+        "warn"
+      ],
+      "jsx-a11y/click-events-have-key-events": [
+        "warn"
+      ],
+      "jsx-a11y/no-static-element-interactions": [
+        "warn"
+      ],
+      "radix": [
+        "warn"
+      ],
+      "no-var": [
+        "warn"
+      ],
+      "implicit-arrow-linebreak": [
+        "warn"
+      ],
+      "no-param-reassign": [
+        "warn"
+      ],
+      "prefer-template": [
+        "warn"
+      ],
+      "no-extra-semi": [
+        "warn"
+      ],
+      "no-restricted-syntax": [
+        "warn"
+      ],
+      "arrow-body-style": [
+        "off"
+      ],
+      "no-use-before-define": [
+        "warn"
+      ],
+      "no-multiple-empty-lines": [
+        "warn"
+      ],
+      "no-multi-spaces": [
+        "warn"
+      ],
+      "no-trailing-spaces": [
+        "warn"
+      ],
+      "no-else-return": [
+        "warn"
+      ],
+      "no-plusplus": [
+        "warn"
+      ],
+      "prefer-const": [
+        "warn"
+      ],
+      "function-paren-newline": [
+        "warn"
+      ],
+      "no-mixed-spaces-and-tabs": [
+        "warn"
+      ],
+      "comma-spacing": [
+        "warn"
+      ],
+      "no-unused-vars": [
+        "warn"
+      ],
+      "operator-linebreak": [
+        "warn"
+      ],
+      "no-shadow": [
+        "warn"
+      ],
+      "jsx-quotes": [
+        "warn"
+      ],
+      "arrow-parens": [
+        "warn"
+      ],
+      "spaced-comment": [
+        "warn"
+      ],
+      "object-curly-newline": [
+        "warn"
+      ],
+      "space-infix-ops": [
+        "warn"
+      ],
+      "camelcase": [
+        "warn"
+      ],
+      "comma-dangle": [
+        "warn"
+      ],
+      "keyword-spacing": [
+        "warn"
+      ],
       "array-callback-return": [
         "off"
+      ],
+      "import/order": [
+        "warn"
+      ],
+      "import/extensions": [
+        "warn"
+      ],
+      "import/newline-after-import": [
+        "warn"
+      ],
+      "import/prefer-default-export": [
+        "warn"
+      ],
+      "import/no-cycle": [
+        "warn"
+      ],
+      "import/no-useless-path-segments": [
+        "warn"
       ],
       "eol-last": [
         "error",
@@ -68,7 +185,7 @@
         "always"
       ],
       "indent": [
-        "error",
+        "warn",
         "tab",
         {
           "SwitchCase": 1
@@ -104,7 +221,7 @@
         "off"
       ],
       "react/jsx-indent": [
-        "error",
+        "warn",
         "tab"
       ],
       "react/jsx-indent-props": [
@@ -130,7 +247,70 @@
         "warn"
       ],
       "react/jsx-boolean-value": [
-        "never"
+        2
+      ],
+      "react/no-find-dom-node": [
+        2
+      ],
+      "react/no-unused-state": [
+        "warn"
+      ],
+      "react/sort-comp": [
+        "warn"
+      ],
+      "react/destructuring-assignment": [
+        "warn"
+      ],
+      "react/prop-types": [
+        "warn"
+      ],
+      "react/jsx-wrap-multilines": [
+        "warn"
+      ],
+      "react/jsx-closing-tag-location": [
+        "warn"
+      ],
+      "react/jsx-props-no-multi-spaces": [
+        "warn"
+      ],
+      "react/forbid-prop-types": [
+        "warn"
+      ],
+      "react/no-unused-prop-types": [
+        "warn"
+      ],
+      "react/jsx-first-prop-new-line": [
+        "warn"
+      ],
+      "react/jsx-curly-spacing": [
+        "warn"
+      ],
+      "react/jsx-max-props-per-line": [
+        "warn"
+      ],
+      "react/jsx-closing-bracket-location": [
+        "warn"
+      ],
+      "react/jsx-boolean-value": [
+        "warn"
+      ],
+      "react/no-unescaped-entities": [
+        "warn"
+      ],
+      "react/self-closing-comp": [
+        "warn"
+      ],
+      "react/no-access-state-in-setstate": [
+        "warn"
+      ],
+      "react/button-has-type": [
+        "warn"
+      ],
+      "react/no-find-dom-node": [
+        "warn"
+      ],
+      "react/jsx-tag-spacing": [
+        "warn"
       ]
     },
     "env": {
@@ -146,7 +326,6 @@
   ],
   "devDependencies": {
     "ajv": "^6.12.6",
-    "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",

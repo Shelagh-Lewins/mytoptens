@@ -415,7 +415,8 @@ const getReusableItemsFromTopTenLists = (topTenLists, topTenItems, reusableItems
 		topTenListObj.topTenItem.forEach((topTenItemId) => {
 			const topTenItemObj = topTenItems[topTenItemId];
 
-			if (topTenItemObj.reusableItem && topTenItemObj.reusableItem !== '') {
+			// topTenItemObj can be null if you have logged in after refreshing, while on a public list.
+			if (topTenItemObj && topTenItemObj.reusableItem && topTenItemObj.reusableItem !== '') {
 				const reusableItemObj = reusableItems[topTenItemObj.reusableItem];
 				reusableItemsArray.push(reusableItemObj);
 			}
