@@ -248,7 +248,7 @@ class EditableTextField extends Component {
 					/>
 					{showMoreButton && <span className="fader" />}
 				</span>
-				{showMoreButton && <button type="button" className="show-more" onClick={this.toggleMore}>{moreButtonText}</button>}
+				{showMoreButton && <button type="button" className="show-more btn btn-default" onClick={this.toggleMore}>{moreButtonText}</button>}
 			</span>
 		);
 

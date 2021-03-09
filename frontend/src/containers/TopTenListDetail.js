@@ -68,7 +68,8 @@ class TopTenListDetails extends Component {
 
 		// user has navigated to a new top ten list
 		// e.g. child or parent top ten list
-		if (prevProps.topTenList && prevProps.topTenList.id !== topTenList.id) {
+		// avoid error if user has just logged out
+		if (topTenList && prevProps.topTenList && prevProps.topTenList.id !== topTenList.id) {
 			this.getTopTenListData(this.props);
 		}
 	}
