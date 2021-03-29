@@ -18,7 +18,7 @@ cd $PROJECT_DIR
 
 # unzip app update files to where Passenger needs them
 echo "unzipping new app files into /var/www/mytoptens..."
-tar -zxvf "$UPDATE_DIR"/mytoptens-app-update.tar.gz --overwrite
+tar -zxf "$UPDATE_DIR"/mytoptens-app-update.tar.gz --overwrite
 rm -rf "$UPDATE_DIR"/mytoptens-app-update.tar.gz
 
 ### update Python requirements ###

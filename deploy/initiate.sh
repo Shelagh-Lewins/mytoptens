@@ -17,7 +17,7 @@ echo "building app..."
 
 echo "compressing app update..."
 touch mytoptens-app-update.tar.gz
-tar -zcvf mytoptens-app-update.tar.gz ./ --exclude mytoptens-app-update.tar.gz --exclude deployapp.sh --exclude startapp.sh --exclude test_server.sh --exclude deploy --exclude .git --exclude .gitignore
+tar --exclude mytoptens-app-update.tar.gz --exclude deployapp.sh --exclude startapp.sh --exclude test_server.sh --exclude deploy --exclude .git --exclude .gitignore --exclude frontend/node_modules -zcf mytoptens-app-update.tar.gz ./ 
 
 # copy zipped app update onto the app user's folder on the server
 echo "copying zipped app update onto server..."
