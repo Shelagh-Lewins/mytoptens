@@ -247,10 +247,10 @@
         "warn"
       ],
       "react/jsx-boolean-value": [
-        2
+        "warn"
       ],
       "react/no-find-dom-node": [
-        2
+        "warn"
       ],
       "react/no-unused-state": [
         "warn"
@@ -291,9 +291,6 @@
       "react/jsx-closing-bracket-location": [
         "warn"
       ],
-      "react/jsx-boolean-value": [
-        "warn"
-      ],
       "react/no-unescaped-entities": [
         "warn"
       ],
@@ -304,9 +301,6 @@
         "warn"
       ],
       "react/button-has-type": [
-        "warn"
-      ],
-      "react/no-find-dom-node": [
         "warn"
       ],
       "react/jsx-tag-spacing": [
