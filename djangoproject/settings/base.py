@@ -38,10 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth.account',
     'allauth.socialaccount',
-    'rest_auth.registration',
+    'dj_rest_auth.registration',
     'users',
     'toptenlists',
-    'rest_auth',
+    'dj_rest_auth',
     'drf_multiple_model',
     'django_mysql',
     'allauth', # needs to be at the end so custom templates are found first
@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'djangoproject.urls'

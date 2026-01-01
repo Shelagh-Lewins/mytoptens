@@ -2,6 +2,9 @@
 # files that Django creates but we don't use
 db.sqlite3
 
+# Python virtual environment
+venv/
+
 # secure files that should not be in the repository
 /.env
 /database.cnf

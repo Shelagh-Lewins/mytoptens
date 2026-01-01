@@ -16,9 +16,7 @@ import {
 	RECEIVE_ORGANIZER_DATA,
 } from './topTenList';
 
-
-
-const updeep = require('updeep');
+import updeep from 'updeep';
 
 /* eslint-disable array-callback-return */
 
