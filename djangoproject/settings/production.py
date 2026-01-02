@@ -10,4 +10,6 @@ REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {
     'user': '45/minute'
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 DEFAULT_FROM_EMAIL = 'My Top Tens <noreply@mytoptens.com>'

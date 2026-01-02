@@ -49,7 +49,6 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.mailgun.org'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'postmaster@mytoptens.com'
@@ -198,7 +197,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # required for custom user info to be returned
-REST_AUTH_SERIALIZERS = {
+REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
 }
 
