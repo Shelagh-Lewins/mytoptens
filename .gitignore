@@ -33,3 +33,9 @@ mytoptens-app-update.tar.gz
 # /api/migrations
 # /toptenlists/migrations
 # /users/migrations
+
+database.cnf
+venv/
+node_modules/
+__pycache__/
+*.pyc

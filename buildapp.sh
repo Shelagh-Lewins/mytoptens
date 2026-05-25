@@ -17,4 +17,4 @@ yes yes | ./manage.py collectstatic --settings=djangoproject.settings.developmen
 pip freeze > requirements.txt
 
 # make and apply database migrations
-./migrations.sh
+# ./migrations.sh  # Skip local migrations - will run on server instead
