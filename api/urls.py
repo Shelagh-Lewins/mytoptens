@@ -2,6 +2,7 @@
 from django.urls import include, path, re_path
 from django.contrib.auth import views
 from django.views.generic.base import RedirectView
+from allauth.account.forms import default_token_generator as allauth_password_reset_token_generator
 from .forms import SetPasswordFormCustom
 from .serializers import PasswordResetViewCustom
 from allauth.account.views import confirm_email
@@ -23,7 +24,7 @@ urlpatterns = [
     path('rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     path('users/', include('users.urls'), name='UsersURLS'),
     path('reset/<uidb64>/<token>/',
-    	views.PasswordResetConfirmView.as_view(template_name='account/password_reset_confirm.html', form_class=SetPasswordFormCustom),
+        views.PasswordResetConfirmView.as_view(template_name='account/password_reset_confirm.html', form_class=SetPasswordFormCustom, token_generator=allauth_password_reset_token_generator),
     	name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(template_name='account/password_reset_complete.html'),
     	name='password_reset_complete'),
