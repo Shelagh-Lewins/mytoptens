@@ -6,7 +6,6 @@ from django.db import models
 from django.utils.http import int_to_base36
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
-from django_mysql.models import JSONField
 
 USER = get_user_model()
 
@@ -45,9 +44,9 @@ class ReusableItem(models.Model):
     link = models.CharField(max_length=255, blank=True, default='')
 
     modified_at = models.DateTimeField(auto_now_add=True)
-    history = JSONField(default=list, blank=True) # array of version objects
+    history = models.JSONField(default=list, blank=True) # array of version objects
    
-    change_request = JSONField(default=None, blank=True, null=True) # change request object
+    change_request = models.JSONField(default=None, blank=True, null=True) # change request object
     change_request_at = models.DateTimeField(blank=True, null=True) # when the change request was submitted
     change_request_by = models.ForeignKey(USER, on_delete=models.SET_NULL, null=True,
         blank=True, related_name='reusableItem_change_request_by') # user who submitted the change request

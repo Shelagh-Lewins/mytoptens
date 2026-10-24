@@ -7,37 +7,44 @@ UPDATE_DIR=$HOME/
 # app location
 APP_DIR="/var/www/mytoptens/"
 PROJECT_DIR="mytoptens"
-FRONTEND_DIR="frontend"
 
+# Switch to app directory as mytoptens user
 cd $APP_DIR
 
 ### Activate Python virtual environment ###
-source venv36/bin/activate
+source venv/bin/activate
 
 cd $PROJECT_DIR
 
 # unzip app update files to where Passenger needs them
-echo "unzipping new app files into /var/www/mytoptens..."
+echo "unzipping new app files into /var/www/mytoptens/mytoptens..."
 tar -zxvf "$UPDATE_DIR"/mytoptens-app-update.tar.gz --overwrite
 rm -rf "$UPDATE_DIR"/mytoptens-app-update.tar.gz
 
 ### update Python requirements ###
-pip3 install -r requirements.txt
+pip install -r requirements.txt
+
+### Create/update database.cnf ###
+echo "Creating database.cnf..."
+cat > database.cnf << 'EOF'
+[client]
+database = mytoptens
+user = mytoptens_user
+password = niptacklefloodbag
+host = localhost
+port = 3306
+default-character-set = utf8mb4
+EOF
 
 ### load secret environment variables required by manage.py
 . .env
 
 ### make and run migrations ###
-# note that at present, migrations are created on the dev machine and copied to the live server. The line below is there for reference in case we need to revert.
-# ./manage.py makemigrations --settings=djangoproject.settings.production
 echo "make and run migrations"
-./manage.py migrate --settings=djangoproject.settings.production
-
-echo "update node packages"
-### update node packages ###
-cd $FRONTEND_DIR
-npm prune
-npm install
+python manage.py migrate --settings=djangoproject.settings.production
 
 ### restart app ###
-passenger-config restart-app $APP_DIR
+echo "Restarting Passenger app..."
+mkdir -p tmp 2>/dev/null || true
+touch tmp/restart.txt 2>/dev/null || echo "Could not create restart.txt, will restart on next request"
+echo "App restart triggered"

@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import filters
@@ -225,7 +225,7 @@ class TopTenItemViewSet(viewsets.ModelViewSet):
 
         return TopTenItem.objects.filter(topTenList__is_public=True)
 
-    @detail_route(methods=['patch'])
+    @action(detail=True, methods=['patch'])
     def moveup(self, request, pk=None):
 
         if self.request.user.is_authenticated:
@@ -455,7 +455,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         # notifications are created by the server
         raise APIException("Notification may not be created via API")
 
-    @list_route(methods=['delete'])
+    @action(detail=False, methods=['delete'])
     def deleteall(self, request):
         """
         Delete all notifications belonging to this user

@@ -2,7 +2,6 @@
 
 import django.core.validators
 from django.db import migrations, models
-import django_mysql.models
 import uuid
 
 
@@ -36,8 +35,8 @@ class Migration(migrations.Migration):
                 ('is_public', models.BooleanField(default=False)),
                 ('link', models.CharField(blank=True, default='', max_length=255)),
                 ('modified_at', models.DateTimeField(auto_now_add=True)),
-                ('history', django_mysql.models.JSONField(blank=True, default=list)),
-                ('change_request', django_mysql.models.JSONField(blank=True, default=None, null=True)),
+                ('history', models.JSONField(blank=True, default=list)),
+                ('change_request', models.JSONField(blank=True, default=None, null=True)),
                 ('change_request_at', models.DateTimeField(blank=True, null=True)),
                 ('change_request_votes_yes_count', models.IntegerField(blank=True, null=True)),
                 ('change_request_votes_no_count', models.IntegerField(blank=True, null=True)),

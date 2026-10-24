@@ -825,7 +825,7 @@ class TopTenListSerializer(FlexFieldsModelSerializer):
     )
 
     expandable_fields = {
-        'topTenItem': (TopTenItemSerializer, {'source': 'topTenItem', 'many': True, 'fields': ['name', 'id', 'topTenList_id', 'order', 'reusableItem_id']})
+        'topTenItem': (TopTenItemSerializer, {'many': True, 'fields': ['name', 'id', 'topTenList_id', 'order', 'reusableItem_id']})
     }
 
     class Meta:

@@ -2,6 +2,7 @@
 from django.urls import include, path, re_path
 from django.contrib.auth import views
 from django.views.generic.base import RedirectView
+from allauth.account.forms import default_token_generator as allauth_password_reset_token_generator
 from .forms import SetPasswordFormCustom
 from .serializers import PasswordResetViewCustom
 from allauth.account.views import confirm_email
@@ -19,11 +20,11 @@ urlpatterns = [
     # seems to work but regex can apparently fail. However fails with the github recommended regex, invalid syntax
         # https://stackoverflow.com/questions/48390749/reverse-for-account-email-verification-sent-not-found-account-email-verifica
     path('rest-auth/password/reset/', PasswordResetViewCustom.as_view()), # must come before rest-auth includes or custom view is not used
-    path('rest-auth/', include('rest_auth.urls')),
-    path('rest-auth/registration/', include('rest_auth.registration.urls')),
+    path('rest-auth/', include('dj_rest_auth.urls')),
+    path('rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     path('users/', include('users.urls'), name='UsersURLS'),
     path('reset/<uidb64>/<token>/',
-    	views.PasswordResetConfirmView.as_view(template_name='account/password_reset_confirm.html', form_class=SetPasswordFormCustom),
+        views.PasswordResetConfirmView.as_view(template_name='account/password_reset_confirm.html', form_class=SetPasswordFormCustom, token_generator=allauth_password_reset_token_generator),
     	name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(template_name='account/password_reset_complete.html'),
     	name='password_reset_complete'),

@@ -38,10 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'allauth.account',
     'allauth.socialaccount',
-    'rest_auth.registration',
+    'dj_rest_auth.registration',
     'users',
     'toptenlists',
-    'rest_auth',
+    'dj_rest_auth',
     'drf_multiple_model',
     'django_mysql',
     'allauth', # needs to be at the end so custom templates are found first
@@ -49,7 +49,6 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.mailgun.org'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'postmaster@mytoptens.com'
@@ -66,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'djangoproject.urls'
@@ -197,7 +197,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # required for custom user info to be returned
-REST_AUTH_SERIALIZERS = {
+REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer',
 }
 
